@@ -27,6 +27,13 @@ export const commands = {
 	undo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
 	redo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("redo")),
+	/**  Facts about the host that the WebView cannot report reliably. */
+	platformInfo: () => __TAURI_INVOKE<PlatformInfo>("platform_info"),
+	/**
+	 *  Validates and writes a benchmark report (JSON). Dev builds write to the repository's
+	 *  `testdata/`, release builds to `<app data>/benchmarks/`. Returns the file path.
+	 */
+	writeBenchReport: (preset: StressPreset, report: string) => typedError<string, CommandError>(__TAURI_INVOKE("write_bench_report", { preset, report })),
 };
 
 /** Events */
@@ -156,6 +163,14 @@ export type PanelArray = {
 	/**  Module azimuth relative to the roof face azimuth, degrees (e.g. ±90 for east-west). */
 	azimuthOffsetDeg: number,
 	grid: ArrayGrid,
+};
+
+export type PlatformInfo = {
+	/**  `windows`, `macos`, `linux`. */
+	os: string,
+	arch: string,
+	/**  Whether the Rust side is a debug build (benchmarks should use release builds). */
+	debugBuild: boolean,
 };
 
 /**  Identifies a project. */

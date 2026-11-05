@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { RootState } from '@react-three/fiber';
 import type { ColorMode } from '../viewport3d/PanelMeshes';
 import type { Editor } from '../viewport3d/editor';
 
@@ -12,6 +13,8 @@ interface ViewState {
   selectionCount: number;
   /** Imperative editing API of the mounted viewport (null when no project is shown). */
   editor: Editor | null;
+  /** R3F state accessor of the mounted canvas (camera, controls, invalidate) for the benchmark. */
+  three: (() => RootState) | null;
   setColorMode: (mode: ColorMode) => void;
   setTool: (tool: Tool) => void;
 }
@@ -21,6 +24,7 @@ export const useViewStore = create<ViewState>()((set) => ({
   tool: 'select',
   selectionCount: 0,
   editor: null,
+  three: null,
   setColorMode: (colorMode) => {
     set({ colorMode });
   },

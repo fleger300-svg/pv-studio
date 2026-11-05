@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, type ComponentRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type ComponentRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Object3D, Vector3, type DirectionalLight } from 'three';
@@ -12,6 +12,8 @@ import { GridIndex } from './gridIndex';
 import { Editor } from './editor';
 import { Interaction } from './Interaction';
 import { ipcCallCount } from '../ipc';
+import { FrameProbe } from '../perf/FrameProbe';
+import { usePerfStore } from '../perf/perfStore';
 import { useViewStore } from '../store/view';
 import { useUiStore } from '../store/ui';
 
@@ -38,17 +40,38 @@ function Scene({ summary, modules }: SceneProps) {
   const colorMode = useViewStore((s) => s.colorMode);
 
   const panels = useMemo(() => new PanelMeshes(summary, modules), [summary, modules]);
+  // Static shadows: light and geometry do not move with the camera, so the shadow map is
+  // rendered only when the model changes (load, after a command), not on every frame.
+  const redraw = useCallback(
+    (opts?: { shadows?: boolean }) => {
+      if (opts?.shadows) getThree().gl.shadowMap.needsUpdate = true;
+      invalidate();
+    },
+    [getThree, invalidate],
+  );
+  useLayoutEffect(() => {
+    const { gl } = getThree();
+    gl.shadowMap.autoUpdate = false;
+    gl.shadowMap.needsUpdate = true;
+  }, [getThree, panels]);
   const editor = useMemo(
-    () => new Editor(summary, panels, new GridIndex(summary, modules), invalidate),
-    [summary, modules, panels, invalidate],
+    () =>
+      new Editor(
+        summary,
+        panels,
+        new GridIndex(summary, modules),
+        redraw,
+        usePerfStore.getState().recordCommand,
+      ),
+    [summary, modules, panels, redraw],
   );
   useEffect(() => {
     void editor.attach();
-    useViewStore.setState({ editor, selectionCount: editor.selection.size });
+    useViewStore.setState({ editor, three: getThree, selectionCount: editor.selection.size });
     // Dev-only automation handle (stripped from production builds).
     if (import.meta.env.DEV) window.__pv = { editor, three: getThree, ipcCallCount };
     return () => {
-      useViewStore.setState({ editor: null, selectionCount: 0 });
+      useViewStore.setState({ editor: null, three: null, selectionCount: 0 });
       editor.detach();
     };
   }, [editor, getThree]);
@@ -100,8 +123,8 @@ function Scene({ summary, modules }: SceneProps) {
     light.shadow.bias = -0.0005;
     light.shadow.normalBias = texel * 1.5;
     light.shadow.needsUpdate = true;
-    invalidate();
-  }, [center, radius, invalidate]);
+    redraw({ shadows: true });
+  }, [center, radius, redraw]);
 
   useEffect(() => {
     editor.setColorMode(colorMode);
@@ -124,6 +147,7 @@ function Scene({ summary, modules }: SceneProps) {
       <Buildings summary={summary} />
       <primitive object={panels.group} />
       <Interaction editor={editor} />
+      <FrameProbe key={summary.projectId} />
       <OrbitControls
         ref={controls}
         makeDefault

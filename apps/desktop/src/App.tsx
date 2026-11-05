@@ -9,6 +9,7 @@ import { useProjectStore } from './store/project';
 import { useViewStore } from './store/view';
 import { Viewport } from './viewport3d/Viewport';
 import { useEditorShortcuts } from './viewport3d/Interaction';
+import { Hud, useHudShortcut } from './perf/Hud';
 
 export function App() {
   const { t } = useTranslation();
@@ -16,6 +17,7 @@ export function App() {
   const modules = useProjectStore((s) => s.modules);
   const editor = useViewStore((s) => s.editor);
   useEditorShortcuts(editor);
+  useHudShortcut();
   return (
     <div className="app">
       <TopBar projectName={summary?.name ?? null} />
@@ -28,6 +30,7 @@ export function App() {
           <>
             <Viewport summary={summary} modules={modules} />
             <Toolbar />
+            <Hud />
           </>
         ) : (
           <p className="viewport-empty">{t('viewport.empty')}</p>

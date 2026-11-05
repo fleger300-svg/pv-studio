@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { IconButton } from '@pv/ui';
 import { useProjectStore } from '../store/project';
 import { useViewStore, type Tool } from '../store/view';
-import { IconBox, IconDelete, IconMove, IconRedo, IconSelect, IconUndo } from './icons';
+import { usePerfStore } from '../perf/perfStore';
+import { IconBox, IconDelete, IconGauge, IconMove, IconRedo, IconSelect, IconUndo } from './icons';
 
 const TOOLS: readonly { tool: Tool; icon: () => React.JSX.Element }[] = [
   { tool: 'select', icon: IconSelect },
@@ -19,6 +20,8 @@ export function Toolbar() {
   const selectionCount = useViewStore((s) => s.selectionCount);
   const canUndo = useProjectStore((s) => s.counters.canUndo);
   const canRedo = useProjectStore((s) => s.counters.canRedo);
+  const hudVisible = usePerfStore((s) => s.hudVisible);
+  const toggleHud = usePerfStore((s) => s.toggleHud);
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('tools.label')}>
@@ -51,6 +54,13 @@ export function Toolbar() {
         icon={<IconRedo />}
         disabled={!editor || !canRedo}
         onClick={() => void editor?.redo()}
+      />
+      <span className="toolbar__sep" aria-hidden="true" />
+      <IconButton
+        label={t('hud.toggle')}
+        icon={<IconGauge />}
+        active={hudVisible}
+        onClick={toggleHud}
       />
     </div>
   );

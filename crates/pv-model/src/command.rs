@@ -22,6 +22,7 @@ pub mod keys {
     pub const STORE_ALREADY_EXISTS: &str = "errors.store.alreadyExists";
     pub const STORE_NEWER_SCHEMA: &str = "errors.store.newerSchema";
     pub const STORE_FAILURE: &str = "errors.store.failure";
+    pub const INVALID_REPORT: &str = "errors.bench.invalidReport";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -35,6 +36,7 @@ pub mod keys {
         STORE_ALREADY_EXISTS,
         STORE_NEWER_SCHEMA,
         STORE_FAILURE,
+        INVALID_REPORT,
     ];
 }
 

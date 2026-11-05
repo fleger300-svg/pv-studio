@@ -38,6 +38,12 @@ export const IconRedo = () => (
     <path d="M20 9H10a6 6 0 000 12h3" />
   </svg>
 );
+export const IconGauge = () => (
+  <svg {...base}>
+    <path d="M4 18a8 8 0 1116 0" />
+    <path d="M12 18l4-6" />
+  </svg>
+);
 export const IconDelete = () => (
   <svg {...base}>
     <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />

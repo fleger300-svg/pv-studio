@@ -37,7 +37,6 @@ const MIN_MOVE_M = 0.005;
  */
 export class Editor {
   readonly selection = new Set<number>();
-  onCommand: ((t: CommandTiming) => void) | null = null;
   private drag: { ids: number[]; startU: number; startV: number; du: number; dv: number } | null =
     null;
   private busy = false;
@@ -52,7 +51,10 @@ export class Editor {
     readonly summary: ProjectSummary,
     readonly panels: PanelMeshes,
     readonly grid: GridIndex,
-    private readonly invalidate: () => void,
+    /** Requests a frame; `shadows` also re-renders the (otherwise static) shadow map. */
+    private readonly invalidate: (opts?: { shadows?: boolean }) => void,
+    /** Receives the timing of every command round trip (HUD, benchmark). */
+    public onCommand: ((t: CommandTiming) => void) | null = null,
   ) {
     this.axes = summary.arrays.map((a) => {
       const frame = summary.roofFaces[a.roofFaceIndex]?.frame;
@@ -281,6 +283,7 @@ export class Editor {
     this.grid.update(changed);
     this.box?.update(this.panels.data, changed);
     this.panels.updateColors(changed, this.colorOf);
-    this.invalidate();
+    // Geometry changed: the static shadow map must be re-rendered once.
+    this.invalidate({ shadows: true });
   }
 }

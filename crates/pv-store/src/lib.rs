@@ -4,6 +4,7 @@
 
 pub mod buffer;
 mod error;
+pub mod report;
 mod schema;
 mod store;
 #[cfg(test)]

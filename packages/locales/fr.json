@@ -82,6 +82,39 @@
       "alreadyExists": "Un fichier de projet existe déjà : {path}.",
       "newerSchema": "Ce projet a été créé par une version plus récente de PV Studio (format {found}, pris en charge {supported}).",
       "failure": "Le fichier de projet n'a pas pu être lu ou écrit : {detail}"
+    },
+    "bench": {
+      "invalidReport": "Le rapport de benchmark n'est pas un JSON valide."
+    }
+  },
+  "hud": {
+    "title": "Performance",
+    "toggle": "Indicateurs de performance (F2)",
+    "close": "Fermer",
+    "na": "n.d.",
+    "fps": "IPS (1 s)",
+    "frameP95": "Temps d'image p95 (ms)",
+    "drawCalls": "Appels de dessin",
+    "triangles": "Triangles",
+    "modules": "Modules",
+    "meshes": "Maillages instanciés",
+    "roundTrip": "Aller-retour dernière commande (ms)",
+    "rustApply": "Application Rust (µs)",
+    "openTime": "Ouverture → première image (ms)",
+    "heap": "Tas JS (Mo)",
+    "bench": {
+      "run": "Lancer le benchmark",
+      "done": "Rapport écrit : {path}",
+      "error": "Échec du benchmark : {detail}",
+      "steps": {
+        "open": "Ouverture du projet…",
+        "orbit": "Rotation de la caméra (10 s)…",
+        "drag": "Déplacement de 100 modules (2 s)…",
+        "move": "Application de MoveModules…",
+        "undo": "Annulation…",
+        "redo": "Rétablissement…",
+        "report": "Écriture du rapport…"
+      }
     }
   }
 }

@@ -1,6 +1,7 @@
 //! PV Studio desktop shell. Only this crate depends on Tauri; business logic lives in
 //! `crates/pv-model` and `crates/pv-store`.
 
+mod bench;
 mod commands;
 mod state;
 
@@ -32,6 +33,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::apply_command,
             commands::undo,
             commands::redo,
+            bench::platform_info,
+            bench::write_bench_report,
         ])
         .events(collect_events![commands::ModelChanged])
         .semantic_types(semantic::Configuration::empty().enable_lossless_floats())
