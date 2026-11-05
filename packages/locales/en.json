@@ -26,5 +26,27 @@
   "viewport": {
     "label": "3D viewport",
     "empty": "Create or open a project to display it in 3D."
+  },
+  "errors": {
+    "module": {
+      "outOfRoof": "{count, plural, one {# module would leave its roof face.} other {# modules would leave their roof face.}}",
+      "unknown": "{count, plural, one {# module does not exist.} other {# modules do not exist.}}"
+    },
+    "command": {
+      "invalidNumber": "The command contains an invalid number.",
+      "mismatchedLengths": "The command data is inconsistent."
+    },
+    "history": {
+      "nothingToUndo": "Nothing to undo.",
+      "nothingToRedo": "Nothing to redo."
+    },
+    "project": {
+      "notOpen": "No project is open."
+    },
+    "store": {
+      "alreadyExists": "A project file already exists at {path}.",
+      "newerSchema": "This project was created by a newer version of PV Studio (format {found}, supported {supported}).",
+      "failure": "The project file could not be read or written: {detail}"
+    }
   }
 }

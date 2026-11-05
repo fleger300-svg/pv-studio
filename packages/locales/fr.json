@@ -26,5 +26,27 @@
   "viewport": {
     "label": "Vue 3D",
     "empty": "Créez ou ouvrez un projet pour l'afficher en 3D."
+  },
+  "errors": {
+    "module": {
+      "outOfRoof": "{count, plural, one {# module sortirait de son pan de toiture.} other {# modules sortiraient de leur pan de toiture.}}",
+      "unknown": "{count, plural, one {# module n'existe pas.} other {# modules n'existent pas.}}"
+    },
+    "command": {
+      "invalidNumber": "La commande contient une valeur numérique invalide.",
+      "mismatchedLengths": "Les données de la commande sont incohérentes."
+    },
+    "history": {
+      "nothingToUndo": "Rien à annuler.",
+      "nothingToRedo": "Rien à rétablir."
+    },
+    "project": {
+      "notOpen": "Aucun projet n'est ouvert."
+    },
+    "store": {
+      "alreadyExists": "Un fichier de projet existe déjà : {path}.",
+      "newerSchema": "Ce projet a été créé par une version plus récente de PV Studio (format {found}, pris en charge {supported}).",
+      "failure": "Le fichier de projet n'a pas pu être lu ou écrit : {detail}"
+    }
   }
 }

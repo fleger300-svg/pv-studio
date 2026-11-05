@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["src-tauri"]
+members = ["src-tauri", "crates/*"]
 
 [workspace.package]
 version = "0.1.0"
@@ -10,6 +10,8 @@ publish = false
 rust-version = "1.99"
 
 [workspace.dependencies]
+pv-model = { path = "crates/pv-model" }
+pv-store = { path = "crates/pv-store" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1"
 thiserror = "2.0.21"

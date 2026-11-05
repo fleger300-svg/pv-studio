@@ -15,6 +15,7 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "i18n:check": "node packages/locales/scripts/check-parity.ts",
+    "bindings": "cargo run -q -p pv-studio --bin export-bindings",
     "tauri": "tauri"
   },
   "devDependencies": {

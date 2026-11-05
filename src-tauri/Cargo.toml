@@ -6,18 +6,40 @@ edition.workspace = true
 license.workspace = true
 publish.workspace = true
 rust-version.workspace = true
+default-run = "pv-studio"
 
+# No test harness in this crate: on Windows a Tauri test binary lacks the application
+# manifest (Common Controls v6) and aborts with STATUS_ENTRYPOINT_NOT_FOUND. Logic is tested
+# in crates/*; this crate only adapts it to Tauri.
 [lib]
 name = "pv_studio_lib"
 crate-type = ["rlib"]
+test = false
+doctest = false
+
+[[bin]]
+name = "pv-studio"
+path = "src/main.rs"
+test = false
+
+# `pnpm bindings`: regenerates apps/desktop/src/bindings/index.ts.
+[[bin]]
+name = "export-bindings"
+path = "src/bin/export_bindings.rs"
+test = false
 
 [build-dependencies]
 tauri-build = { version = "2.7.4", features = [] }
 
 [dependencies]
-tauri = { version = "2.12.5", features = [] }
+pv-model.workspace = true
+pv-store.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+specta.workspace = true
+specta-typescript = "=0.0.13"
+tauri = { version = "2.12.5", features = [] }
+tauri-specta = { version = "=2.0.0-rc.26", features = ["derive", "typescript"] }
 
 [lints]
 workspace = true

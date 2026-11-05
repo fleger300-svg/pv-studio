@@ -26,5 +26,27 @@
   "viewport": {
     "label": "3D-Ansicht",
     "empty": "Erstellen oder öffnen Sie ein Projekt, um es in 3D anzuzeigen."
+  },
+  "errors": {
+    "module": {
+      "outOfRoof": "{count, plural, one {# Modul würde seine Dachfläche verlassen.} other {# Module würden ihre Dachfläche verlassen.}}",
+      "unknown": "{count, plural, one {# Modul existiert nicht.} other {# Module existieren nicht.}}"
+    },
+    "command": {
+      "invalidNumber": "Der Befehl enthält einen ungültigen Zahlenwert.",
+      "mismatchedLengths": "Die Befehlsdaten sind widersprüchlich."
+    },
+    "history": {
+      "nothingToUndo": "Nichts rückgängig zu machen.",
+      "nothingToRedo": "Nichts wiederherzustellen."
+    },
+    "project": {
+      "notOpen": "Es ist kein Projekt geöffnet."
+    },
+    "store": {
+      "alreadyExists": "Unter {path} existiert bereits eine Projektdatei.",
+      "newerSchema": "Dieses Projekt wurde mit einer neueren Version von PV Studio erstellt (Format {found}, unterstützt {supported}).",
+      "failure": "Die Projektdatei konnte nicht gelesen oder geschrieben werden: {detail}"
+    }
   }
 }
