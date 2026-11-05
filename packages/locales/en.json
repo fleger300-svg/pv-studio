@@ -23,6 +23,15 @@
     "connection": "Connection",
     "unavailable": "Not available in this prototype"
   },
+  "project": {
+    "title": "Stress projects",
+    "loading": "Loading…",
+    "loaded": "{count, plural, one {# module} other {# modules}} in {arrays, plural, one {# array} other {# arrays}}",
+    "presets": {
+      "residential": "Residential · ~1,000 modules",
+      "industrial": "Industrial · ~10,000 modules"
+    }
+  },
   "viewport": {
     "label": "3D viewport",
     "empty": "Create or open a project to display it in 3D."

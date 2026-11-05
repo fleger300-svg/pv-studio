@@ -1,15 +1,114 @@
 //! Tauri commands and events. Thin adapters: all logic lives in `pv-model` / `pv-store`.
 
+use std::path::PathBuf;
 use std::time::Instant;
 
-use pv_model::{ChangeSet, Command, CommandError, ModuleId};
+use pv_model::command::keys;
+use pv_model::{ChangeSet, Command, CommandError, ModuleId, ProjectSummary, StressPreset};
 use pv_store::{Author, ProjectStore};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tauri::{AppHandle, State};
+use tauri::ipc::{InvokeResponseBody, IpcResponse, Response};
+use tauri::{AppHandle, Manager, State};
 use tauri_specta::Event;
 
 use crate::state::AppState;
+
+/// Raw `PVS1` bytes (see `pv_store::buffer`), sent as a binary IPC response
+/// (`tauri::ipc::Response`), never as JSON. The front-end receives an `ArrayBuffer`.
+pub struct ModuleBuffer(Response);
+
+impl ModuleBuffer {
+    fn new(bytes: Vec<u8>) -> Self {
+        Self(Response::new(bytes))
+    }
+}
+
+impl IpcResponse for ModuleBuffer {
+    fn body(self) -> tauri::Result<InvokeResponseBody> {
+        self.0.body()
+    }
+}
+
+impl Type for ModuleBuffer {
+    fn definition(_: &mut specta::Types) -> specta::datatype::DataType {
+        specta::datatype::DataType::Reference(specta_typescript::define("ArrayBuffer"))
+    }
+}
+
+fn summary(store: &ProjectStore) -> Result<ProjectSummary, CommandError> {
+    let (can_undo, can_redo) = store.history_state().map_err(CommandError::from)?;
+    Ok(ProjectSummary::new(
+        store.project(),
+        store.path().display().to_string(),
+        can_undo,
+        can_redo,
+    ))
+}
+
+/// Default location of a stress project file (in the app data directory).
+#[tauri::command]
+#[specta::specta]
+pub async fn stress_project_path(
+    app: AppHandle,
+    preset: StressPreset,
+) -> Result<String, CommandError> {
+    let dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| CommandError::new(keys::STORE_FAILURE).with_text("detail", e.to_string()))?;
+    std::fs::create_dir_all(&dir)
+        .map_err(|e| CommandError::new(keys::STORE_FAILURE).with_text("detail", e.to_string()))?;
+    let name = match preset {
+        StressPreset::Residential1k => "stress-residential-1k.pvproj",
+        StressPreset::Industrial10k => "stress-industrial-10k.pvproj",
+    };
+    Ok(dir.join(name).display().to_string())
+}
+
+/// Builds a synthetic project into a new `.pvproj` file and opens it.
+#[tauri::command]
+#[specta::specta]
+pub async fn create_stress_project(
+    state: State<'_, AppState>,
+    preset: StressPreset,
+    path: String,
+) -> Result<ProjectSummary, CommandError> {
+    let store = ProjectStore::create(&PathBuf::from(path), preset.build())?;
+    let result = summary(&store)?;
+    state.set(store);
+    Ok(result)
+}
+
+/// Opens an existing `.pvproj` file (applying migrations) and makes it the open project.
+#[tauri::command]
+#[specta::specta]
+pub async fn open_project(
+    state: State<'_, AppState>,
+    path: String,
+) -> Result<ProjectSummary, CommandError> {
+    let store = ProjectStore::open(&PathBuf::from(path))?;
+    let result = summary(&store)?;
+    state.set(store);
+    Ok(result)
+}
+
+/// Binary buffer of every module of the open project.
+#[tauri::command]
+#[specta::specta]
+pub async fn get_module_buffer(state: State<'_, AppState>) -> Result<ModuleBuffer, CommandError> {
+    state.with(|store| Ok(ModuleBuffer::new(store.module_buffer())))
+}
+
+/// Binary buffer of the given modules only (used to resync after undo/redo).
+#[tauri::command]
+#[specta::specta]
+pub async fn get_module_buffer_for(
+    state: State<'_, AppState>,
+    ids: Vec<ModuleId>,
+) -> Result<ModuleBuffer, CommandError> {
+    state.with(|store| Ok(ModuleBuffer::new(store.module_buffer_for(&ids))))
+}
 
 /// Result of `apply_command`, `undo` and `redo`.
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]

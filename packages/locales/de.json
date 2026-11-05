@@ -23,6 +23,15 @@
     "connection": "Anschluss",
     "unavailable": "In diesem Prototyp nicht verfügbar"
   },
+  "project": {
+    "title": "Lasttest-Projekte",
+    "loading": "Wird geladen…",
+    "loaded": "{count, plural, one {# Modul} other {# Module}} in {arrays, plural, one {# Modulfeld} other {# Modulfeldern}}",
+    "presets": {
+      "residential": "Wohnbau · ~1000 Module",
+      "industrial": "Industrie · ~10 000 Module"
+    }
+  },
   "viewport": {
     "label": "3D-Ansicht",
     "empty": "Erstellen oder öffnen Sie ein Projekt, um es in 3D anzuzeigen."

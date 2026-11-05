@@ -12,6 +12,7 @@ pub mod command;
 pub mod geometry;
 pub mod ids;
 pub mod project;
+pub mod stress;
 pub mod summary;
 pub mod units;
 
@@ -22,4 +23,5 @@ pub use project::{
     ArrayGrid, Building, ModuleInstance, ModuleState, Orientation, PanelArray, Project, RoofFace,
     RoofKind, MODULES_PER_STRING, MODULE_MOUNT_GAP_M, MODULE_THICKNESS_M,
 };
+pub use stress::StressPreset;
 pub use summary::{ArraySummary, ProjectSummary, RoofFaceSummary};

@@ -511,6 +511,24 @@ mod tests {
     }
 
     #[test]
+    fn stress_presets_persist_and_encode() {
+        let dir = tempfile::tempdir().expect("tmp");
+        for (preset, count) in [
+            (pv_model::StressPreset::Residential1k, 1008usize),
+            (pv_model::StressPreset::Industrial10k, 10_080),
+        ] {
+            let path = dir.path().join(format!("{preset:?}.pvproj"));
+            let created = ProjectStore::create(&path, preset.build()).expect("create");
+            let original = created.project().clone();
+            drop(created);
+            let store = ProjectStore::open(&path).expect("open");
+            assert_eq!(store.project(), &original);
+            let buf = store.module_buffer();
+            assert_eq!(buf.len(), buffer::HEADER_LEN + count * buffer::RECORD_LEN);
+        }
+    }
+
+    #[test]
     fn rejected_command_is_not_journalled() {
         let dir = tempfile::tempdir().expect("tmp");
         let mut s = new_store(&dir);

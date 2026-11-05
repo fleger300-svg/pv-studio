@@ -7,6 +7,16 @@ import * as __TAURI_EVENT from "@tauri-apps/api/event";
 
 /** Commands */
 export const commands = {
+	/**  Default location of a stress project file (in the app data directory). */
+	stressProjectPath: (preset: StressPreset) => typedError<string, CommandError>(__TAURI_INVOKE("stress_project_path", { preset })),
+	/**  Builds a synthetic project into a new `.pvproj` file and opens it. */
+	createStressProject: (preset: StressPreset, path: string) => typedError<ProjectSummary, CommandError>(__TAURI_INVOKE("create_stress_project", { preset, path })),
+	/**  Opens an existing `.pvproj` file (applying migrations) and makes it the open project. */
+	openProject: (path: string) => typedError<ProjectSummary, CommandError>(__TAURI_INVOKE("open_project", { path })),
+	/**  Binary buffer of every module of the open project. */
+	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
+	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
+	getModuleBufferFor: (ids: ModuleId[]) => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer_for", { ids })),
 	/**  Validates, applies and journals a model command. */
 	applyCommand: (cmd: Command) => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("apply_command", { cmd })),
 	/**  Undoes the last command. */
@@ -30,6 +40,51 @@ export type ApplyResult = {
 	canRedo: boolean,
 	activeModuleCount: number,
 };
+
+/**  Regular grid on which an array's modules were laid out (used for click lookup). */
+export type ArrayGrid = {
+	rows: number,
+	cols: number,
+	/**  Roof `(u, v)` of the centre of cell (row 0, col 0). */
+	originU: number,
+	originV: number,
+	/**  Centre-to-centre spacing along `u` (columns) and `v` (rows). */
+	pitchU: number,
+	pitchV: number,
+};
+
+/**  Identifies a panel array. */
+export type ArrayId = string;
+
+export type ArraySummary = {
+	array: PanelArray,
+	/**  Index into `ProjectSummary::roof_faces`. */
+	roofFaceIndex: number,
+	/**  Modules of this array have the contiguous ids `first_module_id .. first_module_id + module_count`. */
+	firstModuleId: number,
+	moduleCount: number,
+	/**  Module box size in its local frame (x, y, z), metres. */
+	moduleSize: [number, number, number],
+	/**  Half extents of the footprint on the roof plane along (u, v), metres. */
+	halfFootprint: [number, number],
+};
+
+/**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
+export type Building = {
+	id: BuildingId,
+	name: string,
+	/**  Centre of the footprint at ground level (world ENU, m). */
+	origin: [number, number, number],
+	/**  Footprint size along x (east) and y (north), m. */
+	sizeM: [number, number],
+	eaveHeightM: number,
+	/**  Ridge height above ground; equals `eave_height_m` for a flat roof. */
+	ridgeHeightM: number,
+	roofKind: RoofKind,
+};
+
+/**  Identifies a building. */
+export type BuildingId = string;
 
 /**  Modules whose state or transform changed. */
 export type ChangeSet = {
@@ -79,6 +134,89 @@ export type ModulePosition = {
 	u: number,
 	v: number,
 };
+
+export type Orientation = 
+/**  Long side along the module's slope direction. */
+"portrait" | 
+/**  Long side across the module's slope direction. */
+"landscape";
+
+export type PanelArray = {
+	id: ArrayId,
+	roofFaceId: RoofFaceId,
+	moduleLengthM: number,
+	moduleWidthM: number,
+	orientation: Orientation,
+	/**  Extra tilt relative to the roof plane (racks on flat roofs); 0 = coplanar. */
+	tiltOnRoofDeg: number,
+	/**  Module azimuth relative to the roof face azimuth, degrees (e.g. ±90 for east-west). */
+	azimuthOffsetDeg: number,
+	grid: ArrayGrid,
+};
+
+/**  Identifies a project. */
+export type ProjectId = string;
+
+export type ProjectSummary = {
+	projectId: ProjectId,
+	name: string,
+	path: string,
+	moduleCount: number,
+	activeModuleCount: number,
+	modulesPerString: number,
+	moduleThicknessM: number,
+	buildings: Building[],
+	roofFaces: RoofFaceSummary[],
+	arrays: ArraySummary[],
+	canUndo: boolean,
+	canRedo: boolean,
+};
+
+/**  Rectangular planar roof face. */
+export type RoofFace = {
+	id: RoofFaceId,
+	buildingId: BuildingId,
+	name: string,
+	/**  World position of local `(u, v) = (0, 0)` (see [`crate::geometry`]). */
+	origin: [number, number, number],
+	/**  Slope from horizontal, degrees. */
+	tiltDeg: number,
+	/**  Compass direction the downslope side faces, degrees. */
+	azimuthDeg: number,
+	/**  Extent along `u`, m. */
+	widthM: number,
+	/**  Extent along `v` (slope length), m. */
+	heightM: number,
+};
+
+/**  Identifies a roof face. */
+export type RoofFaceId = string;
+
+export type RoofFaceSummary = {
+	face: RoofFace,
+	/**  Precomputed orthonormal frame, so the front-end never re-derives roof geometry. */
+	frame: RoofFrame,
+};
+
+/**  Orthonormal frame of a planar roof face, derived from tilt and azimuth. */
+export type RoofFrame = {
+	/**  World position of roof `(u, v) = (0, 0)`. */
+	origin: [number, number, number],
+	/**  Unit vector of the `u` axis (horizontal, along the eave). */
+	axis_u: [number, number, number],
+	/**  Unit vector of the `v` axis (up the slope). */
+	axis_v: [number, number, number],
+	/**  Outward unit normal (`axis_u × axis_v`). */
+	normal: [number, number, number],
+};
+
+export type RoofKind = "gable" | "flat";
+
+export type StressPreset = 
+/**  Three gable-roof barns, south + north faces at 30°, ~1,000 coplanar portrait modules. */
+"Residential1k" | 
+/**  One 160 m × 140 m flat roof with 10° east-west racks, ~10,000 modules. */
+"Industrial10k";
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {

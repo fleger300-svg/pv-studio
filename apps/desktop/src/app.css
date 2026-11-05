@@ -81,6 +81,22 @@ body,
   font-weight: 600;
 }
 
+.app__left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+.project-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.project-picker__error {
+  margin: 0;
+  color: var(--color-accent-hover);
+  font-size: 12px;
+}
+
 /* Centre: viewport */
 .app__viewport {
   grid-area: viewport;

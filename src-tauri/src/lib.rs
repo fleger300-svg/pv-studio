@@ -24,9 +24,14 @@ pub const BINDINGS_PATH: &str = concat!(
 pub fn specta_builder() -> Builder<tauri::Wry> {
     Builder::<tauri::Wry>::new()
         .commands(collect_commands![
+            commands::stress_project_path,
+            commands::create_stress_project,
+            commands::open_project,
+            commands::get_module_buffer,
+            commands::get_module_buffer_for,
             commands::apply_command,
             commands::undo,
-            commands::redo
+            commands::redo,
         ])
         .events(collect_events![commands::ModelChanged])
         .semantic_types(semantic::Configuration::empty().enable_lossless_floats())

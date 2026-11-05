@@ -20,6 +20,11 @@ impl AppState {
         self.project.lock().unwrap_or_else(PoisonError::into_inner)
     }
 
+    /// Replaces the open project (the previous one is closed).
+    pub fn set(&self, store: ProjectStore) {
+        *self.lock() = Some(store);
+    }
+
     /// Runs `f` on the open project.
     ///
     /// # Errors
