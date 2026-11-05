@@ -26,10 +26,17 @@
   "project": {
     "title": "Projets de test de charge",
     "loading": "Chargement…",
-    "loaded": "{count, plural, one {# module} other {# modules}} dans {arrays, plural, one {# champ} other {# champs}}",
     "presets": {
       "residential": "Résidentiel · ~1 000 modules",
       "industrial": "Industriel · ~10 000 modules"
+    }
+  },
+  "display": {
+    "title": "Affichage",
+    "colorMode": "Mode de couleur",
+    "colorModes": {
+      "default": "Par défaut",
+      "string": "Par string"
     }
   },
   "viewport": {

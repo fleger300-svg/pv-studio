@@ -151,6 +151,7 @@ impl std::ops::Mul for Quat {
 
 /// Orthonormal frame of a planar roof face, derived from tilt and azimuth.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct RoofFrame {
     /// World position of roof `(u, v) = (0, 0)`.
     pub origin: Vec3,

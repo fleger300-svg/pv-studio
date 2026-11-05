@@ -11,6 +11,8 @@ export default defineConfig({
     watch: { ignored: ['**/src-tauri/**', '**/target/**'] },
   },
   envPrefix: ['VITE_', 'TAURI_ENV_'],
+  // Binary test fixtures (PVS1 buffers produced by the Rust encoder).
+  assetsInclude: ['**/*.bin'],
   build: {
     target: ['es2022', 'chrome120', 'safari16'],
     sourcemap: true,

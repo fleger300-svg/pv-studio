@@ -203,9 +203,9 @@ export type RoofFrame = {
 	/**  World position of roof `(u, v) = (0, 0)`. */
 	origin: [number, number, number],
 	/**  Unit vector of the `u` axis (horizontal, along the eave). */
-	axis_u: [number, number, number],
+	axisU: [number, number, number],
 	/**  Unit vector of the `v` axis (up the slope). */
-	axis_v: [number, number, number],
+	axisV: [number, number, number],
 	/**  Outward unit normal (`axis_u × axis_v`). */
 	normal: [number, number, number],
 };

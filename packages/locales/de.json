@@ -26,10 +26,17 @@
   "project": {
     "title": "Lasttest-Projekte",
     "loading": "Wird geladen…",
-    "loaded": "{count, plural, one {# Modul} other {# Module}} in {arrays, plural, one {# Modulfeld} other {# Modulfeldern}}",
     "presets": {
       "residential": "Wohnbau · ~1000 Module",
       "industrial": "Industrie · ~10 000 Module"
+    }
+  },
+  "display": {
+    "title": "Darstellung",
+    "colorMode": "Farbmodus",
+    "colorModes": {
+      "default": "Standard",
+      "string": "Nach String"
     }
   },
   "viewport": {

@@ -1,12 +1,15 @@
 import { create } from 'zustand';
 import type { CommandError, ProjectSummary, StressPreset } from '../bindings';
 import { api, BackendError, unwrap } from '../ipc';
+import { decodeModuleBuffer, type ModuleData } from '../viewport3d/moduleBuffer';
 
 const ALREADY_EXISTS = 'errors.store.alreadyExists';
 
 /** Read-only projection of the project metadata owned by Rust. */
 interface ProjectState {
   summary: ProjectSummary | null;
+  /** Decoded PVS1 buffer (typed arrays; mutated in place by the viewport on sync). */
+  modules: ModuleData | null;
   preset: StressPreset | null;
   loading: StressPreset | null;
   error: CommandError | null;
@@ -26,6 +29,7 @@ function toCommandError(e: unknown): CommandError {
 
 export const useProjectStore = create<ProjectState>()((set, get) => ({
   summary: null,
+  modules: null,
   preset: null,
   loading: null,
   error: null,
@@ -44,7 +48,8 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
       }
       const openStartedAt = performance.now();
       const summary = await unwrap(api.openProject(path));
-      set({ summary, preset, openStartedAt, loading: null });
+      const modules = decodeModuleBuffer(await unwrap(api.getModuleBuffer()));
+      set({ summary, modules, preset, openStartedAt, loading: null });
     } catch (e) {
       set({ error: toCommandError(e), loading: null });
     }
