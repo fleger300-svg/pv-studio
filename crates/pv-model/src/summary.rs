@@ -6,7 +6,8 @@ use specta::Type;
 use crate::geometry::RoofFrame;
 use crate::ids::ProjectId;
 use crate::project::{
-    Building, PanelArray, Project, RoofFace, MODULES_PER_STRING, MODULE_THICKNESS_M,
+    Building, PanelArray, Project, RoofFace, MODULES_PER_STRING, MODULE_PEAK_POWER_WP,
+    MODULE_THICKNESS_M,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
@@ -42,6 +43,8 @@ pub struct ProjectSummary {
     pub active_module_count: u32,
     pub modules_per_string: u32,
     pub module_thickness_m: f64,
+    /// Peak power of one module, Wp.
+    pub module_peak_power_wp: f64,
     pub buildings: Vec<Building>,
     pub roof_faces: Vec<RoofFaceSummary>,
     pub arrays: Vec<ArraySummary>,
@@ -97,6 +100,7 @@ impl ProjectSummary {
             active_module_count: project.active_count() as u32,
             modules_per_string: MODULES_PER_STRING,
             module_thickness_m: MODULE_THICKNESS_M,
+            module_peak_power_wp: MODULE_PEAK_POWER_WP,
             buildings: project.buildings.clone(),
             roof_faces,
             arrays,

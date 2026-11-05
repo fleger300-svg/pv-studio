@@ -9,7 +9,11 @@ import * as __TAURI_EVENT from "@tauri-apps/api/event";
 export const commands = {
 	/**  Default location of a stress project file (in the app data directory). */
 	stressProjectPath: (preset: StressPreset) => typedError<string, CommandError>(__TAURI_INVOKE("stress_project_path", { preset })),
-	/**  Builds a synthetic project into a new `.pvproj` file and opens it. */
+	/**
+	 *  Builds a synthetic project into a new `.pvproj` file and opens it. Stress projects are
+	 *  disposable: an existing file at `path` (and its WAL/SHM side files) is replaced, so every
+	 *  benchmark run starts from the same state.
+	 */
 	createStressProject: (preset: StressPreset, path: string) => typedError<ProjectSummary, CommandError>(__TAURI_INVOKE("create_stress_project", { preset, path })),
 	/**  Opens an existing `.pvproj` file (applying migrations) and makes it the open project. */
 	openProject: (path: string) => typedError<ProjectSummary, CommandError>(__TAURI_INVOKE("open_project", { path })),
@@ -165,6 +169,8 @@ export type ProjectSummary = {
 	activeModuleCount: number,
 	modulesPerString: number,
 	moduleThicknessM: number,
+	/**  Peak power of one module, Wp. */
+	modulePeakPowerWp: number,
 	buildings: Building[],
 	roofFaces: RoofFaceSummary[],
 	arrays: ArraySummary[],

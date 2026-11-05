@@ -66,7 +66,9 @@ pub async fn stress_project_path(
     Ok(dir.join(name).display().to_string())
 }
 
-/// Builds a synthetic project into a new `.pvproj` file and opens it.
+/// Builds a synthetic project into a new `.pvproj` file and opens it. Stress projects are
+/// disposable: an existing file at `path` (and its WAL/SHM side files) is replaced, so every
+/// benchmark run starts from the same state.
 #[tauri::command]
 #[specta::specta]
 pub async fn create_stress_project(
@@ -74,7 +76,23 @@ pub async fn create_stress_project(
     preset: StressPreset,
     path: String,
 ) -> Result<ProjectSummary, CommandError> {
-    let store = ProjectStore::create(&PathBuf::from(path), preset.build())?;
+    let path = PathBuf::from(path);
+    // Close the open project first: Windows cannot delete a file that is still open.
+    state.clear();
+    for suffix in ["", "-wal", "-shm"] {
+        let mut file = path.clone().into_os_string();
+        file.push(suffix);
+        match std::fs::remove_file(&file) {
+            Ok(()) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(e) => {
+                return Err(
+                    CommandError::new(keys::STORE_FAILURE).with_text("detail", e.to_string())
+                )
+            }
+        }
+    }
+    let store = ProjectStore::create(&path, preset.build())?;
     let result = summary(&store)?;
     state.set(store);
     Ok(result)

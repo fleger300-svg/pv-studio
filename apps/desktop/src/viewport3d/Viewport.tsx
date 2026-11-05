@@ -7,13 +7,11 @@ import type { ProjectSummary } from '../bindings';
 import type { ModuleData } from './moduleBuffer';
 import { Buildings } from './Buildings';
 import { sceneBounds } from './frames';
-import {
-  DEFAULT_CELL_COLOR,
-  PanelMeshes,
-  STRING_PALETTE,
-  type ColorMode,
-  type ColorOf,
-} from './PanelMeshes';
+import { PanelMeshes } from './PanelMeshes';
+import { GridIndex } from './gridIndex';
+import { Editor } from './editor';
+import { Interaction } from './Interaction';
+import { ipcCallCount } from '../ipc';
 import { useViewStore } from '../store/view';
 import { useUiStore } from '../store/ui';
 
@@ -26,14 +24,6 @@ const SUN_DIR = (() => {
   const el = (40 * Math.PI) / 180;
   return new Vector3(Math.sin(az) * Math.cos(el), Math.cos(az) * Math.cos(el), Math.sin(el));
 })();
-
-export function colorFunction(panels: PanelMeshes, mode: ColorMode): ColorOf {
-  if (mode === 'string') {
-    return (id) =>
-      STRING_PALETTE[panels.stringIndex(id) % STRING_PALETTE.length] ?? DEFAULT_CELL_COLOR;
-  }
-  return () => DEFAULT_CELL_COLOR;
-}
 
 interface SceneProps {
   summary: ProjectSummary;
@@ -48,6 +38,22 @@ function Scene({ summary, modules }: SceneProps) {
   const colorMode = useViewStore((s) => s.colorMode);
 
   const panels = useMemo(() => new PanelMeshes(summary, modules), [summary, modules]);
+  const editor = useMemo(
+    () => new Editor(summary, panels, new GridIndex(summary, modules), invalidate),
+    [summary, modules, panels, invalidate],
+  );
+  useEffect(() => {
+    void editor.attach();
+    useViewStore.setState({ editor, selectionCount: editor.selection.size });
+    // Dev-only automation handle (stripped from production builds).
+    if (import.meta.env.DEV) window.__pv = { editor, three: getThree, ipcCallCount };
+    return () => {
+      useViewStore.setState({ editor: null, selectionCount: 0 });
+      editor.detach();
+    };
+  }, [editor, getThree]);
+  // GPU resources are freed when the project changes (three.js re-uploads on demand, so a
+  // StrictMode remount is harmless).
   useEffect(
     () => () => {
       panels.dispose();
@@ -98,9 +104,8 @@ function Scene({ summary, modules }: SceneProps) {
   }, [center, radius, invalidate]);
 
   useEffect(() => {
-    panels.updateAllColors(colorFunction(panels, colorMode));
-    invalidate();
-  }, [panels, colorMode, invalidate]);
+    editor.setColorMode(colorMode);
+  }, [editor, colorMode]);
 
   return (
     <>
@@ -118,6 +123,7 @@ function Scene({ summary, modules }: SceneProps) {
       </mesh>
       <Buildings summary={summary} />
       <primitive object={panels.group} />
+      <Interaction editor={editor} />
       <OrbitControls
         ref={controls}
         makeDefault

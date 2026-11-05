@@ -20,6 +20,11 @@ impl AppState {
         self.project.lock().unwrap_or_else(PoisonError::into_inner)
     }
 
+    /// Closes the open project, if any (releases the SQLite file).
+    pub fn clear(&self) {
+        *self.lock() = None;
+    }
+
     /// Replaces the open project (the previous one is closed).
     pub fn set(&self, store: ProjectStore) {
         *self.lock() = Some(store);

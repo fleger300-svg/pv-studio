@@ -3,23 +3,31 @@ import type { CommandError, ProjectSummary, StressPreset } from '../bindings';
 import { api, BackendError, unwrap } from '../ipc';
 import { decodeModuleBuffer, type ModuleData } from '../viewport3d/moduleBuffer';
 
-const ALREADY_EXISTS = 'errors.store.alreadyExists';
+/** Counters that change with every command (kept apart so `summary` stays immutable). */
+export interface ProjectCounters {
+  canUndo: boolean;
+  canRedo: boolean;
+  activeModuleCount: number;
+}
 
-/** Read-only projection of the project metadata owned by Rust. */
+/** Read-only projection of the project owned by Rust. */
 interface ProjectState {
+  /**
+   * Static description of the open project. Never replaced while the project is open: the
+   * viewport builds its GPU meshes from it, and edits must not rebuild them.
+   */
   summary: ProjectSummary | null;
-  /** Decoded PVS1 buffer (typed arrays; mutated in place by the viewport on sync). */
+  /** Decoded PVS1 buffer (typed arrays; updated in place by the viewport on sync). */
   modules: ModuleData | null;
+  counters: ProjectCounters;
   preset: StressPreset | null;
   loading: StressPreset | null;
   error: CommandError | null;
   /** `performance.now()` when `open_project` was called (open-to-first-frame metric). */
   openStartedAt: number | null;
   loadPreset: (preset: StressPreset) => Promise<void>;
-  /** Applies counters returned by Rust after a command (undo/redo availability, counts). */
-  patch: (
-    patch: Partial<Pick<ProjectSummary, 'canUndo' | 'canRedo' | 'activeModuleCount'>>,
-  ) => void;
+  /** Applies the counters returned by Rust after a command. */
+  setCounters: (counters: ProjectCounters) => void;
 }
 
 function toCommandError(e: unknown): CommandError {
@@ -30,6 +38,7 @@ function toCommandError(e: unknown): CommandError {
 export const useProjectStore = create<ProjectState>()((set, get) => ({
   summary: null,
   modules: null,
+  counters: { canUndo: false, canRedo: false, activeModuleCount: 0 },
   preset: null,
   loading: null,
   error: null,
@@ -40,23 +49,26 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
     set({ loading: preset, error: null });
     try {
       const path = await unwrap(api.stressProjectPath(preset));
-      // Generate the file the first time; afterwards always measure a plain open.
-      try {
-        await unwrap(api.createStressProject(preset, path));
-      } catch (e) {
-        if (!(e instanceof BackendError && e.key === ALREADY_EXISTS)) throw e;
-      }
+      // Regenerate the synthetic file (same state every time), then measure a plain open.
+      await unwrap(api.createStressProject(preset, path));
       const openStartedAt = performance.now();
       const summary = await unwrap(api.openProject(path));
       const modules = decodeModuleBuffer(await unwrap(api.getModuleBuffer()));
-      set({ summary, modules, preset, openStartedAt, loading: null });
+      const { canUndo, canRedo, activeModuleCount } = summary;
+      set({
+        summary,
+        modules,
+        counters: { canUndo, canRedo, activeModuleCount },
+        preset,
+        openStartedAt,
+        loading: null,
+      });
     } catch (e) {
       set({ error: toCommandError(e), loading: null });
     }
   },
 
-  patch: (patch) => {
-    const { summary } = get();
-    if (summary) set({ summary: { ...summary, ...patch } });
+  setCounters: (counters) => {
+    set({ counters });
   },
 }));

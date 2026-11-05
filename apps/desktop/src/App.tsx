@@ -3,13 +3,19 @@ import { TopBar } from './shell/TopBar';
 import { WorkflowSteps } from './shell/WorkflowSteps';
 import { ProjectPicker } from './shell/ProjectPicker';
 import { SidePanel } from './shell/SidePanel';
+import { Toolbar } from './shell/Toolbar';
+import { Toasts } from './shell/Toasts';
 import { useProjectStore } from './store/project';
+import { useViewStore } from './store/view';
 import { Viewport } from './viewport3d/Viewport';
+import { useEditorShortcuts } from './viewport3d/Interaction';
 
 export function App() {
   const { t } = useTranslation();
   const summary = useProjectStore((s) => s.summary);
   const modules = useProjectStore((s) => s.modules);
+  const editor = useViewStore((s) => s.editor);
+  useEditorShortcuts(editor);
   return (
     <div className="app">
       <TopBar projectName={summary?.name ?? null} />
@@ -19,10 +25,14 @@ export function App() {
       </aside>
       <main className="app__viewport" aria-label={t('viewport.label')}>
         {summary && modules ? (
-          <Viewport summary={summary} modules={modules} />
+          <>
+            <Viewport summary={summary} modules={modules} />
+            <Toolbar />
+          </>
         ) : (
           <p className="viewport-empty">{t('viewport.empty')}</p>
         )}
+        <Toasts />
       </main>
       <SidePanel />
     </div>

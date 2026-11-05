@@ -10,6 +10,8 @@ use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 pub const MODULE_THICKNESS_M: f64 = 0.030;
 /// Clearance between roof surface and the underside of a module (m).
 pub const MODULE_MOUNT_GAP_M: f64 = 0.050;
+/// Peak power of one module (Wp), used for the selection's kWp.
+pub const MODULE_PEAK_POWER_WP: f64 = 430.0;
 /// Fake string size used by the stress presets (string colouring mode only).
 pub const MODULES_PER_STRING: u32 = 18;
 /// Tolerance used by geometric validation (m).
