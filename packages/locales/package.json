@@ -1,0 +1,22 @@
+﻿{
+  "name": "@pv/locales",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fr.json": "./fr.json",
+    "./en.json": "./en.json",
+    "./de.json": "./de.json"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run",
+    "check": "node scripts/check-parity.ts"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
+  }
+}

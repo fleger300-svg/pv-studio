@@ -1,0 +1,30 @@
+{
+  "app": {
+    "title": "PV Studio",
+    "noProject": "Aucun projet ouvert"
+  },
+  "topbar": {
+    "language": "Langue",
+    "theme": {
+      "label": "Thème sombre"
+    }
+  },
+  "languages": {
+    "fr": "Français",
+    "en": "English",
+    "de": "Deutsch"
+  },
+  "workflow": {
+    "title": "Étapes",
+    "step": "{index}. {label}",
+    "building": "Bâtiment",
+    "roof": "Toiture",
+    "layout": "Calepinage",
+    "connection": "Raccordement",
+    "unavailable": "Non disponible dans ce prototype"
+  },
+  "viewport": {
+    "label": "Vue 3D",
+    "empty": "Créez ou ouvrez un projet pour l'afficher en 3D."
+  }
+}

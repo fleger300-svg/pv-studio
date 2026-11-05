@@ -1,0 +1,27 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
+
+# Tauri
+src-tauri/gen/schemas/
+
+# Projects created by the app in dev
+*.pvproj
+*.pvproj-wal
+*.pvproj-shm
+
+# Benchmark reports are committed explicitly with `git add -f` when publishing results
+testdata/bench-*.json
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

@@ -1,0 +1,112 @@
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 200px 1fr 280px;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'top top top'
+    'left viewport right';
+}
+
+/* Top bar */
+.topbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.topbar__title {
+  font-size: 20px;
+}
+.topbar__project {
+  color: var(--color-text-muted);
+}
+.topbar__spacer {
+  flex: 1;
+}
+.topbar__controls {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-lg);
+}
+
+/* Left: workflow */
+.app__left {
+  grid-area: left;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-lg);
+}
+.workflow__title {
+  font-size: 15px;
+  margin-bottom: var(--space-md);
+}
+.workflow__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.workflow__step {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.workflow__step:disabled {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.workflow__step[aria-current='step'] {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  font-weight: 600;
+}
+
+/* Centre: viewport */
+.app__viewport {
+  grid-area: viewport;
+  position: relative;
+  background: var(--color-viewport-bg);
+  min-width: 0;
+  min-height: 0;
+}
+.viewport-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* Right: side panel */
+.app__right {
+  grid-area: right;
+  background: var(--color-bg);
+  border-left: 1px solid var(--color-border);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow-y: auto;
+}

@@ -1,0 +1,42 @@
+/* Design tokens. Keep in sync with tokens.ts. */
+:root {
+  --font-heading: Georgia, 'Gelasio', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --color-accent: #ff6727;
+  --color-accent-hover: #e5551a;
+  --color-on-accent: #1b1b1f;
+  --color-focus-ring: #ff6727;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+
+  /* light theme (default) */
+  --color-bg: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fafafa;
+  --color-border: #d9d9de;
+  --color-text: #1b1b1f;
+  --color-text-muted: #5e5e66;
+  --color-viewport-bg: #dce3ea;
+  --shadow-float: 0 4px 16px rgb(0 0 0 / 0.12);
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #141416;
+  --color-surface: #1d1d20;
+  --color-surface-raised: #26262a;
+  --color-border: #38383e;
+  --color-text: #ededef;
+  --color-text-muted: #a0a0a8;
+  --color-viewport-bg: #202328;
+  --shadow-float: 0 4px 16px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
+}

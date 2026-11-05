@@ -1,0 +1,30 @@
+{
+  "app": {
+    "title": "PV Studio",
+    "noProject": "Kein Projekt geöffnet"
+  },
+  "topbar": {
+    "language": "Sprache",
+    "theme": {
+      "label": "Dunkles Design"
+    }
+  },
+  "languages": {
+    "fr": "Français",
+    "en": "English",
+    "de": "Deutsch"
+  },
+  "workflow": {
+    "title": "Arbeitsschritte",
+    "step": "{index}. {label}",
+    "building": "Gebäude",
+    "roof": "Dach",
+    "layout": "Belegung",
+    "connection": "Anschluss",
+    "unavailable": "In diesem Prototyp nicht verfügbar"
+  },
+  "viewport": {
+    "label": "3D-Ansicht",
+    "empty": "Erstellen oder öffnen Sie ein Projekt, um es in 3D anzuzeigen."
+  }
+}

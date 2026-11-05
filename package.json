@@ -1,0 +1,30 @@
+{
+  "name": "pv-studio",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": ">=26.13.0"
+  },
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:rust": "cargo test --workspace",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "i18n:check": "node packages/locales/scripts/check-parity.ts",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@tauri-apps/cli": "2.12.4",
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.14.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1"
+  }
+}
