@@ -1,0 +1,16 @@
+[package]
+name = "pv-graph"
+description = "PV Studio dependency graph: memoised derived results, dirty propagation, early cut-off, cancellation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-model.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

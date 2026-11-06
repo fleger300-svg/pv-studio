@@ -9,6 +9,7 @@
 //! This crate has no dependency on Tauri or on storage.
 
 pub mod command;
+pub mod fingerprint;
 pub mod geometry;
 pub mod ids;
 pub mod layout;
@@ -18,6 +19,7 @@ pub mod summary;
 pub mod units;
 
 pub use command::{ChangeSet, Command, CommandError, ErrorParam};
+pub use fingerprint::fingerprint;
 pub use geometry::{Quat, RoofFrame, Vec3};
 pub use ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 pub use layout::{

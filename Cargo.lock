@@ -2400,6 +2400,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-graph"
+version = "0.1.0"
+dependencies = [
+ "pv-model",
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "pv-layout"
 version = "0.1.0"
 dependencies = [
