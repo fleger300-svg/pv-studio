@@ -1,0 +1,38 @@
+{
+  "_about": "Layout references hand-transcribed from the K2 Base report of project A (ref-a, PDF kept out of git, anonymised). Field sizes are printed to 1 cm, distances to roof edges to 0.1 m (truncated). See crates/pv-layout/tests/k2_layout.rs.",
+  "module": { "length_m": 1.8, "width_m": 1.134, "orientation": "landscape" },
+  "_grid": "Dm = 10 mm between modules along u (bottom rails), Dc = 20 mm along v (modules clamped on the top rails). Blocks of at most 2 x 2 modules, anchored lower-left; 0.08 m between blocks along u (printed), 0.13 m along v (derived: top rails overhang 0.05 m at each end, 0.03 m between rail ends; reproduces all printed field lengths).",
+  "grid": { "gap_u_m": 0.01, "gap_v_m": 0.02, "block": { "max_cols": 2, "max_rows": 2, "gap_u_m": 0.08, "gap_v_m": 0.13 } },
+  "fields": [
+    { "roof": "roof-1", "field": 1, "cols": 4, "rows": 4, "width_m": 7.30, "length_m": 4.71, "blocks": [[2,2],[2,2],[2,2],[2,2]], "removed": 0 },
+    { "roof": "roof-1", "field": 2, "cols": 5, "rows": 4, "width_m": 9.18, "length_m": 4.71, "blocks": [[2,2],[2,2],[1,2],[2,2],[2,2],[1,2]], "removed": 1 },
+    { "roof": "roof-2", "field": 1, "cols": 5, "rows": 4, "width_m": 9.18, "length_m": 4.71, "blocks": [[2,2],[2,2],[1,2],[2,2],[2,2],[1,2]], "removed": 0 },
+    { "roof": "roof-2", "field": 2, "cols": 3, "rows": 2, "width_m": 5.49, "length_m": 2.29, "blocks": [[2,2],[1,2]], "removed": 0 },
+    { "roof": "roof-3", "field": 1, "cols": 5, "rows": 4, "width_m": 9.18, "length_m": 4.71, "blocks": [[2,2],[2,2],[1,2],[2,2],[2,2],[1,2]], "removed": 0 },
+    { "roof": "roof-3", "field": 2, "cols": 3, "rows": 2, "width_m": 5.49, "length_m": 2.29, "blocks": [[2,2],[1,2]], "removed": 0 },
+    { "roof": "roof-4", "field": 1, "cols": 3, "rows": 3, "width_m": 5.49, "length_m": 3.55, "blocks": [[2,1],[1,1],[2,2],[1,2]], "removed": 0 },
+    { "roof": "roof-4", "field": 2, "cols": 5, "rows": 4, "width_m": 9.18, "length_m": 4.71, "blocks": [[2,2],[2,2],[1,2],[2,2],[2,2],[1,2]], "removed": 0 }
+  ],
+  "expected_modules": { "roof-1": 35, "roof-2": 26, "roof-3": 26, "roof-4": 29, "total": 116 },
+  "roof_1_face": {
+    "_about": "roof-1 reconstructed from the printed dimensions: eave 26.18 m, ridge 19.62 m, hip 9.45 m (= sqrt(6.56^2 + 6.80^2)), slope height 6.80 m, right side vertical. The printed block distances are horizontal distances from each block's lower-left corner to the hip, and distances to eave / ridge / right edge. Field origins (lower-left module corner) are the ones consistent with all 18 printed values.",
+    "vertices_uv": [[0.0, 0.0], [26.18, 0.0], [26.18, 6.80], [6.56, 6.80]],
+    "edge_kinds": ["eave", "abutment", "ridge", "hip"],
+    "fields": [
+      { "field": 1, "cols": 4, "rows": 4, "lower_left": [6.15, 0.70],
+        "blocks": [
+          { "block": [0, 1], "k2_no": 1, "hip": 3.1, "ridge": 1.3 },
+          { "block": [1, 1], "k2_no": 2, "ridge": 1.3, "right": 12.7 },
+          { "block": [0, 0], "k2_no": 3, "eave": 0.7, "hip": 5.4 },
+          { "block": [1, 0], "k2_no": 4, "right": 12.7, "eave": 0.7 } ] },
+      { "field": 2, "cols": 5, "rows": 4, "lower_left": [16.48, 0.62],
+        "blocks": [
+          { "block": [0, 1], "k2_no": 5, "ridge": 1.4, "hip": 13.5 },
+          { "block": [1, 1], "k2_no": 6, "ridge": 1.4 },
+          { "block": [2, 1], "k2_no": 7, "ridge": 1.4, "right": 0.5 },
+          { "block": [0, 0], "k2_no": 8, "eave": 0.6, "hip": 15.8 },
+          { "block": [1, 0], "k2_no": 9, "eave": 0.6 },
+          { "block": [2, 0], "k2_no": 10, "eave": 0.6, "right": 0.5 } ] }
+    ]
+  }
+}

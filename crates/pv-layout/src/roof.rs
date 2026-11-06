@@ -1,43 +1,12 @@
 //! Roof outline in the face's `(u, v)` frame: boundary polygon with typed edges, obstacles.
 
 use pv_geo::{Polygon, PolygonError, Vec2};
+use pv_model::{RoofFace, RoofOutlineSpec};
 use serde::{Deserialize, Serialize};
 
 use crate::LayoutError;
 
-/// Kind of a roof edge. Setbacks and (in `pv-statics`) wind zones depend on it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum EdgeKind {
-    /// Lower horizontal edge (gutter).
-    Eave,
-    /// Upper horizontal edge where two faces meet.
-    Ridge,
-    /// Sloped free edge (gable).
-    Verge,
-    /// Sloped edge shared with an adjacent face (hipped roofs).
-    Hip,
-    /// Internal edge between two faces draining towards each other.
-    Valley,
-    /// Edge of a flat roof bordered by a parapet.
-    Parapet,
-    /// Edge against a rising wall.
-    Abutment,
-    /// Anything else (cut-outs drawn by the user…).
-    Other,
-}
-
-/// Kind of obstacle on the roof.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ObstacleKind {
-    Chimney,
-    Skylight,
-    Vent,
-    Dormer,
-    /// Area kept free on purpose (access path, maintenance zone…).
-    KeepOut,
-}
+pub use pv_model::{ObstacleKind, RoofEdgeKind as EdgeKind};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Obstacle {
@@ -116,6 +85,43 @@ impl RoofOutline {
             vec![EdgeKind::Parapet; 4],
             Vec::new(),
         )
+    }
+
+    /// Outline of a `pv-model` face: its explicit outline when it has one, otherwise its
+    /// rectangle (parapets all round below 5° of pitch, eave / verges / ridge above).
+    pub fn from_face(face: &RoofFace) -> Result<Self, LayoutError> {
+        match &face.outline {
+            Some(spec) => Self::from_spec(spec),
+            None if face.tilt_deg < 5.0 => Self::flat(face.width_m, face.height_m),
+            None => Self::rectangle(face.width_m, face.height_m, EdgeKind::Verge),
+        }
+    }
+
+    pub fn from_spec(spec: &RoofOutlineSpec) -> Result<Self, LayoutError> {
+        let vertices = spec
+            .vertices_uv
+            .iter()
+            .map(|&[u, v]| Vec2::new(u, v))
+            .collect();
+        let obstacles = spec
+            .obstacles
+            .iter()
+            .map(|o| {
+                let fp = o
+                    .footprint_uv
+                    .iter()
+                    .map(|&[u, v]| Vec2::new(u, v))
+                    .collect();
+                Ok(Obstacle {
+                    name: o.name.clone(),
+                    kind: o.kind,
+                    footprint: Polygon::new(fp)?,
+                    height_m: o.height_m,
+                    clearance_m: o.clearance_m,
+                })
+            })
+            .collect::<Result<Vec<_>, LayoutError>>()?;
+        Self::new(vertices, spec.edge_kinds.clone(), obstacles)
     }
 
     /// Adds an obstacle; it must lie at least partly on the roof.

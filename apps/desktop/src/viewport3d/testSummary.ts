@@ -6,7 +6,18 @@ import type { ModuleData } from './moduleBuffer';
  * of portrait modules (pitch 1.154 × 1.782 m). Module ids are row-major.
  */
 export function flatRoofFixture(): { summary: ProjectSummary; data: ModuleData } {
-  const grid = { rows: 2, cols: 3, originU: 1, originV: 1.5, pitchU: 1.154, pitchV: 1.782 };
+  const grid = {
+    rows: 2,
+    cols: 3,
+    originU: 1,
+    originV: 1.5,
+    pitchU: 1.154,
+    pitchV: 1.782,
+    blockCols: 0,
+    blockRows: 0,
+    blockExtraU: 0,
+    blockExtraV: 0,
+  };
   const summary: ProjectSummary = {
     projectId: 'p',
     name: 'test',
@@ -43,6 +54,15 @@ export function flatRoofFixture(): { summary: ProjectSummary; data: ModuleData }
           tiltOnRoofDeg: 0,
           azimuthOffsetDeg: 0,
           grid,
+          layout: {
+            boundaryUv: [],
+            moduleGapUM: 0,
+            moduleGapVM: 0,
+            edgeSetbackM: 0,
+            edgeSetbacks: [],
+            obstacleClearanceM: 0,
+            anchor: 'lowerLeft',
+          },
         },
         roofFaceIndex: 0,
         firstModuleId: 0,

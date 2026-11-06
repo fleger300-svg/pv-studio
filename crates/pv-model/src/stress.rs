@@ -5,6 +5,7 @@ use specta::Type;
 
 use crate::geometry::Vec3;
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
+use crate::layout::ArrayLayoutParams;
 use crate::project::{
     ArrayGrid, Building, ModuleInstance, ModuleState, Orientation, PanelArray, Project, RoofFace,
     RoofKind, MODULES_PER_STRING,
@@ -77,6 +78,7 @@ impl Builder {
             azimuth_deg: shape.azimuth_deg,
             width_m: shape.width_m,
             height_m: shape.height_m,
+            outline: None,
         });
         id
     }
@@ -174,6 +176,10 @@ fn residential_1k() -> Project {
                 origin_v,
                 pitch_u,
                 pitch_v,
+                block_cols: 0,
+                block_rows: 0,
+                block_extra_u: 0.0,
+                block_extra_v: 0.0,
             };
             let array = PanelArray {
                 id: ArrayId::new(),
@@ -184,6 +190,7 @@ fn residential_1k() -> Project {
                 tilt_on_roof_deg: 0.0,
                 azimuth_offset_deg: 0.0,
                 grid,
+                layout: ArrayLayoutParams::default(),
             };
             let cells = (0..rows).flat_map(move |r| {
                 (0..cols).map(move |c| {
@@ -258,6 +265,10 @@ fn industrial_10k() -> Project {
             origin_v: row_v(0),
             pitch_u: pair_pitch,
             pitch_v,
+            block_cols: 0,
+            block_rows: 0,
+            block_extra_u: 0.0,
+            block_extra_v: 0.0,
         };
         let array = PanelArray {
             id: ArrayId::new(),
@@ -268,6 +279,7 @@ fn industrial_10k() -> Project {
             tilt_on_roof_deg: RACK_TILT,
             azimuth_offset_deg: offset,
             grid,
+            layout: ArrayLayoutParams::default(),
         };
         let cells = (0..rows).flat_map(move |r| {
             (0..PAIRS).map(move |c| (r, c, origin_u + f64::from(c) * pair_pitch, row_v(r)))

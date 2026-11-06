@@ -375,7 +375,7 @@ fn climber_counts_match_k2_exactly() {
         let lengths: Vec<f64> = roof
             .top_rails
             .iter()
-            .flat_map(|&(len, n)| std::iter::repeat(len).take(n))
+            .flat_map(|&(len, n)| std::iter::repeat_n(len, n))
             .collect();
         let n = climber_count(&lengths, fx.climbers.bottom_rail_spacing_m);
         total += n;
