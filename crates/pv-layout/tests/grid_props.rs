@@ -191,6 +191,7 @@ fn array(face: &RoofFace, azimuth_offset: f64, tilt: f64, layout: ArrayLayoutPar
         azimuth_offset_deg: azimuth_offset,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
         layout,
+        mounting: None,
     }
 }
 

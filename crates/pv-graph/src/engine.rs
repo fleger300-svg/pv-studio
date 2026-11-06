@@ -64,6 +64,11 @@ struct Slot {
     watched: Option<Option<u64>>,
     /// In the pending list of the next pass.
     pending: bool,
+    /// Forgotten (its instance was deleted): no key, no value; kept while other nodes still
+    /// list it as a dependency, so that they see a change and recompute.
+    tomb: bool,
+    /// Tomb in the free list, ready for reuse.
+    freed: bool,
 }
 
 impl Slot {
@@ -76,7 +81,11 @@ impl Slot {
 pub struct Graph {
     registry: Registry,
     index: FxHashMap<NodeKey, Idx>,
+    /// Live slots of each instance (for [`Graph::forget`]).
+    by_instance: FxHashMap<Instance, Vec<Idx>>,
     slots: Vec<Slot>,
+    /// Tombs no node depends on any more: reused by the next new keys.
+    free: Vec<Idx>,
     revision: u64,
     /// Watched nodes a pass must look at: dirtied, never computed or not yet reported.
     pending: Vec<Idx>,
@@ -100,7 +109,9 @@ impl Graph {
         Self {
             registry: Registry::default(),
             index: FxHashMap::default(),
+            by_instance: FxHashMap::default(),
             slots: Vec::new(),
+            free: Vec::new(),
             revision: 1,
             pending: Vec::new(),
             active: Vec::new(),
@@ -133,8 +144,7 @@ impl Graph {
             Entry::Input => (None, None),
             Entry::Derived { policy, compute } => (Some(*policy), Some(Arc::clone(compute))),
         };
-        let idx = Idx::try_from(self.slots.len()).expect("fewer than 2^32 nodes");
-        self.slots.push(Slot {
+        let slot = Slot {
             key,
             policy,
             compute,
@@ -150,8 +160,18 @@ impl Graph {
             changed_at: 0,
             watched: None,
             pending: false,
-        });
+            tomb: false,
+            freed: false,
+        };
+        let idx = if let Some(idx) = self.free.pop() {
+            self.slots[idx as usize] = slot;
+            idx
+        } else {
+            self.slots.push(slot);
+            Idx::try_from(self.slots.len() - 1).expect("fewer than 2^32 nodes")
+        };
         self.index.insert(key, idx);
+        self.by_instance.entry(key.instance).or_default().push(idx);
         Ok(idx)
     }
 
@@ -167,8 +187,10 @@ impl Graph {
         self.index.get(&key).map(|&i| self.slot(i))
     }
 
-    pub(crate) fn key_of(&self, idx: Idx) -> NodeKey {
-        self.slot(idx).key
+    /// Key of a live slot (`None` for a forgotten one, whose key may be recreated elsewhere).
+    pub(crate) fn live_key(&self, idx: Idx) -> Option<NodeKey> {
+        let s = self.slot(idx);
+        (!s.tomb).then_some(s.key)
     }
 
     pub(crate) fn policy_of(&self, idx: Idx) -> Option<Policy> {
@@ -258,6 +280,63 @@ impl Graph {
                 self.pending.push(i);
             }
         }
+    }
+
+    /// Removes `dependent` from the reverse edges of `d`; a tomb nobody depends on any more
+    /// goes to the free list.
+    fn unlink(&mut self, d: Idx, dependent: Idx) {
+        let s = &mut self.slots[d as usize];
+        s.dependents.retain(|&x| x != dependent);
+        if s.tomb && !s.freed && s.dependents.is_empty() {
+            s.freed = true;
+            self.free.push(d);
+        }
+    }
+
+    /// Forgets every node of an entity that was deleted (a field, a face…): inputs and
+    /// derived nodes alike. Nodes of *other* instances that read them become stale and, when
+    /// recomputed, read [`GraphError::MissingInput`] (or whatever the recreated nodes give).
+    /// The slots are reused once no node depends on them. Returns the number of nodes
+    /// forgotten.
+    pub fn forget(&mut self, instance: Instance) -> usize {
+        let Some(idxs) = self.by_instance.remove(&instance) else {
+            return 0;
+        };
+        self.revision += 1;
+        let revision = self.revision;
+        for &idx in &idxs {
+            self.mark_dependents(idx);
+        }
+        let mut old_deps = Vec::new();
+        for &idx in &idxs {
+            let s = &mut self.slots[idx as usize];
+            self.index.remove(&s.key);
+            old_deps.push((idx, std::mem::replace(&mut s.deps, Arc::from([]))));
+            s.tomb = true;
+            s.value = None;
+            s.policy = None;
+            s.compute = None;
+            s.watched = None;
+            s.dirty = false;
+            s.output_fp = 0;
+            s.input_fp = 0;
+            // Readers compare against this: they see a change and recompute.
+            s.changed_at = revision;
+            s.verified_at = revision;
+        }
+        for (idx, deps) in old_deps {
+            for &d in deps.iter() {
+                self.unlink(d, idx);
+            }
+        }
+        for &idx in &idxs {
+            let s = &mut self.slots[idx as usize];
+            if !s.freed && s.dependents.is_empty() {
+                s.freed = true;
+                self.free.push(idx);
+            }
+        }
+        idxs.len()
     }
 
     // --- Reading -------------------------------------------------------------------------
@@ -432,7 +511,7 @@ impl Graph {
         let (old_set, new_set): (FxHashSet<Idx>, FxHashSet<Idx>) =
             (old.iter().copied().collect(), new.iter().copied().collect());
         for &d in old.iter().filter(|d| !new_set.contains(d)) {
-            self.slot_mut(d).dependents.retain(|&x| x != idx);
+            self.unlink(d, idx);
         }
         for &d in new.iter().filter(|d| !old_set.contains(d)) {
             self.slot_mut(d).dependents.push(idx);
@@ -652,8 +731,15 @@ impl Graph {
             .map(|s| s.input_fp)
     }
 
+    /// Live nodes (forgotten ones excluded).
     #[must_use]
     pub fn node_count(&self) -> usize {
+        self.index.len()
+    }
+
+    /// Slots allocated, live or awaiting reuse (to check that forgetting does not leak).
+    #[must_use]
+    pub fn slot_capacity(&self) -> usize {
         self.slots.len()
     }
 

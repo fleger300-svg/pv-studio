@@ -9,7 +9,7 @@ import {
   PlaneGeometry,
 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import type { ProjectSummary } from '../bindings';
+import type { ProjectSummary, RoofKind } from '../bindings';
 import { roofMatrix } from './frames';
 
 /** Walls stop just below the eave so flat roofs do not z-fight with the box top. */
@@ -50,7 +50,15 @@ function wallsGeometry(summary: ProjectSummary): BufferGeometry | null {
   return parts.length ? mergeGeometries(parts) : null;
 }
 
-const ROOF_COLORS = { gable: new Color('#8d5a4a'), flat: new Color('#8f969c') } as const;
+// Pitched roofs share the tile colour. Hipped and monopitch volumes are drawn as plain boxes
+// for now (no gable ends); their faces come from the project like any other.
+const PITCHED = new Color('#8d5a4a');
+const ROOF_COLORS: Record<RoofKind, Color> = {
+  gable: PITCHED,
+  hipped: PITCHED,
+  monopitch: PITCHED,
+  flat: new Color('#8f969c'),
+};
 
 function roofsGeometry(summary: ProjectSummary): BufferGeometry | null {
   const kindOf = new Map(summary.buildings.map((b) => [b.id, b.roofKind]));

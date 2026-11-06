@@ -92,7 +92,17 @@
       "obstacleClearance": "Trop près d'un obstacle ({name}) : {distance} m, {required} m requis.",
       "moduleOverlap": "{count, plural, one {# module chevaucherait un autre module.} other {# modules chevaucheraient d'autres modules.}}",
       "arrayDistance": "Trop près d'un autre champ : {distance} m, {required} m requis.",
-      "invalidOutline": "Le contour de la toiture est invalide."
+      "invalidOutline": "Le contour de la toiture est invalide.",
+      "invalidParameters": "Les paramètres de calepinage du champ sont incohérents : {detail}"
+    },
+    "statics": {
+      "siteMissing": "Les données de site du bâtiment (altitude, vent, terrain) ne sont pas renseignées.",
+      "mountingMissing": "Aucun système de montage n'est choisi pour ce champ.",
+      "outOfRange": "Valeur hors du domaine de calcul : {quantity} = {value} (admis : {min} à {max}).",
+      "missingCoefficient": "Pas de coefficient de pression pour la zone {zone}.",
+      "unsupported": "Cas non encore pris en charge par le prédimensionnement : {what}",
+      "noSupportGrid": "La couverture du pan (joints debout ou chevrons) n'est pas renseignée.",
+      "eastWestUnpaired": "Un système est-ouest doit être associé à sa moitié opposée."
     }
   },
   "hud": {

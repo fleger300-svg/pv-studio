@@ -136,6 +136,7 @@ fn residential_1k() -> Project {
             eave_height_m: EAVE,
             ridge_height_m: ridge,
             roof_kind: RoofKind::Gable,
+            site: None,
         };
         let bid = building.id;
         b.project.buildings.push(building);
@@ -191,6 +192,7 @@ fn residential_1k() -> Project {
                 tilt_on_roof_deg: 0.0,
                 azimuth_offset_deg: 0.0,
                 grid,
+                mounting: None,
                 layout: ArrayLayoutParams::default(),
             };
             let cells = (0..rows).flat_map(move |r| {
@@ -228,6 +230,7 @@ fn industrial_10k() -> Project {
         eave_height_m: HEIGHT,
         ridge_height_m: HEIGHT,
         roof_kind: RoofKind::Flat,
+        site: None,
     };
     let bid = building.id;
     b.project.buildings.push(building);
@@ -280,6 +283,7 @@ fn industrial_10k() -> Project {
             tilt_on_roof_deg: RACK_TILT,
             azimuth_offset_deg: offset,
             grid,
+            mounting: None,
             layout: ArrayLayoutParams::default(),
         };
         let cells = (0..rows).flat_map(move |r| {

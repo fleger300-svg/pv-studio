@@ -6,6 +6,8 @@ use specta::Type;
 use crate::geometry::{Quat, RoofFrame, Vec3};
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 use crate::layout::{ArrayLayoutParams, RoofOutlineSpec, SupportGridSpec};
+use crate::mounting::MountingStatics;
+use crate::site::SiteParams;
 
 /// Module frame thickness (m).
 pub const MODULE_THICKNESS_M: f64 = 0.030;
@@ -21,8 +23,13 @@ const EPS_M: f64 = 1e-6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum RoofKind {
+    /// Two faces meeting at a ridge (duopitch).
     Gable,
     Flat,
+    /// Four faces: trapezoids on the long sides, triangles on the short sides.
+    Hipped,
+    /// One sloped face.
+    Monopitch,
 }
 
 /// Simple building volume: a box from the ground to the eave, plus the roof faces on top.
@@ -39,6 +46,9 @@ pub struct Building {
     /// Ridge height above ground; equals `eave_height_m` for a flat roof.
     pub ridge_height_m: f64,
     pub roof_kind: RoofKind,
+    /// Site data for the statics; `None` until the site step fills it.
+    #[specta(optional)]
+    pub site: Option<SiteParams>,
 }
 
 /// Rectangular planar roof face.
@@ -182,6 +192,9 @@ pub struct PanelArray {
     pub grid: ArrayGrid,
     /// Layout parameters (field outline, gaps, blocks, setbacks).
     pub layout: ArrayLayoutParams,
+    /// Statics snapshot of the mounting system; `None` until a system is chosen.
+    #[specta(optional)]
+    pub mounting: Option<MountingStatics>,
 }
 
 impl PanelArray {
@@ -369,6 +382,7 @@ pub(crate) mod fixtures {
             eave_height_m: 6.0,
             ridge_height_m: 9.0,
             roof_kind: RoofKind::Gable,
+            site: None,
         };
         let face = RoofFace {
             id: RoofFaceId::new(),
@@ -404,6 +418,7 @@ pub(crate) mod fixtures {
                 block_extra_u: 0.0,
                 block_extra_v: 0.0,
             },
+            mounting: None,
             layout: ArrayLayoutParams::default(),
         };
         let mut modules = Vec::new();

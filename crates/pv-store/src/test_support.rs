@@ -16,6 +16,7 @@ pub fn fixture_project() -> Project {
         eave_height_m: 5.0,
         ridge_height_m: 7.0,
         roof_kind: RoofKind::Gable,
+        site: None,
     };
     let shed = Building {
         id: BuildingId::new(),
@@ -25,6 +26,7 @@ pub fn fixture_project() -> Project {
         eave_height_m: 3.0,
         ridge_height_m: 3.0,
         roof_kind: RoofKind::Flat,
+        site: None,
     };
     let south = RoofFace {
         id: RoofFaceId::new(),
@@ -70,6 +72,7 @@ pub fn fixture_project() -> Project {
             block_extra_u: 0.0,
             block_extra_v: 0.0,
         },
+        mounting: None,
         layout: ArrayLayoutParams::default(),
     };
     let rack = PanelArray {
@@ -92,6 +95,7 @@ pub fn fixture_project() -> Project {
             block_extra_u: 0.0,
             block_extra_v: 0.0,
         },
+        mounting: None,
         layout: ArrayLayoutParams::default(),
     };
     let mut modules = Vec::new();

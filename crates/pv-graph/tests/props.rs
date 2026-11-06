@@ -96,7 +96,12 @@ fn run_sequence(seed: u64) -> Vec<String> {
             5 => {
                 let n = rng.below(N);
                 inputs.xs[n as usize] = None;
-                g.remove_input::<X>(i(n)).unwrap();
+                // Either the input disappears, or the whole entity is forgotten.
+                if rng.below(2) == 0 {
+                    g.remove_input::<X>(i(n)).unwrap();
+                } else {
+                    g.forget(i(n));
+                }
             }
             6 => {
                 // A pass cancelled before it starts.

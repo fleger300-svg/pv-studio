@@ -52,7 +52,7 @@ impl Ctx<'_> {
     pub fn get<K: Kind>(&mut self, instance: Instance) -> Result<Arc<K::Output>, GraphError> {
         let key = K::key(instance);
         let idx = match self.prev.get(self.deps.len()) {
-            Some(&c) if self.graph.key_of(c) == key => c,
+            Some(&c) if self.graph.live_key(c) == Some(key) => c,
             _ => self.graph.intern(key)?,
         };
         self.record(idx);

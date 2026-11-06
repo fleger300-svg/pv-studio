@@ -92,7 +92,17 @@
       "obstacleClearance": "Zu nah an einem Hindernis ({name}): {distance} m, {required} m erforderlich.",
       "moduleOverlap": "{count, plural, one {# Modul würde ein anderes Modul überlappen.} other {# Module würden andere Module überlappen.}}",
       "arrayDistance": "Zu nah an einem anderen Modulfeld: {distance} m, {required} m erforderlich.",
-      "invalidOutline": "Der Dachumriss ist ungültig."
+      "invalidOutline": "Der Dachumriss ist ungültig.",
+      "invalidParameters": "Die Belegungsparameter des Feldes sind widersprüchlich: {detail}"
+    },
+    "statics": {
+      "siteMissing": "Die Standortdaten des Gebäudes (Höhe, Wind, Gelände) fehlen.",
+      "mountingMissing": "Für dieses Feld ist kein Montagesystem gewählt.",
+      "outOfRange": "Wert ausserhalb des Berechnungsbereichs: {quantity} = {value} (zulässig: {min} bis {max}).",
+      "missingCoefficient": "Kein Druckbeiwert für die Zone {zone}.",
+      "unsupported": "Fall von der Vordimensionierung noch nicht unterstützt: {what}",
+      "noSupportGrid": "Die Dacheindeckung der Fläche (Stehfalz oder Sparren) ist nicht angegeben.",
+      "eastWestUnpaired": "Ein Ost-West-System muss mit seiner Gegenhälfte gekoppelt sein."
     }
   },
   "hud": {

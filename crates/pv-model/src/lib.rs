@@ -13,7 +13,9 @@ pub mod fingerprint;
 pub mod geometry;
 pub mod ids;
 pub mod layout;
+pub mod mounting;
 pub mod project;
+pub mod site;
 pub mod stress;
 pub mod summary;
 pub mod units;
@@ -27,9 +29,14 @@ pub use layout::{
     LayoutAnchor, ObstacleKind, RoofEdgeKind, RoofObstacle, RoofOutlineSpec, SupportGridKind,
     SupportGridSpec,
 };
+pub use mounting::{
+    AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, FixationSpec, MembraneKind, MountingStatics,
+    PairCoefficientsSpec, RailSectionSpec, RailStatics, WindZone,
+};
 pub use project::{
     ArrayGrid, Building, ModuleInstance, ModuleState, Orientation, PanelArray, Project, RoofFace,
     RoofKind, MODULES_PER_STRING, MODULE_MOUNT_GAP_M, MODULE_THICKNESS_M,
 };
+pub use site::{ConsequenceClass, ServiceLifeModel, SiteParams, SnowExposure, TerrainCategory};
 pub use stress::StressPreset;
 pub use summary::{ArraySummary, ProjectSummary, RoofFaceSummary};

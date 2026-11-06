@@ -2431,6 +2431,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-pipeline"
+version = "0.1.0"
+dependencies = [
+ "pv-geo",
+ "pv-graph",
+ "pv-layout",
+ "pv-model",
+ "pv-statics",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "pv-statics"
 version = "0.1.0"
 dependencies = [

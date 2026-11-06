@@ -42,6 +42,13 @@ export const events = {
 };
 
 /* Types */
+/**  Coefficients of one zone: uplift check and sliding check. */
+export type AeroZoneSpec = {
+	zone: WindZone,
+	uplift: PairCoefficientsSpec,
+	sliding: PairCoefficientsSpec,
+};
+
 /**  Result of `apply_command`, `undo` and `redo`. */
 export type ApplyResult = {
 	changes: ChangeSet,
@@ -184,6 +191,24 @@ export type ArraySummary_Serialize = {
 	halfFootprint: [number, number],
 };
 
+/**  Ballast data of an aerodynamic (east-west) system. */
+export type BallastSpec = {
+	manufacturer: string,
+	product: string,
+	/**  Wind-tunnel report, or the report the values were back-fitted from. */
+	document: string,
+	moduleTiltDeg: number,
+	entries: AeroZoneSpec[],
+	/**  Two modules and their mounting system, without ballast [kg]. */
+	pairOwnMassKg: number,
+	blockName: string,
+	blockMassKg: number,
+	membrane: MembraneKind,
+	/**  Design friction coefficient µ between system and roof [-]. */
+	frictionCoefficient: number,
+	frictionSource: string,
+};
+
 /**  Grouping of modules into mounting blocks (rails continuous inside a block only). */
 export type BlockParams = {
 	/**  Maximum modules per block along `u` / `v`. */
@@ -195,7 +220,13 @@ export type BlockParams = {
 };
 
 /**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
-export type Building = {
+export type Building = Building_Serialize | Building_Deserialize;
+
+/**  Identifies a building. */
+export type BuildingId = string;
+
+/**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
+export type Building_Deserialize = {
 	id: BuildingId,
 	name: string,
 	/**  Centre of the footprint at ground level (world ENU, m). */
@@ -206,10 +237,25 @@ export type Building = {
 	/**  Ridge height above ground; equals `eave_height_m` for a flat roof. */
 	ridgeHeightM: number,
 	roofKind: RoofKind,
+	/**  Site data for the statics; `None` until the site step fills it. */
+	site?: SiteParams | null,
 };
 
-/**  Identifies a building. */
-export type BuildingId = string;
+/**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
+export type Building_Serialize = {
+	id: BuildingId,
+	name: string,
+	/**  Centre of the footprint at ground level (world ENU, m). */
+	origin: [number, number, number],
+	/**  Footprint size along x (east) and y (north), m. */
+	sizeM: [number, number],
+	eaveHeightM: number,
+	/**  Ridge height above ground; equals `eave_height_m` for a flat roof. */
+	ridgeHeightM: number,
+	roofKind: RoofKind,
+	/**  Site data for the statics; `None` until the site step fills it. */
+	site?: SiteParams | null,
+};
 
 /**  Modules whose state or transform changed. */
 export type ChangeSet = {
@@ -236,6 +282,25 @@ export type CommandError = {
 	key: string,
 	params: { [key in string]: ErrorParam },
 };
+
+/**  Consequence class (SIA 260), sets the importance factor K_FI. */
+export type ConsequenceClass = "CC1" | "CC2" | "CC3";
+
+/**  Explicit pressure coefficients of one zone. */
+export type CpEntrySpec = {
+	zone: WindZone,
+	cpPressure: number,
+	cpSuction: number,
+};
+
+/**  Where the pressure coefficients come from. */
+export type CpSpec = 
+/**  SN EN 1991-1-4 tables (by roof shape and pitch). */
+{ kind: "standard" } | 
+/**  Manufacturer wind-tunnel table. */
+{ kind: "manufacturer"; manufacturer: string; product: string; document: string; pitch_min_deg: number; pitch_max_deg: number; entries: CpEntrySpec[] } | 
+/**  Fixed by the engineer. */
+{ kind: "explicit"; reference: string; entries: CpEntrySpec[] };
 
 /**
  *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
@@ -294,6 +359,14 @@ export type ExpansionJointSpec = {
 	positionM: number,
 };
 
+/**  Design resistance of one roof fixation [kN]. */
+export type FixationSpec = {
+	name: string,
+	upliftKn: number,
+	pressureKn: number,
+	parallelKn: number,
+};
+
 /**  Direction of an expansion joint line. */
 export type JointAxis = 
 /**  Line `u = position`: cuts the rails running along `u`. */
@@ -305,6 +378,9 @@ export type JointAxis =
 export type LayoutAnchor = 
 /**  Lower-left corner (eave, left verge): K2 Base convention. */
 "lowerLeft" | "lowerRight" | "upperLeft" | "upperRight" | "centre";
+
+/**  Roof membrane under a ballasted system. */
+export type MembraneKind = "epdm" | "bitumen" | "pvc" | "tpo" | "gravel" | "green";
 
 /**  Emitted after every applied command, undo or redo. */
 export type ModelChanged = {
@@ -326,6 +402,47 @@ export type ModulePosition = {
 	v: number,
 };
 
+/**  Statics snapshot of a field's mounting system. */
+export type MountingStatics = MountingStatics_Serialize | MountingStatics_Deserialize;
+
+/**  Statics snapshot of a field's mounting system. */
+export type MountingStatics_Deserialize = {
+	/**  Product name shown in reports. */
+	name: string,
+	/**  Mass of one module [kg] (module datasheet). */
+	moduleMassKg: number,
+	/**  Mounting system mass per module, without ballast [kg]. */
+	systemMassPerModuleKg: number,
+	/**  Loaded area for the pressure coefficients [m²] (K2 sizes the system with 10 m²). */
+	loadedAreaM2: number,
+	/**  Combination factor ψ₀ for snow, when the manufacturer's tool deviates from SIA 260. */
+	psi0Snow?: number | null,
+	cp: CpSpec,
+	/**  Cross-rail system (coplanar fields). */
+	rails?: RailStatics_Deserialize | null,
+	/**  Aerodynamic ballasted system (east-west on flat roofs). */
+	ballast?: BallastSpec | null,
+};
+
+/**  Statics snapshot of a field's mounting system. */
+export type MountingStatics_Serialize = {
+	/**  Product name shown in reports. */
+	name: string,
+	/**  Mass of one module [kg] (module datasheet). */
+	moduleMassKg: number,
+	/**  Mounting system mass per module, without ballast [kg]. */
+	systemMassPerModuleKg: number,
+	/**  Loaded area for the pressure coefficients [m²] (K2 sizes the system with 10 m²). */
+	loadedAreaM2: number,
+	/**  Combination factor ψ₀ for snow, when the manufacturer's tool deviates from SIA 260. */
+	psi0Snow?: number | null,
+	cp: CpSpec,
+	/**  Cross-rail system (coplanar fields). */
+	rails?: RailStatics_Serialize | null,
+	/**  Aerodynamic ballasted system (east-west on flat roofs). */
+	ballast?: BallastSpec | null,
+};
+
 /**  Kind of an obstacle on the roof. */
 export type ObstacleKind = "chimney" | "skylight" | "vent" | "dormer" | 
 /**  Area kept free on purpose (access path, maintenance zone…). */
@@ -336,6 +453,18 @@ export type Orientation =
 "portrait" | 
 /**  Long side across the module's slope direction. */
 "landscape";
+
+/**  Wind-tunnel coefficients of an east-west module pair for one check. */
+export type PairCoefficientsSpec = {
+	cpEast: number,
+	cpWest: number,
+	kSlope: number,
+	kDirection: number,
+	kParapet: number,
+	kModuleSize: number,
+	kRowSpacing: number,
+	kBuildingHeight: number,
+};
 
 export type PanelArray = PanelArray_Serialize | PanelArray_Deserialize;
 
@@ -352,6 +481,8 @@ export type PanelArray_Deserialize = {
 	grid: ArrayGrid,
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Deserialize,
+	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
+	mounting?: MountingStatics_Deserialize | null,
 };
 
 export type PanelArray_Serialize = {
@@ -367,6 +498,8 @@ export type PanelArray_Serialize = {
 	grid: ArrayGrid,
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Serialize,
+	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
+	mounting?: MountingStatics_Serialize | null,
 };
 
 export type PlatformInfo = {
@@ -392,7 +525,7 @@ export type ProjectSummary_Deserialize = {
 	moduleThicknessM: number,
 	/**  Peak power of one module, Wp. */
 	modulePeakPowerWp: number,
-	buildings: Building[],
+	buildings: Building_Deserialize[],
 	roofFaces: RoofFaceSummary_Deserialize[],
 	arrays: ArraySummary_Deserialize[],
 	canUndo: boolean,
@@ -409,11 +542,55 @@ export type ProjectSummary_Serialize = {
 	moduleThicknessM: number,
 	/**  Peak power of one module, Wp. */
 	modulePeakPowerWp: number,
-	buildings: Building[],
+	buildings: Building_Serialize[],
 	roofFaces: RoofFaceSummary_Serialize[],
 	arrays: ArraySummary_Serialize[],
 	canUndo: boolean,
 	canRedo: boolean,
+};
+
+/**  Cross-section and material of a rail. */
+export type RailSectionSpec = {
+	name: string,
+	areaCm2: number,
+	iyCm4: number,
+	izCm4: number,
+	wyCm3: number,
+	wzCm3: number,
+	/**  0.2 % proof strength f₀ [MPa]. */
+	f0Mpa: number,
+	gammaM1: number,
+	eMpa: number,
+	/**  Admissible deflection under the characteristic combination [m]. */
+	deflectionLimitM: number,
+};
+
+/**
+ *  Rails and fixations of a cross-rail system (the rail *layout* rules are in
+ *  [`crate::CrossRailSpec`]).
+ */
+export type RailStatics = RailStatics_Serialize | RailStatics_Deserialize;
+
+/**
+ *  Rails and fixations of a cross-rail system (the rail *layout* rules are in
+ *  [`crate::CrossRailSpec`]).
+ */
+export type RailStatics_Deserialize = {
+	topRail: RailSectionSpec,
+	bottomRail: RailSectionSpec,
+	/**  `None`: fixations not checked (K2 standing-seam clamps: one on every seam). */
+	fixation?: FixationSpec | null,
+};
+
+/**
+ *  Rails and fixations of a cross-rail system (the rail *layout* rules are in
+ *  [`crate::CrossRailSpec`]).
+ */
+export type RailStatics_Serialize = {
+	topRail: RailSectionSpec,
+	bottomRail: RailSectionSpec,
+	/**  `None`: fixations not checked (K2 standing-seam clamps: one on every seam). */
+	fixation?: FixationSpec | null,
 };
 
 /**  Kind of a roof edge (setbacks and wind zones depend on it). */
@@ -513,7 +690,13 @@ export type RoofFrame = {
 	normal: [number, number, number],
 };
 
-export type RoofKind = "gable" | "flat";
+export type RoofKind = 
+/**  Two faces meeting at a ridge (duopitch). */
+"gable" | "flat" | 
+/**  Four faces: trapezoids on the long sides, triangles on the short sides. */
+"hipped" | 
+/**  One sloped face. */
+"monopitch";
 
 export type RoofObstacle = RoofObstacle_Serialize | RoofObstacle_Deserialize;
 
@@ -560,6 +743,34 @@ export type RoofOutlineSpec_Serialize = {
 	obstacles: RoofObstacle_Serialize[],
 };
 
+/**  How the service life adjusts the characteristic loads. */
+export type ServiceLifeModel = 
+/**  SN EN 1991-1-3 annex D and SN EN 1991-1-4 §4.2 (c_prob). */
+{ kind: "en1991" } | 
+/**  Factors fixed by the engineer. */
+{ kind: "explicit"; snow: number; wind: number };
+
+/**  Site data of a building. */
+export type SiteParams = {
+	/**  Terrain altitude above sea level [m]. */
+	altitudeM: number,
+	/**  Correction from the SIA 261 snow map added to the altitude (reference altitude h₀) [m]. */
+	snowAltitudeCorrectionM: number,
+	/**  Reference peak velocity pressure q_p0 (SIA 261 annex E) [kN/m²]. */
+	windReferencePressureKnM2: number,
+	terrain: TerrainCategory,
+	snowExposure: SnowExposure,
+	/**  Thermal coefficient C_t [-]. */
+	thermalCoefficient: number,
+	/**  Design service life [years]. */
+	serviceLifeYears: number,
+	consequenceClass: ConsequenceClass,
+	serviceLifeModel: ServiceLifeModel,
+};
+
+/**  Snow exposure (coefficient C_e). */
+export type SnowExposure = "windswept" | "normal" | "sheltered";
+
 export type StressPreset = 
 /**  Three gable-roof barns, south + north faces at 30°, ~1,000 coplanar portrait modules. */
 "Residential1k" | 
@@ -580,6 +791,12 @@ export type SupportGridSpec = {
 	originM: number,
 	spacingM: number,
 };
+
+/**  SIA 261 terrain category (tab. 4). */
+export type TerrainCategory = "II" | "IIa" | "III" | "IV";
+
+/**  Wind zone of a roof face (SN EN 1991-1-4, K2 Base nomenclature). */
+export type WindZone = "interior" | "ridge" | "verge" | "eave" | "eaveCorner";
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {

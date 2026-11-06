@@ -92,7 +92,17 @@
       "obstacleClearance": "Too close to an obstacle ({name}): {distance} m, {required} m required.",
       "moduleOverlap": "{count, plural, one {# module would overlap another module.} other {# modules would overlap other modules.}}",
       "arrayDistance": "Too close to another array: {distance} m, {required} m required.",
-      "invalidOutline": "The roof outline is invalid."
+      "invalidOutline": "The roof outline is invalid.",
+      "invalidParameters": "The layout parameters of the field are inconsistent: {detail}"
+    },
+    "statics": {
+      "siteMissing": "The site data of the building (altitude, wind, terrain) is missing.",
+      "mountingMissing": "No mounting system is chosen for this field.",
+      "outOfRange": "Value outside the calculation range: {quantity} = {value} (allowed: {min} to {max}).",
+      "missingCoefficient": "No pressure coefficient for zone {zone}.",
+      "unsupported": "Case not yet supported by the pre-dimensioning: {what}",
+      "noSupportGrid": "The roof covering of the face (standing seams or rafters) is not specified.",
+      "eastWestUnpaired": "An east-west system must be paired with its opposite half."
     }
   },
   "hud": {
