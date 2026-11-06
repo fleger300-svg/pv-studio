@@ -2391,6 +2391,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-geo"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "pv-layout"
+version = "0.1.0"
+dependencies = [
+ "pv-geo",
+ "pv-model",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "pv-model"
 version = "0.1.0"
 dependencies = [
@@ -2402,9 +2422,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-statics"
+version = "0.1.0"
+dependencies = [
+ "pv-geo",
+ "pv-layout",
+ "pv-model",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "pv-store"
 version = "0.1.0"
 dependencies = [
+ "pv-layout",
  "pv-model",
  "rusqlite",
  "serde",

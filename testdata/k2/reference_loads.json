@@ -1,0 +1,145 @@
+{
+  "_about": "Expected statics values hand-transcribed from K2 Base reports. The PDFs are client documents and are deliberately kept out of git; only the numbers needed for validation are kept, anonymised (no names, addresses or project numbers). Units: m, deg, kg, kN/m2. Loads are tested at +/-3 %, see crates/pv-statics/tests/k2_reference.rs.",
+  "load_tolerance": 0.03,
+  "cases": [
+    {
+      "id": "ref-a",
+      "source": "K2 Base 3.2.109.0, project A, 4 hipped roofs (2 buildings), SingleRail on double standing seam, 116 modules",
+      "site": {
+        "altitude_m": 389.88,
+        "snow_altitude_correction_m": 0.0,
+        "wind_reference_pressure_kn_m2": 1.1,
+        "terrain": "IV",
+        "building_height_m": 25.0,
+        "snow_exposure": "sheltered",
+        "thermal_coefficient": 1.0,
+        "service_life_years": 25.0,
+        "consequence_class": "CC2"
+      },
+      "roof": { "shape": "hipped", "pitch_deg": 19.0 },
+      "dead_load": { "module_mass_kg": 21.6, "system_mass_per_module_kg": 4.30, "module_area_m2": 2.0412 },
+      "expected": {
+        "s_k": 0.900,
+        "mu": 0.800,
+        "cos_alpha": 0.946,
+        "s_50": 0.817,
+        "f_s": 0.929,
+        "s_n": 0.759,
+        "q_p50": 1.060,
+        "f_w": 0.911,
+        "q_pn": 0.965,
+        "module_dead_kg_m2": 10.58,
+        "system_dead_kg_m2": 2.11
+      },
+      "zone_tables": [
+        {
+          "_about": "Report section 'Charge maximale sur les modules (dimensionnement du systeme de montage)', loaded area 10 m2",
+          "area_m2": 10.0,
+          "zones": [
+            { "zone": "interior",    "cp_pressure": 0.253, "cp_suction": -0.653, "w_pressure": 0.245, "w_suction": -0.631,
+              "uls": { "pressure_perp": 1.455, "pressure_par": 0.425, "uplift_perp": -0.840, "uplift_par": 0.036 },
+              "sls": { "pressure_perp": 0.982, "pressure_par": 0.288, "uplift_perp": -0.513, "uplift_par": 0.041 } },
+            { "zone": "ridge",       "cp_pressure": 0.253, "cp_suction": -1.013, "w_pressure": 0.245, "w_suction": -0.978,
+              "uls": { "pressure_perp": 1.455, "pressure_par": 0.425, "uplift_perp": -1.361, "uplift_par": 0.036 },
+              "sls": { "pressure_perp": 0.982, "pressure_par": 0.288, "uplift_perp": -0.861, "uplift_par": 0.041 } },
+            { "zone": "verge",       "cp_pressure": 0.253, "cp_suction": -1.400, "w_pressure": 0.245, "w_suction": -1.351,
+              "uls": { "pressure_perp": 1.455, "pressure_par": 0.425, "uplift_perp": -1.921, "uplift_par": 0.036 },
+              "sls": { "pressure_perp": 0.982, "pressure_par": 0.288, "uplift_perp": -1.234, "uplift_par": 0.041 } },
+            { "zone": "eave",        "cp_pressure": 0.333, "cp_suction": -0.720, "w_pressure": 0.322, "w_suction": -0.695,
+              "uls": { "pressure_perp": 1.552, "pressure_par": 0.425, "uplift_perp": -0.937, "uplift_par": 0.036 },
+              "sls": { "pressure_perp": 1.047, "pressure_par": 0.288, "uplift_perp": -0.577, "uplift_par": 0.041 } },
+            { "zone": "eave_corner", "cp_pressure": 0.333, "cp_suction": -1.400, "w_pressure": 0.322, "w_suction": -1.351,
+              "uls": { "pressure_perp": 1.552, "pressure_par": 0.425, "uplift_perp": -1.921, "uplift_par": 0.036 },
+              "sls": { "pressure_perp": 1.047, "pressure_par": 0.288, "uplift_perp": -1.234, "uplift_par": 0.041 } }
+          ]
+        },
+        {
+          "_about": "Report section 'Charges sur les modules (dimensionnement des modules)', loaded area = module area, values printed in Pa and converted to kN/m2",
+          "area_m2": 2.04,
+          "zones": [
+            { "zone": "interior",
+              "uls": { "pressure_perp": 1.4553, "pressure_par": 0.4253, "uplift_perp": -1.3864, "uplift_par": 0.0365 },
+              "sls": { "pressure_perp": 0.9820, "pressure_par": 0.2876, "uplift_perp": -0.8772, "uplift_par": 0.0405 } },
+            { "zone": "ridge",
+              "uls": { "pressure_perp": 1.4553, "pressure_par": 0.4253, "uplift_perp": -1.9477, "uplift_par": 0.0365 },
+              "sls": { "pressure_perp": 0.9820, "pressure_par": 0.2876, "uplift_perp": -1.2514, "uplift_par": 0.0405 } },
+            { "zone": "verge",
+              "uls": { "pressure_perp": 1.4553, "pressure_par": 0.4253, "uplift_perp": -2.5209, "uplift_par": 0.0365 },
+              "sls": { "pressure_perp": 0.9820, "pressure_par": 0.2876, "uplift_perp": -1.6336, "uplift_par": 0.0405 } },
+            { "zone": "eave",
+              "uls": { "pressure_perp": 1.5522, "pressure_par": 0.4253, "uplift_perp": -1.7162, "uplift_par": 0.0365 },
+              "sls": { "pressure_perp": 1.0466, "pressure_par": 0.2876, "uplift_perp": -1.0970, "uplift_par": 0.0405 } },
+            { "zone": "eave_corner",
+              "uls": { "pressure_perp": 1.5522, "pressure_par": 0.4253, "uplift_perp": -2.5209, "uplift_par": 0.0365 },
+              "sls": { "pressure_perp": 1.0466, "pressure_par": 0.2876, "uplift_perp": -1.6336, "uplift_par": 0.0405 } }
+          ]
+        }
+      ],
+      "roofs": [
+        { "id": "roof-1", "fields": [ { "field": 1, "zones": ["eave_corner", "eave", "verge", "ridge", "interior"] },
+                                      { "field": 2, "zones": ["interior", "ridge", "verge", "eave", "eave_corner"] } ] },
+        { "id": "roof-2", "fields": [ { "field": 1, "zones": ["eave_corner", "eave", "verge", "ridge", "interior"] },
+                                      { "field": 2, "zones": ["interior", "eave", "eave_corner"] } ] },
+        { "id": "roof-3", "fields": [ { "field": 1, "zones": ["eave_corner", "eave", "verge", "ridge", "interior"] },
+                                      { "field": 2, "zones": ["interior", "eave", "eave_corner"] } ] },
+        { "id": "roof-4", "fields": [ { "field": 1, "zones": ["eave_corner", "eave", "verge", "ridge", "interior"] },
+                                      { "field": 2, "zones": ["interior", "ridge", "verge", "eave", "eave_corner"] } ] }
+      ]
+    },
+    {
+      "id": "ref-b-h12",
+      "source": "K2 Base 3.2.63.0, project B (flat roof, D-Dome 6.10), roof zone at 12 m. Snow and wind only for now; ballast comes with step 7.",
+      "site": {
+        "altitude_m": 396.09, "snow_altitude_correction_m": -200.0, "wind_reference_pressure_kn_m2": 0.9,
+        "terrain": "III", "building_height_m": 12.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
+        "service_life_years": 25.0, "consequence_class": "CC1"
+      },
+      "roof": { "shape": "flat", "pitch_deg": 0.0 },
+      "expected": { "s_k": 0.900, "mu": 0.800, "s_50": 0.720, "f_s": 0.929, "s_n": 0.669, "q_p50": 0.944, "f_w": 0.911, "q_pn": 0.860 }
+    },
+    {
+      "id": "ref-b-h9",
+      "source": "K2 Base 3.2.63.0, project B, roof zone at 9 m",
+      "site": {
+        "altitude_m": 396.09, "snow_altitude_correction_m": -200.0, "wind_reference_pressure_kn_m2": 0.9,
+        "terrain": "III", "building_height_m": 9.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
+        "service_life_years": 25.0, "consequence_class": "CC1"
+      },
+      "roof": { "shape": "flat", "pitch_deg": 0.0 },
+      "expected": { "s_k": 0.900, "s_50": 0.720, "s_n": 0.669, "q_p50": 0.880, "f_w": 0.911, "q_pn": 0.802 }
+    },
+    {
+      "id": "ref-c-roof1",
+      "source": "K2 Base 3.2.61.0, project C, duopitch corrugated sheet roof 15 deg, 5 m. The report prints f_w = f_s = 1.000 for this roof but applies 0.911 / 0.929 (q_p,25 = 0.700, s_25 = 0.711): display bug in K2, the applied values are kept here",
+      "site": {
+        "altitude_m": 425.34, "snow_altitude_correction_m": 0.0, "wind_reference_pressure_kn_m2": 0.9,
+        "terrain": "III", "building_height_m": 5.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
+        "service_life_years": 25.0, "consequence_class": "CC1"
+      },
+      "roof": { "shape": "duopitch", "pitch_deg": 15.0 },
+      "expected": { "s_k": 0.991, "mu": 0.800, "s_50": 0.766, "f_s": 0.929, "s_n": 0.711, "q_p50": 0.768, "f_w": 0.911, "q_pn": 0.700 }
+    },
+    {
+      "id": "ref-c-roof2",
+      "source": "K2 Base 3.2.61.0, project C, duopitch corrugated sheet roof 16 deg, 5 m",
+      "site": {
+        "altitude_m": 425.34, "snow_altitude_correction_m": 0.0, "wind_reference_pressure_kn_m2": 0.9,
+        "terrain": "III", "building_height_m": 5.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
+        "service_life_years": 25.0, "consequence_class": "CC1"
+      },
+      "roof": { "shape": "duopitch", "pitch_deg": 16.0 },
+      "expected": { "s_k": 0.991, "s_50": 0.762, "f_s": 0.929, "s_n": 0.708, "q_p50": 0.768, "q_pn": 0.700 }
+    },
+    {
+      "id": "ref-c-roof3",
+      "source": "K2 Base 3.2.61.0, project C, flat roof (D-Dome), 3 m: below z_min, profile clamps to 5 m",
+      "site": {
+        "altitude_m": 425.34, "snow_altitude_correction_m": 0.0, "wind_reference_pressure_kn_m2": 0.9,
+        "terrain": "III", "building_height_m": 3.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
+        "service_life_years": 25.0, "consequence_class": "CC1"
+      },
+      "roof": { "shape": "flat", "pitch_deg": 0.0 },
+      "expected": { "s_k": 0.991, "s_50": 0.793, "s_n": 0.736, "q_p50": 0.768, "q_pn": 0.700 }
+    }
+  ]
+}

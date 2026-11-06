@@ -1,0 +1,20 @@
+[package]
+name = "pv-layout"
+description = "PV Studio layout engine: buildable area, module grid, mounting blocks, expansion joints, rails and supports"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-geo.workspace = true
+pv-model.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

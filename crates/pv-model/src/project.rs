@@ -5,6 +5,7 @@ use specta::Type;
 
 use crate::geometry::{Quat, RoofFrame, Vec3};
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
+use crate::layout::{ArrayLayoutParams, RoofOutlineSpec, SupportGridSpec};
 
 /// Module frame thickness (m).
 pub const MODULE_THICKNESS_M: f64 = 0.030;
@@ -57,6 +58,13 @@ pub struct RoofFace {
     pub width_m: f64,
     /// Extent along `v` (slope length), m.
     pub height_m: f64,
+    /// Real outline when the face is not the `width_m × height_m` rectangle (trapezoid of a
+    /// hipped roof, L-shapes, obstacles). `None` = the rectangle, eave at `v = 0`.
+    #[specta(optional)]
+    pub outline: Option<RoofOutlineSpec>,
+    /// Seams / rafters of the covering (decide the fixation positions).
+    #[specta(optional)]
+    pub support_grid: Option<SupportGridSpec>,
 }
 
 impl RoofFace {
@@ -100,6 +108,63 @@ pub struct ArrayGrid {
     /// Centre-to-centre spacing along `u` (columns) and `v` (rows).
     pub pitch_u: f64,
     pub pitch_v: f64,
+    /// Mounting blocks of `block_cols × block_rows` modules (0 = no blocks), separated by
+    /// `block_extra_*` on top of the normal pitch. Cells are then not evenly spaced: use
+    /// [`ArrayGrid::cell_centre`].
+    pub block_cols: u32,
+    pub block_rows: u32,
+    /// Extra distance added between two blocks along `u` / `v`, on top of the pitch, m.
+    pub block_extra_u: f64,
+    pub block_extra_v: f64,
+}
+
+impl ArrayGrid {
+    /// Regular grid without blocks.
+    #[must_use]
+    pub fn regular(
+        rows: u32,
+        cols: u32,
+        origin_u: f64,
+        origin_v: f64,
+        pitch_u: f64,
+        pitch_v: f64,
+    ) -> Self {
+        Self {
+            rows,
+            cols,
+            origin_u,
+            origin_v,
+            pitch_u,
+            pitch_v,
+            block_cols: 0,
+            block_rows: 0,
+            block_extra_u: 0.0,
+            block_extra_v: 0.0,
+        }
+    }
+
+    /// Offset of column `col` from column 0 along `u`, m.
+    #[must_use]
+    pub fn col_offset(&self, col: u32) -> f64 {
+        let blocks = col.checked_div(self.block_cols).unwrap_or(0);
+        f64::from(col) * self.pitch_u + f64::from(blocks) * self.block_extra_u
+    }
+
+    /// Offset of row `row` from row 0 along `v`, m.
+    #[must_use]
+    pub fn row_offset(&self, row: u32) -> f64 {
+        let blocks = row.checked_div(self.block_rows).unwrap_or(0);
+        f64::from(row) * self.pitch_v + f64::from(blocks) * self.block_extra_v
+    }
+
+    /// Roof `(u, v)` of the centre of a cell.
+    #[must_use]
+    pub fn cell_centre(&self, row: u32, col: u32) -> (f64, f64) {
+        (
+            self.origin_u + self.col_offset(col),
+            self.origin_v + self.row_offset(row),
+        )
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
@@ -115,6 +180,8 @@ pub struct PanelArray {
     /// Module azimuth relative to the roof face azimuth, degrees (e.g. ±90 for east-west).
     pub azimuth_offset_deg: f64,
     pub grid: ArrayGrid,
+    /// Layout parameters (field outline, gaps, blocks, setbacks).
+    pub layout: ArrayLayoutParams,
 }
 
 impl PanelArray {
@@ -312,6 +379,8 @@ pub(crate) mod fixtures {
             azimuth_deg: 180.0,
             width_m: 10.0,
             height_m: 6.0,
+            outline: None,
+            support_grid: None,
         };
         let pitch_u = 1.134 + 0.02;
         let pitch_v = 1.762 + 0.02;
@@ -330,7 +399,12 @@ pub(crate) mod fixtures {
                 origin_v: 0.3 + 1.762 / 2.0,
                 pitch_u,
                 pitch_v,
+                block_cols: 0,
+                block_rows: 0,
+                block_extra_u: 0.0,
+                block_extra_v: 0.0,
             },
+            layout: ArrayLayoutParams::default(),
         };
         let mut modules = Vec::new();
         for row in 0..2 {

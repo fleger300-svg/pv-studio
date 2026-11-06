@@ -83,6 +83,19 @@ const MIGRATIONS: &[&str] = &[
     ) STRICT;
     CREATE INDEX command_log_undone ON command_log(undone, seq);
     "#,
+    // v2: layout data (pv-layout). Additive: existing rows keep working with the defaults.
+    r#"
+    ALTER TABLE roof_face ADD COLUMN outline_json TEXT;
+    ALTER TABLE "array" ADD COLUMN layout_json TEXT NOT NULL DEFAULT '{}';
+    ALTER TABLE "array" ADD COLUMN grid_block_cols INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE "array" ADD COLUMN grid_block_rows INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE "array" ADD COLUMN grid_block_extra_u REAL NOT NULL DEFAULT 0;
+    ALTER TABLE "array" ADD COLUMN grid_block_extra_v REAL NOT NULL DEFAULT 0;
+    "#,
+    // v3: seams / rafters of the roof covering (pv-layout supports).
+    r#"
+    ALTER TABLE roof_face ADD COLUMN support_grid_json TEXT;
+    "#,
 ];
 
 /// Latest schema version known to this build.

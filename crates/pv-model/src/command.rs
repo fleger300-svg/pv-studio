@@ -23,6 +23,13 @@ pub mod keys {
     pub const STORE_NEWER_SCHEMA: &str = "errors.store.newerSchema";
     pub const STORE_FAILURE: &str = "errors.store.failure";
     pub const INVALID_REPORT: &str = "errors.bench.invalidReport";
+    /// Layout validation (pv-layout).
+    pub const LAYOUT_EDGE_SETBACK: &str = "errors.layout.edgeSetback";
+    pub const LAYOUT_OBSTACLE_OVERLAP: &str = "errors.layout.obstacleOverlap";
+    pub const LAYOUT_OBSTACLE_CLEARANCE: &str = "errors.layout.obstacleClearance";
+    pub const LAYOUT_MODULE_OVERLAP: &str = "errors.layout.moduleOverlap";
+    pub const LAYOUT_ARRAY_DISTANCE: &str = "errors.layout.arrayDistance";
+    pub const LAYOUT_INVALID_OUTLINE: &str = "errors.layout.invalidOutline";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -37,6 +44,12 @@ pub mod keys {
         STORE_NEWER_SCHEMA,
         STORE_FAILURE,
         INVALID_REPORT,
+        LAYOUT_EDGE_SETBACK,
+        LAYOUT_OBSTACLE_OVERLAP,
+        LAYOUT_OBSTACLE_CLEARANCE,
+        LAYOUT_MODULE_OVERLAP,
+        LAYOUT_ARRAY_DISTANCE,
+        LAYOUT_INVALID_OUTLINE,
     ];
 }
 

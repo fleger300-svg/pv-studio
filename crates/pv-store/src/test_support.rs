@@ -1,8 +1,8 @@
 //! Deterministic fixture project for tests (geometry is fixed; only UUIDs vary).
 
 use pv_model::{
-    ArrayGrid, ArrayId, Building, BuildingId, ModuleId, ModuleInstance, ModuleState, Orientation,
-    PanelArray, Project, ProjectId, RoofFace, RoofFaceId, RoofKind,
+    ArrayGrid, ArrayId, ArrayLayoutParams, Building, BuildingId, ModuleId, ModuleInstance,
+    ModuleState, Orientation, PanelArray, Project, ProjectId, RoofFace, RoofFaceId, RoofKind,
 };
 
 /// Two roof faces: a 30° south face with a coplanar portrait array (2 × 2) and a flat roof
@@ -35,6 +35,8 @@ pub fn fixture_project() -> Project {
         azimuth_deg: 180.0,
         width_m: 10.0,
         height_m: 4.6,
+        outline: None,
+        support_grid: None,
     };
     let flat = RoofFace {
         id: RoofFaceId::new(),
@@ -45,6 +47,8 @@ pub fn fixture_project() -> Project {
         azimuth_deg: 180.0,
         width_m: 8.0,
         height_m: 6.0,
+        outline: None,
+        support_grid: None,
     };
     let coplanar = PanelArray {
         id: ArrayId::new(),
@@ -61,7 +65,12 @@ pub fn fixture_project() -> Project {
             origin_v: 1.25,
             pitch_u: 1.154,
             pitch_v: 1.782,
+            block_cols: 0,
+            block_rows: 0,
+            block_extra_u: 0.0,
+            block_extra_v: 0.0,
         },
+        layout: ArrayLayoutParams::default(),
     };
     let rack = PanelArray {
         id: ArrayId::new(),
@@ -78,7 +87,12 @@ pub fn fixture_project() -> Project {
             origin_v: 1.5,
             pitch_u: 1.2,
             pitch_v: 1.782,
+            block_cols: 0,
+            block_rows: 0,
+            block_extra_u: 0.0,
+            block_extra_v: 0.0,
         },
+        layout: ArrayLayoutParams::default(),
     };
     let mut modules = Vec::new();
     for (array, rows, cols) in [(&coplanar, 2u32, 2u32), (&rack, 2, 1)] {

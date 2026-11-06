@@ -12,6 +12,9 @@ rust-version = "1.99"
 [workspace.dependencies]
 pv-model = { path = "crates/pv-model" }
 pv-store = { path = "crates/pv-store" }
+pv-statics = { path = "crates/pv-statics" }
+pv-geo = { path = "crates/pv-geo" }
+pv-layout = { path = "crates/pv-layout" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 thiserror = "2.0.21"
@@ -26,6 +29,13 @@ unsafe_code = "forbid"
 all = { level = "warn", priority = -1 }
 
 [profile.dev.package."*"]
+opt-level = 2
+
+# Geometry kernels run in tight loops (layout offset search): optimise them in dev too.
+[profile.dev.package.pv-geo]
+opt-level = 2
+
+[profile.dev.package.pv-layout]
 opt-level = 2
 
 [profile.release]

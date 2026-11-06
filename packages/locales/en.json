@@ -85,6 +85,14 @@
     },
     "bench": {
       "invalidReport": "The benchmark report is not valid JSON."
+    },
+    "layout": {
+      "edgeSetback": "Too close to a roof edge: {distance} m, {required} m required.",
+      "obstacleOverlap": "A module would cover an obstacle ({name}).",
+      "obstacleClearance": "Too close to an obstacle ({name}): {distance} m, {required} m required.",
+      "moduleOverlap": "{count, plural, one {# module would overlap another module.} other {# modules would overlap other modules.}}",
+      "arrayDistance": "Too close to another array: {distance} m, {required} m required.",
+      "invalidOutline": "The roof outline is invalid."
     }
   },
   "hud": {

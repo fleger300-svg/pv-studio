@@ -13,8 +13,15 @@ import { summarizeFrames, type FrameSummary } from './stats';
 const ORBIT_MS = 10_000;
 const DRAG_MS = 2_000;
 const DRAG_MODULES = 100;
-/** Drag displacement along roof u (m): small enough to stay inside every preset's roof. */
-const DRAG_DU = 0.25;
+/**
+ * Drag displacement along roof u (m). Must stay below the module gap:
+ * since pv-layout validates moves (collisions), a larger
+ * shift of a partial row overlaps its neighbours and Rust rejects the MoveModules, which
+ * would leave nothing to undo. The amplitude does not change what is measured (GPU drag
+ * preview, one 100-module command round trip). Guarded by pv-store's
+ * `benchmark_move_passes_layout_validation` test.
+ */
+const DRAG_DU = 0.01;
 
 /** Acceptance budgets (README / spec §12). */
 export const BUDGETS: Record<

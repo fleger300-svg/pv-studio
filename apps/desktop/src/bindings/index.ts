@@ -14,9 +14,9 @@ export const commands = {
 	 *  disposable: an existing file at `path` (and its WAL/SHM side files) is replaced, so every
 	 *  benchmark run starts from the same state.
 	 */
-	createStressProject: (preset: StressPreset, path: string) => typedError<ProjectSummary, CommandError>(__TAURI_INVOKE("create_stress_project", { preset, path })),
+	createStressProject: (preset: StressPreset, path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("create_stress_project", { preset, path })),
 	/**  Opens an existing `.pvproj` file (applying migrations) and makes it the open project. */
-	openProject: (path: string) => typedError<ProjectSummary, CommandError>(__TAURI_INVOKE("open_project", { path })),
+	openProject: (path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("open_project", { path })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -62,13 +62,104 @@ export type ArrayGrid = {
 	/**  Centre-to-centre spacing along `u` (columns) and `v` (rows). */
 	pitchU: number,
 	pitchV: number,
+	/**
+	 *  Mounting blocks of `block_cols × block_rows` modules (0 = no blocks), separated by
+	 *  `block_extra_*` on top of the normal pitch. Cells are then not evenly spaced: use
+	 *  [`ArrayGrid::cell_centre`].
+	 */
+	blockCols: number,
+	blockRows: number,
+	/**  Extra distance added between two blocks along `u` / `v`, on top of the pitch, m. */
+	blockExtraU: number,
+	blockExtraV: number,
 };
 
 /**  Identifies a panel array. */
 export type ArrayId = string;
 
-export type ArraySummary = {
-	array: PanelArray,
+/**  Layout parameters of an array (the architecture's `params_json` / `boundary_json`). */
+export type ArrayLayoutParams = ArrayLayoutParams_Serialize | ArrayLayoutParams_Deserialize;
+
+/**  Layout parameters of an array (the architecture's `params_json` / `boundary_json`). */
+export type ArrayLayoutParams_Deserialize = {
+	/**  Field outline on the face; empty = the whole face. */
+	boundaryUv: ([number, number])[],
+	/**  Clear distance between adjacent modules along `u` / `v` inside a block, m. */
+	moduleGapUM: number,
+	moduleGapVM: number,
+	block?: BlockParams | null,
+	/**  Setback for edges not listed in `edge_setbacks`, m. */
+	edgeSetbackM: number,
+	edgeSetbacks: EdgeSetback[],
+	/**  Clearance around obstacles (unless the obstacle overrides it), m. */
+	obstacleClearanceM: number,
+	/**  Row pitch along `v` for tilted rows, or pair pitch along `u` for east-west systems, m. */
+	rowPitchM?: number | null,
+	anchor: LayoutAnchor,
+	/**  Expansion joints placed by the user. */
+	expansionJoints: ExpansionJointSpec[],
+	/**
+	 *  Maximum length of a mounting block along `u` / `v` (continuous rails, from the
+	 *  mounting system's thermal rule), m. `None` = no automatic joint in that direction.
+	 */
+	maxBlockLengthUM?: number | null,
+	maxBlockLengthVM?: number | null,
+	/**
+	 *  Minimum clear distance between this array's modules and the modules of the other
+	 *  arrays of the face, m.
+	 */
+	minDistanceToOtherArraysM: number,
+	/**  Rail geometry of the mounting system (cross-rail systems). */
+	rails?: CrossRailSpec_Deserialize | null,
+	/**
+	 *  The other half of an east-west system (the +90° / −90° partner array): the two
+	 *  halves are one mounting system, the distance between arrays does not apply to them.
+	 */
+	pairedWith?: ArrayId | null,
+};
+
+/**  Layout parameters of an array (the architecture's `params_json` / `boundary_json`). */
+export type ArrayLayoutParams_Serialize = {
+	/**  Field outline on the face; empty = the whole face. */
+	boundaryUv: ([number, number])[],
+	/**  Clear distance between adjacent modules along `u` / `v` inside a block, m. */
+	moduleGapUM: number,
+	moduleGapVM: number,
+	block?: BlockParams | null,
+	/**  Setback for edges not listed in `edge_setbacks`, m. */
+	edgeSetbackM: number,
+	edgeSetbacks: EdgeSetback[],
+	/**  Clearance around obstacles (unless the obstacle overrides it), m. */
+	obstacleClearanceM: number,
+	/**  Row pitch along `v` for tilted rows, or pair pitch along `u` for east-west systems, m. */
+	rowPitchM?: number | null,
+	anchor: LayoutAnchor,
+	/**  Expansion joints placed by the user. */
+	expansionJoints: ExpansionJointSpec[],
+	/**
+	 *  Maximum length of a mounting block along `u` / `v` (continuous rails, from the
+	 *  mounting system's thermal rule), m. `None` = no automatic joint in that direction.
+	 */
+	maxBlockLengthUM?: number | null,
+	maxBlockLengthVM?: number | null,
+	/**
+	 *  Minimum clear distance between this array's modules and the modules of the other
+	 *  arrays of the face, m.
+	 */
+	minDistanceToOtherArraysM: number,
+	/**  Rail geometry of the mounting system (cross-rail systems). */
+	rails?: CrossRailSpec_Serialize | null,
+	/**
+	 *  The other half of an east-west system (the +90° / −90° partner array): the two
+	 *  halves are one mounting system, the distance between arrays does not apply to them.
+	 */
+	pairedWith?: ArrayId | null,
+};
+
+export type ArraySummary = ArraySummary_Serialize | ArraySummary_Deserialize;
+
+export type ArraySummary_Deserialize = {
+	array: PanelArray_Deserialize,
 	/**  Index into `ProjectSummary::roof_faces`. */
 	roofFaceIndex: number,
 	/**  Modules of this array have the contiguous ids `first_module_id .. first_module_id + module_count`. */
@@ -78,6 +169,29 @@ export type ArraySummary = {
 	moduleSize: [number, number, number],
 	/**  Half extents of the footprint on the roof plane along (u, v), metres. */
 	halfFootprint: [number, number],
+};
+
+export type ArraySummary_Serialize = {
+	array: PanelArray_Serialize,
+	/**  Index into `ProjectSummary::roof_faces`. */
+	roofFaceIndex: number,
+	/**  Modules of this array have the contiguous ids `first_module_id .. first_module_id + module_count`. */
+	firstModuleId: number,
+	moduleCount: number,
+	/**  Module box size in its local frame (x, y, z), metres. */
+	moduleSize: [number, number, number],
+	/**  Half extents of the footprint on the roof plane along (u, v), metres. */
+	halfFootprint: [number, number],
+};
+
+/**  Grouping of modules into mounting blocks (rails continuous inside a block only). */
+export type BlockParams = {
+	/**  Maximum modules per block along `u` / `v`. */
+	maxCols: number,
+	maxRows: number,
+	/**  Clear distance between the modules of two adjacent blocks along `u` / `v`, m. */
+	gapUM: number,
+	gapVM: number,
 };
 
 /**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
@@ -123,8 +237,74 @@ export type CommandError = {
 	params: { [key in string]: ErrorParam },
 };
 
+/**
+ *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
+ *  mounting system's data.
+ */
+export type CrossRailSpec = CrossRailSpec_Serialize | CrossRailSpec_Deserialize;
+
+/**
+ *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
+ *  mounting system's data.
+ */
+export type CrossRailSpec_Deserialize = {
+	perColumn: number,
+	topInsetM: number,
+	topOverhangM: number,
+	bottomSpacingM: number,
+	minSupportOverhangM: number,
+	spacingStepM: number,
+	bottomInsetM: number,
+	/**  Fixations keep this distance from the bottom-rail ends, m. */
+	fixationEdgeM: number,
+	/**  Maximum bottom-rail cantilever beyond the outer fixation, m. */
+	maxCantileverM?: number | null,
+};
+
+/**
+ *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
+ *  mounting system's data.
+ */
+export type CrossRailSpec_Serialize = {
+	perColumn: number,
+	topInsetM: number,
+	topOverhangM: number,
+	bottomSpacingM: number,
+	minSupportOverhangM: number,
+	spacingStepM: number,
+	bottomInsetM: number,
+	/**  Fixations keep this distance from the bottom-rail ends, m. */
+	fixationEdgeM: number,
+	/**  Maximum bottom-rail cantilever beyond the outer fixation, m. */
+	maxCantileverM?: number | null,
+};
+
+export type EdgeSetback = {
+	kind: RoofEdgeKind,
+	distanceM: number,
+};
+
 /**  A parameter of a translated error message. */
 export type ErrorParam = number | string;
+
+/**  Expansion joint placed by the user (the architecture's `expansion_joint`). */
+export type ExpansionJointSpec = {
+	axis: JointAxis,
+	/**  Roof coordinate of the line, m. */
+	positionM: number,
+};
+
+/**  Direction of an expansion joint line. */
+export type JointAxis = 
+/**  Line `u = position`: cuts the rails running along `u`. */
+"constantU" | 
+/**  Line `v = position`: cuts the rails running along `v`. */
+"constantV";
+
+/**  Where the grid is anchored when the engine searches the best offset. */
+export type LayoutAnchor = 
+/**  Lower-left corner (eave, left verge): K2 Base convention. */
+"lowerLeft" | "lowerRight" | "upperLeft" | "upperRight" | "centre";
 
 /**  Emitted after every applied command, undo or redo. */
 export type ModelChanged = {
@@ -146,13 +326,20 @@ export type ModulePosition = {
 	v: number,
 };
 
+/**  Kind of an obstacle on the roof. */
+export type ObstacleKind = "chimney" | "skylight" | "vent" | "dormer" | 
+/**  Area kept free on purpose (access path, maintenance zone…). */
+"keepOut";
+
 export type Orientation = 
 /**  Long side along the module's slope direction. */
 "portrait" | 
 /**  Long side across the module's slope direction. */
 "landscape";
 
-export type PanelArray = {
+export type PanelArray = PanelArray_Serialize | PanelArray_Deserialize;
+
+export type PanelArray_Deserialize = {
 	id: ArrayId,
 	roofFaceId: RoofFaceId,
 	moduleLengthM: number,
@@ -163,6 +350,23 @@ export type PanelArray = {
 	/**  Module azimuth relative to the roof face azimuth, degrees (e.g. ±90 for east-west). */
 	azimuthOffsetDeg: number,
 	grid: ArrayGrid,
+	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
+	layout: ArrayLayoutParams_Deserialize,
+};
+
+export type PanelArray_Serialize = {
+	id: ArrayId,
+	roofFaceId: RoofFaceId,
+	moduleLengthM: number,
+	moduleWidthM: number,
+	orientation: Orientation,
+	/**  Extra tilt relative to the roof plane (racks on flat roofs); 0 = coplanar. */
+	tiltOnRoofDeg: number,
+	/**  Module azimuth relative to the roof face azimuth, degrees (e.g. ±90 for east-west). */
+	azimuthOffsetDeg: number,
+	grid: ArrayGrid,
+	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
+	layout: ArrayLayoutParams_Serialize,
 };
 
 export type PlatformInfo = {
@@ -176,7 +380,9 @@ export type PlatformInfo = {
 /**  Identifies a project. */
 export type ProjectId = string;
 
-export type ProjectSummary = {
+export type ProjectSummary = ProjectSummary_Serialize | ProjectSummary_Deserialize;
+
+export type ProjectSummary_Deserialize = {
 	projectId: ProjectId,
 	name: string,
 	path: string,
@@ -187,14 +393,68 @@ export type ProjectSummary = {
 	/**  Peak power of one module, Wp. */
 	modulePeakPowerWp: number,
 	buildings: Building[],
-	roofFaces: RoofFaceSummary[],
-	arrays: ArraySummary[],
+	roofFaces: RoofFaceSummary_Deserialize[],
+	arrays: ArraySummary_Deserialize[],
 	canUndo: boolean,
 	canRedo: boolean,
 };
 
+export type ProjectSummary_Serialize = {
+	projectId: ProjectId,
+	name: string,
+	path: string,
+	moduleCount: number,
+	activeModuleCount: number,
+	modulesPerString: number,
+	moduleThicknessM: number,
+	/**  Peak power of one module, Wp. */
+	modulePeakPowerWp: number,
+	buildings: Building[],
+	roofFaces: RoofFaceSummary_Serialize[],
+	arrays: ArraySummary_Serialize[],
+	canUndo: boolean,
+	canRedo: boolean,
+};
+
+/**  Kind of a roof edge (setbacks and wind zones depend on it). */
+export type RoofEdgeKind = 
+/**  Lower horizontal edge (gutter). */
+"eave" | 
+/**  Upper horizontal edge where two faces meet. */
+"ridge" | 
+/**  Sloped free edge (gable). */
+"verge" | 
+/**  Sloped edge shared with an adjacent face (hipped roofs). */
+"hip" | 
+/**  Internal edge between two faces draining towards each other. */
+"valley" | 
+/**  Edge of a flat roof bordered by a parapet. */
+"parapet" | 
+/**  Edge against a rising wall. */
+"abutment" | "other";
+
 /**  Rectangular planar roof face. */
-export type RoofFace = {
+export type RoofFace = RoofFace_Serialize | RoofFace_Deserialize;
+
+/**  Identifies a roof face. */
+export type RoofFaceId = string;
+
+export type RoofFaceSummary = RoofFaceSummary_Serialize | RoofFaceSummary_Deserialize;
+
+export type RoofFaceSummary_Deserialize = {
+	face: RoofFace_Deserialize,
+	/**  Precomputed orthonormal frame, so the front-end never re-derives roof geometry. */
+	frame: RoofFrame,
+};
+
+export type RoofFaceSummary_Serialize = {
+	face: RoofFace_Serialize,
+	/**  Precomputed orthonormal frame, so the front-end never re-derives roof geometry. */
+	frame: RoofFrame,
+};
+
+/**  Rectangular planar roof face. */
+export type RoofFace_Deserialize = {
 	id: RoofFaceId,
 	buildingId: BuildingId,
 	name: string,
@@ -208,15 +468,37 @@ export type RoofFace = {
 	widthM: number,
 	/**  Extent along `v` (slope length), m. */
 	heightM: number,
+	/**
+	 *  Real outline when the face is not the `width_m × height_m` rectangle (trapezoid of a
+	 *  hipped roof, L-shapes, obstacles). `None` = the rectangle, eave at `v = 0`.
+	 */
+	outline?: RoofOutlineSpec_Deserialize | null,
+	/**  Seams / rafters of the covering (decide the fixation positions). */
+	supportGrid?: SupportGridSpec | null,
 };
 
-/**  Identifies a roof face. */
-export type RoofFaceId = string;
-
-export type RoofFaceSummary = {
-	face: RoofFace,
-	/**  Precomputed orthonormal frame, so the front-end never re-derives roof geometry. */
-	frame: RoofFrame,
+/**  Rectangular planar roof face. */
+export type RoofFace_Serialize = {
+	id: RoofFaceId,
+	buildingId: BuildingId,
+	name: string,
+	/**  World position of local `(u, v) = (0, 0)` (see [`crate::geometry`]). */
+	origin: [number, number, number],
+	/**  Slope from horizontal, degrees. */
+	tiltDeg: number,
+	/**  Compass direction the downslope side faces, degrees. */
+	azimuthDeg: number,
+	/**  Extent along `u`, m. */
+	widthM: number,
+	/**  Extent along `v` (slope length), m. */
+	heightM: number,
+	/**
+	 *  Real outline when the face is not the `width_m × height_m` rectangle (trapezoid of a
+	 *  hipped roof, L-shapes, obstacles). `None` = the rectangle, eave at `v = 0`.
+	 */
+	outline?: RoofOutlineSpec_Serialize | null,
+	/**  Seams / rafters of the covering (decide the fixation positions). */
+	supportGrid?: SupportGridSpec | null,
 };
 
 /**  Orthonormal frame of a planar roof face, derived from tilt and azimuth. */
@@ -233,11 +515,71 @@ export type RoofFrame = {
 
 export type RoofKind = "gable" | "flat";
 
+export type RoofObstacle = RoofObstacle_Serialize | RoofObstacle_Deserialize;
+
+export type RoofObstacle_Deserialize = {
+	name: string,
+	kind: ObstacleKind,
+	/**  Footprint polygon on the roof plane. */
+	footprintUv: ([number, number])[],
+	/**  Height above the roof surface, m. */
+	heightM: number,
+	/**  Clearance overriding the rule for this obstacle kind, m. */
+	clearanceM?: number | null,
+};
+
+export type RoofObstacle_Serialize = {
+	name: string,
+	kind: ObstacleKind,
+	/**  Footprint polygon on the roof plane. */
+	footprintUv: ([number, number])[],
+	/**  Height above the roof surface, m. */
+	heightM: number,
+	/**  Clearance overriding the rule for this obstacle kind, m. */
+	clearanceM?: number | null,
+};
+
+/**  Outline of a roof face that is not a plain rectangle, with typed edges and obstacles. */
+export type RoofOutlineSpec = RoofOutlineSpec_Serialize | RoofOutlineSpec_Deserialize;
+
+/**  Outline of a roof face that is not a plain rectangle, with typed edges and obstacles. */
+export type RoofOutlineSpec_Deserialize = {
+	/**  Polygon vertices; edge `i` joins vertices `i` and `i + 1`. */
+	verticesUv: ([number, number])[],
+	/**  One kind per edge. */
+	edgeKinds: RoofEdgeKind[],
+	obstacles: RoofObstacle_Deserialize[],
+};
+
+/**  Outline of a roof face that is not a plain rectangle, with typed edges and obstacles. */
+export type RoofOutlineSpec_Serialize = {
+	/**  Polygon vertices; edge `i` joins vertices `i` and `i + 1`. */
+	verticesUv: ([number, number])[],
+	/**  One kind per edge. */
+	edgeKinds: RoofEdgeKind[],
+	obstacles: RoofObstacle_Serialize[],
+};
+
 export type StressPreset = 
 /**  Three gable-roof barns, south + north faces at 30°, ~1,000 coplanar portrait modules. */
 "Residential1k" | 
 /**  One 160 m × 140 m flat roof with 10° east-west racks, ~10,000 modules. */
 "Industrial10k";
+
+/**  Kind of support grid under the roof covering. */
+export type SupportGridKind = 
+/**  Standing seams: one clamp on every seam under a rail. */
+"standingSeam" | 
+/**  Rafters or purlins (tiles, corrugated sheets): fixations every n-th line. */
+"rafters";
+
+/**  Seams or rafters of a roof face: lines `u = origin + k·spacing` (they run up the slope). */
+export type SupportGridSpec = {
+	kind: SupportGridKind,
+	/**  `u` of one seam / rafter, m. */
+	originM: number,
+	spacingM: number,
+};
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {
