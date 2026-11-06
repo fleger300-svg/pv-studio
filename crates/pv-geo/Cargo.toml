@@ -1,0 +1,18 @@
+[package]
+name = "pv-geo"
+description = "PV Studio 2D geometry in roof-face coordinates: points, segments, polygons, oriented rectangles"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

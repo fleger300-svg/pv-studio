@@ -13,6 +13,8 @@ rust-version = "1.99"
 pv-model = { path = "crates/pv-model" }
 pv-store = { path = "crates/pv-store" }
 pv-statics = { path = "crates/pv-statics" }
+pv-geo = { path = "crates/pv-geo" }
+pv-layout = { path = "crates/pv-layout" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 thiserror = "2.0.21"
