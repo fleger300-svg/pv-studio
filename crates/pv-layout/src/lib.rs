@@ -12,14 +12,18 @@
 //!   coplanar / tilted rows / east-west pairs; [`model`]: bridge with `pv-model`.
 //! - L3 [`joints`], [`blocks`]: expansion joints (manual and thermal rule), mounting
 //!   blocks, mechanical links for ballast sharing.
-//! - L4 rails and supports, L5 mixing of systems on one face and command validation (to come).
+//! - L4 [`supports`], [`rails`]: support grids (standing seams, rafters) and their phase,
+//!   cross-rail tracing (top / bottom rails, climbers), fixations on the support lines.
+//! - L5 mixing of systems on one face and command validation (to come).
 
 pub mod blocks;
 pub mod grid;
 pub mod joints;
 pub mod model;
+pub mod rails;
 pub mod roof;
 pub mod setbacks;
+pub mod supports;
 
 pub use blocks::{build_structure, CellLink, Joint, MountingBlock, Structure};
 pub use grid::{
@@ -28,8 +32,12 @@ pub use grid::{
 };
 pub use joints::{JointRules, JointSource};
 pub use model::{layout_array, layout_east_west, relayout_fixed, ArrayLayout};
+pub use rails::{
+    cross_rails, fixations, CrossRailParams, Fixations, Rail, RailLayer, RailLayout, TopSupports,
+};
 pub use roof::{EdgeKind, Obstacle, ObstacleKind, RoofOutline};
 pub use setbacks::{BuildableArea, Rejection, SetbackRules};
+pub use supports::{SupportKind, SupportLines};
 
 /// Errors of the layout engine.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]

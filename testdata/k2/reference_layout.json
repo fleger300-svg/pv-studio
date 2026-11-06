@@ -14,6 +14,18 @@
     { "roof": "roof-4", "field": 2, "cols": 5, "rows": 4, "width_m": 9.18, "length_m": 4.71, "blocks": [[2,2],[2,2],[1,2],[2,2],[2,2],[1,2]], "removed": 0 }
   ],
   "expected_modules": { "roof-1": 35, "roof-2": 26, "roof-3": 26, "roof-4": 29, "total": 116 },
+  "rails": {
+    "_about": "Cut lists of the 4 roofs (pieces per length) and article quantities. Bottom rails: 'long' span 2 module columns, 'short' 1 column. K2 lengthens some bottom rails beyond the base length depending on the seam positions. In roof-1 field 2, block 6 is K2's (2 x 2) - 1 block: the removed module is the top one of its right column; K2 prints a reduced bottom-rail spacing of 0.98 m for that column.",
+    "bottom_spacing_m": 1.0,
+    "per_roof": {
+      "roof-1": { "top": [[2.388, 34], [1.234, 2]], "bottom_long": [[3.198, 2], [3.060, 20]], "bottom_short": [[1.308, 6], [1.250, 3]], "climbers": 106, "clamps": 136 },
+      "roof-2": { "top": [[2.388, 26]], "bottom_long": [[3.171, 6], [3.060, 9]], "bottom_short": [[1.375, 3], [1.250, 6]], "climbers": 78, "clamps": 105 },
+      "roof-3": { "top": [[2.388, 26]], "bottom_long": [[3.171, 3], [3.060, 12]], "bottom_short": [[1.250, 9]], "climbers": 78, "clamps": 99 },
+      "roof-4": { "top": [[2.388, 26], [1.234, 6]], "bottom_long": [[3.181, 5], [3.136, 6], [3.114, 6]], "bottom_short": [[1.394, 2], [1.250, 9]], "climbers": 90, "clamps": 126 }
+    },
+    "reduced_spacing_m": 0.98,
+    "seam_spacing_m": 0.6
+  },
   "roof_1_face": {
     "_about": "roof-1 reconstructed from the printed dimensions: eave 26.18 m, ridge 19.62 m, hip 9.45 m (= sqrt(6.56^2 + 6.80^2)), slope height 6.80 m, right side vertical. The printed block distances are horizontal distances from each block's lower-left corner to the hip, and distances to eave / ridge / right edge. Field origins (lower-left module corner) are the ones consistent with all 18 printed values.",
     "vertices_uv": [[0.0, 0.0], [26.18, 0.0], [26.18, 6.80], [6.56, 6.80]],

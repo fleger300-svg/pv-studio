@@ -429,76 +429,14 @@ pub fn descend(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Fixation counts
+// Fixation counts: geometry, owned by `pv-layout` (re-exported for existing callers).
 // ---------------------------------------------------------------------------------------------
 
-/// Number of supports under a rail of length `rail_length_m`, centred on a support grid of
-/// spacing `spacing_m`, keeping at least `min_overhang_m` at each end.
-#[must_use]
-pub fn supports_under_centred_rail(
-    rail_length_m: f64,
-    spacing_m: f64,
-    min_overhang_m: f64,
-) -> usize {
-    if rail_length_m <= 2.0 * min_overhang_m || spacing_m <= 0.0 {
-        return 0;
-    }
-    let usable = rail_length_m - 2.0 * min_overhang_m;
-    (usable / spacing_m + 1e-9).floor() as usize + 1
-}
-
-/// Number of grid lines (seams, rafters) under a rail starting at `start_m`, for a grid with a
-/// line at `grid_origin_m` and spacing `spacing_m`, keeping at least `min_edge_m` from both
-/// rail ends. This is the exact count once the layout gives the grid position.
-#[must_use]
-pub fn supports_on_grid(
-    start_m: f64,
-    rail_length_m: f64,
-    grid_origin_m: f64,
-    spacing_m: f64,
-    min_edge_m: f64,
-) -> usize {
-    if spacing_m <= 0.0 {
-        return 0;
-    }
-    let lo = start_m + min_edge_m;
-    let hi = start_m + rail_length_m - min_edge_m;
-    if hi < lo {
-        return 0;
-    }
-    let first = ((lo - grid_origin_m) / spacing_m - 1e-9).ceil();
-    let last = ((hi - grid_origin_m) / spacing_m + 1e-9).floor();
-    if last < first {
-        0
-    } else {
-        (last - first) as usize + 1
-    }
-}
-
-/// Climbers (top-rail fixations) of a field: each top rail rests on every bottom rail it
-/// crosses; top rails are centred on the bottom rails.
-#[must_use]
-pub fn climber_count(top_rail_lengths_m: &[f64], bottom_rail_spacing_m: f64) -> usize {
-    top_rail_lengths_m
-        .iter()
-        .map(|&l| supports_under_centred_rail(l, bottom_rail_spacing_m, 0.0))
-        .sum()
-}
+pub use pv_layout::supports::{climber_count, supports_on_grid, supports_under_centred_rail};
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn grid_counting() {
-        // 3.06 m rail, 0.6 m seams, first seam 0.03 m after the rail start → 6 clamps.
-        assert_eq!(supports_on_grid(0.0, 3.06, 0.03, 0.6, 0.0), 6);
-        // Same rail shifted so that the first seam is 0.2 m in → 5 clamps.
-        assert_eq!(supports_on_grid(0.0, 3.06, 0.2, 0.6, 0.0), 5);
-        assert_eq!(supports_under_centred_rail(2.388, 1.0, 0.0), 3);
-        assert_eq!(supports_under_centred_rail(1.234, 1.0, 0.0), 2);
-        assert_eq!(supports_under_centred_rail(0.5, 1.0, 0.3), 0);
-    }
 
     #[test]
     fn rafter_grid_picks_largest_multiple() {
