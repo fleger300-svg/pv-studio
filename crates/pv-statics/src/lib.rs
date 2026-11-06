@@ -10,16 +10,22 @@
 //!    zone, normative or from a manufacturer.
 //! 5. [`combos`]: dead load and SIA 260 combinations, split ⊥ / ∥ to the roof.
 //!
-//! [`analyze_zones`] runs steps 2–5 for one field. Load descent to rails and fixations,
-//! utilisation checks and ballast come next.
+//! 6. [`descent`]: load descent surface → top rail → bottom rail → fixation, rail and
+//!    fixation checks, maximum spacings, fixation spacing on the support grid, counts.
+//! 7. [`ballast`]: flat-roof ballast against uplift and sliding, aerodynamic east-west
+//!    systems, sharing within mechanically linked positions, rounding to whole blocks.
+//!
+//! [`analyze_zones`] runs steps 2–5 for one field; its envelopes feed [`descent::descend`].
 //!
 //! The results are a **pre-dimensioning**: every report and UI view showing them must also
 //! show [`disclaimer`].
 //!
 //! Units: kN, kN/m², m, degrees.
 
+pub mod ballast;
 pub mod combos;
 pub mod cp;
+pub mod descent;
 pub mod site;
 pub mod snow;
 pub mod trace;
@@ -30,7 +36,9 @@ use serde::{Deserialize, Serialize};
 pub use combos::{
     CombinationId, DeadLoad, DesignEnvelope, LimitState, PartialFactors, SurfaceActions,
 };
-pub use cp::{CpSource, ManufacturerCpEntry, ManufacturerCpTable, RoofShape, RoofZone, ZoneCp};
+pub use cp::{
+    CpEntry, CpSource, ExplicitCpTable, ManufacturerCpTable, RoofShape, RoofZone, ZoneCp,
+};
 pub use site::{ConsequenceClass, ServiceLifeModel, SiteInput, SnowExposure, TerrainCategory};
 pub use snow::SnowResult;
 pub use trace::{fingerprint, Assumption, NormRef, Traced, Unit};

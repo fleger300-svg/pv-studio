@@ -92,7 +92,7 @@
       "site": {
         "altitude_m": 396.09, "snow_altitude_correction_m": -200.0, "wind_reference_pressure_kn_m2": 0.9,
         "terrain": "III", "building_height_m": 12.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
-        "service_life_years": 25.0, "consequence_class": "CC2"
+        "service_life_years": 25.0, "consequence_class": "CC1"
       },
       "roof": { "shape": "flat", "pitch_deg": 0.0 },
       "expected": { "s_k": 0.900, "mu": 0.800, "s_50": 0.720, "f_s": 0.929, "s_n": 0.669, "q_p50": 0.944, "f_w": 0.911, "q_pn": 0.860 }
@@ -103,21 +103,21 @@
       "site": {
         "altitude_m": 396.09, "snow_altitude_correction_m": -200.0, "wind_reference_pressure_kn_m2": 0.9,
         "terrain": "III", "building_height_m": 9.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
-        "service_life_years": 25.0, "consequence_class": "CC2"
+        "service_life_years": 25.0, "consequence_class": "CC1"
       },
       "roof": { "shape": "flat", "pitch_deg": 0.0 },
       "expected": { "s_k": 0.900, "s_50": 0.720, "s_n": 0.669, "q_p50": 0.880, "f_w": 0.911, "q_pn": 0.802 }
     },
     {
       "id": "ref-c-roof1",
-      "source": "K2 Base 3.2.61.0, project C, duopitch corrugated sheet roof 15 deg, 5 m, service life 50 years",
+      "source": "K2 Base 3.2.61.0, project C, duopitch corrugated sheet roof 15 deg, 5 m. The report prints f_w = f_s = 1.000 for this roof but applies 0.911 / 0.929 (q_p,25 = 0.700, s_25 = 0.711): display bug in K2, the applied values are kept here",
       "site": {
         "altitude_m": 425.34, "snow_altitude_correction_m": 0.0, "wind_reference_pressure_kn_m2": 0.9,
         "terrain": "III", "building_height_m": 5.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
-        "service_life_years": 50.0, "consequence_class": "CC2"
+        "service_life_years": 25.0, "consequence_class": "CC1"
       },
       "roof": { "shape": "duopitch", "pitch_deg": 15.0 },
-      "expected": { "s_k": 0.991, "mu": 0.800, "s_50": 0.766, "f_s": 1.000, "s_n": 0.766, "q_p50": 0.768, "f_w": 1.000, "q_pn": 0.768 }
+      "expected": { "s_k": 0.991, "mu": 0.800, "s_50": 0.766, "f_s": 0.929, "s_n": 0.711, "q_p50": 0.768, "f_w": 0.911, "q_pn": 0.700 }
     },
     {
       "id": "ref-c-roof2",
@@ -125,7 +125,7 @@
       "site": {
         "altitude_m": 425.34, "snow_altitude_correction_m": 0.0, "wind_reference_pressure_kn_m2": 0.9,
         "terrain": "III", "building_height_m": 5.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
-        "service_life_years": 25.0, "consequence_class": "CC2"
+        "service_life_years": 25.0, "consequence_class": "CC1"
       },
       "roof": { "shape": "duopitch", "pitch_deg": 16.0 },
       "expected": { "s_k": 0.991, "s_50": 0.762, "f_s": 0.929, "s_n": 0.708, "q_p50": 0.768, "q_pn": 0.700 }
@@ -136,7 +136,7 @@
       "site": {
         "altitude_m": 425.34, "snow_altitude_correction_m": 0.0, "wind_reference_pressure_kn_m2": 0.9,
         "terrain": "III", "building_height_m": 3.0, "snow_exposure": "normal", "thermal_coefficient": 1.0,
-        "service_life_years": 25.0, "consequence_class": "CC2"
+        "service_life_years": 25.0, "consequence_class": "CC1"
       },
       "roof": { "shape": "flat", "pitch_deg": 0.0 },
       "expected": { "s_k": 0.991, "s_50": 0.793, "s_n": 0.736, "q_p50": 0.768, "q_pn": 0.700 }

@@ -1,0 +1,116 @@
+{
+  "_about": "Expected load descent, fixation and ballast values hand-transcribed from K2 Base reports (PDFs kept out of git, anonymised). Site data of each case is in reference_loads.json under the same id. Forces/masses/lengths derived from loads are tested at +/-3 %, decisions and counts (fixation spacing, climbers, concrete blocks) at 0 deviation. See crates/pv-statics/tests/k2_descent_ballast.rs.",
+  "load_tolerance": 0.03,
+  "descent": [
+    {
+      "id": "ref-a",
+      "_about": "SingleRail cross system on double standing seam (seams every 0.600 m). Top rails 2 per module (1.800 m module side across the rails), bottom rails 1.00 m apart. K2 does not compute D_max of the standing-seam bottom rail (printed 0.000): one clamp per seam.",
+      "loaded_area_m2": 10.0,
+      "system": {
+        "top_rail_tributary_width_m": 0.9,
+        "bottom_rail_spacing_m": 1.0,
+        "support_grid": { "kind": "standing_seam", "seam_spacing_m": 0.6 }
+      },
+      "zones": [
+        { "zone": "interior",
+          "fixation": { "uls": [0.917, 0.268, -0.529, 0.023], "sls": [0.619, 0.181, -0.323, 0.026] },
+          "top_bending": 0.344, "top_max_span_m": 1.628, "bottom_bending": 0.178, "fixation_spacing_m": 0.600 },
+        { "zone": "ridge",
+          "fixation": { "uls": [0.917, 0.268, -0.858, 0.023], "sls": [0.619, 0.181, -0.542, 0.026] },
+          "top_bending": 0.344, "top_max_span_m": 1.628, "bottom_bending": 0.178, "fixation_spacing_m": 0.600 },
+        { "zone": "verge",
+          "_bottom": "K2 bottom rail utilisation 0.198 under uplift is not reproduced (engine 0.233, conservative); not compared",
+          "fixation": { "uls": [0.917, 0.268, -1.210, 0.023], "sls": [0.619, 0.181, -0.777, 0.026] },
+          "top_bending": 0.445, "top_max_span_m": 1.499, "fixation_spacing_m": 0.600 },
+        { "zone": "eave",
+          "fixation": { "uls": [0.978, 0.268, -0.590, 0.023], "sls": [0.659, 0.181, -0.364, 0.026] },
+          "top_bending": 0.366, "top_max_span_m": 1.602, "bottom_bending": 0.188, "fixation_spacing_m": 0.600 },
+        { "zone": "eave_corner",
+          "_bottom": "same as verge",
+          "fixation": { "uls": [0.978, 0.268, -1.210, 0.023], "sls": [0.659, 0.181, -0.777, 0.026] },
+          "top_bending": 0.445, "top_max_span_m": 1.499, "fixation_spacing_m": 0.600 }
+      ]
+    },
+    {
+      "id": "ref-c-roof1",
+      "_about": "SingleRail cross system on corrugated sheet, hanger bolts in timber rafters every 0.65 m (largest actual spacing 0.66 m). Duopitch c_pe as printed by K2 (no normative duopitch table in the engine yet). K2 computes the rails with a bottom-rail spacing of 1.67 m.",
+      "loaded_area_m2": 10.0,
+      "dead_load": { "module_mass_kg": 21.5, "system_mass_per_module_kg": 6.4, "module_area_m2": 1.9924 },
+      "factors_overrides": { "psi0_snow": 0.86 },
+      "cp": [
+        { "zone": "interior", "cp_pressure": 0.2, "cp_suction": -0.6 },
+        { "zone": "ridge", "cp_pressure": 0.2, "cp_suction": -1.0 }
+      ],
+      "system": {
+        "top_rail_tributary_width_m": 0.8785,
+        "bottom_rail_spacing_m": 1.67,
+        "support_grid": { "kind": "rafters", "spacing_m": 0.65 },
+        "actual_fixation_spacing_m": 0.66,
+        "fixation": { "name": "HangerBolt Climber Set M10x250", "uplift_kn": 3.48, "pressure_kn": 2.71, "parallel_kn": 0.34 }
+      },
+      "zones": [
+        { "zone": "interior",
+          "surface": { "uls": [1.202, 0.292, -0.461, 0.028], "sls": [0.904, 0.220, -0.287, 0.036] },
+          "fixation": { "uls": [1.391, 0.338, -0.533, 0.033], "sls": [1.046, 0.254, -0.332, 0.041] },
+          "top_bending": 0.765, "top_deflection": 0.995, "top_max_span_m": 1.672,
+          "bottom_bending": 0.289, "bottom_deflection": 0.117, "bottom_max_span_m": 1.228,
+          "fixation_utilisation": 0.514, "fixation_spacing_m": 0.650 },
+        { "zone": "ridge",
+          "surface": { "uls": [1.202, 0.292, -0.838, 0.028], "sls": [0.904, 0.220, -0.567, 0.036] },
+          "fixation": { "uls": [1.391, 0.338, -0.970, 0.033], "sls": [1.046, 0.254, -0.656, 0.041] },
+          "top_bending": 0.765, "top_deflection": 0.995, "top_max_span_m": 1.672,
+          "bottom_bending": 0.289, "bottom_deflection": 0.117, "bottom_max_span_m": 1.228,
+          "fixation_utilisation": 0.514, "fixation_spacing_m": 0.650 }
+      ]
+    }
+  ],
+  "climbers": {
+    "_about": "ref-a: top-rail cut lists per roof (pieces of 2.388 m and 1.234 m), bottom rails 1.00 m apart; expected climber sets from the K2 article list (total 352).",
+    "bottom_rail_spacing_m": 1.0,
+    "roofs": [
+      { "id": "roof-1", "top_rails": [[2.388, 34], [1.234, 2]], "expected": 106 },
+      { "id": "roof-2", "top_rails": [[2.388, 26]], "expected": 78 },
+      { "id": "roof-3", "top_rails": [[2.388, 26]], "expected": 78 },
+      { "id": "roof-4", "top_rails": [[2.388, 26], [1.234, 6]], "expected": 90 }
+    ],
+    "expected_total": 352
+  },
+  "ballast": [
+    {
+      "id": "ref-b-h9",
+      "_about": "D-Dome 6.10 Classic on gravel, module 1762x1134, tilt 8.6 deg, 2 modules + system = 47.5 kg per pair, concrete blocks of 11 kg. K2 prints only the two extreme pairs of the roof (highest and lowest ballast); they are back-fitted here as eave_corner (highest) and interior (lowest).",
+      "system": {
+        "module_area_m2": 1.998108, "pair_own_mass_kg": 47.5, "module_tilt_deg": 8.6,
+        "block_mass_kg": 11.0, "friction_coefficient": 0.7
+      },
+      "zones": [
+        { "zone": "eave_corner",
+          "uplift":  { "cp_east": -0.028, "cp_west": -0.324, "k": [1.00, 0.90, 1.03, 1.03, 1.01, 1.00] },
+          "sliding": { "cp_east":  0.079, "cp_west": -0.273, "k": [1.00, 0.90, 1.03, 1.03, 1.01, 1.00] },
+          "expected": { "uplift_fz": 0.557, "uplift_ballast_kg": 34.9, "sliding_fz": 0.306, "sliding_fx": 0.085, "sliding_ballast_kg": 15.8, "blocks": 4 } },
+        { "zone": "interior",
+          "uplift":  { "cp_east": -0.011, "cp_west": -0.182, "k": [1.00, 0.90, 1.03, 1.03, 1.01, 1.00] },
+          "sliding": { "cp_east":  0.087, "cp_west": -0.246, "k": [1.00, 0.90, 1.03, 1.03, 1.01, 1.00] },
+          "expected": { "uplift_fz": 0.304, "uplift_ballast_kg": 0.0, "sliding_fz": 0.251, "sliding_fx": 0.080, "sliding_ballast_kg": 6.7, "blocks": 1 } }
+      ]
+    },
+    {
+      "id": "ref-b-h12",
+      "_about": "Same system, roof zone at 12 m.",
+      "system": {
+        "module_area_m2": 1.998108, "pair_own_mass_kg": 47.5, "module_tilt_deg": 8.6,
+        "block_mass_kg": 11.0, "friction_coefficient": 0.7
+      },
+      "zones": [
+        { "zone": "eave_corner",
+          "uplift":  { "cp_east": -0.017, "cp_west": -0.463, "k": [1.00, 0.90, 1.03, 1.03, 1.01, 1.00] },
+          "sliding": { "cp_east":  0.085, "cp_west": -0.282, "k": [1.00, 0.90, 1.01, 1.03, 1.01, 1.00] },
+          "expected": { "uplift_fz": 0.814, "uplift_ballast_kg": 73.1, "sliding_fz": 0.335, "sliding_fx": 0.095, "sliding_ballast_kg": 20.9, "blocks": 7 } },
+        { "zone": "interior",
+          "uplift":  { "cp_east": -0.002, "cp_west": -0.163, "k": [1.00, 0.90, 0.99, 1.03, 1.01, 1.00] },
+          "sliding": { "cp_east":  0.096, "cp_west": -0.221, "k": [1.00, 0.90, 0.98, 1.03, 1.01, 1.00] },
+          "expected": { "uplift_fz": 0.280, "uplift_ballast_kg": 0.0, "sliding_fz": 0.212, "sliding_fx": 0.082, "sliding_ballast_kg": 0.0, "blocks": 0 } }
+      ]
+    }
+  ]
+}

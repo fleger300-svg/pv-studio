@@ -85,9 +85,9 @@ pub struct ZoneCp {
     pub suction: Traced,
 }
 
-/// Explicit coefficients from a manufacturer, for one roof zone.
+/// Explicit coefficients for one roof zone.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ManufacturerCpEntry {
+pub struct CpEntry {
     pub zone: RoofZone,
     pub cp_pressure: f64,
     pub cp_suction: f64,
@@ -103,7 +103,16 @@ pub struct ManufacturerCpTable {
     pub document: String,
     /// Valid pitch range of the roof [°].
     pub pitch_range_deg: (f64, f64),
-    pub entries: Vec<ManufacturerCpEntry>,
+    pub entries: Vec<CpEntry>,
+}
+
+/// Coefficients fixed explicitly by the engineer (e.g. a roof shape without normative
+/// table in the engine yet, or values taken over from another calculation).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ExplicitCpTable {
+    /// Where the values come from; shown in the report.
+    pub reference: String,
+    pub entries: Vec<CpEntry>,
 }
 
 /// Where the pressure coefficients come from.
@@ -113,6 +122,7 @@ pub enum CpSource {
     #[default]
     Standard,
     Manufacturer(ManufacturerCpTable),
+    Explicit(ExplicitCpTable),
 }
 
 impl CpSource {
@@ -128,34 +138,49 @@ impl CpSource {
         match self {
             CpSource::Standard => standard_coefficients(shape, pitch_deg, zone, loaded_area_m2),
             CpSource::Manufacturer(table) => {
-                manufacturer_coefficients(table, pitch_deg, zone, loaded_area_m2)
+                let (lo, hi) = table.pitch_range_deg;
+                StaticsError::check_range("pitch_deg", pitch_deg, lo, hi)?;
+                let provenance = format!(
+                    "{} {} — {}",
+                    table.manufacturer, table.product, table.document
+                );
+                table_coefficients(
+                    &table.entries,
+                    zone,
+                    loaded_area_m2,
+                    NormRef::new("Manufacturer data", "wind-tunnel test"),
+                    "statics.assumption.cp.manufacturer",
+                    provenance,
+                )
             }
+            CpSource::Explicit(table) => table_coefficients(
+                &table.entries,
+                zone,
+                loaded_area_m2,
+                NormRef::new("Explicit values", "engineer input"),
+                "statics.assumption.cp.explicit",
+                table.reference.clone(),
+            ),
         }
     }
 }
 
-fn manufacturer_coefficients(
-    table: &ManufacturerCpTable,
-    pitch_deg: f64,
+fn table_coefficients(
+    entries: &[CpEntry],
     zone: RoofZone,
     loaded_area_m2: f64,
+    reference: NormRef,
+    assumption_key: &'static str,
+    provenance: String,
 ) -> Result<ZoneCp, StaticsError> {
-    let (lo, hi) = table.pitch_range_deg;
-    StaticsError::check_range("pitch_deg", pitch_deg, lo, hi)?;
-    let entry = table
-        .entries
+    let entry = entries
         .iter()
         .find(|e| e.zone == zone)
         .ok_or(StaticsError::MissingCoefficient { zone })?;
-    let reference = NormRef::new("Manufacturer data", "wind-tunnel test");
-    let provenance = format!(
-        "{} {} — {}",
-        table.manufacturer, table.product, table.document
-    );
     let make = |symbol: &str, value: f64| {
         Traced::given(symbol, value, Unit::Dimensionless)
             .reference(reference)
-            .assume("statics.assumption.cp.manufacturer", provenance.clone())
+            .assume(assumption_key, provenance.clone())
     };
     Ok(ZoneCp {
         zone,
@@ -388,7 +413,7 @@ mod tests {
             product: "Dome".into(),
             document: "WT-1".into(),
             pitch_range_deg: (0.0, 5.0),
-            entries: vec![ManufacturerCpEntry {
+            entries: vec![CpEntry {
                 zone: RoofZone::Interior,
                 cp_pressure: 0.3,
                 cp_suction: -0.4,

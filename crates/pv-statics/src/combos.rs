@@ -110,6 +110,17 @@ impl PartialFactors {
             psi0_snow: 0.85,
         }
     }
+
+    /// Same set, with γ_G,inf = 0.80 in consequence class CC1, as K2 Base applies it
+    /// (references `ref-b`, `ref-c`).
+    #[must_use]
+    pub const fn sia_260_for(class: crate::ConsequenceClass) -> Self {
+        let mut f = Self::sia_260();
+        if matches!(class, crate::ConsequenceClass::CC1) {
+            f.gamma_g_inf = 0.80;
+        }
+        f
+    }
 }
 
 impl Default for PartialFactors {
