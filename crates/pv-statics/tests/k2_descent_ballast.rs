@@ -476,3 +476,52 @@ fn ballast_matches_k2() {
     }
     c.finish("ballast");
 }
+
+/// Ballast sharing over the mounting blocks laid out by `pv-layout`: linked modules share,
+/// an expansion joint splits the group (architecture: « les joints de dilatation coupent ces
+/// liaisons »).
+#[test]
+fn ballast_is_shared_within_layout_blocks() {
+    use pv_layout::{build_structure, Cell, GridSpec, JointRules};
+    use pv_statics::ballast::share_ballast_on_structure;
+
+    let spec = GridSpec {
+        footprint_u: 1.134,
+        footprint_v: 1.762,
+        gap_u: 0.02,
+        gap_v: 0.02,
+        block: None,
+        row_pitch_v: None,
+        anchor: pv_model::LayoutAnchor::LowerLeft,
+    };
+    let cells: Vec<Cell> = (0..6)
+        .map(|c| Cell {
+            row: 0,
+            col: c,
+            centre: pv_geo::Vec2::new(spec.col_offset(c), 0.0),
+        })
+        .collect();
+    // Edge modules need ballast, the middle ones have a surplus.
+    let required = [60.0, 20.0, 20.0, 20.0, 20.0, 60.0];
+    let own = [25.0; 6];
+
+    // One block: total deficit 2·35 − 4·5 = 50 kg → 5 blocks of 11 kg.
+    let one = build_structure(&cells, &spec, &JointRules::default()).unwrap();
+    let groups = share_ballast_on_structure(&one, &required, &own, 11.0).unwrap();
+    assert_eq!(groups.len(), 1);
+    assert!((groups[0].ballast_mass_kg - 50.0).abs() < 1e-9);
+    assert_eq!(groups[0].blocks, 5);
+
+    // A joint in the middle: two groups of 35 − 2·5 = 25 kg → 3 blocks each.
+    let rules = JointRules {
+        max_length_u: Some(3.5),
+        ..JointRules::default()
+    };
+    let split = build_structure(&cells, &spec, &rules).unwrap();
+    assert_eq!(split.blocks.len(), 2);
+    let groups = share_ballast_on_structure(&split, &required, &own, 11.0).unwrap();
+    assert_eq!(groups.len(), 2);
+    assert!(groups
+        .iter()
+        .all(|g| (g.ballast_mass_kg - 25.0).abs() < 1e-9 && g.blocks == 3));
+}

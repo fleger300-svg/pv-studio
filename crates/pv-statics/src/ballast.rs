@@ -474,6 +474,46 @@ pub fn share_ballast(
         .collect())
 }
 
+/// Mechanical links of a laid-out field (`pv-layout` mounting blocks). Positions are the
+/// structure's cells, in the same order; links across an expansion joint keep their flag so
+/// that [`share_ballast`] ignores them.
+#[must_use]
+pub fn links_from_structure(structure: &pv_layout::Structure) -> Vec<Link> {
+    structure
+        .links
+        .iter()
+        .map(|l| Link {
+            a: l.a,
+            b: l.b,
+            crosses_expansion_joint: l.crosses_expansion_joint,
+        })
+        .collect()
+}
+
+/// [`share_ballast`] over the mounting blocks of a field: one group per block.
+pub fn share_ballast_on_structure(
+    structure: &pv_layout::Structure,
+    required_kg: &[f64],
+    own_kg: &[f64],
+    block_kg: f64,
+) -> Result<Vec<GroupBallast>, StaticsError> {
+    if required_kg.len() != structure.block_of.len() {
+        return Err(StaticsError::Unsupported {
+            what: format!(
+                "{} masses for {} positions",
+                required_kg.len(),
+                structure.block_of.len()
+            ),
+        });
+    }
+    share_ballast(
+        required_kg,
+        own_kg,
+        &links_from_structure(structure),
+        block_kg,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

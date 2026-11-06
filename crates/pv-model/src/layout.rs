@@ -99,6 +99,25 @@ pub enum LayoutAnchor {
     Centre,
 }
 
+/// Direction of an expansion joint line.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum JointAxis {
+    /// Line `u = position`: cuts the rails running along `u`.
+    ConstantU,
+    /// Line `v = position`: cuts the rails running along `v`.
+    ConstantV,
+}
+
+/// Expansion joint placed by the user (the architecture's `expansion_joint`).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ExpansionJointSpec {
+    pub axis: JointAxis,
+    /// Roof coordinate of the line, m.
+    pub position_m: f64,
+}
+
 /// Layout parameters of an array (the architecture's `params_json` / `boundary_json`).
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -119,4 +138,12 @@ pub struct ArrayLayoutParams {
     #[specta(optional)]
     pub row_pitch_m: Option<f64>,
     pub anchor: LayoutAnchor,
+    /// Expansion joints placed by the user.
+    pub expansion_joints: Vec<ExpansionJointSpec>,
+    /// Maximum length of a mounting block along `u` / `v` (continuous rails, from the
+    /// mounting system's thermal rule), m. `None` = no automatic joint in that direction.
+    #[specta(optional)]
+    pub max_block_length_u_m: Option<f64>,
+    #[specta(optional)]
+    pub max_block_length_v_m: Option<f64>,
 }

@@ -21,8 +21,8 @@ pub use command::{ChangeSet, Command, CommandError, ErrorParam};
 pub use geometry::{Quat, RoofFrame, Vec3};
 pub use ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 pub use layout::{
-    ArrayLayoutParams, BlockParams, EdgeSetback, LayoutAnchor, ObstacleKind, RoofEdgeKind,
-    RoofObstacle, RoofOutlineSpec,
+    ArrayLayoutParams, BlockParams, EdgeSetback, ExpansionJointSpec, JointAxis, LayoutAnchor,
+    ObstacleKind, RoofEdgeKind, RoofObstacle, RoofOutlineSpec,
 };
 pub use project::{
     ArrayGrid, Building, ModuleInstance, ModuleState, Orientation, PanelArray, Project, RoofFace,

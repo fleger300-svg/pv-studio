@@ -96,6 +96,14 @@ export type ArrayLayoutParams_Deserialize = {
 	/**  Row pitch along `v` for tilted rows, or pair pitch along `u` for east-west systems, m. */
 	rowPitchM?: number | null,
 	anchor: LayoutAnchor,
+	/**  Expansion joints placed by the user. */
+	expansionJoints: ExpansionJointSpec[],
+	/**
+	 *  Maximum length of a mounting block along `u` / `v` (continuous rails, from the
+	 *  mounting system's thermal rule), m. `None` = no automatic joint in that direction.
+	 */
+	maxBlockLengthUM?: number | null,
+	maxBlockLengthVM?: number | null,
 };
 
 /**  Layout parameters of an array (the architecture's `params_json` / `boundary_json`). */
@@ -114,6 +122,14 @@ export type ArrayLayoutParams_Serialize = {
 	/**  Row pitch along `v` for tilted rows, or pair pitch along `u` for east-west systems, m. */
 	rowPitchM?: number | null,
 	anchor: LayoutAnchor,
+	/**  Expansion joints placed by the user. */
+	expansionJoints: ExpansionJointSpec[],
+	/**
+	 *  Maximum length of a mounting block along `u` / `v` (continuous rails, from the
+	 *  mounting system's thermal rule), m. `None` = no automatic joint in that direction.
+	 */
+	maxBlockLengthUM?: number | null,
+	maxBlockLengthVM?: number | null,
 };
 
 export type ArraySummary = ArraySummary_Serialize | ArraySummary_Deserialize;
@@ -204,6 +220,20 @@ export type EdgeSetback = {
 
 /**  A parameter of a translated error message. */
 export type ErrorParam = number | string;
+
+/**  Expansion joint placed by the user (the architecture's `expansion_joint`). */
+export type ExpansionJointSpec = {
+	axis: JointAxis,
+	/**  Roof coordinate of the line, m. */
+	positionM: number,
+};
+
+/**  Direction of an expansion joint line. */
+export type JointAxis = 
+/**  Line `u = position`: cuts the rails running along `u`. */
+"constantU" | 
+/**  Line `v = position`: cuts the rails running along `v`. */
+"constantV";
 
 /**  Where the grid is anchored when the engine searches the best offset. */
 export type LayoutAnchor = 

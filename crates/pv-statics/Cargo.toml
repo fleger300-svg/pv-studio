@@ -8,9 +8,14 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+pv-layout.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+pv-geo.workspace = true
+pv-model.workspace = true

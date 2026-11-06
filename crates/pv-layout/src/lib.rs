@@ -10,18 +10,23 @@
 //!   acceptance test of a module footprint.
 //! - L2 [`grid`]: lattice with mounting blocks, fixed placement, best-offset filling,
 //!   coplanar / tilted rows / east-west pairs; [`model`]: bridge with `pv-model`.
-//! - L3 blocks and expansion joints, L4 rails and supports, L5 mixing of systems on one face
-//!   and command validation (to come).
+//! - L3 [`joints`], [`blocks`]: expansion joints (manual and thermal rule), mounting
+//!   blocks, mechanical links for ballast sharing.
+//! - L4 rails and supports, L5 mixing of systems on one face and command validation (to come).
 
+pub mod blocks;
 pub mod grid;
+pub mod joints;
 pub mod model;
 pub mod roof;
 pub mod setbacks;
 
+pub use blocks::{build_structure, CellLink, Joint, MountingBlock, Structure};
 pub use grid::{
     fill, fill_east_west, place_fixed, Cell, EastWestPlacement, EastWestSpec, GridSpec, Placement,
     Region, Search,
 };
+pub use joints::{JointRules, JointSource};
 pub use model::{layout_array, layout_east_west, relayout_fixed, ArrayLayout};
 pub use roof::{EdgeKind, Obstacle, ObstacleKind, RoofOutline};
 pub use setbacks::{BuildableArea, Rejection, SetbackRules};
@@ -41,4 +46,10 @@ pub enum LayoutError {
     NotEastWest,
     #[error("an east-west system needs its pair pitch (row_pitch_m)")]
     MissingPairPitch,
+    #[error("a {module_m} m module is longer than the maximum block length {max_m} m ({axis:?})")]
+    JointRuleUnsatisfiable {
+        axis: pv_model::JointAxis,
+        module_m: f64,
+        max_m: f64,
+    },
 }

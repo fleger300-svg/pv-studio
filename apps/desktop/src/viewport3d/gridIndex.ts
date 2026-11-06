@@ -38,6 +38,12 @@ export class GridIndex {
     this.uv[id * 2 + 1] = dx * axisV[0] + dy * axisV[1] + dz * axisV[2];
   }
 
+  // TODO(pv-layout blocks): this assumes evenly spaced cells (`origin + index × pitch`).
+  // Arrays laid out with mounting blocks (`grid.blockCols/blockRows > 0`) add
+  // `blockExtraU/V` between blocks, so the index computed here drifts by that much per block
+  // and the ±1 neighbourhood searched in `hit()` stops covering the right cell after a few
+  // blocks. Migrate to the block-aware formula of Rust `ArrayGrid::cell_centre()` (and its
+  // inverse) when the visual interface is resumed. No impact today: no array has blocks yet.
   private cell(arrayIndex: number, u: number, v: number): number {
     const g = this.summary.arrays[arrayIndex]?.array.grid;
     if (!g) return 0;
@@ -74,6 +80,8 @@ export class GridIndex {
       if (a.roofFaceIndex !== faceIndex) return;
       const [hu, hv] = a.halfFootprint;
       const g = a.array.grid;
+      // TODO(pv-layout blocks): same evenly-spaced assumption as `cell()`; use the
+      // block-aware `ArrayGrid::cell_centre()` formula (see the note on `cell()`).
       const row = Math.round((v - g.originV) / g.pitchV);
       const col = Math.round((u - g.originU) / g.pitchU);
       for (let dr = -1; dr <= 1; dr++) {

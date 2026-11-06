@@ -5,9 +5,11 @@ use pv_geo::{Polygon, Vec2};
 use pv_model::{ArrayGrid, ArrayId, ModuleId, ModuleInstance, ModuleState, PanelArray, RoofFace};
 use serde::Serialize;
 
+use crate::blocks::{build_structure, Structure};
 use crate::grid::{
     fill, fill_east_west, place_fixed, Cell, EastWestSpec, GridSpec, Placement, Region, Search,
 };
+use crate::joints::JointRules;
 use crate::roof::RoofOutline;
 use crate::setbacks::{BuildableArea, SetbackRules};
 use crate::LayoutError;
@@ -206,4 +208,30 @@ pub fn layout_east_west(
         l
     };
     Ok((side(&ew.minus_u, -half), side(&ew.plus_u, half)))
+}
+
+/// Mounting blocks of an array from its stored modules (active ones only, removed modules
+/// leave a hole). Returns the structure and, for each of its cells, the module id.
+pub fn structure(
+    array: &PanelArray,
+    modules: &[ModuleInstance],
+) -> Result<(Structure, Vec<ModuleId>), LayoutError> {
+    let active: Vec<&ModuleInstance> = modules
+        .iter()
+        .filter(|m| m.array_id == array.id && m.state == ModuleState::Active)
+        .collect();
+    let cells: Vec<Cell> = active
+        .iter()
+        .map(|m| Cell {
+            row: m.row,
+            col: m.col,
+            centre: Vec2::new(m.u, m.v),
+        })
+        .collect();
+    let s = build_structure(
+        &cells,
+        &grid_spec(array),
+        &JointRules::from_params(&array.layout),
+    )?;
+    Ok((s, active.iter().map(|m| m.id).collect()))
 }

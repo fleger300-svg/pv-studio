@@ -62,6 +62,7 @@ export function flatRoofFixture(): { summary: ProjectSummary; data: ModuleData }
             edgeSetbacks: [],
             obstacleClearanceM: 0,
             anchor: 'lowerLeft',
+            expansionJoints: [],
           },
         },
         roofFaceIndex: 0,

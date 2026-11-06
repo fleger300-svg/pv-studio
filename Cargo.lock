@@ -2425,6 +2425,9 @@ dependencies = [
 name = "pv-statics"
 version = "0.1.0"
 dependencies = [
+ "pv-geo",
+ "pv-layout",
+ "pv-model",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
