@@ -5,7 +5,7 @@ use specta::Type;
 
 use crate::geometry::{Quat, RoofFrame, Vec3};
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
-use crate::layout::{ArrayLayoutParams, RoofOutlineSpec};
+use crate::layout::{ArrayLayoutParams, RoofOutlineSpec, SupportGridSpec};
 
 /// Module frame thickness (m).
 pub const MODULE_THICKNESS_M: f64 = 0.030;
@@ -62,6 +62,9 @@ pub struct RoofFace {
     /// hipped roof, L-shapes, obstacles). `None` = the rectangle, eave at `v = 0`.
     #[specta(optional)]
     pub outline: Option<RoofOutlineSpec>,
+    /// Seams / rafters of the covering (decide the fixation positions).
+    #[specta(optional)]
+    pub support_grid: Option<SupportGridSpec>,
 }
 
 impl RoofFace {
@@ -377,6 +380,7 @@ pub(crate) mod fixtures {
             width_m: 10.0,
             height_m: 6.0,
             outline: None,
+            support_grid: None,
         };
         let pitch_u = 1.134 + 0.02;
         let pitch_v = 1.762 + 0.02;

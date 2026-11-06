@@ -27,9 +27,9 @@
     "seam_spacing_m": 0.6
   },
   "roof_1_face": {
-    "_about": "roof-1 reconstructed from the printed dimensions: eave 26.18 m, ridge 19.62 m, hip 9.45 m (= sqrt(6.56^2 + 6.80^2)), slope height 6.80 m, right side vertical. The printed block distances are horizontal distances from each block's lower-left corner to the hip, and distances to eave / ridge / right edge. Field origins (lower-left module corner) are the ones consistent with all 18 printed values.",
+    "_about": "roof-1 reconstructed from the printed dimensions: eave 26.18 m, ridge 19.62 m, hip 9.45 m (= sqrt(6.56^2 + 6.80^2)), slope height 6.80 m, right side vertical and free (K2 assigns verge zones along it). The printed block distances are horizontal distances from each block's lower-left corner to the hip, and distances to eave / ridge / right edge. Field origins (lower-left module corner) are the ones consistent with all 18 printed values.",
     "vertices_uv": [[0.0, 0.0], [26.18, 0.0], [26.18, 6.80], [6.56, 6.80]],
-    "edge_kinds": ["eave", "abutment", "ridge", "hip"],
+    "edge_kinds": ["eave", "verge", "ridge", "hip"],
     "fields": [
       { "field": 1, "cols": 4, "rows": 4, "lower_left": [6.15, 0.70],
         "blocks": [

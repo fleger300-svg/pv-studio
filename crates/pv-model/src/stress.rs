@@ -79,6 +79,7 @@ impl Builder {
             width_m: shape.width_m,
             height_m: shape.height_m,
             outline: None,
+            support_grid: None,
         });
         id
     }

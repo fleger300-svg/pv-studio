@@ -15,6 +15,8 @@
 //! 7. [`ballast`]: flat-roof ballast against uplift and sliding, aerodynamic east-west
 //!    systems, sharing within mechanically linked positions, rounding to whole blocks.
 //!
+//! [`zones`]: wind zones of the whole face, assigned to each field by position.
+//!
 //! [`analyze_zones`] runs steps 2–5 for one field; its envelopes feed [`descent::descend`].
 //!
 //! The results are a **pre-dimensioning**: every report and UI view showing them must also
@@ -30,6 +32,7 @@ pub mod site;
 pub mod snow;
 pub mod trace;
 pub mod wind;
+pub mod zones;
 
 use serde::{Deserialize, Serialize};
 

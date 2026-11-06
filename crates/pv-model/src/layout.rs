@@ -99,6 +99,45 @@ pub enum LayoutAnchor {
     Centre,
 }
 
+/// Kind of support grid under the roof covering.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum SupportGridKind {
+    /// Standing seams: one clamp on every seam under a rail.
+    StandingSeam,
+    /// Rafters or purlins (tiles, corrugated sheets): fixations every n-th line.
+    Rafters,
+}
+
+/// Seams or rafters of a roof face: lines `u = origin + k·spacing` (they run up the slope).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SupportGridSpec {
+    pub kind: SupportGridKind,
+    /// `u` of one seam / rafter, m.
+    pub origin_m: f64,
+    pub spacing_m: f64,
+}
+
+/// Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
+/// mounting system's data.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct CrossRailSpec {
+    pub per_column: u32,
+    pub top_inset_m: f64,
+    pub top_overhang_m: f64,
+    pub bottom_spacing_m: f64,
+    pub min_support_overhang_m: f64,
+    pub spacing_step_m: f64,
+    pub bottom_inset_m: f64,
+    /// Fixations keep this distance from the bottom-rail ends, m.
+    pub fixation_edge_m: f64,
+    /// Maximum bottom-rail cantilever beyond the outer fixation, m.
+    #[specta(optional)]
+    pub max_cantilever_m: Option<f64>,
+}
+
 /// Direction of an expansion joint line.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -146,4 +185,14 @@ pub struct ArrayLayoutParams {
     pub max_block_length_u_m: Option<f64>,
     #[specta(optional)]
     pub max_block_length_v_m: Option<f64>,
+    /// Minimum clear distance between this array's modules and the modules of the other
+    /// arrays of the face, m.
+    pub min_distance_to_other_arrays_m: f64,
+    /// Rail geometry of the mounting system (cross-rail systems).
+    #[specta(optional)]
+    pub rails: Option<CrossRailSpec>,
+    /// The other half of an east-west system (the +90° / −90° partner array): the two
+    /// halves are one mounting system, the distance between arrays does not apply to them.
+    #[specta(optional)]
+    pub paired_with: Option<crate::ids::ArrayId>,
 }

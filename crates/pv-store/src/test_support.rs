@@ -36,6 +36,7 @@ pub fn fixture_project() -> Project {
         width_m: 10.0,
         height_m: 4.6,
         outline: None,
+        support_grid: None,
     };
     let flat = RoofFace {
         id: RoofFaceId::new(),
@@ -47,6 +48,7 @@ pub fn fixture_project() -> Project {
         width_m: 8.0,
         height_m: 6.0,
         outline: None,
+        support_grid: None,
     };
     let coplanar = PanelArray {
         id: ArrayId::new(),

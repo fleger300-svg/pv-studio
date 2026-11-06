@@ -85,6 +85,14 @@
     },
     "bench": {
       "invalidReport": "Le rapport de benchmark n'est pas un JSON valide."
+    },
+    "layout": {
+      "edgeSetback": "Trop près d'un bord de toiture : {distance} m, {required} m requis.",
+      "obstacleOverlap": "Un module recouvrirait un obstacle ({name}).",
+      "obstacleClearance": "Trop près d'un obstacle ({name}) : {distance} m, {required} m requis.",
+      "moduleOverlap": "{count, plural, one {# module chevaucherait un autre module.} other {# modules chevaucheraient d'autres modules.}}",
+      "arrayDistance": "Trop près d'un autre champ : {distance} m, {required} m requis.",
+      "invalidOutline": "Le contour de la toiture est invalide."
     }
   },
   "hud": {

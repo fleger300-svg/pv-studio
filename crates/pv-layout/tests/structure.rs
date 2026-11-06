@@ -21,6 +21,7 @@ fn face() -> RoofFace {
         width_m: 40.0,
         height_m: 12.0,
         outline: None,
+        support_grid: None,
     }
 }
 

@@ -92,6 +92,10 @@ const MIGRATIONS: &[&str] = &[
     ALTER TABLE "array" ADD COLUMN grid_block_extra_u REAL NOT NULL DEFAULT 0;
     ALTER TABLE "array" ADD COLUMN grid_block_extra_v REAL NOT NULL DEFAULT 0;
     "#,
+    // v3: seams / rafters of the roof covering (pv-layout supports).
+    r#"
+    ALTER TABLE roof_face ADD COLUMN support_grid_json TEXT;
+    "#,
 ];
 
 /// Latest schema version known to this build.

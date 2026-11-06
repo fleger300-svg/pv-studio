@@ -2437,6 +2437,7 @@ dependencies = [
 name = "pv-store"
 version = "0.1.0"
 dependencies = [
+ "pv-layout",
  "pv-model",
  "rusqlite",
  "serde",

@@ -85,6 +85,14 @@
     },
     "bench": {
       "invalidReport": "Der Benchmark-Bericht ist kein gültiges JSON."
+    },
+    "layout": {
+      "edgeSetback": "Zu nah am Dachrand: {distance} m, {required} m erforderlich.",
+      "obstacleOverlap": "Ein Modul würde ein Hindernis überdecken ({name}).",
+      "obstacleClearance": "Zu nah an einem Hindernis ({name}): {distance} m, {required} m erforderlich.",
+      "moduleOverlap": "{count, plural, one {# Modul würde ein anderes Modul überlappen.} other {# Module würden andere Module überlappen.}}",
+      "arrayDistance": "Zu nah an einem anderen Modulfeld: {distance} m, {required} m erforderlich.",
+      "invalidOutline": "Der Dachumriss ist ungültig."
     }
   },
   "hud": {

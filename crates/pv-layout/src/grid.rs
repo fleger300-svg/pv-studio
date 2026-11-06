@@ -39,6 +39,26 @@ impl GridSpec {
         self.row_pitch_v.unwrap_or(self.footprint_v + self.gap_v)
     }
 
+    /// Checks that cells cannot overlap (pitches and block gaps not smaller than the
+    /// footprint).
+    pub fn validate(&self) -> Result<(), crate::LayoutError> {
+        let (_, _, eu, ev) = self.block_terms();
+        for (axis, pitch, extra, fp) in [
+            ("u", self.pitch_u(), eu, self.footprint_u),
+            ("v", self.pitch_v(), ev, self.footprint_v),
+        ] {
+            let worst = pitch + extra.min(0.0);
+            if worst < fp - 1e-9 {
+                return Err(crate::LayoutError::PitchTooSmall {
+                    axis,
+                    pitch_m: worst,
+                    footprint_m: fp,
+                });
+            }
+        }
+        Ok(())
+    }
+
     /// (block_cols, block_rows, extra_u, extra_v); zeros without blocks.
     #[must_use]
     pub fn block_terms(&self) -> (u32, u32, f64, f64) {

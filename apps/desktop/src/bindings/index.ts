@@ -104,6 +104,18 @@ export type ArrayLayoutParams_Deserialize = {
 	 */
 	maxBlockLengthUM?: number | null,
 	maxBlockLengthVM?: number | null,
+	/**
+	 *  Minimum clear distance between this array's modules and the modules of the other
+	 *  arrays of the face, m.
+	 */
+	minDistanceToOtherArraysM: number,
+	/**  Rail geometry of the mounting system (cross-rail systems). */
+	rails?: CrossRailSpec_Deserialize | null,
+	/**
+	 *  The other half of an east-west system (the +90° / −90° partner array): the two
+	 *  halves are one mounting system, the distance between arrays does not apply to them.
+	 */
+	pairedWith?: ArrayId | null,
 };
 
 /**  Layout parameters of an array (the architecture's `params_json` / `boundary_json`). */
@@ -130,6 +142,18 @@ export type ArrayLayoutParams_Serialize = {
 	 */
 	maxBlockLengthUM?: number | null,
 	maxBlockLengthVM?: number | null,
+	/**
+	 *  Minimum clear distance between this array's modules and the modules of the other
+	 *  arrays of the face, m.
+	 */
+	minDistanceToOtherArraysM: number,
+	/**  Rail geometry of the mounting system (cross-rail systems). */
+	rails?: CrossRailSpec_Serialize | null,
+	/**
+	 *  The other half of an east-west system (the +90° / −90° partner array): the two
+	 *  halves are one mounting system, the distance between arrays does not apply to them.
+	 */
+	pairedWith?: ArrayId | null,
 };
 
 export type ArraySummary = ArraySummary_Serialize | ArraySummary_Deserialize;
@@ -211,6 +235,48 @@ export type Command =
 export type CommandError = {
 	key: string,
 	params: { [key in string]: ErrorParam },
+};
+
+/**
+ *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
+ *  mounting system's data.
+ */
+export type CrossRailSpec = CrossRailSpec_Serialize | CrossRailSpec_Deserialize;
+
+/**
+ *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
+ *  mounting system's data.
+ */
+export type CrossRailSpec_Deserialize = {
+	perColumn: number,
+	topInsetM: number,
+	topOverhangM: number,
+	bottomSpacingM: number,
+	minSupportOverhangM: number,
+	spacingStepM: number,
+	bottomInsetM: number,
+	/**  Fixations keep this distance from the bottom-rail ends, m. */
+	fixationEdgeM: number,
+	/**  Maximum bottom-rail cantilever beyond the outer fixation, m. */
+	maxCantileverM?: number | null,
+};
+
+/**
+ *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
+ *  mounting system's data.
+ */
+export type CrossRailSpec_Serialize = {
+	perColumn: number,
+	topInsetM: number,
+	topOverhangM: number,
+	bottomSpacingM: number,
+	minSupportOverhangM: number,
+	spacingStepM: number,
+	bottomInsetM: number,
+	/**  Fixations keep this distance from the bottom-rail ends, m. */
+	fixationEdgeM: number,
+	/**  Maximum bottom-rail cantilever beyond the outer fixation, m. */
+	maxCantileverM?: number | null,
 };
 
 export type EdgeSetback = {
@@ -407,6 +473,8 @@ export type RoofFace_Deserialize = {
 	 *  hipped roof, L-shapes, obstacles). `None` = the rectangle, eave at `v = 0`.
 	 */
 	outline?: RoofOutlineSpec_Deserialize | null,
+	/**  Seams / rafters of the covering (decide the fixation positions). */
+	supportGrid?: SupportGridSpec | null,
 };
 
 /**  Rectangular planar roof face. */
@@ -429,6 +497,8 @@ export type RoofFace_Serialize = {
 	 *  hipped roof, L-shapes, obstacles). `None` = the rectangle, eave at `v = 0`.
 	 */
 	outline?: RoofOutlineSpec_Serialize | null,
+	/**  Seams / rafters of the covering (decide the fixation positions). */
+	supportGrid?: SupportGridSpec | null,
 };
 
 /**  Orthonormal frame of a planar roof face, derived from tilt and azimuth. */
@@ -495,6 +565,21 @@ export type StressPreset =
 "Residential1k" | 
 /**  One 160 m × 140 m flat roof with 10° east-west racks, ~10,000 modules. */
 "Industrial10k";
+
+/**  Kind of support grid under the roof covering. */
+export type SupportGridKind = 
+/**  Standing seams: one clamp on every seam under a rail. */
+"standingSeam" | 
+/**  Rafters or purlins (tiles, corrugated sheets): fixations every n-th line. */
+"rafters";
+
+/**  Seams or rafters of a roof face: lines `u = origin + k·spacing` (they run up the slope). */
+export type SupportGridSpec = {
+	kind: SupportGridKind,
+	/**  `u` of one seam / rafter, m. */
+	originM: number,
+	spacingM: number,
+};
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {

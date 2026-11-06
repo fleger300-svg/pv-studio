@@ -10,8 +10,10 @@ use crate::grid::{
     fill, fill_east_west, place_fixed, Cell, EastWestSpec, GridSpec, Placement, Region, Search,
 };
 use crate::joints::JointRules;
+use crate::rails::{cross_rails, fixations, CrossRailParams, Fixations, RailLayout};
 use crate::roof::RoofOutline;
 use crate::setbacks::{BuildableArea, SetbackRules};
+use crate::supports::{SupportKind, SupportLines};
 use crate::LayoutError;
 
 /// Setback rules of an array.
@@ -69,7 +71,7 @@ pub struct ArrayLayout {
 }
 
 impl ArrayLayout {
-    fn from_placement(p: &Placement) -> Self {
+    pub(crate) fn from_placement(p: &Placement) -> Self {
         let (bc, br, eu, ev) = p.spec.block_terms();
         let (su, sv) = match p.spec.anchor {
             pv_model::LayoutAnchor::LowerRight => (-1.0, 1.0),
@@ -116,6 +118,26 @@ impl ArrayLayout {
     }
 }
 
+/// The pair pitch of an east-west system must hold a whole pair.
+pub(crate) fn ew_pitch_check(spec: &EastWestSpec) -> Result<(), LayoutError> {
+    let pair = 2.0 * spec.footprint_u + spec.peak_gap;
+    if spec.pair_pitch_u < pair - 1e-9 {
+        return Err(LayoutError::PitchTooSmall {
+            axis: "pair",
+            pitch_m: spec.pair_pitch_u,
+            footprint_m: pair,
+        });
+    }
+    if spec.gap_v < 0.0 {
+        return Err(LayoutError::PitchTooSmall {
+            axis: "v",
+            pitch_m: spec.footprint_v + spec.gap_v,
+            footprint_m: spec.footprint_v,
+        });
+    }
+    Ok(())
+}
+
 /// Fills the array's field (or the whole face) with the best offset.
 pub fn layout_array(
     face: &RoofFace,
@@ -131,11 +153,9 @@ pub fn layout_array(
         area: &area,
         boundary: boundary.as_ref(),
     };
-    Ok(ArrayLayout::from_placement(&fill(
-        region,
-        grid_spec(array),
-        search,
-    )))
+    let spec = grid_spec(array);
+    spec.validate()?;
+    Ok(ArrayLayout::from_placement(&fill(region, spec, search)))
 }
 
 /// Places the array's grid as stored (`array.grid`) and keeps the cells that fit: used to
@@ -192,6 +212,7 @@ pub fn layout_east_west(
         block: p.block,
         anchor: p.anchor,
     };
+    ew_pitch_check(&spec)?;
     let ew = fill_east_west(
         Region {
             area: &area,
@@ -234,4 +255,76 @@ pub fn structure(
         &JointRules::from_params(&array.layout),
     )?;
     Ok((s, active.iter().map(|m| m.id).collect()))
+}
+
+/// Support lines of a face (seams / rafters), if the face has them.
+#[must_use]
+pub fn support_lines(face: &RoofFace) -> Option<SupportLines> {
+    face.support_grid.map(|g| SupportLines {
+        kind: match g.kind {
+            pv_model::SupportGridKind::StandingSeam => SupportKind::StandingSeam,
+            pv_model::SupportGridKind::Rafters => SupportKind::Rafters,
+        },
+        origin_m: g.origin_m,
+        spacing_m: g.spacing_m,
+    })
+}
+
+/// Rail rules of an array's mounting system, if it is a cross-rail system.
+#[must_use]
+pub fn rail_params(array: &PanelArray) -> Option<(CrossRailParams, f64, Option<f64>)> {
+    array.layout.rails.map(|r| {
+        (
+            CrossRailParams {
+                per_column: r.per_column,
+                top_inset_m: r.top_inset_m,
+                top_overhang_m: r.top_overhang_m,
+                bottom_spacing_m: r.bottom_spacing_m,
+                min_support_overhang_m: r.min_support_overhang_m,
+                spacing_step_m: r.spacing_step_m,
+                bottom_inset_m: r.bottom_inset_m,
+            },
+            r.fixation_edge_m,
+            r.max_cantilever_m,
+        )
+    })
+}
+
+/// Blocks, rails and (when the face has a support grid) fixations of a stored array.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct ArrayHardware {
+    pub structure: Structure,
+    pub module_ids: Vec<ModuleId>,
+    pub rails: RailLayout,
+    pub fixations: Option<Fixations>,
+}
+
+/// Mounting hardware of an array from its stored modules; `None` when its mounting system
+/// has no rail rules.
+pub fn hardware(
+    face: &RoofFace,
+    array: &PanelArray,
+    modules: &[ModuleInstance],
+) -> Result<Option<ArrayHardware>, LayoutError> {
+    let Some((params, edge, cantilever)) = rail_params(array) else {
+        return Ok(None);
+    };
+    let (structure, module_ids) = structure(array, modules)?;
+    let cells: Vec<Cell> = module_ids
+        .iter()
+        .filter_map(|id| modules.iter().find(|m| m.id == *id))
+        .map(|m| Cell {
+            row: m.row,
+            col: m.col,
+            centre: Vec2::new(m.u, m.v),
+        })
+        .collect();
+    let rails = cross_rails(&cells, &grid_spec(array), &structure, &params);
+    let fixations = support_lines(face).map(|lines| fixations(&rails, &lines, edge, cantilever));
+    Ok(Some(ArrayHardware {
+        structure,
+        module_ids,
+        rails,
+        fixations,
+    }))
 }

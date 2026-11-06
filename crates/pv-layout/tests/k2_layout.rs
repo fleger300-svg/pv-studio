@@ -111,6 +111,7 @@ fn face(width: f64, height: f64, outline: Option<RoofOutlineSpec>) -> RoofFace {
         width_m: width,
         height_m: height,
         outline,
+        support_grid: None,
     }
 }
 

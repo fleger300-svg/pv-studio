@@ -162,6 +162,15 @@ impl ProjectStore {
         if changes.module_ids.is_empty() {
             return Ok(changes);
         }
+        // Layout rules on the resulting state (setbacks, obstacles, collisions, distance
+        // between arrays). Commands that only remove modules cannot break them.
+        if !matches!(cmd, Command::RemoveModules { .. }) {
+            if let Err(e) = pv_layout::validate_module_positions(&self.project, &changes.module_ids)
+            {
+                let _ = inverse.apply(&mut self.project);
+                return Err(StoreError::Command(e));
+            }
+        }
         let result = (|| -> Result<(), StoreError> {
             let tx = self.conn.transaction()?;
             tx.execute("DELETE FROM command_log WHERE undone = 1", [])?;
@@ -299,12 +308,13 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
     }
     for (ord, f) in p.roof_faces.iter().enumerate() {
         tx.execute(
-            "INSERT INTO roof_face (id, building_id, ord, name, origin_x, origin_y, origin_z, tilt_deg, azimuth_deg, width_m, height_m, outline_json)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            "INSERT INTO roof_face (id, building_id, ord, name, origin_x, origin_y, origin_z, tilt_deg, azimuth_deg, width_m, height_m, outline_json, support_grid_json)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
             params![
                 f.id.0.to_string(), f.building_id.0.to_string(), ord as i64, f.name,
                 f.origin[0], f.origin[1], f.origin[2], f.tilt_deg, f.azimuth_deg, f.width_m, f.height_m,
                 f.outline.as_ref().map(serde_json::to_string).transpose()?,
+                f.support_grid.as_ref().map(serde_json::to_string).transpose()?,
             ],
         )?;
     }
@@ -376,7 +386,7 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
 
     let roof_faces = conn
         .prepare(
-            "SELECT id, building_id, name, origin_x, origin_y, origin_z, tilt_deg, azimuth_deg, width_m, height_m, outline_json
+            "SELECT id, building_id, name, origin_x, origin_y, origin_z, tilt_deg, azimuth_deg, width_m, height_m, outline_json, support_grid_json
              FROM roof_face ORDER BY ord",
         )?
         .query_map([], |r| {
@@ -390,6 +400,7 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
                 width_m: r.get(8)?,
                 height_m: r.get(9)?,
                 outline: json_col(r, 10)?,
+                support_grid: json_col(r, 11)?,
             })
         })?
         .collect::<Result<Vec<_>, _>>()?;
@@ -510,6 +521,11 @@ mod tests {
                 clearance_m: Some(0.4),
             }],
         });
+        p.roof_faces[0].support_grid = Some(pv_model::SupportGridSpec {
+            kind: pv_model::SupportGridKind::StandingSeam,
+            origin_m: 0.12,
+            spacing_m: 0.6,
+        });
         let a = &mut p.arrays[0];
         a.layout.boundary_uv = vec![[0.5, 0.5], [9.0, 0.5], [9.0, 4.0], [0.5, 4.0]];
         a.layout.module_gap_u_m = 0.01;
@@ -524,6 +540,18 @@ mod tests {
             distance_m: 0.4,
         }];
         a.layout.anchor = LayoutAnchor::LowerRight;
+        a.layout.min_distance_to_other_arrays_m = 0.3;
+        a.layout.rails = Some(pv_model::CrossRailSpec {
+            per_column: 2,
+            top_inset_m: 0.4,
+            top_overhang_m: 0.05,
+            bottom_spacing_m: 1.0,
+            min_support_overhang_m: 0.06,
+            spacing_step_m: 0.01,
+            bottom_inset_m: 0.275,
+            fixation_edge_m: 0.03,
+            max_cantilever_m: Some(0.485),
+        });
         a.grid.block_cols = 2;
         a.grid.block_rows = 2;
         a.grid.block_extra_u = 0.07;
@@ -545,6 +573,7 @@ mod tests {
             let conn = Connection::open(&path).expect("raw open");
             conn.execute_batch(
                 r#"ALTER TABLE roof_face DROP COLUMN outline_json;
+                   ALTER TABLE roof_face DROP COLUMN support_grid_json;
                    ALTER TABLE "array" DROP COLUMN layout_json;
                    ALTER TABLE "array" DROP COLUMN grid_block_cols;
                    ALTER TABLE "array" DROP COLUMN grid_block_rows;
@@ -573,10 +602,11 @@ mod tests {
         let s0 = s.project().clone();
         assert_eq!(s.history_state().expect("h"), (false, false));
 
+        // Down-slope by 5 cm: the modules above are 2 cm away, moving up would collide.
         let mv = Command::MoveModules {
             ids: ids(&[0, 1]),
             du: 0.1,
-            dv: 0.05,
+            dv: -0.05,
         };
         s.apply(&mv, Author::User).expect("move");
         let s1 = s.project().clone();
@@ -642,6 +672,68 @@ mod tests {
             let buf = store.module_buffer();
             assert_eq!(buf.len(), buffer::HEADER_LEN + count * buffer::RECORD_LEN);
         }
+    }
+
+    /// The scripted benchmark (apps/desktop/src/perf/benchmark.ts) drags the first 100 active
+    /// modules of the first array by DRAG_DU = 0.01 m along `u` and releases: that move
+    /// must pass the layout validation, while 0.25 m (the former value) overlaps neighbours.
+    #[test]
+    fn benchmark_move_passes_layout_validation() {
+        for preset in [
+            pv_model::StressPreset::Residential1k,
+            pv_model::StressPreset::Industrial10k,
+        ] {
+            let p = preset.build();
+            let first = p.arrays[0].id;
+            let picked: Vec<ModuleId> = p
+                .modules
+                .iter()
+                .filter(|m| m.array_id == first && m.state == ModuleState::Active)
+                .take(100)
+                .map(|m| m.id)
+                .collect();
+            for (du, ok) in [(0.01, true), (0.25, false)] {
+                let mut q = p.clone();
+                Command::MoveModules {
+                    ids: picked.clone(),
+                    du,
+                    dv: 0.0,
+                }
+                .apply(&mut q)
+                .expect("pv-model accepts");
+                let r = pv_layout::validate_module_positions(&q, &picked);
+                assert_eq!(r.is_ok(), ok, "{preset:?} du = {du}: {r:?}");
+            }
+        }
+    }
+
+    /// pv-layout validation runs inside `apply`: a move onto a neighbour is rejected with
+    /// `errors.layout.moduleOverlap`, the model is unchanged and nothing is journalled.
+    #[test]
+    fn colliding_move_is_rejected_by_layout_validation() {
+        let dir = tempfile::tempdir().expect("tmp");
+        let mut s = new_store(&dir);
+        let before = s.project().clone();
+        // Module 0 (row 0, col 0) onto module 1 (row 0, col 1, 1.154 m to the right).
+        let err = s
+            .apply(
+                &Command::MoveModules {
+                    ids: ids(&[0]),
+                    du: 0.6,
+                    dv: 0.0,
+                },
+                Author::User,
+            )
+            .expect_err("overlap");
+        assert!(
+            matches!(err, StoreError::Command(ref e) if e.key == keys::LAYOUT_MODULE_OVERLAP),
+            "{err:?}"
+        );
+        assert_eq!(s.project(), &before);
+        assert_eq!(s.history_state().expect("h"), (false, false));
+        // Removing modules is never blocked by the layout rules.
+        s.apply(&Command::RemoveModules { ids: ids(&[0]) }, Author::User)
+            .expect("remove");
     }
 
     #[test]

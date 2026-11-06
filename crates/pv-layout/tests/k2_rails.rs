@@ -75,6 +75,7 @@ fn face(width: f64, height: f64) -> RoofFace {
         width_m: width,
         height_m: height,
         outline: None,
+        support_grid: None,
     }
 }
 

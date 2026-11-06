@@ -171,6 +171,7 @@ fn face(tilt: f64) -> RoofFace {
         width_m: 12.0,
         height_m: 7.0,
         outline: None,
+        support_grid: None,
     }
 }
 
@@ -180,7 +181,12 @@ fn array(face: &RoofFace, azimuth_offset: f64, tilt: f64, layout: ArrayLayoutPar
         roof_face_id: face.id,
         module_length_m: 1.762,
         module_width_m: 1.134,
-        orientation: Orientation::Portrait,
+        // East-west halves: landscape (long side along v, short side tilted, as D-Dome).
+        orientation: if azimuth_offset == 0.0 {
+            Orientation::Portrait
+        } else {
+            Orientation::Landscape
+        },
         tilt_on_roof_deg: tilt,
         azimuth_offset_deg: azimuth_offset,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
@@ -252,6 +258,26 @@ fn east_west_through_the_model() {
         let (gu, gv) = w.grid.cell_centre(a.row, a.col);
         assert!((gu - a.centre.u).abs() < 1e-9 && (gv - a.centre.v).abs() < 1e-9);
     }
+    // No two modules of the system overlap.
+    let all: Vec<OrientedRect> = w
+        .cells
+        .iter()
+        .chain(&e.cells)
+        .map(|c| OrientedRect::axis_aligned(c.centre, 2.0 * hu, 2.0 * hv))
+        .collect();
+    for (i, r) in all.iter().enumerate() {
+        assert!(
+            all[i + 1..].iter().all(|o| !r.overlaps(o)),
+            "overlapping east-west modules"
+        );
+    }
+    // A pair pitch smaller than a pair is refused.
+    let mut tight = west.clone();
+    tight.layout.row_pitch_m = Some(2.0);
+    assert!(matches!(
+        layout_east_west(&f, &tight, &east, Search::default()),
+        Err(pv_layout::LayoutError::PitchTooSmall { .. })
+    ));
     // Wrong offsets are refused.
     assert!(layout_east_west(&f, &east, &west, Search::default()).is_err());
 }
