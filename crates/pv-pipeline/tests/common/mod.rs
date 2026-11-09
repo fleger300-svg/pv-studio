@@ -1,6 +1,8 @@
 //! Test projects built from the anonymised K2 references (`testdata/k2/`).
 #![allow(dead_code)]
 
+pub mod k2;
+
 use pv_graph::{CancelToken, Graph, Instance};
 use pv_layout::model::{grid_spec, relayout_fixed};
 use pv_layout::{layout_east_west, Search};
@@ -327,4 +329,94 @@ pub fn graph_for(project: &Project) -> Graph {
 
 pub fn array(i: usize, p: &Project) -> Instance {
     Instance::Array(p.arrays[i].id)
+}
+
+/// Every array-level node of `inc` against a graph built from scratch on `p`: same value or
+/// same error, compared through their serialised form. `Err` lists the differences.
+pub fn compare_with_full(inc: &mut Graph, p: &Project) -> Result<(), String> {
+    use pv_pipeline::nodes::{ballast::Ballast, descent::Descent, layout::Hardware};
+    use pv_pipeline::nodes::{loads::ZoneLoads, zones::ModuleZones};
+    use pv_pipeline::FieldStatics;
+
+    fn json<K: pv_graph::Kind>(g: &mut Graph, i: Instance) -> serde_json::Value
+    where
+        K::Output: serde::Serialize,
+    {
+        match g.get::<K>(i) {
+            Ok(v) => serde_json::to_value(&*v).unwrap(),
+            Err(e) => serde_json::json!({ "error": e }),
+        }
+    }
+    let mut full = pv_pipeline::new_graph();
+    pv_pipeline::sync_project(&mut full, p).unwrap();
+    full.run_auto(&CancelToken::new()).unwrap();
+    let mut diffs = Vec::new();
+    for a in &p.arrays {
+        let i = Instance::Array(a.id);
+        for (name, ours, theirs) in [
+            (
+                "statics",
+                json::<FieldStatics>(inc, i),
+                json::<FieldStatics>(&mut full, i),
+            ),
+            (
+                "hardware",
+                json::<Hardware>(inc, i),
+                json::<Hardware>(&mut full, i),
+            ),
+            (
+                "zones",
+                json::<ModuleZones>(inc, i),
+                json::<ModuleZones>(&mut full, i),
+            ),
+            (
+                "loads",
+                json::<ZoneLoads>(inc, i),
+                json::<ZoneLoads>(&mut full, i),
+            ),
+            (
+                "descent",
+                json::<Descent>(inc, i),
+                json::<Descent>(&mut full, i),
+            ),
+            (
+                "ballast",
+                json::<Ballast>(inc, i),
+                json::<Ballast>(&mut full, i),
+            ),
+        ] {
+            if ours != theirs {
+                diffs.push(format!("array {} {name} differs", a.id.0));
+            }
+        }
+    }
+    if diffs.is_empty() {
+        Ok(())
+    } else {
+        Err(diffs.join("\n"))
+    }
+}
+
+/// A project file for `p` in `dir` (real commands: validation, journal, undo / redo).
+pub fn store_for(dir: &tempfile::TempDir, name: &str, p: &Project) -> pv_store::ProjectStore {
+    pv_store::ProjectStore::create(&dir.path().join(format!("{name}.pvproj")), p.clone()).unwrap()
+}
+
+/// SplitMix64: small and deterministic.
+pub struct Rng(pub u64);
+impl Rng {
+    pub fn next(&mut self) -> u64 {
+        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
+        let mut z = self.0;
+        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+        z ^ (z >> 31)
+    }
+    pub fn below(&mut self, n: u64) -> u64 {
+        self.next() % n
+    }
+    /// Uniform in `[-a, a]`.
+    pub fn signed(&mut self, a: f64) -> f64 {
+        (self.below(2001) as f64 / 1000.0 - 1.0) * a
+    }
 }

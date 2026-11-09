@@ -47,6 +47,13 @@ opt-level = 2
 [profile.dev.package.pv-model]
 opt-level = 2
 
+# Statics and the domain graph run in every property / end-to-end test.
+[profile.dev.package.pv-statics]
+opt-level = 2
+
+[profile.dev.package.pv-pipeline]
+opt-level = 2
+
 [profile.release]
 codegen-units = 1
 lto = true

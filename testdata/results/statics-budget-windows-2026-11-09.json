@@ -1,0 +1,120 @@
+{
+  "schema": "pv-studio-statics-budget/1",
+  "build": "release",
+  "os": "windows",
+  "arch": "x86_64",
+  "budgetMs": 100.0,
+  "repeats": 21,
+  "presets": [
+    {
+      "preset": "Residential1k",
+      "modules": 1008,
+      "open_full_pass_ms": 8.738199999999999,
+      "scenarios": [
+        {
+          "name": "move 40 modules (+2 mm)",
+          "modules_changed": 40,
+          "command": {
+            "median_ms": 0.2841,
+            "max_ms": 0.7274
+          },
+          "extract": {
+            "median_ms": 0.0074,
+            "max_ms": 0.034999999999999996
+          },
+          "compute": {
+            "median_ms": 0.3806,
+            "max_ms": 0.9867000000000001
+          },
+          "total": {
+            "median_ms": 0.6920000000000001,
+            "max_ms": 1.3967
+          },
+          "end_to_end": {
+            "median_ms": 0.5022,
+            "max_ms": 1.0182
+          }
+        },
+        {
+          "name": "remove the eave row (zone set changes)",
+          "modules_changed": 28,
+          "command": {
+            "median_ms": 0.1792,
+            "max_ms": 0.39399999999999996
+          },
+          "extract": {
+            "median_ms": 0.0070999999999999995,
+            "max_ms": 0.0468
+          },
+          "compute": {
+            "median_ms": 0.7102999999999999,
+            "max_ms": 1.3623
+          },
+          "total": {
+            "median_ms": 0.8725,
+            "max_ms": 1.7659
+          },
+          "end_to_end": {
+            "median_ms": 0.7556,
+            "max_ms": 1.3298999999999999
+          }
+        }
+      ]
+    },
+    {
+      "preset": "Industrial10k",
+      "modules": 10080,
+      "open_full_pass_ms": 13.357000000000001,
+      "scenarios": [
+        {
+          "name": "move 40 modules (+2 mm)",
+          "modules_changed": 40,
+          "command": {
+            "median_ms": 2.7256,
+            "max_ms": 4.6101
+          },
+          "extract": {
+            "median_ms": 0.2318,
+            "max_ms": 0.958
+          },
+          "compute": {
+            "median_ms": 10.3806,
+            "max_ms": 15.0752
+          },
+          "total": {
+            "median_ms": 13.1454,
+            "max_ms": 17.0272
+          },
+          "end_to_end": {
+            "median_ms": 10.8683,
+            "max_ms": 27.4268
+          }
+        },
+        {
+          "name": "remove the eave row (zone set changes)",
+          "modules_changed": 70,
+          "command": {
+            "median_ms": 0.3368,
+            "max_ms": 0.7488
+          },
+          "extract": {
+            "median_ms": 0.1893,
+            "max_ms": 0.6664
+          },
+          "compute": {
+            "median_ms": 10.7906,
+            "max_ms": 13.9535
+          },
+          "total": {
+            "median_ms": 11.3301,
+            "max_ms": 14.408199999999999
+          },
+          "end_to_end": {
+            "median_ms": 10.978200000000001,
+            "max_ms": 15.9596
+          }
+        }
+      ]
+    }
+  ]
+}

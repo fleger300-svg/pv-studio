@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import type { RootState } from '@react-three/fiber';
-import type { StressPreset } from '../bindings';
+import { events, type StressPreset } from '../bindings';
 import { api, BackendError, ipcCallCount, unwrap } from '../ipc';
 import { useProjectStore } from '../store/project';
 import { useViewStore } from '../store/view';
@@ -23,14 +23,68 @@ const DRAG_MODULES = 100;
  */
 const DRAG_DU = 0.01;
 
-/** Acceptance budgets (README / spec §12). */
+/**
+ * Acceptance budgets (README / spec §12). `staticsMs`: release of a drag → statics of the
+ * changed fields recomputed (architecture: « moins de 100 ms pour 1000 panneaux »; held to
+ * the same 100 ms on 10k).
+ */
 export const BUDGETS: Record<
   StressPreset,
-  { orbitFps: number; dragFps: number; moveRoundTripMs: number; openMs: number; memoryMB: number }
+  {
+    orbitFps: number;
+    dragFps: number;
+    moveRoundTripMs: number;
+    staticsMs: number;
+    openMs: number;
+    memoryMB: number;
+  }
 > = {
-  Residential1k: { orbitFps: 60, dragFps: 60, moveRoundTripMs: 100, openMs: 1000, memoryMB: 400 },
-  Industrial10k: { orbitFps: 30, dragFps: 60, moveRoundTripMs: 500, openMs: 3000, memoryMB: 1024 },
+  Residential1k: {
+    orbitFps: 60,
+    dragFps: 60,
+    moveRoundTripMs: 100,
+    staticsMs: 100,
+    openMs: 1000,
+    memoryMB: 400,
+  },
+  Industrial10k: {
+    orbitFps: 30,
+    dragFps: 60,
+    moveRoundTripMs: 500,
+    staticsMs: 100,
+    openMs: 3000,
+    memoryMB: 1024,
+  },
 };
+
+/**
+ * Milliseconds from `since` to the end of the next statics pass (`compute:state` idle), or
+ * `null` if none ends within 5 s (e.g. the command was rejected). Listens before the command
+ * is sent, so the pass cannot be missed.
+ */
+function staticsPassAfter(since: number): Promise<number | null> {
+  return new Promise((resolve) => {
+    let done = false;
+    let unlisten: (() => void) | null = null;
+    const finish = (value: number | null) => {
+      if (done) return;
+      done = true;
+      unlisten?.();
+      resolve(value);
+    };
+    void events.computeState
+      .listen((e) => {
+        if (!e.payload.busy) finish(performance.now() - since);
+      })
+      .then((f) => {
+        if (done) f();
+        else unlisten = f;
+      });
+    setTimeout(() => {
+      finish(null);
+    }, 5000);
+  });
+}
 /** FPS budgets are met when within 2 % (vsync quantisation on a display of that rate). */
 const FPS_TOLERANCE = 0.98;
 
@@ -174,9 +228,11 @@ export async function runBenchmark(): Promise<string> {
     const ids = pickModules(editor, DRAG_MODULES);
     const dragStats = await drag(editor, three, ids);
 
-    // 4. One MoveModules on release.
+    // 4. One MoveModules on release; the statics recompute on the compute thread.
     step('move');
+    const staticsDone = staticsPassAfter(performance.now());
     await editor.endDrag();
+    const staticsAfterMoveMs = await staticsDone;
     await sleep(300); // model:changed resync
     // 5. Undo, redo.
     step('undo');
@@ -219,6 +275,7 @@ export async function runBenchmark(): Promise<string> {
         moveModules: move && { roundTripMs: move.roundTripMs, rustUs: move.rustUs },
         undo: find('undo'),
         redo: find('redo'),
+        staticsAfterMoveMs,
         jsHeapMB: heap,
       },
       budgets: {
@@ -229,6 +286,7 @@ export async function runBenchmark(): Promise<string> {
           dragZeroIpc: dragStats.ipcCalls === 0,
           drawCallsOnePerArray: editor.panels.meshes.length === editor.summary.arrays.length,
           moveRoundTrip: move !== null && move.roundTripMs < budget.moveRoundTripMs,
+          staticsAfterMove: staticsAfterMoveMs !== null && staticsAfterMoveMs < budget.staticsMs,
           openTime: openMs < budget.openMs,
           jsHeap: heap === null ? null : heap < budget.memoryMB,
         },
