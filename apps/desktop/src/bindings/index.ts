@@ -27,6 +27,8 @@ export const commands = {
 	undo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
 	redo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("redo")),
+	/**  Latest statics results of the open project (no computation: read from the cache). */
+	getStaticsSnapshot: () => typedError<StaticsSnapshot_Serialize, CommandError>(__TAURI_INVOKE("get_statics_snapshot")),
 	/**  Facts about the host that the WebView cannot report reliably. */
 	platformInfo: () => __TAURI_INVOKE<PlatformInfo>("platform_info"),
 	/**
@@ -38,7 +40,10 @@ export const commands = {
 
 /** Events */
 export const events = {
+	computeFailed: makeEvent<ComputeFailed, ComputeFailed>("compute:failed"),
+	computeState: makeEvent<ComputeState, ComputeState>("compute:state"),
 	modelChanged: makeEvent<ModelChanged, ModelChanged>("model:changed"),
+	resultReady: makeEvent<ResultReady_Serialize, ResultReady_Deserialize>("result:ready"),
 };
 
 /* Types */
@@ -283,6 +288,18 @@ export type CommandError = {
 	params: { [key in string]: ErrorParam },
 };
 
+/**  A pass could not run. */
+export type ComputeFailed = {
+	seq: number,
+	error: CommandError,
+};
+
+/**  The compute thread starts (`busy`) or finishes a pass. */
+export type ComputeState = {
+	busy: boolean,
+	seq: number,
+};
+
 /**  Consequence class (SIA 260), sets the importance factor K_FI. */
 export type ConsequenceClass = "CC1" | "CC2" | "CC3";
 
@@ -357,6 +374,75 @@ export type ExpansionJointSpec = {
 	axis: JointAxis,
 	/**  Roof coordinate of the line, m. */
 	positionM: number,
+};
+
+/**  Outcome of a field's statics. */
+export type FieldOutcome = FieldOutcome_Serialize | FieldOutcome_Deserialize;
+
+/**  Outcome of a field's statics. */
+export type FieldOutcome_Deserialize = { status: "ok"; result: FieldStaticsResult_Deserialize } | { status: "failed"; error: CommandError };
+
+/**  Outcome of a field's statics. */
+export type FieldOutcome_Serialize = { status: "ok"; result: FieldStaticsResult_Serialize } | { status: "failed"; error: CommandError };
+
+/**  Statics of one field, tagged with the command it was computed for. */
+export type FieldReport = FieldReport_Serialize | FieldReport_Deserialize;
+
+/**  Statics of one field, tagged with the command it was computed for. */
+export type FieldReport_Deserialize = {
+	arrayId: ArrayId,
+	/**
+	 *  Sequence number of the last command applied before the computation: a report older
+	 *  than the one already shown is ignored.
+	 */
+	seq: number,
+	/**  Fingerprint of the inputs of this result (hex), shown in reports for traceability. */
+	inputFingerprint: string,
+	outcome: FieldOutcome_Deserialize,
+};
+
+/**  Statics of one field, tagged with the command it was computed for. */
+export type FieldReport_Serialize = {
+	arrayId: ArrayId,
+	/**
+	 *  Sequence number of the last command applied before the computation: a report older
+	 *  than the one already shown is ignored.
+	 */
+	seq: number,
+	/**  Fingerprint of the inputs of this result (hex), shown in reports for traceability. */
+	inputFingerprint: string,
+	outcome: FieldOutcome_Serialize,
+};
+
+/**  Statics of one field. */
+export type FieldStaticsResult = FieldStaticsResult_Serialize | FieldStaticsResult_Deserialize;
+
+/**  Statics of one field. */
+export type FieldStaticsResult_Deserialize = {
+	zones: WindZone[],
+	/**  Cross-rail systems. */
+	decisions: ZoneDecision[],
+	fixations?: number | null,
+	climbers?: number | null,
+	/**  Ballasted systems (on the half that carries the computation). */
+	ballastBlocks?: number | null,
+	maxUtilisation?: number | null,
+	/**  Every utilisation ≤ 1. */
+	ok: boolean,
+};
+
+/**  Statics of one field. */
+export type FieldStaticsResult_Serialize = {
+	zones: WindZone[],
+	/**  Cross-rail systems. */
+	decisions: ZoneDecision[],
+	fixations: number | null,
+	climbers: number | null,
+	/**  Ballasted systems (on the half that carries the computation). */
+	ballastBlocks: number | null,
+	maxUtilisation: number | null,
+	/**  Every utilisation ≤ 1. */
+	ok: boolean,
 };
 
 /**  Design resistance of one roof fixation [kN]. */
@@ -593,6 +679,38 @@ export type RailStatics_Serialize = {
 	fixation?: FixationSpec | null,
 };
 
+/**
+ *  Statics of fields that changed (architecture: « Chaque résultat arrive par événement
+ *  result:ready, avec son empreinte d'entrées »).
+ */
+export type ResultReady = ResultReady_Serialize | ResultReady_Deserialize;
+
+/**
+ *  Statics of fields that changed (architecture: « Chaque résultat arrive par événement
+ *  result:ready, avec son empreinte d'entrées »).
+ */
+export type ResultReady_Deserialize = {
+	seq: number,
+	fields: FieldReport_Deserialize[],
+	/**  Fields deleted from the project. */
+	removed: ArrayId[],
+	/**  Every previous result is obsolete (project opened, recovery). */
+	reset: boolean,
+};
+
+/**
+ *  Statics of fields that changed (architecture: « Chaque résultat arrive par événement
+ *  result:ready, avec son empreinte d'entrées »).
+ */
+export type ResultReady_Serialize = {
+	seq: number,
+	fields: FieldReport_Serialize[],
+	/**  Fields deleted from the project. */
+	removed: ArrayId[],
+	/**  Every previous result is obsolete (project opened, recovery). */
+	reset: boolean,
+};
+
 /**  Kind of a roof edge (setbacks and wind zones depend on it). */
 export type RoofEdgeKind = 
 /**  Lower horizontal edge (gutter). */
@@ -771,6 +889,23 @@ export type SiteParams = {
 /**  Snow exposure (coefficient C_e). */
 export type SnowExposure = "windswept" | "normal" | "sheltered";
 
+/**  What the front end loads when it (re)attaches to a project. */
+export type StaticsSnapshot = StaticsSnapshot_Serialize | StaticsSnapshot_Deserialize;
+
+/**  What the front end loads when it (re)attaches to a project. */
+export type StaticsSnapshot_Deserialize = {
+	busy: boolean,
+	seq: number,
+	fields: FieldReport_Deserialize[],
+};
+
+/**  What the front end loads when it (re)attaches to a project. */
+export type StaticsSnapshot_Serialize = {
+	busy: boolean,
+	seq: number,
+	fields: FieldReport_Serialize[],
+};
+
 export type StressPreset = 
 /**  Three gable-roof barns, south + north faces at 30°, ~1,000 coplanar portrait modules. */
 "Residential1k" | 
@@ -797,6 +932,15 @@ export type TerrainCategory = "II" | "IIa" | "III" | "IV";
 
 /**  Wind zone of a roof face (SN EN 1991-1-4, K2 Base nomenclature). */
 export type WindZone = "interior" | "ridge" | "verge" | "eave" | "eaveCorner";
+
+/**  Decision of one zone of a cross-rail field. */
+export type ZoneDecision = {
+	zone: WindZone,
+	/**  Fixation spacing on the support grid [m]. */
+	fixationSpacingM: number,
+	/**  Largest utilisation of the zone (rails bending and deflection, fixation). */
+	maxUtilisation: number,
+};
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {

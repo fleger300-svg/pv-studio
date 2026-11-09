@@ -5,11 +5,16 @@ use specta::Type;
 
 use crate::geometry::Vec3;
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
-use crate::layout::ArrayLayoutParams;
+use crate::layout::{ArrayLayoutParams, CrossRailSpec, SupportGridKind, SupportGridSpec};
+use crate::mounting::{
+    AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, MembraneKind, MountingStatics,
+    PairCoefficientsSpec, WindZone,
+};
 use crate::project::{
     ArrayGrid, Building, ModuleInstance, ModuleState, Orientation, PanelArray, Project, RoofFace,
     RoofKind, MODULES_PER_STRING,
 };
+use crate::site::{SiteParams, TerrainCategory};
 
 pub const MODULE_LENGTH_M: f64 = 1.762;
 pub const MODULE_WIDTH_M: f64 = 1.134;
@@ -67,6 +72,7 @@ impl Builder {
         name: &str,
         origin: Vec3,
         shape: FaceShape,
+        support_grid: Option<SupportGridSpec>,
     ) -> RoofFaceId {
         let id = RoofFaceId::new();
         self.project.roof_faces.push(RoofFace {
@@ -79,7 +85,7 @@ impl Builder {
             width_m: shape.width_m,
             height_m: shape.height_m,
             outline: None,
-            support_grid: None,
+            support_grid,
         });
         id
     }
@@ -136,7 +142,7 @@ fn residential_1k() -> Project {
             eave_height_m: EAVE,
             ridge_height_m: ridge,
             roof_kind: RoofKind::Gable,
-            site: None,
+            site: Some(demo_site(TerrainCategory::III)),
         };
         let bid = building.id;
         b.project.buildings.push(building);
@@ -153,6 +159,7 @@ fn residential_1k() -> Project {
             "South",
             [cx - LENGTH / 2.0, -half_depth, EAVE],
             slope(180.0),
+            Some(SEAMS),
         );
         // North face: origin at the east end of the north eave; u → west.
         let north = b.face(
@@ -160,6 +167,7 @@ fn residential_1k() -> Project {
             "North",
             [cx + LENGTH / 2.0, half_depth, EAVE],
             slope(0.0),
+            Some(SEAMS),
         );
 
         for face in [south, north] {
@@ -192,8 +200,11 @@ fn residential_1k() -> Project {
                 tilt_on_roof_deg: 0.0,
                 azimuth_offset_deg: 0.0,
                 grid,
-                mounting: None,
-                layout: ArrayLayoutParams::default(),
+                mounting: Some(single_rail_on_gable()),
+                layout: ArrayLayoutParams {
+                    rails: Some(CrossRailSpec::k2_single_rail()),
+                    ..ArrayLayoutParams::default()
+                },
             };
             let cells = (0..rows).flat_map(move |r| {
                 (0..cols).map(move |c| {
@@ -230,7 +241,7 @@ fn industrial_10k() -> Project {
         eave_height_m: HEIGHT,
         ridge_height_m: HEIGHT,
         roof_kind: RoofKind::Flat,
-        site: None,
+        site: Some(demo_site(TerrainCategory::IV)),
     };
     let bid = building.id;
     b.project.buildings.push(building);
@@ -240,7 +251,13 @@ fn industrial_10k() -> Project {
         width_m: WIDTH,
         height_m: DEPTH,
     };
-    let roof = b.face(bid, "Flat roof", [-WIDTH / 2.0, -DEPTH / 2.0, HEIGHT], flat);
+    let roof = b.face(
+        bid,
+        "Flat roof",
+        [-WIDTH / 2.0, -DEPTH / 2.0, HEIGHT],
+        flat,
+        None,
+    );
 
     // Landscape modules on E-W racks: long side runs north-south (along v).
     let foot_u = MODULE_WIDTH_M * RACK_TILT.to_radians().cos();
@@ -283,7 +300,7 @@ fn industrial_10k() -> Project {
             tilt_on_roof_deg: RACK_TILT,
             azimuth_offset_deg: offset,
             grid,
-            mounting: None,
+            mounting: Some(d_dome()),
             layout: ArrayLayoutParams::default(),
         };
         let cells = (0..rows).flat_map(move |r| {
@@ -291,7 +308,106 @@ fn industrial_10k() -> Project {
         });
         b.array(array, cells);
     }
+    // The two halves of one east-west system (ids are assigned by `Builder::array`).
+    let (west, east) = (b.project.arrays[0].id, b.project.arrays[1].id);
+    b.project.arrays[0].layout.paired_with = Some(east);
+    b.project.arrays[1].layout.paired_with = Some(west);
     b.project
+}
+
+// --- Statics data of the presets (demo values, not for design) ----------------------------
+
+/// Standing seams every 0.60 m.
+const SEAMS: SupportGridSpec = SupportGridSpec {
+    kind: SupportGridKind::StandingSeam,
+    origin_m: 0.0,
+    spacing_m: 0.6,
+};
+
+/// A Swiss Plateau order of magnitude: 500 m, q_p0 = 1.1 kN/m², 50 years, CC2.
+fn demo_site(terrain: TerrainCategory) -> SiteParams {
+    let mut s = SiteParams::new(500.0, 1.1);
+    s.terrain = terrain;
+    s
+}
+
+/// K2 SingleRail on the gable barns. The engine has no normative duopitch c_pe table yet:
+/// the preset uses the duopitch coefficients printed by K2 Base for project C (interior and
+/// ridge); the other edge zones take the ridge values.
+fn single_rail_on_gable() -> MountingStatics {
+    let entry = |zone, cp_pressure, cp_suction| CpEntrySpec {
+        zone,
+        cp_pressure,
+        cp_suction,
+    };
+    MountingStatics {
+        cp: CpSpec::Explicit {
+            reference: "Stress preset (demo): K2 Base duopitch c_pe of project C, ridge values \
+                        on the other edge zones"
+                .into(),
+            entries: vec![
+                entry(WindZone::Interior, 0.2, -0.6),
+                entry(WindZone::Ridge, 0.2, -1.0),
+                entry(WindZone::Verge, 0.2, -1.0),
+                entry(WindZone::Eave, 0.2, -1.0),
+                entry(WindZone::EaveCorner, 0.2, -1.0),
+            ],
+        },
+        ..MountingStatics::k2_single_rail()
+    }
+}
+
+/// K2 D-Dome 6.10 on gravel, coefficients back-fitted from the K2 Base report of reference
+/// B (9 m): eave corner and interior as printed, the other edge zones take the eave-corner
+/// values.
+fn d_dome() -> MountingStatics {
+    let k = |cp_east, cp_west| PairCoefficientsSpec {
+        cp_east,
+        cp_west,
+        k_slope: 1.00,
+        k_direction: 0.90,
+        k_parapet: 1.03,
+        k_module_size: 1.03,
+        k_row_spacing: 1.01,
+        k_building_height: 1.00,
+    };
+    let corner = |zone| AeroZoneSpec {
+        zone,
+        uplift: k(-0.028, -0.324),
+        sliding: k(0.079, -0.273),
+    };
+    MountingStatics {
+        name: "K2 D-Dome 6.10".into(),
+        module_mass_kg: 21.5,
+        system_mass_per_module_kg: 2.25,
+        loaded_area_m2: 10.0,
+        psi0_snow: None,
+        cp: CpSpec::Standard,
+        rails: None,
+        ballast: Some(BallastSpec {
+            manufacturer: "K2 Systems".into(),
+            product: "D-Dome 6.10".into(),
+            document: "Stress preset (demo): back-fitted from a K2 Base report".into(),
+            module_tilt_deg: 8.6,
+            entries: vec![
+                AeroZoneSpec {
+                    zone: WindZone::Interior,
+                    uplift: k(-0.011, -0.182),
+                    sliding: k(0.087, -0.246),
+                },
+                corner(WindZone::Ridge),
+                corner(WindZone::Verge),
+                corner(WindZone::Eave),
+                corner(WindZone::EaveCorner),
+            ],
+            pair_own_mass_kg: 47.5,
+            block_name: "Concrete block 11 kg".into(),
+            block_mass_kg: 11.0,
+            membrane: MembraneKind::Gravel,
+            friction_coefficient: 0.7,
+            friction_source: "K2 Base report".into(),
+        }),
+    }
 }
 
 #[cfg(test)]

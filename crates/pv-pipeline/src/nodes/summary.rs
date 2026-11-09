@@ -3,6 +3,7 @@
 use pv_graph::{Ctx, Derived, GraphError, Instance};
 use pv_model::WindZone;
 use serde::Serialize;
+use specta::Type;
 
 use super::ballast::Ballast;
 use super::descent::Descent;
@@ -12,7 +13,7 @@ use super::{array_of, kind};
 use crate::convert::wind_zone;
 
 /// Decision of one zone of a cross-rail field.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ZoneDecision {
     pub zone: WindZone,
@@ -23,14 +24,14 @@ pub struct ZoneDecision {
 }
 
 /// Statics of one field.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct FieldStaticsResult {
     pub zones: Vec<WindZone>,
     /// Cross-rail systems.
     pub decisions: Vec<ZoneDecision>,
-    pub fixations: Option<usize>,
-    pub climbers: Option<usize>,
+    pub fixations: Option<u32>,
+    pub climbers: Option<u32>,
     /// Ballasted systems (on the half that carries the computation).
     pub ballast_blocks: Option<u32>,
     pub max_utilisation: Option<f64>,
@@ -76,8 +77,8 @@ impl Derived for FieldStatics {
                 });
             }
             if let Some(hw) = ctx.get::<Hardware>(i)?.as_ref() {
-                climbers = Some(hw.rails.climbers.len());
-                fixations = hw.fixations.as_ref().map(pv_layout::Fixations::count);
+                climbers = Some(count(hw.rails.climbers.len()));
+                fixations = hw.fixations.as_ref().map(|f| count(f.count()));
             }
         }
         let max_utilisation = decisions
@@ -94,4 +95,8 @@ impl Derived for FieldStatics {
             ok: max_utilisation.is_none_or(|u| u <= 1.0),
         })
     }
+}
+
+fn count(n: usize) -> u32 {
+    u32::try_from(n).unwrap_or(u32::MAX)
 }

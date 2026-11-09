@@ -2441,6 +2441,7 @@ dependencies = [
  "pv-statics",
  "serde",
  "serde_json",
+ "specta",
 ]
 
 [[package]]
@@ -2475,6 +2476,7 @@ name = "pv-studio"
 version = "0.1.0"
 dependencies = [
  "pv-model",
+ "pv-pipeline",
  "pv-store",
  "serde",
  "serde_json",

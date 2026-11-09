@@ -151,6 +151,7 @@ fn roof_1_through_the_graph_matches_k2() {
             g.get::<FieldStatics>(array(f, &p))
                 .unwrap()
                 .climbers
+                .map(|n| n as usize)
                 .unwrap()
         })
         .sum();

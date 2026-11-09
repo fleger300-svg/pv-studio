@@ -138,6 +138,25 @@ pub struct CrossRailSpec {
     pub max_cantilever_m: Option<f64>,
 }
 
+impl CrossRailSpec {
+    /// K2 SingleRail cross system as K2 Base lays it out (2 top rails per module column,
+    /// bottom rails 1.00 m apart, fixations 3 cm from the rail ends, cantilever 0.485 m).
+    #[must_use]
+    pub const fn k2_single_rail() -> Self {
+        Self {
+            per_column: 2,
+            top_inset_m: 0.40,
+            top_overhang_m: 0.05,
+            bottom_spacing_m: 1.0,
+            min_support_overhang_m: 0.06,
+            spacing_step_m: 0.01,
+            bottom_inset_m: 0.275,
+            fixation_edge_m: 0.03,
+            max_cantilever_m: Some(0.485),
+        }
+    }
+}
+
 /// Direction of an expansion joint line.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]

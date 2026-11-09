@@ -102,7 +102,8 @@
       "missingCoefficient": "No pressure coefficient for zone {zone}.",
       "unsupported": "Case not yet supported by the pre-dimensioning: {what}",
       "noSupportGrid": "The roof covering of the face (standing seams or rafters) is not specified.",
-      "eastWestUnpaired": "An east-west system must be paired with its opposite half."
+      "eastWestUnpaired": "An east-west system must be paired with its opposite half.",
+      "internal": "The statics calculation failed unexpectedly: {detail}"
     }
   },
   "hud": {
@@ -134,5 +135,26 @@
         "report": "Writing report…"
       }
     }
+  },
+  "statics": {
+    "title": "Statics",
+    "computing": "Computing statics…",
+    "upToDate": "Results up to date.",
+    "field": "Field {index} · {face}",
+    "status": {
+      "ok": "OK",
+      "over": "Exceeded",
+      "failed": "Error",
+      "pending": "Pending"
+    },
+    "maxUtilisation": "Max utilisation",
+    "spacing": "Fixation spacing",
+    "fixations": "Fixations",
+    "climbers": "Climber sets",
+    "ballastBlocks": "Ballast blocks",
+    "zones": "Wind zones",
+    "percent": "{value} %",
+    "metres": "{value} m",
+    "disclaimer": "Pre-dimensioning to SIA 261, to be validated before execution."
   }
 }

@@ -102,7 +102,8 @@
       "missingCoefficient": "Pas de coefficient de pression pour la zone {zone}.",
       "unsupported": "Cas non encore pris en charge par le prédimensionnement : {what}",
       "noSupportGrid": "La couverture du pan (joints debout ou chevrons) n'est pas renseignée.",
-      "eastWestUnpaired": "Un système est-ouest doit être associé à sa moitié opposée."
+      "eastWestUnpaired": "Un système est-ouest doit être associé à sa moitié opposée.",
+      "internal": "Le calcul statique a échoué de façon inattendue : {detail}"
     }
   },
   "hud": {
@@ -134,5 +135,26 @@
         "report": "Écriture du rapport…"
       }
     }
+  },
+  "statics": {
+    "title": "Statique",
+    "computing": "Calcul statique…",
+    "upToDate": "Résultats à jour.",
+    "field": "Champ {index} · {face}",
+    "status": {
+      "ok": "OK",
+      "over": "Dépassement",
+      "failed": "Erreur",
+      "pending": "En attente"
+    },
+    "maxUtilisation": "Taux de travail maxi",
+    "spacing": "Espacement des fixations",
+    "fixations": "Fixations",
+    "climbers": "Jeux de climbers",
+    "ballastBlocks": "Blocs de lest",
+    "zones": "Zones de vent",
+    "percent": "{value} %",
+    "metres": "{value} m",
+    "disclaimer": "Pré-dimensionnement selon SIA 261, à faire valider pour exécution."
   }
 }

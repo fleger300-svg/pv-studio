@@ -27,16 +27,22 @@
 //! The automatic layout is not a node: it is an on-demand action that issues commands; the
 //! graph takes the laid-out modules as input.
 
+pub mod batch;
 pub mod convert;
 pub mod error;
 pub mod inputs;
 pub mod nodes;
+pub mod report;
 pub mod sync;
+pub mod worker;
 
 use pv_graph::{Graph, GraphError};
 
+pub use batch::{apply_batch, batch_for_changes, batch_for_project, InputBatch};
 pub use nodes::summary::{FieldStatics, FieldStaticsResult, ZoneDecision};
+pub use report::{FieldOutcome, FieldReport};
 pub use sync::{sync_changes, sync_project, SyncReport};
+pub use worker::{ComputeEvent, ComputeHandle, EventSink, WorkerLink};
 
 /// Registers every pipeline kind in `graph`.
 ///

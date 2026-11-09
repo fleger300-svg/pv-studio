@@ -1,11 +1,15 @@
 //! PV Studio desktop shell. Only this crate depends on Tauri; business logic lives in
-//! `crates/pv-model` and `crates/pv-store`.
+//! `crates/pv-model`, `crates/pv-store` and `crates/pv-pipeline` (statics compute thread).
 
 mod bench;
 mod commands;
+mod compute;
 mod state;
 
+use std::sync::Arc;
+
 use specta_typescript::{semantic, Typescript};
+use tauri::Manager;
 use tauri_specta::{collect_commands, collect_events, Builder};
 
 use crate::state::AppState;
@@ -33,10 +37,16 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::apply_command,
             commands::undo,
             commands::redo,
+            compute::get_statics_snapshot,
             bench::platform_info,
             bench::write_bench_report,
         ])
-        .events(collect_events![commands::ModelChanged])
+        .events(collect_events![
+            commands::ModelChanged,
+            compute::ResultReady,
+            compute::ComputeState,
+            compute::ComputeFailed,
+        ])
         .semantic_types(semantic::Configuration::empty().enable_lossless_floats())
 }
 
@@ -63,6 +73,10 @@ pub fn run() {
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
+            // The statics compute thread (pv-pipeline), owner of the dependency graph.
+            let state = app.state::<AppState>();
+            let handle = compute::start(app.handle(), Arc::clone(&state.results))?;
+            state.attach_compute(handle);
             Ok(())
         })
         .run(tauri::generate_context!())

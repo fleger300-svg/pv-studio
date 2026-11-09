@@ -39,6 +39,7 @@ pub mod keys {
     pub const STATICS_UNSUPPORTED: &str = "errors.statics.unsupported";
     pub const STATICS_NO_SUPPORT_GRID: &str = "errors.statics.noSupportGrid";
     pub const STATICS_EAST_WEST_UNPAIRED: &str = "errors.statics.eastWestUnpaired";
+    pub const STATICS_INTERNAL: &str = "errors.statics.internal";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -67,6 +68,7 @@ pub mod keys {
         STATICS_UNSUPPORTED,
         STATICS_NO_SUPPORT_GRID,
         STATICS_EAST_WEST_UNPAIRED,
+        STATICS_INTERNAL,
     ];
 }
 
