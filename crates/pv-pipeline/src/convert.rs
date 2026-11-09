@@ -4,7 +4,7 @@
 //! engine evolves, and every mapping is written out here, in one place.
 
 use pv_model::{
-    Building, ConsequenceClass, CpEntrySpec, CpSpec, FixationSpec, MembraneKind, MountingStatics,
+    Building, ConsequenceClass, CpEntrySpec, CpSpec, FixationSpec, MembraneKind, MountingSystem,
     PairCoefficientsSpec, PanelArray, RailSectionSpec, RoofFace, RoofKind, ServiceLifeModel,
     SiteParams, SnowExposure, SupportGridKind, TerrainCategory, WindZone,
 };
@@ -137,7 +137,7 @@ pub fn cp_source(cp: &CpSpec) -> CpSource {
 
 /// Dead load: module area from the array's module dimensions.
 #[must_use]
-pub fn dead_load(m: &MountingStatics, array: &PanelArray) -> DeadLoad {
+pub fn dead_load(m: &MountingSystem, array: &PanelArray) -> DeadLoad {
     DeadLoad {
         module_mass_kg: m.module_mass_kg,
         system_mass_per_module_kg: m.system_mass_per_module_kg,
@@ -147,7 +147,7 @@ pub fn dead_load(m: &MountingStatics, array: &PanelArray) -> DeadLoad {
 
 /// SIA 260 factors of the site's consequence class, with the snapshot's ψ₀,S override.
 #[must_use]
-pub fn factors(site: &SiteInput, m: &MountingStatics) -> PartialFactors {
+pub fn factors(site: &SiteInput, m: &MountingSystem) -> PartialFactors {
     let mut f = PartialFactors::sia_260_for(site.consequence_class);
     if let Some(psi) = m.psi0_snow {
         f.psi0_snow = psi;

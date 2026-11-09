@@ -9,9 +9,7 @@ use pv_pipeline::{batch_for_changes, batch_for_project};
 fn extracting_a_module_command_is_cheap() {
     // Industrial 10k: two east-west halves of ~5 000 modules each.
     let p = StressPreset::Industrial10k.build();
-    let changes = ChangeSet {
-        module_ids: vec![p.modules[0].id],
-    };
+    let changes = ChangeSet::modules(vec![p.modules[0].id]);
     let batch = batch_for_changes(&p, &changes);
     assert_eq!(batch.modules.len(), 1);
     let n = batch.modules[0].1.len();

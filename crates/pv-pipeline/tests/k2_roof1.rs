@@ -35,6 +35,6 @@ fn field_statics_summarise_the_decisions() {
         assert!(s.decisions.iter().any(|d| d.zone == WindZone::EaveCorner));
     }
     assert!(g.stale().is_empty());
-    assert_eq!(g.watched().len(), 2);
+    assert_eq!(g.watched().len(), 3); // two fields and the bill of materials
     let _ = Instance::Project;
 }

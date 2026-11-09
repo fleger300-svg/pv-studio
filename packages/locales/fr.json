@@ -69,7 +69,8 @@
     },
     "command": {
       "invalidNumber": "La commande contient une valeur numérique invalide.",
-      "mismatchedLengths": "Les données de la commande sont incohérentes."
+      "mismatchedLengths": "Les données de la commande sont incohérentes.",
+      "invalidDiscount": "Remise invalide pour {manufacturer} : {rate} (attendu entre 0 et 1)."
     },
     "history": {
       "nothingToUndo": "Rien à annuler.",
@@ -104,6 +105,13 @@
       "noSupportGrid": "La couverture du pan (joints debout ou chevrons) n'est pas renseignée.",
       "eastWestUnpaired": "Un système est-ouest doit être associé à sa moitié opposée.",
       "internal": "Le calcul statique a échoué de façon inattendue : {detail}"
+    },
+    "bom": {
+      "zeroPack": "Article {articleNo} : la quantité par unité de vente est nulle.",
+      "invalidStock": "Article {articleNo} : longueur de barre ou largeur de coupe invalide.",
+      "invalidDiscount": "Remise invalide pour {manufacturer} : {rate}.",
+      "stale": "La nomenclature est encore en cours de calcul : réessayez dans un instant.",
+      "invalidPiece": "Article {articleNo} : longueur de pièce de rail invalide ({length} m)."
     }
   },
   "hud": {
@@ -156,5 +164,40 @@
     "percent": "{value} %",
     "metres": "{value} m",
     "disclaimer": "Pré-dimensionnement selon SIA 261, à faire valider pour exécution."
+  },
+  "bom": {
+    "title": "Nomenclature",
+    "total": "Total",
+    "price": "Prix total",
+    "currency": "CHF",
+    "mass": "Poids total",
+    "kg": "{value} kg",
+    "saleUnits": "Unités de vente",
+    "savedBars": "Barres économisées",
+    "discount": "Remise {manufacturer}",
+    "view": "Voir la nomenclature",
+    "export": "Exporter Excel",
+    "exporting": "Export en cours…",
+    "exported": "Fichier enregistré : {path}",
+    "pending": "Calcul de la nomenclature…",
+    "empty": "Aucune pièce : le système de montage des champs ne déclare pas d'articles.",
+    "close": "Fermer",
+    "percent": "{value} %",
+    "savedBarsNote": "Barres économisées par réutilisation des chutes : article {articleNo}, {perFaces} barres pan par pan, {project} sur le projet ({saved} de moins).",
+    "fileName": "Nomenclature",
+    "snapshotLabel": "Export Excel du {date}",
+    "columns": {
+      "articleNo": "Art. no",
+      "description": "Description de l'article",
+      "quantity": "Nombre",
+      "mass": "Poids",
+      "saleUnits": "Nombre d'unités de vente",
+      "packQty": "Quantité par unité de vente",
+      "listPrice": "Prix catalogue",
+      "discountRate": "Taux de remise",
+      "unitPrice": "Prix à l'unité",
+      "price": "Prix"
+    },
+    "noPrices": "Prix catalogue non renseignés"
   }
 }

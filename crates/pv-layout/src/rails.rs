@@ -100,6 +100,9 @@ pub struct TopSupports {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct RailLayout {
     pub top: Vec<Rail>,
+    /// Modules carried by each top rail (aligned with `top`): the run of adjacent modules of
+    /// its column. Middle clamps = modules − 1, end clamps = 2 per rail.
+    pub top_modules: Vec<u32>,
     pub bottom: Vec<Rail>,
     pub supports: Vec<TopSupports>,
     /// Crossings of top and bottom rails.
@@ -121,6 +124,7 @@ pub fn cross_rails(
     let (hu, hv) = (spec.footprint_u / 2.0, spec.footprint_v / 2.0);
     let mut out = RailLayout {
         top: Vec::new(),
+        top_modules: Vec::new(),
         bottom: Vec::new(),
         supports: Vec::new(),
         climbers: Vec::new(),
@@ -209,6 +213,8 @@ pub fn cross_rails(
                         start: Vec2::new(tu, lo),
                         end: Vec2::new(tu, hi),
                     });
+                    out.top_modules
+                        .push(u32::try_from(run.len()).unwrap_or(u32::MAX));
                     out.climbers.extend(vs.iter().map(|&v| Vec2::new(tu, v)));
                     out.supports.push(TopSupports {
                         top_rail: idx,

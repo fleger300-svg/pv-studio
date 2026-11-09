@@ -125,6 +125,26 @@ const MIGRATIONS: &[&str] = &[
     ALTER TABLE building_v4 RENAME TO building;
     ALTER TABLE "array" ADD COLUMN mounting_json TEXT;
     "#,
+    // v5: mounting systems carry their parts (pv-bom); snapshots written before have none.
+    r#"
+    UPDATE "array"
+       SET mounting_json = json_set(mounting_json, '$.parts', json('[]'))
+     WHERE mounting_json IS NOT NULL AND json_extract(mounting_json, '$.parts') IS NULL;
+    "#,
+    // v6: project pricing (discount per manufacturer, set by commands) and frozen bills of
+    // materials (immutable records: the basis of quotes and exports).
+    r#"
+    ALTER TABLE project ADD COLUMN pricing_json TEXT NOT NULL DEFAULT '{}';
+    CREATE TABLE bom_snapshot (
+        id                INTEGER PRIMARY KEY AUTOINCREMENT,
+        created_at        TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        label             TEXT NOT NULL,
+        seq               INTEGER NOT NULL,
+        input_fingerprint TEXT NOT NULL,
+        pricing_json      TEXT NOT NULL,
+        bom_json          TEXT NOT NULL
+    ) STRICT;
+    "#,
 ];
 
 /// Latest schema version known to this build.
@@ -206,6 +226,7 @@ mod tests {
             tables,
             [
                 "array",
+                "bom_snapshot",
                 "building",
                 "command_log",
                 "module_instance",

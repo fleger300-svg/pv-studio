@@ -22,13 +22,34 @@ export const commands = {
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
 	getModuleBufferFor: (ids: ModuleId[]) => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer_for", { ids })),
 	/**  Validates, applies and journals a model command. */
-	applyCommand: (cmd: Command) => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("apply_command", { cmd })),
+	applyCommand: (cmd: Command_Deserialize) => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("apply_command", { cmd })),
 	/**  Undoes the last command. */
 	undo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
 	redo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("redo")),
 	/**  Latest statics results of the open project (no computation: read from the cache). */
 	getStaticsSnapshot: () => typedError<StaticsSnapshot_Serialize, CommandError>(__TAURI_INVOKE("get_statics_snapshot")),
+	/**
+	 *  Latest bill of materials of the open project (from the cache; `None` before the first
+	 *  pass).
+	 */
+	getBom: () => typedError<BomReport_Serialize | null, CommandError>(__TAURI_INVOKE("get_bom")),
+	/**
+	 *  Freezes the bill of materials of the current project state (the basis of a quote or an
+	 *  export). Waits until the compute thread has caught up with the last command; refuses a
+	 *  stale or failed bill of materials.
+	 */
+	freezeBom: (label: string) => typedError<BomSnapshotInfo, CommandError>(__TAURI_INVOKE("freeze_bom", { label })),
+	/**  Frozen bills of materials of the open project, oldest first. */
+	listBomSnapshots: () => typedError<BomSnapshotInfo[], CommandError>(__TAURI_INVOKE("list_bom_snapshots")),
+	/**  One frozen bill of materials, exactly as it was recorded. */
+	getBomSnapshot: (id: number) => typedError<FrozenBom_Serialize, CommandError>(__TAURI_INVOKE("get_bom_snapshot", { id })),
+	/**
+	 *  Saves `bytes` as an Excel file. Without `path`, asks the user where (native dialog,
+	 *  `suggested_name` pre-filled); `None` when the user cancels. With `path` (automation,
+	 *  e.g. tests), writes there without asking.
+	 */
+	saveExport: (suggestedName: string, bytes: number[], path: string | null) => typedError<string | null, CommandError>(__TAURI_INVOKE("save_export", { suggestedName, bytes, path })),
 	/**  Facts about the host that the WebView cannot report reliably. */
 	platformInfo: () => __TAURI_INVOKE<PlatformInfo>("platform_info"),
 	/**
@@ -196,6 +217,24 @@ export type ArraySummary_Serialize = {
 	halfFootprint: [number, number],
 };
 
+/**  One article of a manufacturer's catalogue. */
+export type Article = {
+	/**  Manufacturer's article number (e.g. `2004393`). */
+	articleNo: string,
+	manufacturer: string,
+	/**  Manufacturer's label, shown when no translation exists. */
+	label: string,
+	/**  Translated descriptions by language (`fr`, `de`, `en`); may be empty. */
+	descriptions: { [key in string]: string },
+	/**  Mass of one piece [kg]. */
+	unitMassKg: number,
+	/**  Pieces per sale unit (pack, bundle). */
+	packQty: number,
+	/**  List price of one piece, in `currency`; 0 when unknown. */
+	listPrice: number,
+	currency: string,
+};
+
 /**  Ballast data of an aerodynamic (east-west) system. */
 export type BallastSpec = {
 	manufacturer: string,
@@ -222,6 +261,109 @@ export type BlockParams = {
 	/**  Clear distance between the modules of two adjacent blocks along `u` / `v`, m. */
 	gapUM: number,
 	gapVM: number,
+};
+
+/**  The bill of materials of a project. */
+export type Bom = Bom_Serialize | Bom_Deserialize;
+
+/**  One article line (K2 columns). */
+export type BomLine = {
+	articleNo: string,
+	manufacturer: string,
+	/**  Manufacturer's label (shown when `descriptions` lacks the UI language). */
+	label: string,
+	descriptions: { [key in string]: string },
+	/**  Pieces. */
+	quantity: number,
+	/**  quantity × unit mass [kg]. */
+	massKg: number,
+	/**  Packs: ⌈quantity / pack⌉ on this table's quantity (ADR-005). */
+	saleUnits: number,
+	packQty: number,
+	listPrice: number,
+	/**  Manufacturer discount of the project, in `[0, 1)`. */
+	discountRate: number,
+	/**  List price after discount, to the cent. */
+	unitPrice: number,
+	/**  quantity × unit price. */
+	price: number,
+};
+
+/**  Outcome of the bill of materials. */
+export type BomOutcome = BomOutcome_Serialize | BomOutcome_Deserialize;
+
+/**  Outcome of the bill of materials. */
+export type BomOutcome_Deserialize = { status: "ok"; bom: Bom_Deserialize } | { status: "failed"; error: CommandError };
+
+/**  Outcome of the bill of materials. */
+export type BomOutcome_Serialize = { status: "ok"; bom: Bom_Serialize } | { status: "failed"; error: CommandError };
+
+/**  Bill of materials of the project, tagged like the field reports. */
+export type BomReport = BomReport_Serialize | BomReport_Deserialize;
+
+/**  Bill of materials of the project, tagged like the field reports. */
+export type BomReport_Deserialize = {
+	seq: number,
+	/**  Fingerprint of its inputs (hex): stored with frozen bills of materials. */
+	inputFingerprint: string,
+	outcome: BomOutcome_Deserialize,
+};
+
+/**  Bill of materials of the project, tagged like the field reports. */
+export type BomReport_Serialize = {
+	seq: number,
+	/**  Fingerprint of its inputs (hex): stored with frozen bills of materials. */
+	inputFingerprint: string,
+	outcome: BomOutcome_Serialize,
+};
+
+/**  A frozen bill of materials. */
+export type BomSnapshotInfo = {
+	id: number,
+	createdAt: string,
+	label: string,
+	/**  Command the bill of materials is valid for. */
+	seq: number,
+	inputFingerprint: string,
+};
+
+/**  One tab: a roof face, or the project total. */
+export type BomTable = BomTable_Serialize | BomTable_Deserialize;
+
+/**  One tab: a roof face, or the project total. */
+export type BomTable_Deserialize = {
+	/**  `None` for the Total. */
+	faceId?: string | null,
+	title: string,
+	lines: BomLine[],
+	massKg: number,
+	price: number,
+};
+
+/**  One tab: a roof face, or the project total. */
+export type BomTable_Serialize = {
+	/**  `None` for the Total. */
+	faceId: string | null,
+	title: string,
+	lines: BomLine[],
+	massKg: number,
+	price: number,
+};
+
+/**  The bill of materials of a project. */
+export type Bom_Deserialize = {
+	faces: BomTable_Deserialize[],
+	total: BomTable_Deserialize,
+	/**  Only the articles where the project-wide cut saves bars. */
+	savedBars: SavedBars[],
+};
+
+/**  The bill of materials of a project. */
+export type Bom_Serialize = {
+	faces: BomTable_Serialize[],
+	total: BomTable_Serialize,
+	/**  Only the articles where the project-wide cut saves bars. */
+	savedBars: SavedBars[],
 };
 
 /**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
@@ -262,14 +404,25 @@ export type Building_Serialize = {
 	site?: SiteParams | null,
 };
 
-/**  Modules whose state or transform changed. */
+/**  What a command changed. */
 export type ChangeSet = {
 	/**  Sorted, unique. */
 	moduleIds: ModuleId[],
+	/**  The project's pricing (discounts) changed. */
+	pricing: boolean,
 };
 
 /**  A serialisable model change. */
-export type Command = 
+export type Command = Command_Serialize | Command_Deserialize;
+
+/**  A command failure, expressed as an i18n key plus ICU parameters — never as prose. */
+export type CommandError = {
+	key: string,
+	params: { [key in string]: ErrorParam },
+};
+
+/**  A serialisable model change. */
+export type Command_Deserialize = 
 /**  Translates modules in their roof's `(u, v)` frame, metres. */
 { type: "MoveModules"; ids: ModuleId[]; du: number; dv: number } | 
 /**  Marks modules as removed (they keep their slot and GPU instance index). */
@@ -280,13 +433,25 @@ export type Command =
  *  Sets exact module positions. Used as the inverse of `MoveModules` so that undo
  *  restores the original coordinates bit for bit (`(u + du) - du != u` in floating point).
  */
-{ type: "SetModulePositions"; positions: ModulePosition[] };
+{ type: "SetModulePositions"; positions: ModulePosition[] } | 
+/**  Sets (`Some`) or removes (`None`) the discount of a manufacturer on the whole project. */
+{ type: "SetDiscount"; manufacturer: string; rate?: number | null };
 
-/**  A command failure, expressed as an i18n key plus ICU parameters — never as prose. */
-export type CommandError = {
-	key: string,
-	params: { [key in string]: ErrorParam },
-};
+/**  A serialisable model change. */
+export type Command_Serialize = 
+/**  Translates modules in their roof's `(u, v)` frame, metres. */
+{ type: "MoveModules"; ids: ModuleId[]; du: number; dv: number } | 
+/**  Marks modules as removed (they keep their slot and GPU instance index). */
+{ type: "RemoveModules"; ids: ModuleId[] } | 
+/**  Marks removed modules as active again. */
+{ type: "RestoreModules"; ids: ModuleId[] } | 
+/**
+ *  Sets exact module positions. Used as the inverse of `MoveModules` so that undo
+ *  restores the original coordinates bit for bit (`(u + du) - du != u` in floating point).
+ */
+{ type: "SetModulePositions"; positions: ModulePosition[] } | 
+/**  Sets (`Some`) or removes (`None`) the discount of a manufacturer on the whole project. */
+{ type: "SetDiscount"; manufacturer: string; rate: number | null };
 
 /**  A pass could not run. */
 export type ComputeFailed = {
@@ -360,6 +525,33 @@ export type CrossRailSpec_Serialize = {
 	/**  Maximum bottom-rail cantilever beyond the outer fixation, m. */
 	maxCantileverM?: number | null,
 };
+
+/**
+ *  What a part's quantity is counted from (closed set: the bill-of-materials engine knows how
+ *  to count each of them on a laid-out field).
+ */
+export type Driver = 
+/**  One per roof fixation (standing-seam clamp, hanger bolt…). */
+{ kind: "fixation" } | 
+/**  One per crossing of a top and a bottom rail. */
+{ kind: "climber" } | 
+/**  Two per top rail (end clamps). */
+{ kind: "topRailEnd" } | 
+/**  Modules − 1 per top rail (middle clamps). */
+{ kind: "topRailInnerJoint" } | 
+/**  One per active module. */
+{ kind: "module" } | 
+/**  One per ballast block. */
+{ kind: "ballastBlock" } | 
+/**
+ *  One per splice of the rails of `layer` longer than a bar of `stock_length_m`
+ *  (rail connectors).
+ */
+{ kind: "railJoint"; layer: RailLayerKind; stock_length_m: number } | 
+/**  Stock bars the rail pieces of `layer` are cut from. */
+{ kind: "railBars"; layer: RailLayerKind; stock_length_m: number; 
+/**  Saw cut lost between two pieces of a bar [m]. */
+kerf_m: number };
 
 export type EdgeSetback = {
 	kind: RoofEdgeKind,
@@ -453,6 +645,23 @@ export type FixationSpec = {
 	parallelKn: number,
 };
 
+/**  A frozen bill of materials, read back for an export. */
+export type FrozenBom = FrozenBom_Serialize | FrozenBom_Deserialize;
+
+/**  A frozen bill of materials, read back for an export. */
+export type FrozenBom_Deserialize = {
+	info: BomSnapshotInfo,
+	bom: Bom_Deserialize,
+	pricing: Pricing,
+};
+
+/**  A frozen bill of materials, read back for an export. */
+export type FrozenBom_Serialize = {
+	info: BomSnapshotInfo,
+	bom: Bom_Serialize,
+	pricing: Pricing,
+};
+
 /**  Direction of an expansion joint line. */
 export type JointAxis = 
 /**  Line `u = position`: cuts the rails running along `u`. */
@@ -464,6 +673,13 @@ export type JointAxis =
 export type LayoutAnchor = 
 /**  Lower-left corner (eave, left verge): K2 Base convention. */
 "lowerLeft" | "lowerRight" | "upperLeft" | "upperRight" | "centre";
+
+/**  Discount granted by a manufacturer. */
+export type ManufacturerDiscount = {
+	manufacturer: string,
+	/**  Fraction of the list price, in `[0, 1)` (0.35 = −35 %). */
+	rate: number,
+};
 
 /**  Roof membrane under a ballasted system. */
 export type MembraneKind = "epdm" | "bitumen" | "pvc" | "tpo" | "gravel" | "green";
@@ -488,11 +704,11 @@ export type ModulePosition = {
 	v: number,
 };
 
-/**  Statics snapshot of a field's mounting system. */
-export type MountingStatics = MountingStatics_Serialize | MountingStatics_Deserialize;
+/**  Snapshot of a field's mounting system: statics data and parts. */
+export type MountingSystem = MountingSystem_Serialize | MountingSystem_Deserialize;
 
-/**  Statics snapshot of a field's mounting system. */
-export type MountingStatics_Deserialize = {
+/**  Snapshot of a field's mounting system: statics data and parts. */
+export type MountingSystem_Deserialize = {
 	/**  Product name shown in reports. */
 	name: string,
 	/**  Mass of one module [kg] (module datasheet). */
@@ -508,10 +724,12 @@ export type MountingStatics_Deserialize = {
 	rails?: RailStatics_Deserialize | null,
 	/**  Aerodynamic ballasted system (east-west on flat roofs). */
 	ballast?: BallastSpec | null,
+	/**  Parts of the system and the rules giving their quantities (bill of materials). */
+	parts: PartRule[],
 };
 
-/**  Statics snapshot of a field's mounting system. */
-export type MountingStatics_Serialize = {
+/**  Snapshot of a field's mounting system: statics data and parts. */
+export type MountingSystem_Serialize = {
 	/**  Product name shown in reports. */
 	name: string,
 	/**  Mass of one module [kg] (module datasheet). */
@@ -527,6 +745,8 @@ export type MountingStatics_Serialize = {
 	rails?: RailStatics_Serialize | null,
 	/**  Aerodynamic ballasted system (east-west on flat roofs). */
 	ballast?: BallastSpec | null,
+	/**  Parts of the system and the rules giving their quantities (bill of materials). */
+	parts: PartRule[],
 };
 
 /**  Kind of an obstacle on the roof. */
@@ -568,7 +788,7 @@ export type PanelArray_Deserialize = {
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Deserialize,
 	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
-	mounting?: MountingStatics_Deserialize | null,
+	mounting?: MountingSystem_Deserialize | null,
 };
 
 export type PanelArray_Serialize = {
@@ -585,7 +805,15 @@ export type PanelArray_Serialize = {
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Serialize,
 	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
-	mounting?: MountingStatics_Serialize | null,
+	mounting?: MountingSystem_Serialize | null,
+};
+
+/**  One part of a system: an article, counted by `driver`, `per` pieces each time. */
+export type PartRule = {
+	article: Article,
+	driver: Driver,
+	/**  Pieces per counted item (ignored for rail bars). */
+	per: number,
 };
 
 export type PlatformInfo = {
@@ -594,6 +822,11 @@ export type PlatformInfo = {
 	arch: string,
 	/**  Whether the Rust side is a debug build (benchmarks should use release builds). */
 	debugBuild: boolean,
+};
+
+/**  Pricing of a project. */
+export type Pricing = {
+	discounts: ManufacturerDiscount[],
 };
 
 /**  Identifies a project. */
@@ -634,6 +867,12 @@ export type ProjectSummary_Serialize = {
 	canUndo: boolean,
 	canRedo: boolean,
 };
+
+/**
+ *  Layer of a cross-rail system: rails of different layers are never cut from the same bar
+ *  (K2 Base cuts top and bottom rails separately).
+ */
+export type RailLayerKind = "top" | "bottom";
 
 /**  Cross-section and material of a rail. */
 export type RailSectionSpec = {
@@ -692,6 +931,8 @@ export type ResultReady = ResultReady_Serialize | ResultReady_Deserialize;
 export type ResultReady_Deserialize = {
 	seq: number,
 	fields: FieldReport_Deserialize[],
+	/**  The project's bill of materials, when it changed. */
+	bom?: BomReport_Deserialize | null,
 	/**  Fields deleted from the project. */
 	removed: ArrayId[],
 	/**  Every previous result is obsolete (project opened, recovery). */
@@ -705,6 +946,8 @@ export type ResultReady_Deserialize = {
 export type ResultReady_Serialize = {
 	seq: number,
 	fields: FieldReport_Serialize[],
+	/**  The project's bill of materials, when it changed. */
+	bom: BomReport_Serialize | null,
 	/**  Fields deleted from the project. */
 	removed: ArrayId[],
 	/**  Every previous result is obsolete (project opened, recovery). */
@@ -859,6 +1102,16 @@ export type RoofOutlineSpec_Serialize = {
 	/**  One kind per edge. */
 	edgeKinds: RoofEdgeKind[],
 	obstacles: RoofObstacle_Serialize[],
+};
+
+/**
+ *  Bars saved on the project by reusing offcuts across faces: the face tabs need
+ *  `per_faces` bars (each face cut alone), the Total `project`.
+ */
+export type SavedBars = {
+	articleNo: string,
+	perFaces: number,
+	project: number,
 };
 
 /**  How the service life adjusts the characteristic loads. */

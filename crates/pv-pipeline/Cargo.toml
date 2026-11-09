@@ -11,6 +11,7 @@ rust-version.workspace = true
 pv-geo.workspace = true
 pv-graph.workspace = true
 pv-layout.workspace = true
+pv-bom.workspace = true
 pv-model.workspace = true
 pv-statics.workspace = true
 serde.workspace = true

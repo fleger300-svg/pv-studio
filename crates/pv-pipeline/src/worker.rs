@@ -32,7 +32,7 @@ use pv_model::{ArrayId, ChangeSet, CommandError, Project};
 
 use crate::batch::{apply_batch, batch_for_changes, batch_for_project, InputBatch};
 use crate::new_graph;
-use crate::report::{command_error, field_reports, FieldReport};
+use crate::report::{bom_report, command_error, field_reports, BomReport, FieldReport};
 
 /// What the compute thread tells the application.
 #[derive(Debug, Clone, PartialEq)]
@@ -44,6 +44,8 @@ pub enum ComputeEvent {
     Ready {
         seq: u32,
         fields: Vec<FieldReport>,
+        /// The project's bill of materials, when it changed.
+        bom: Option<BomReport>,
         removed: Vec<ArrayId>,
         reset: bool,
     },
@@ -125,17 +127,31 @@ impl WorkerLink {
     }
 }
 
-/// A pass: run the graph, collect the reports. Replaceable in tests.
-pub type PassFn =
-    dyn FnMut(&mut Graph, &CancelToken, u32) -> Result<Vec<FieldReport>, GraphError> + Send;
+/// What a pass reports: the fields whose statics changed, and the bill of materials if it
+/// changed.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct PassOutput {
+    pub fields: Vec<FieldReport>,
+    pub bom: Option<BomReport>,
+}
 
-fn default_pass(
+/// A pass: run the graph, collect the reports. Replaceable in tests.
+pub type PassFn = dyn FnMut(&mut Graph, &CancelToken, u32) -> Result<PassOutput, GraphError> + Send;
+
+/// The pass of the application.
+///
+/// # Errors
+/// [`GraphError::Cancelled`].
+pub fn default_pass(
     graph: &mut Graph,
     cancel: &CancelToken,
     seq: u32,
-) -> Result<Vec<FieldReport>, GraphError> {
+) -> Result<PassOutput, GraphError> {
     let ready = graph.run_auto(cancel)?;
-    Ok(field_reports(graph, &ready, seq))
+    Ok(PassOutput {
+        fields: field_reports(graph, &ready, seq),
+        bom: bom_report(graph, &ready, seq),
+    })
 }
 
 /// Receiving side: the compute loop.
@@ -227,10 +243,11 @@ impl WorkerQueue {
                 sink.emit(ComputeEvent::State { busy: true, seq });
                 let outcome = catch_unwind(AssertUnwindSafe(|| pass(&mut graph, &token, seq)));
                 match outcome {
-                    Ok(Ok(fields)) => {
+                    Ok(Ok(PassOutput { fields, bom })) => {
                         sink.emit(ComputeEvent::Ready {
                             seq,
                             fields,
+                            bom,
                             removed: mem::take(&mut removed),
                             reset: mem::take(&mut reset),
                         });

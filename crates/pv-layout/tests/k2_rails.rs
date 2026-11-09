@@ -221,7 +221,51 @@ fn rails_and_climbers_match_k2_cut_lists() {
         // Climbers: crossings of top and bottom rails.
         let climbers: usize = layouts.iter().map(|r| r.climbers.len()).sum();
         assert_eq!(climbers, expected.climbers, "{roof}: climber sets");
+
+        // Modules per top rail → module clamps of the K2 material list (reference_bom.json):
+        // middle clamps = Σ (modules − 1), end clamps = 2 per top rail.
+        assert!(layouts.iter().all(|r| r.top_modules.len() == r.top.len()));
+        let middle: u32 = layouts
+            .iter()
+            .flat_map(|r| r.top_modules.iter().map(|m| m - 1))
+            .sum();
+        let end = 2 * layouts.iter().map(|r| r.top.len()).sum::<usize>();
+        let bom = &bom_tabs()[roof];
+        assert_eq!(middle, bom["2004148"], "{roof}: middle clamps");
+        assert_eq!(end as u32, bom["2004545"], "{roof}: end clamps");
     }
+}
+
+/// Quantities per article of each roof tab of the K2 material list.
+fn bom_tabs() -> BTreeMap<String, BTreeMap<String, u32>> {
+    #[derive(Deserialize)]
+    struct Line {
+        article_no: String,
+        quantity: u32,
+    }
+    #[derive(Deserialize)]
+    struct Tab {
+        id: String,
+        lines: Vec<Line>,
+    }
+    #[derive(Deserialize)]
+    struct Bom {
+        roofs: Vec<Tab>,
+    }
+    let bom: Bom =
+        serde_json::from_str(include_str!("../../../testdata/k2/reference_bom.json")).unwrap();
+    bom.roofs
+        .into_iter()
+        .map(|t| {
+            (
+                t.id,
+                t.lines
+                    .into_iter()
+                    .map(|l| (l.article_no, l.quantity))
+                    .collect(),
+            )
+        })
+        .collect()
 }
 
 #[test]
@@ -391,6 +435,7 @@ fn k2_clamp_totals_follow_from_cut_lists() {
     };
     let rail = |len: f64| RailLayout {
         top: vec![],
+        top_modules: vec![],
         bottom: vec![pv_layout::Rail {
             block: 0,
             layer: pv_layout::RailLayer::Bottom,

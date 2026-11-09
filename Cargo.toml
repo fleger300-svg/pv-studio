@@ -17,6 +17,7 @@ pv-geo = { path = "crates/pv-geo" }
 pv-layout = { path = "crates/pv-layout" }
 pv-graph = { path = "crates/pv-graph" }
 pv-pipeline = { path = "crates/pv-pipeline" }
+pv-bom = { path = "crates/pv-bom" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 thiserror = "2.0.21"

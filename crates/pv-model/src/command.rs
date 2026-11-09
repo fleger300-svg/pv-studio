@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::ids::ModuleId;
+use crate::pricing::ManufacturerDiscount;
 use crate::project::{ModuleState, Project};
 
 /// i18n keys of every error the back-end can return. The front-end translates them; never
@@ -15,6 +16,7 @@ pub mod keys {
     pub const OUT_OF_ROOF: &str = "errors.module.outOfRoof";
     pub const UNKNOWN_MODULE: &str = "errors.module.unknown";
     pub const INVALID_NUMBER: &str = "errors.command.invalidNumber";
+    pub const INVALID_DISCOUNT: &str = "errors.command.invalidDiscount";
     pub const MISMATCHED_LENGTHS: &str = "errors.command.mismatchedLengths";
     pub const NOTHING_TO_UNDO: &str = "errors.history.nothingToUndo";
     pub const NOTHING_TO_REDO: &str = "errors.history.nothingToRedo";
@@ -40,12 +42,19 @@ pub mod keys {
     pub const STATICS_NO_SUPPORT_GRID: &str = "errors.statics.noSupportGrid";
     pub const STATICS_EAST_WEST_UNPAIRED: &str = "errors.statics.eastWestUnpaired";
     pub const STATICS_INTERNAL: &str = "errors.statics.internal";
+    /// Bill of materials (pv-bom).
+    pub const BOM_ZERO_PACK: &str = "errors.bom.zeroPack";
+    pub const BOM_INVALID_PIECE: &str = "errors.bom.invalidPiece";
+    pub const BOM_INVALID_STOCK: &str = "errors.bom.invalidStock";
+    pub const BOM_INVALID_DISCOUNT: &str = "errors.bom.invalidDiscount";
+    pub const BOM_STALE: &str = "errors.bom.stale";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
         OUT_OF_ROOF,
         UNKNOWN_MODULE,
         INVALID_NUMBER,
+        INVALID_DISCOUNT,
         MISMATCHED_LENGTHS,
         NOTHING_TO_UNDO,
         NOTHING_TO_REDO,
@@ -69,6 +78,11 @@ pub mod keys {
         STATICS_NO_SUPPORT_GRID,
         STATICS_EAST_WEST_UNPAIRED,
         STATICS_INTERNAL,
+        BOM_ZERO_PACK,
+        BOM_INVALID_PIECE,
+        BOM_INVALID_STOCK,
+        BOM_INVALID_DISCOUNT,
+        BOM_STALE,
     ];
 }
 
@@ -97,14 +111,37 @@ pub enum Command {
     /// Sets exact module positions. Used as the inverse of `MoveModules` so that undo
     /// restores the original coordinates bit for bit (`(u + du) - du != u` in floating point).
     SetModulePositions { positions: Vec<ModulePosition> },
+    /// Sets (`Some`) or removes (`None`) the discount of a manufacturer on the whole project.
+    SetDiscount {
+        manufacturer: String,
+        rate: Option<f64>,
+    },
 }
 
-/// Modules whose state or transform changed.
+/// What a command changed.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeSet {
     /// Sorted, unique.
     pub module_ids: Vec<ModuleId>,
+    /// The project's pricing (discounts) changed.
+    pub pricing: bool,
+}
+
+impl ChangeSet {
+    /// Module changes only.
+    #[must_use]
+    pub fn modules(module_ids: Vec<ModuleId>) -> Self {
+        Self {
+            module_ids,
+            pricing: false,
+        }
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.module_ids.is_empty() && !self.pricing
+    }
 }
 
 /// A parameter of a translated error message.
@@ -203,9 +240,7 @@ fn set_state(
             changed.push(id);
         }
     }
-    ChangeSet {
-        module_ids: changed,
-    }
+    ChangeSet::modules(changed)
 }
 
 impl Command {
@@ -245,6 +280,15 @@ impl Command {
             Command::RestoreModules { ids } => Command::RemoveModules {
                 ids: with_state(ids, ModuleState::Removed),
             },
+            Command::SetDiscount { manufacturer, .. } => Command::SetDiscount {
+                manufacturer: manufacturer.clone(),
+                rate: project
+                    .pricing
+                    .discounts
+                    .iter()
+                    .find(|d| &d.manufacturer == manufacturer)
+                    .map(|d| d.rate),
+            },
         }
     }
 
@@ -273,7 +317,7 @@ impl Command {
                     m.u = u;
                     m.v = v;
                 }
-                Ok(ChangeSet { module_ids: ids })
+                Ok(ChangeSet::modules(ids))
             }
             Command::SetModulePositions { positions } => {
                 let ids: Vec<ModuleId> = positions.iter().map(|p| p.id).collect();
@@ -289,9 +333,7 @@ impl Command {
                     m.u = p.u;
                     m.v = p.v;
                 }
-                Ok(ChangeSet {
-                    module_ids: unique_sorted(&ids),
-                })
+                Ok(ChangeSet::modules(unique_sorted(&ids)))
             }
             Command::RemoveModules { ids } => {
                 let ids = unique_sorted(ids);
@@ -312,6 +354,42 @@ impl Command {
                     ModuleState::Removed,
                     ModuleState::Active,
                 ))
+            }
+            Command::SetDiscount { manufacturer, rate } => {
+                if let Some(r) = rate {
+                    if !(r.is_finite() && (0.0..1.0).contains(r)) {
+                        return Err(CommandError::new(keys::INVALID_DISCOUNT)
+                            .with_text("manufacturer", manufacturer.clone())
+                            .with_number("rate", *r));
+                    }
+                }
+                let discounts = &mut project.pricing.discounts;
+                let current = discounts
+                    .iter()
+                    .position(|d| &d.manufacturer == manufacturer);
+                let changed = match (current, rate) {
+                    (Some(i), Some(r)) if discounts[i].rate == *r => false,
+                    (Some(i), Some(r)) => {
+                        discounts[i].rate = *r;
+                        true
+                    }
+                    (Some(i), None) => {
+                        discounts.remove(i);
+                        true
+                    }
+                    (None, Some(r)) => {
+                        discounts.push(ManufacturerDiscount {
+                            manufacturer: manufacturer.clone(),
+                            rate: *r,
+                        });
+                        true
+                    }
+                    (None, None) => false,
+                };
+                Ok(ChangeSet {
+                    module_ids: Vec::new(),
+                    pricing: changed,
+                })
             }
         }
     }
@@ -441,5 +519,47 @@ mod tests {
         );
         let back: Command = serde_json::from_str(&json).expect("deserialise");
         assert_eq!(back, cmd);
+    }
+
+    fn set_discount(rate: Option<f64>) -> Command {
+        Command::SetDiscount {
+            manufacturer: "K2 Systems".into(),
+            rate,
+        }
+    }
+
+    #[test]
+    fn set_discount_applies_and_undoes_exactly() {
+        let mut p = small_project();
+        let before = p.clone();
+        let inverse = set_discount(Some(0.35)).inverse(&p);
+        assert_eq!(inverse, set_discount(None));
+        let c = set_discount(Some(0.35)).apply(&mut p).expect("apply");
+        assert!(c.pricing && c.module_ids.is_empty());
+        assert!((p.pricing.rate_for("K2 Systems") - 0.35).abs() < 1e-12);
+        // Changing it: the inverse restores the previous rate.
+        assert_eq!(
+            set_discount(Some(0.4)).inverse(&p),
+            set_discount(Some(0.35))
+        );
+        // The same rate again changes nothing (the store does not journal it).
+        assert!(set_discount(Some(0.35))
+            .apply(&mut p)
+            .expect("same")
+            .is_empty());
+        inverse.apply(&mut p).expect("undo");
+        assert_eq!(p, before);
+        // Removing a discount that does not exist changes nothing.
+        assert!(set_discount(None).apply(&mut p).expect("none").is_empty());
+    }
+
+    #[test]
+    fn set_discount_rejects_invalid_rates() {
+        let mut p = small_project();
+        for rate in [1.0, -0.1, f64::NAN] {
+            let e = set_discount(Some(rate)).apply(&mut p).unwrap_err();
+            assert_eq!(e.key, keys::INVALID_DISCOUNT);
+        }
+        assert!(p.pricing.discounts.is_empty());
     }
 }

@@ -8,18 +8,21 @@
 //!
 //! This crate has no dependency on Tauri or on storage.
 
+pub mod article;
 pub mod command;
 pub mod fingerprint;
 pub mod geometry;
 pub mod ids;
 pub mod layout;
 pub mod mounting;
+pub mod pricing;
 pub mod project;
 pub mod site;
 pub mod stress;
 pub mod summary;
 pub mod units;
 
+pub use article::Article;
 pub use command::{ChangeSet, Command, CommandError, ErrorParam};
 pub use fingerprint::fingerprint;
 pub use geometry::{Quat, RoofFrame, Vec3};
@@ -30,9 +33,11 @@ pub use layout::{
     SupportGridSpec,
 };
 pub use mounting::{
-    AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, FixationSpec, MembraneKind, MountingStatics,
-    PairCoefficientsSpec, RailSectionSpec, RailStatics, WindZone,
+    AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, Driver, FixationSpec, MembraneKind,
+    MountingSystem, PairCoefficientsSpec, PartRule, RailLayerKind, RailSectionSpec, RailStatics,
+    WindZone,
 };
+pub use pricing::{ManufacturerDiscount, Pricing};
 pub use project::{
     ArrayGrid, Building, ModuleInstance, ModuleState, Orientation, PanelArray, Project, RoofFace,
     RoofKind, MODULES_PER_STRING, MODULE_MOUNT_GAP_M, MODULE_THICKNESS_M,

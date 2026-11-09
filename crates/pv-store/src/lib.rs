@@ -11,4 +11,4 @@ mod store;
 mod test_support;
 
 pub use error::StoreError;
-pub use store::{Author, ProjectStore};
+pub use store::{Author, BomSnapshotRecord, ProjectStore};

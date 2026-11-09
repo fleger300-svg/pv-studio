@@ -11,7 +11,6 @@ use std::time::Duration;
 use common::*;
 use pv_graph::Instance;
 use pv_model::{ChangeSet, ModuleId, Project};
-use pv_pipeline::report::field_reports;
 use pv_pipeline::worker::channel;
 use pv_pipeline::{
     batch_for_project, new_graph, sync_project, ComputeEvent, ComputeHandle, FieldOutcome,
@@ -43,9 +42,7 @@ fn ready(log: &[ComputeEvent]) -> Vec<(u32, usize, bool)> {
 /// Moves module `id` by 2 mm and returns the change set.
 fn nudge(p: &mut Project, id: u32) -> ChangeSet {
     p.modules[id as usize].u += 0.002;
-    ChangeSet {
-        module_ids: vec![ModuleId(id)],
-    }
+    ChangeSet::modules(vec![ModuleId(id)])
 }
 
 #[test]
@@ -67,12 +64,16 @@ fn opening_a_project_computes_every_field() {
             seq: 1
         })
     ));
-    let ComputeEvent::Ready { fields, .. } = &log[1] else {
+    let ComputeEvent::Ready { fields, bom, .. } = &log[1] else {
         panic!("{:?}", log[1]);
     };
     assert!(fields
         .iter()
         .all(|f| matches!(f.outcome, FieldOutcome::Ok { .. }) && f.seq == 1));
+    // The bill of materials comes with the first results.
+    let bom = bom.as_ref().expect("bill of materials");
+    assert_eq!(bom.seq, 1);
+    assert!(matches!(bom.outcome, pv_pipeline::BomOutcome::Ok { .. }));
 }
 
 #[test]
@@ -181,8 +182,7 @@ fn a_panic_is_contained_and_the_next_command_resyncs_everything() {
     let pass = Box::new(
         move |g: &mut pv_graph::Graph, c: &pv_graph::CancelToken, seq| {
             assert!(!std::mem::take(&mut first), "injected failure");
-            let ready = g.run_auto(c)?;
-            Ok(field_reports(g, &ready, seq))
+            pv_pipeline::worker::default_pass(g, c, seq)
         },
     );
     queue.run_with_pass(

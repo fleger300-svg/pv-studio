@@ -1,0 +1,20 @@
+[package]
+name = "pv-bom"
+description = "PV Studio bill of materials: part rules, rail cutting, per-face and project totals, sale units and prices (ADR-005)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-model.workspace = true
+serde.workspace = true
+specta.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

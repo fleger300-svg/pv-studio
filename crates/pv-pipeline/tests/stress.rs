@@ -20,7 +20,16 @@ fn stress_presets_compute_without_error() {
             p.modules.len(),
             t.elapsed()
         );
-        assert_eq!(ready.len(), p.arrays.len());
+        // Every field, and the bill of materials.
+        assert_eq!(ready.len(), p.arrays.len() + 1);
+        let bom = g
+            .get::<pv_pipeline::nodes::bom::ProjectBom>(Instance::Project)
+            .unwrap_or_else(|e| panic!("{preset:?} BOM: {e}"));
+        // Rails and clamps on the barns; the east-west system has no parts in its preset.
+        assert_eq!(
+            bom.total.lines.is_empty(),
+            preset == StressPreset::Industrial10k
+        );
         for a in &p.arrays {
             let s = g
                 .get::<FieldStatics>(Instance::Array(a.id))
