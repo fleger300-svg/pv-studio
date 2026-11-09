@@ -34,6 +34,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::create_stress_project,
             commands::open_project,
             commands::get_project_summary,
+            commands::plan_roof,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

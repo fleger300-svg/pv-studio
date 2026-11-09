@@ -19,6 +19,12 @@ export const commands = {
 	openProject: (path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("open_project", { path })),
 	/**  Summary of the open project (reloaded after a command that changed entities). */
 	getProjectSummary: () => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("get_project_summary")),
+	/**
+	 *  The command batch that gives `building` (new or edited, with a roof specification) its
+	 *  generated roof. Pure: nothing changes until the front-end applies it with
+	 *  `apply_command` (one journal entry, one undo).
+	 */
+	planRoof: (building: Building_Deserialize) => typedError<Command_Serialize, CommandError>(__TAURI_INVOKE("plan_roof", { building })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */

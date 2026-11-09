@@ -2505,6 +2505,7 @@ dependencies = [
  "pv-bom",
  "pv-model",
  "pv-pipeline",
+ "pv-roof",
  "pv-store",
  "serde",
  "serde_json",

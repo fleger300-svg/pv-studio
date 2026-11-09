@@ -35,6 +35,7 @@ tauri-build = { version = "2.7.4", features = [] }
 pv-model.workspace = true
 pv-bom.workspace = true
 pv-pipeline.workspace = true
+pv-roof.workspace = true
 pv-store.workspace = true
 serde.workspace = true
 serde_json.workspace = true

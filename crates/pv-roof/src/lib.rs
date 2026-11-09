@@ -170,3 +170,16 @@ pub fn is_outline_kind(k: RoofEdgeKind) -> bool {
         RoofEdgeKind::Eave | RoofEdgeKind::Verge | RoofEdgeKind::Parapet
     )
 }
+
+impl From<RoofError> for pv_model::CommandError {
+    fn from(e: RoofError) -> Self {
+        use pv_model::command::keys;
+        let field = match e {
+            RoofError::NoSpec => "roof",
+            RoofError::Invalid(field) => field,
+            RoofError::Overhang => "overhangM",
+            RoofError::NonConvex | RoofError::Degenerate => "footprint",
+        };
+        pv_model::CommandError::new(keys::ENTITY_INVALID).with_text("field", field)
+    }
+}
