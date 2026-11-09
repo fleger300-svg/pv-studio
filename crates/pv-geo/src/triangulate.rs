@@ -28,12 +28,15 @@ pub fn triangulate(poly: &[Vec2]) -> Vec<[usize; 3]> {
                 clipped = true;
                 break;
             }
+            // Another vertex inside the ear, or on its boundary within EPS (a vertex lying on
+            // the would-be diagonal a–c up to rounding), blocks it.
+            let side = |s: Vec2, e: Vec2, p: Vec2| (e - s).cross(p - s) / (e - s).length();
             let inside = idx.iter().any(|&j| {
                 j != i0 && j != i1 && j != i2 && {
                     let p = poly[j];
-                    (b - a).cross(p - a) >= 0.0
-                        && (c - b).cross(p - b) >= 0.0
-                        && (a - c).cross(p - c) >= 0.0
+                    side(a, b, p) >= -EPS
+                        && side(b, c, p) >= -EPS
+                        && side(c, a, p) >= -EPS
                         && p.distance(a) > EPS
                         && p.distance(b) > EPS
                         && p.distance(c) > EPS
@@ -154,5 +157,30 @@ mod tests {
         ];
         assert!((intersection_area(&a, &b) - 323.4).abs() < 1e-9);
         assert!((intersection_area(&b, &a) - 323.4).abs() < 1e-9);
+    }
+
+    /// A vertex on the would-be diagonal (up to rounding) must block the ear: found by the
+    /// roof generator (a valley, a ridge and a vertex aligned).
+    #[test]
+    fn a_vertex_on_the_diagonal_blocks_the_ear() {
+        let b = vec![
+            Vec2::new(6.0, 7.0),
+            Vec2::new(6.0, 5.0),
+            Vec2::new(9.641739612156895, -1.3322676295501878e-15),
+            Vec2::new(10.560774068072874, -3.3306690738754696e-16),
+            Vec2::new(8.150747579484795, 2.6421243988593583),
+            Vec2::new(8.150747579484797, 7.0),
+        ];
+        let tris = triangulate(&b);
+        let sum: f64 = tris
+            .iter()
+            .map(|t| signed_area(&[b[t[0]], b[t[1]], b[t[2]]]))
+            .sum();
+        assert!(
+            (sum - signed_area(&b)).abs() < 1e-9,
+            "{sum} vs {}",
+            signed_area(&b)
+        );
+        assert!((intersection_area(&b, &b) - signed_area(&b)).abs() < 1e-9);
     }
 }

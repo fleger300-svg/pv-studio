@@ -57,6 +57,8 @@ pub mod keys {
     pub const ENTITY_UNKNOWN: &str = "errors.entity.unknown";
     pub const ENTITY_REFERENCE: &str = "errors.entity.reference";
     pub const ENTITY_INVALID: &str = "errors.entity.invalid";
+    /// Roof generation (pv-roof).
+    pub const ROOF_REENTRANT_CORNER: &str = "errors.roof.reentrantCorner";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -95,6 +97,7 @@ pub mod keys {
         ENTITY_UNKNOWN,
         ENTITY_REFERENCE,
         ENTITY_INVALID,
+        ROOF_REENTRANT_CORNER,
     ];
 }
 

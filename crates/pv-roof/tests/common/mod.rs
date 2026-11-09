@@ -209,3 +209,11 @@ pub fn check_roof(b: &Building, roof: &GeneratedRoof) -> Result<(), String> {
     }
     Ok(())
 }
+
+/// Number of random cases: `default`, or `ROOF_CASES` for longer campaigns.
+pub fn cases(default: usize) -> usize {
+    std::env::var("ROOF_CASES")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
+}

@@ -16,6 +16,7 @@ mod point;
 mod polygon;
 mod rect;
 mod segment;
+mod skeleton;
 mod triangulate;
 
 pub use convex::{
@@ -26,6 +27,7 @@ pub use point::Vec2;
 pub use polygon::{Polygon, PolygonError};
 pub use rect::OrientedRect;
 pub use segment::Segment;
+pub use skeleton::{weighted_skeleton, Skeleton, SkeletonError, SkeletonNode, WaveEdge};
 pub use triangulate::{intersection_area, triangulate};
 
 /// Geometric tolerance [m].

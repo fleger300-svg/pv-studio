@@ -117,6 +117,9 @@
       "unknown": "{kind, select, building {Dieses Gebäude} roofFace {Diese Dachfläche} array {Dieses Modulfeld} other {Dieses Element}} existiert nicht mehr.",
       "reference": "Verweis auf {kind, select, building {ein fehlendes Gebäude} roofFace {eine fehlende Dachfläche} array {ein fehlendes Modulfeld} other {ein fehlendes Element}}.",
       "invalid": "Ungültiger Wert für {field}."
+    },
+    "roof": {
+      "reentrantCorner": "Die Kanten {a} und {b} bilden eine einspringende Ecke: Beide brauchen eine Neigung (keine Giebelwand) und dieselbe Traufhöhe (bei einem Dachüberstand auch dieselbe Neigung)."
     }
   },
   "hud": {

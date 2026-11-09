@@ -244,12 +244,13 @@ fn gable_walls_have_triangular_ends() {
 }
 
 /// 1 000 random convex footprints with random pitches (some vertical), raised eaves and
-/// overhangs: every invariant holds, and the roof is the lower envelope of the planes.
+/// overhangs: every invariant holds, and the roof is the lower envelope of the planes when
+/// every envelope face touches its eave.
 #[test]
 fn random_convex_roofs_hold_every_invariant() {
     let mut rng = Rng(0x00C0_FFEE);
     let mut kinds = std::collections::BTreeMap::new();
-    for case in 0..1000 {
+    for case in 0..cases(1000) {
         let fp = convex_footprint(&mut rng);
         let edges = (0..fp.len())
             .map(|_| {
@@ -271,9 +272,11 @@ fn random_convex_roofs_hold_every_invariant() {
         let b = building(fp, RoofSpec { edges, overhang_m });
         let roof = generate(&b).unwrap_or_else(|e| panic!("case {case}: {e}"));
         check_roof(&b, &roof).unwrap_or_else(|e| panic!("case {case}: {e}\n{b:?}"));
-        // Envelope: each face is the lowest plane at its centroid.
+        // Envelope (when it is the roof: every face touches its eave): each face is the
+        // lowest plane at its centroid.
         let input = &roof.input;
-        for pf in &roof.plan_faces {
+        let enveloped = roof.plan_faces == pv_roof::envelope::envelope_faces(input);
+        for pf in roof.plan_faces.iter().filter(|_| enveloped) {
             let c =
                 pf.polygon.iter().fold(Vec2::ZERO, |s, &p| s + p) * (1.0 / pf.polygon.len() as f64);
             let z = classify::face_z(input, pf, c);
