@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Panel, Select, Stat } from '@pv/ui';
 import { useProjectStore } from '../store/project';
 import { useViewStore } from '../store/view';
+import { StaticsPanel } from './StaticsPanel';
 import type { ColorMode } from '../viewport3d/PanelMeshes';
 
 /** Right-hand panel: selection info and display options for the layout step. */
@@ -33,6 +34,7 @@ export function SidePanel() {
           onChange={setColorMode}
         />
       </Panel>
+      <StaticsPanel />
     </aside>
   );
 }

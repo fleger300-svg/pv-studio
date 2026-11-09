@@ -89,6 +89,7 @@ fn ref_a_array(f: &RoofFace, boundary: Vec<[f64; 2]>) -> PanelArray {
         tilt_on_roof_deg: 0.0,
         azimuth_offset_deg: 0.0,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
+        mounting: None,
         layout: ArrayLayoutParams {
             boundary_uv: boundary,
             module_gap_u_m: 0.01,

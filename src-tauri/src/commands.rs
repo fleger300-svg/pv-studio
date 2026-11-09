@@ -152,11 +152,14 @@ pub struct ModelChanged {
 
 fn finish(
     app: &AppHandle,
+    state: &AppState,
     store: &ProjectStore,
     changes: ChangeSet,
     started: Instant,
 ) -> Result<ApplyResult, CommandError> {
     let rust_us = started.elapsed().as_secs_f64() * 1e6;
+    // Statics: the compute thread recomputes in the background (latest command wins).
+    state.submit(store, &changes);
     let (can_undo, can_redo) = store.history_state().map_err(CommandError::from)?;
     let event = ModelChanged {
         module_ids: changes.module_ids.clone(),
@@ -187,7 +190,7 @@ pub async fn apply_command(
         let changes = store
             .apply(&cmd, Author::User)
             .map_err(CommandError::from)?;
-        finish(&app, store, changes, started)
+        finish(&app, &state, store, changes, started)
     })
 }
 
@@ -198,7 +201,7 @@ pub async fn undo(app: AppHandle, state: State<'_, AppState>) -> Result<ApplyRes
     state.with(|store| {
         let started = Instant::now();
         let changes = store.undo().map_err(CommandError::from)?;
-        finish(&app, store, changes, started)
+        finish(&app, &state, store, changes, started)
     })
 }
 
@@ -209,6 +212,6 @@ pub async fn redo(app: AppHandle, state: State<'_, AppState>) -> Result<ApplyRes
     state.with(|store| {
         let started = Instant::now();
         let changes = store.redo().map_err(CommandError::from)?;
-        finish(&app, store, changes, started)
+        finish(&app, &state, store, changes, started)
     })
 }

@@ -81,10 +81,11 @@ pnpm tauri build --no-bundle          # → target/release/pv-studio(.exe)
    1. Regenerate and open the project; measure `open_project` call → first rendered frame.
    2. Orbit the camera for 10 s at constant angular speed (one full turn): average FPS, minimum FPS
       (lowest complete 1-second window) and p95 frame time.
-   3. Select the first 100 modules of array 0 and drag them by 0.25 m over 2 s, preview only:
+   3. Select the first 100 modules of array 0 and drag them by 1 cm over 2 s (below the module gap, so the move passes collision validation), preview only:
       FPS during the drag, and the number of IPC calls made during it (must be 0).
    4. Release: one `MoveModules` command, with the round trip measured in the front-end and the
-      apply time reported by Rust.
+      apply time reported by Rust; then the time until the statics of the changed fields are
+      recomputed on the compute thread (`compute:state` idle).
    5. Undo, then redo: round trips.
 3. The JSON report path is shown in the HUD:
    - dev build: `testdata/bench-<preset>-<platform>-<timestamp>.json`
@@ -147,6 +148,35 @@ Notes:
 - **Dev builds are slower.** Before the static-shadow optimisation, the 10k drag ran at 50 FPS in
   a dev build. That figure is not comparable with the release numbers above.
 
+### Statics recompute (G4, 2026-11-09)
+
+Same Windows machine, release build. In-app benchmark (reports `bench-*-20261109*.json` in
+[`testdata/results/`](testdata/results/)), every budget met:
+
+| Metric | Budget 1k | Windows 1k | Budget 10k | Windows 10k |
+|---|---|---|---|---|
+| Release of a 100-module drag → statics recomputed | < 100 ms | ✅ 14.5 ms | < 100 ms | ✅ 19.0 ms |
+| Orbit FPS (avg / min, p95 frame), with the compute thread running | ≥ 60 | ✅ 60.1 / 60, 17.1 ms | ≥ 30 | ✅ 59.8 / 57, 17.1 ms |
+| Drag of 100 modules | 60 FPS, 0 IPC | ✅ 60.0 FPS, 0 IPC | 60 FPS, 0 IPC | ✅ 59.5 FPS, 0 IPC |
+| `MoveModules` round trip (Rust apply, with collision validation) | < 100 ms | ✅ 16.5 ms (1.2 ms) | < 500 ms | ✅ 7.6 ms (3.0 ms) |
+| Project open → first frame | < 1 s | ✅ 121 ms | < 3 s | ✅ 113 ms |
+
+Per stage, from `cargo test --release -p pv-pipeline --test budget -- --ignored --nocapture`
+(21 commands + 21 undos each; median / max in ms; JSON in
+[`testdata/results/statics-budget-windows-2026-11-09.json`](testdata/results/statics-budget-windows-2026-11-09.json)):
+
+| Preset, scenario | Command thread (apply + batch) | Compute thread (pass) | End to end via the thread |
+|---|---|---|---|
+| 1k, move 40 modules | 0.29 / 0.76 | 0.38 / 0.99 | 0.50 / 1.02 |
+| 1k, remove the eave row (zone set changes) | 0.19 / 0.44 | 0.71 / 1.36 | 0.76 / 1.33 |
+| 10k, move 40 modules | 2.96 / 5.57 | 10.38 / 15.08 | 10.87 / 27.43 |
+| 10k, remove the eave row (zone set changes) | 0.53 / 1.42 | 10.79 / 13.95 | 10.98 / 15.96 |
+
+Opening (whole project, first pass): 8.7 ms (1k), 13.4 ms (10k). The 10k passes are dominated by
+the east-west ballast: the whole half (5 040 pairs) is one mounting block, so a change re-shares
+its ballast. The stress presets carry demo statics data (see `pv-model` `stress.rs`): a demo site,
+and on the gable barns the duopitch c_pe printed by K2 (no normative duopitch table yet).
+
 ### macOS run (to do)
 
 On a Mac with Xcode command-line tools: `pnpm install && pnpm tauri build --no-bundle`. Then run
@@ -178,6 +208,11 @@ These options are ordered by expected gain for effort:
 ```text
 crates/pv-model   domain types, roof frames (u, v) ↔ ENU, commands + inverses, stress presets
 crates/pv-store   SQLite (.pvproj): migrations, command journal (undo/redo), PVS1 binary encoder
+crates/pv-geo     2D geometry (polygons, oriented rectangles)
+crates/pv-layout  roof outlines, setbacks, module grids, mounting blocks, rails, command validation
+crates/pv-statics SIA 261 snow / wind, SIA 260 combinations, load descent, ballast (traced)
+crates/pv-graph   generic dependency graph: memoised nodes, early cut-off, cancellation
+crates/pv-pipeline project → graph wiring (layout, zones, loads, descent, ballast), compute thread
 src-tauri         Tauri 2 shell: managed state, commands, model:changed event, bindings export
 apps/desktop      React app: shell, viewport3d (instanced panels, editor), perf (HUD, benchmark),
                   workers (box selection), store (Zustand projection), i18n

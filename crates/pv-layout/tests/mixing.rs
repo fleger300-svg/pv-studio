@@ -20,6 +20,7 @@ fn building() -> Building {
         eave_height_m: 6.0,
         ridge_height_m: 9.0,
         roof_kind: RoofKind::Gable,
+        site: None,
     }
 }
 
@@ -69,6 +70,7 @@ fn singlerail(f: &RoofFace) -> PanelArray {
         tilt_on_roof_deg: 0.0,
         azimuth_offset_deg: 0.0,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
+        mounting: None,
         layout: ArrayLayoutParams {
             boundary_uv: vec![[0.0, 0.0], [11.0, 0.0], [11.0, 8.0], [0.0, 8.0]],
             module_gap_u_m: 0.01,
@@ -113,6 +115,7 @@ fn portrait(f: &RoofFace) -> PanelArray {
         tilt_on_roof_deg: 0.0,
         azimuth_offset_deg: 0.0,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
+        mounting: None,
         layout: ArrayLayoutParams {
             module_gap_u_m: 0.02,
             module_gap_v_m: 0.02,
@@ -344,6 +347,7 @@ fn east_west_and_tilted_rows_on_one_flat_roof() {
         azimuth_offset_deg: az,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
         layout,
+        mounting: None,
     };
     let mut west = mk(90.0, 8.6, ew_layout.clone());
     let mut east = mk(-90.0, 8.6, ew_layout);

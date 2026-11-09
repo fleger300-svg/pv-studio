@@ -10,12 +10,10 @@ rust-version.workspace = true
 [dependencies]
 pv-geo.workspace = true
 pv-layout.workspace = true
+pv-model.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
 [lints]
 workspace = true
-
-[dev-dependencies]
-pv-model.workspace = true

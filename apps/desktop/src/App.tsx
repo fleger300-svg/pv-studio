@@ -10,6 +10,7 @@ import { useViewStore } from './store/view';
 import { Viewport } from './viewport3d/Viewport';
 import { useEditorShortcuts } from './viewport3d/Interaction';
 import { Hud, useHudShortcut } from './perf/Hud';
+import { useStaticsSync } from './statics/useStatics';
 
 export function App() {
   const { t } = useTranslation();
@@ -18,6 +19,7 @@ export function App() {
   const editor = useViewStore((s) => s.editor);
   useEditorShortcuts(editor);
   useHudShortcut();
+  useStaticsSync();
   return (
     <div className="app">
       <TopBar projectName={summary?.name ?? null} />

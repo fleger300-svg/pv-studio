@@ -30,6 +30,16 @@ pub mod keys {
     pub const LAYOUT_MODULE_OVERLAP: &str = "errors.layout.moduleOverlap";
     pub const LAYOUT_ARRAY_DISTANCE: &str = "errors.layout.arrayDistance";
     pub const LAYOUT_INVALID_OUTLINE: &str = "errors.layout.invalidOutline";
+    pub const LAYOUT_INVALID_PARAMETERS: &str = "errors.layout.invalidParameters";
+    /// Statics (pv-pipeline / pv-statics).
+    pub const STATICS_SITE_MISSING: &str = "errors.statics.siteMissing";
+    pub const STATICS_MOUNTING_MISSING: &str = "errors.statics.mountingMissing";
+    pub const STATICS_OUT_OF_RANGE: &str = "errors.statics.outOfRange";
+    pub const STATICS_MISSING_COEFFICIENT: &str = "errors.statics.missingCoefficient";
+    pub const STATICS_UNSUPPORTED: &str = "errors.statics.unsupported";
+    pub const STATICS_NO_SUPPORT_GRID: &str = "errors.statics.noSupportGrid";
+    pub const STATICS_EAST_WEST_UNPAIRED: &str = "errors.statics.eastWestUnpaired";
+    pub const STATICS_INTERNAL: &str = "errors.statics.internal";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -50,6 +60,15 @@ pub mod keys {
         LAYOUT_MODULE_OVERLAP,
         LAYOUT_ARRAY_DISTANCE,
         LAYOUT_INVALID_OUTLINE,
+        LAYOUT_INVALID_PARAMETERS,
+        STATICS_SITE_MISSING,
+        STATICS_MOUNTING_MISSING,
+        STATICS_OUT_OF_RANGE,
+        STATICS_MISSING_COEFFICIENT,
+        STATICS_UNSUPPORTED,
+        STATICS_NO_SUPPORT_GRID,
+        STATICS_EAST_WEST_UNPAIRED,
+        STATICS_INTERNAL,
     ];
 }
 

@@ -156,21 +156,9 @@ impl Traced {
     }
 }
 
-/// Stable 64-bit fingerprint (FNV-1a) of any serialisable input.
-///
-/// Derived results carry the fingerprint of their inputs so that the cache in `pv-store` only
-/// recomputes what actually changed. Serialisation goes through `serde_json`, which keeps
-/// struct field order, so the hash is stable across runs for the same input.
-#[must_use]
-pub fn fingerprint<T: Serialize>(input: &T) -> u64 {
-    const OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
-    const PRIME: u64 = 0x0100_0000_01b3;
-    // Serialising plain data structs cannot fail; fall back to an empty payload otherwise.
-    let bytes = serde_json::to_vec(input).unwrap_or_default();
-    bytes
-        .iter()
-        .fold(OFFSET, |hash, &b| (hash ^ u64::from(b)).wrapping_mul(PRIME))
-}
+/// Stable 64-bit fingerprint (FNV-1a) of any serialisable input. It lives in `pv-model` so
+/// that the dependency graph (`pv-graph`) shares it; re-exported here unchanged.
+pub use pv_model::fingerprint::fingerprint;
 
 #[cfg(test)]
 mod tests {
@@ -181,15 +169,5 @@ mod tests {
         let t = Traced::new("s_k", 0.9, Unit::KiloNewtonPerSquareMetre)
             .reference(NormRef::new("SIA 261", "§5.2"));
         assert_eq!(t.display(), "s_k = 0.900 kN/m²  [SIA 261 §5.2]");
-    }
-
-    #[test]
-    fn fingerprint_is_stable_and_input_sensitive() {
-        #[derive(Serialize)]
-        struct In {
-            a: f64,
-        }
-        assert_eq!(fingerprint(&In { a: 1.0 }), fingerprint(&In { a: 1.0 }));
-        assert_ne!(fingerprint(&In { a: 1.0 }), fingerprint(&In { a: 1.5 }));
     }
 }

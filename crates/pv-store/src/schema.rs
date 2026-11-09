@@ -96,6 +96,35 @@ const MIGRATIONS: &[&str] = &[
     r#"
     ALTER TABLE roof_face ADD COLUMN support_grid_json TEXT;
     "#,
+    // v4: statics data (pv-pipeline): site per building, mounting snapshot per array, hipped
+    // and monopitch roofs. SQLite cannot alter a CHECK constraint: the building table is
+    // rebuilt (SQLite's 12-step procedure; foreign keys are off during migrations, see
+    // `prepare`, so dropping the old table does not cascade to the roof faces).
+    r#"
+    CREATE TABLE building_v4 (
+        id             TEXT PRIMARY KEY,
+        project_id     TEXT NOT NULL REFERENCES project(id) ON DELETE CASCADE,
+        ord            INTEGER NOT NULL,
+        name           TEXT NOT NULL,
+        origin_x       REAL NOT NULL,
+        origin_y       REAL NOT NULL,
+        origin_z       REAL NOT NULL,
+        size_x         REAL NOT NULL,
+        size_y         REAL NOT NULL,
+        eave_height_m  REAL NOT NULL,
+        ridge_height_m REAL NOT NULL,
+        roof_kind      TEXT NOT NULL CHECK (roof_kind IN ('gable', 'flat', 'hipped', 'monopitch')),
+        site_json      TEXT
+    ) STRICT;
+    INSERT INTO building_v4 (id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y,
+                             eave_height_m, ridge_height_m, roof_kind)
+        SELECT id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y,
+               eave_height_m, ridge_height_m, roof_kind
+        FROM building;
+    DROP TABLE building;
+    ALTER TABLE building_v4 RENAME TO building;
+    ALTER TABLE "array" ADD COLUMN mounting_json TEXT;
+    "#,
 ];
 
 /// Latest schema version known to this build.
@@ -109,7 +138,6 @@ pub fn prepare(conn: &mut Connection) -> Result<(), StoreError> {
             "cannot enable WAL (got {mode})"
         )));
     }
-    conn.pragma_update(None, "foreign_keys", "ON")?;
     conn.pragma_update(None, "synchronous", "NORMAL")?;
 
     let current: i64 = conn.pragma_query_value(None, "user_version", |r| r.get(0))?;
@@ -119,12 +147,26 @@ pub fn prepare(conn: &mut Connection) -> Result<(), StoreError> {
             supported: SCHEMA_VERSION,
         });
     }
+    // Foreign keys off while migrating (table rebuilds must not cascade); checked before
+    // each commit, then on for the session.
+    conn.pragma_update(None, "foreign_keys", "OFF")?;
     for (i, sql) in MIGRATIONS.iter().enumerate().skip(current as usize) {
         let tx = conn.transaction()?;
         tx.execute_batch(sql)?;
+        let violations: i64 =
+            tx.query_row("SELECT COUNT(*) FROM pragma_foreign_key_check", [], |r| {
+                r.get(0)
+            })?;
+        if violations > 0 {
+            return Err(StoreError::Corrupt(format!(
+                "migration to v{} breaks {violations} foreign keys",
+                i + 1
+            )));
+        }
         tx.pragma_update(None, "user_version", i as i64 + 1)?;
         tx.commit()?;
     }
+    conn.pragma_update(None, "foreign_keys", "ON")?;
     Ok(())
 }
 

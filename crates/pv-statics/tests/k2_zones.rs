@@ -106,6 +106,7 @@ fn roof_1_field_centres() -> (RoofOutline, Vec<(u32, Vec<Vec2>)>, f64) {
             tilt_on_roof_deg: 0.0,
             azimuth_offset_deg: 0.0,
             grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
+            mounting: None,
             layout: ArrayLayoutParams {
                 module_gap_u_m: 0.01,
                 module_gap_v_m: 0.02,

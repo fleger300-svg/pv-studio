@@ -89,6 +89,15 @@ where
     serde_json::from_value(merged).map_err(conv)
 }
 
+fn roof_kind_str(k: RoofKind) -> &'static str {
+    match k {
+        RoofKind::Gable => "gable",
+        RoofKind::Flat => "flat",
+        RoofKind::Hipped => "hipped",
+        RoofKind::Monopitch => "monopitch",
+    }
+}
+
 fn state_str(s: ModuleState) -> &'static str {
     match s {
         ModuleState::Active => "active",
@@ -296,13 +305,14 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
     )?;
     for (ord, b) in p.buildings.iter().enumerate() {
         tx.execute(
-            "INSERT INTO building (id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            "INSERT INTO building (id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
             params![
                 b.id.0.to_string(), p.id.0.to_string(), ord as i64, b.name,
                 b.origin[0], b.origin[1], b.origin[2], b.size_m[0], b.size_m[1],
                 b.eave_height_m, b.ridge_height_m,
-                match b.roof_kind { RoofKind::Gable => "gable", RoofKind::Flat => "flat" },
+                roof_kind_str(b.roof_kind),
+                b.site.as_ref().map(serde_json::to_string).transpose()?,
             ],
         )?;
     }
@@ -322,8 +332,8 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
         tx.execute(
             r#"INSERT INTO "array" (id, roof_face_id, ord, module_length_m, module_width_m, orientation, tilt_on_roof_deg, azimuth_offset_deg,
                                     grid_rows, grid_cols, grid_origin_u, grid_origin_v, grid_pitch_u, grid_pitch_v,
-                                    grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json)
-               VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)"#,
+                                    grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json)
+               VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)"#,
             params![
                 a.id.0.to_string(), a.roof_face_id.0.to_string(), ord as i64,
                 a.module_length_m, a.module_width_m,
@@ -332,6 +342,7 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
                 a.grid.rows, a.grid.cols, a.grid.origin_u, a.grid.origin_v, a.grid.pitch_u, a.grid.pitch_v,
                 a.grid.block_cols, a.grid.block_rows, a.grid.block_extra_u, a.grid.block_extra_v,
                 serde_json::to_string(&a.layout)?,
+                a.mounting.as_ref().map(serde_json::to_string).transpose()?,
             ],
         )?;
     }
@@ -364,7 +375,7 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
 
     let buildings = conn
         .prepare(
-            "SELECT id, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind
+            "SELECT id, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json
              FROM building ORDER BY ord",
         )?
         .query_map([], |r| {
@@ -378,8 +389,11 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
                 roof_kind: enum_col(r, 9, |s| match s {
                     "gable" => Some(RoofKind::Gable),
                     "flat" => Some(RoofKind::Flat),
+                    "hipped" => Some(RoofKind::Hipped),
+                    "monopitch" => Some(RoofKind::Monopitch),
                     _ => None,
                 })?,
+                site: json_col(r, 10)?,
             })
         })?
         .collect::<Result<Vec<_>, _>>()?;
@@ -409,7 +423,7 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
         .prepare(
             r#"SELECT id, roof_face_id, module_length_m, module_width_m, orientation, tilt_on_roof_deg, azimuth_offset_deg,
                       grid_rows, grid_cols, grid_origin_u, grid_origin_v, grid_pitch_u, grid_pitch_v,
-                      grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json
+                      grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json
                FROM "array" ORDER BY ord"#,
         )?
         .query_map([], |r| {
@@ -438,6 +452,7 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
                     block_extra_v: r.get(16)?,
                 },
                 layout: json_with_defaults::<ArrayLayoutParams>(r, 17)?,
+                mounting: json_col(r, 18)?,
             })
         })?
         .collect::<Result<Vec<_>, _>>()?;
@@ -495,6 +510,71 @@ mod tests {
         drop(store);
         let reopened = ProjectStore::open(&dir.path().join("p.pvproj")).expect("open");
         assert_eq!(reopened.project(), &original);
+    }
+
+    /// v4: site per building, mounting snapshot per array, the new roof kinds.
+    #[test]
+    fn statics_data_round_trips() {
+        use pv_model::{
+            CpEntrySpec, CpSpec, FixationSpec, MountingStatics, SiteParams, TerrainCategory,
+            WindZone,
+        };
+        let dir = tempfile::tempdir().expect("tmp");
+        let mut p = fixture_project();
+        p.buildings[0].roof_kind = RoofKind::Hipped;
+        p.buildings[1].roof_kind = RoofKind::Monopitch;
+        let mut site = SiteParams::new(389.88, 1.1);
+        site.terrain = TerrainCategory::IV;
+        p.buildings[0].site = Some(site);
+        let mut m = MountingStatics::k2_single_rail();
+        m.psi0_snow = Some(0.86);
+        m.cp = CpSpec::Explicit {
+            reference: "K2 Base".into(),
+            entries: vec![CpEntrySpec {
+                zone: WindZone::Ridge,
+                cp_pressure: 0.2,
+                cp_suction: -1.0,
+            }],
+        };
+        if let Some(r) = m.rails.as_mut() {
+            r.fixation = Some(FixationSpec {
+                name: "HangerBolt".into(),
+                uplift_kn: 3.48,
+                pressure_kn: 2.71,
+                parallel_kn: 0.34,
+            });
+        }
+        p.arrays[0].mounting = Some(m);
+        let path = dir.path().join("statics.pvproj");
+        drop(ProjectStore::create(&path, p.clone()).expect("create"));
+        assert_eq!(ProjectStore::open(&path).expect("open").project(), &p);
+    }
+
+    /// A v3 file (before the statics columns) migrates: the building table is rebuilt
+    /// without cascading to the roof faces, arrays and modules, and foreign keys are back on.
+    #[test]
+    fn v3_file_upgrades_without_losing_children() {
+        let dir = tempfile::tempdir().expect("tmp");
+        let path = dir.path().join("v3.pvproj");
+        let original = fixture_project();
+        drop(ProjectStore::create(&path, original.clone()).expect("create"));
+        {
+            let conn = Connection::open(&path).expect("raw open");
+            conn.execute_batch(
+                r#"ALTER TABLE building DROP COLUMN site_json;
+                   ALTER TABLE "array" DROP COLUMN mounting_json;
+                   PRAGMA user_version = 3;"#,
+            )
+            .expect("downgrade to v3");
+        }
+        let reopened = ProjectStore::open(&path).expect("open v3");
+        assert_eq!(reopened.project(), &original);
+        assert!(!original.roof_faces.is_empty() && !original.modules.is_empty());
+        let fk: i64 = reopened
+            .conn
+            .pragma_query_value(None, "foreign_keys", |r| r.get(0))
+            .expect("fk");
+        assert_eq!(fk, 1);
     }
 
     #[test]
@@ -579,6 +659,8 @@ mod tests {
                    ALTER TABLE "array" DROP COLUMN grid_block_rows;
                    ALTER TABLE "array" DROP COLUMN grid_block_extra_u;
                    ALTER TABLE "array" DROP COLUMN grid_block_extra_v;
+                   ALTER TABLE "array" DROP COLUMN mounting_json;
+                   ALTER TABLE building DROP COLUMN site_json;
                    PRAGMA user_version = 1;"#,
             )
             .expect("downgrade to v1");
