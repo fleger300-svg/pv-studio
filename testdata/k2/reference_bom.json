@@ -1,0 +1,247 @@
+{
+  "_about": "Reference bill of materials of project A (the 4 roofs of testdata/k2/reference_layout.json): K2 Base material list, anonymised (roof ids instead of building names). Quantities, masses and sale units as printed by K2. List prices are scaled by an undisclosed factor and rounded to the cent: the tests check the arithmetic (ADR-005, discounts, cents), not a tariff. Expected prices = quantity x scaled list price (discount 0, as in the K2 list). The source .xlsx is kept out of git.",
+  "currency": "CHF",
+  "rail_cutting": {
+    "stock_length_m": 4.8,
+    "kerf_m": 0,
+    "_finding": "K2 cuts top rails and bottom rails separately (FFD per layer gives 40/28/28/32 = 128 bars, as printed; mixing both layers would give 125). Per-roof tabs: each roof cut alone; total: project-wide cut per layer (also 128 here)."
+  },
+  "articles": [
+    {
+      "article_no": "2003024",
+      "label": "Single Standing SeamClamp CF:x",
+      "unit_mass_kg": 0.145,
+      "pack_qty": 50,
+      "list_price": 9.29
+    },
+    {
+      "article_no": "2004393",
+      "label": "SingleRail 36; 4.80 m",
+      "unit_mass_kg": 3.692,
+      "pack_qty": 20,
+      "list_price": 57.09
+    },
+    {
+      "article_no": "2003145",
+      "label": "SingleRail Climber Set 36/50",
+      "unit_mass_kg": 0.067,
+      "pack_qty": 10,
+      "list_price": 2.55
+    },
+    {
+      "article_no": "2004148",
+      "label": "K2 Clamp MC 25-40 Black",
+      "unit_mass_kg": 0.0653,
+      "pack_qty": 20,
+      "list_price": 3.44
+    },
+    {
+      "article_no": "2004545",
+      "label": "K2 Clamp EC 25-40 Black",
+      "unit_mass_kg": 0.0717,
+      "pack_qty": 20,
+      "list_price": 3.44
+    }
+  ],
+  "roofs": [
+    {
+      "id": "roof-1",
+      "lines": [
+        {
+          "article_no": "2003024",
+          "quantity": 136,
+          "mass_kg": 19.72,
+          "sale_units": 3,
+          "price": 1263.44
+        },
+        {
+          "article_no": "2004393",
+          "quantity": 40,
+          "mass_kg": 147.68,
+          "sale_units": 2,
+          "price": 2283.6
+        },
+        {
+          "article_no": "2003145",
+          "quantity": 106,
+          "mass_kg": 7.102,
+          "sale_units": 11,
+          "price": 270.3
+        },
+        {
+          "article_no": "2004148",
+          "quantity": 34,
+          "mass_kg": 2.2202,
+          "sale_units": 2,
+          "price": 116.96
+        },
+        {
+          "article_no": "2004545",
+          "quantity": 72,
+          "mass_kg": 5.1624,
+          "sale_units": 4,
+          "price": 247.68
+        }
+      ]
+    },
+    {
+      "id": "roof-2",
+      "lines": [
+        {
+          "article_no": "2003024",
+          "quantity": 105,
+          "mass_kg": 15.225,
+          "sale_units": 3,
+          "price": 975.45
+        },
+        {
+          "article_no": "2004393",
+          "quantity": 28,
+          "mass_kg": 103.376,
+          "sale_units": 2,
+          "price": 1598.52
+        },
+        {
+          "article_no": "2003145",
+          "quantity": 78,
+          "mass_kg": 5.226,
+          "sale_units": 8,
+          "price": 198.9
+        },
+        {
+          "article_no": "2004148",
+          "quantity": 26,
+          "mass_kg": 1.6978,
+          "sale_units": 2,
+          "price": 89.44
+        },
+        {
+          "article_no": "2004545",
+          "quantity": 52,
+          "mass_kg": 3.7284,
+          "sale_units": 3,
+          "price": 178.88
+        }
+      ]
+    },
+    {
+      "id": "roof-3",
+      "lines": [
+        {
+          "article_no": "2003024",
+          "quantity": 99,
+          "mass_kg": 14.355,
+          "sale_units": 2,
+          "price": 919.71
+        },
+        {
+          "article_no": "2004393",
+          "quantity": 28,
+          "mass_kg": 103.376,
+          "sale_units": 2,
+          "price": 1598.52
+        },
+        {
+          "article_no": "2003145",
+          "quantity": 78,
+          "mass_kg": 5.226,
+          "sale_units": 8,
+          "price": 198.9
+        },
+        {
+          "article_no": "2004148",
+          "quantity": 26,
+          "mass_kg": 1.6978,
+          "sale_units": 2,
+          "price": 89.44
+        },
+        {
+          "article_no": "2004545",
+          "quantity": 52,
+          "mass_kg": 3.7284,
+          "sale_units": 3,
+          "price": 178.88
+        }
+      ]
+    },
+    {
+      "id": "roof-4",
+      "lines": [
+        {
+          "article_no": "2003024",
+          "quantity": 126,
+          "mass_kg": 18.27,
+          "sale_units": 3,
+          "price": 1170.54
+        },
+        {
+          "article_no": "2004393",
+          "quantity": 32,
+          "mass_kg": 118.144,
+          "sale_units": 2,
+          "price": 1826.88
+        },
+        {
+          "article_no": "2003145",
+          "quantity": 90,
+          "mass_kg": 6.03,
+          "sale_units": 9,
+          "price": 229.5
+        },
+        {
+          "article_no": "2004545",
+          "quantity": 64,
+          "mass_kg": 4.5888,
+          "sale_units": 4,
+          "price": 220.16
+        },
+        {
+          "article_no": "2004148",
+          "quantity": 26,
+          "mass_kg": 1.6978,
+          "sale_units": 2,
+          "price": 89.44
+        }
+      ]
+    }
+  ],
+  "total": {
+    "lines": [
+      {
+        "article_no": "2003024",
+        "quantity": 466,
+        "mass_kg": 67.57,
+        "sale_units": 10,
+        "price": 4329.14
+      },
+      {
+        "article_no": "2004393",
+        "quantity": 128,
+        "mass_kg": 472.576,
+        "sale_units": 7,
+        "price": 7307.52
+      },
+      {
+        "article_no": "2003145",
+        "quantity": 352,
+        "mass_kg": 23.584,
+        "sale_units": 36,
+        "price": 897.6
+      },
+      {
+        "article_no": "2004148",
+        "quantity": 112,
+        "mass_kg": 7.3136,
+        "sale_units": 6,
+        "price": 385.28
+      },
+      {
+        "article_no": "2004545",
+        "quantity": 240,
+        "mass_kg": 17.208,
+        "sale_units": 12,
+        "price": 825.6
+      }
+    ]
+  }
+}

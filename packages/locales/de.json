@@ -104,6 +104,12 @@
       "noSupportGrid": "Die Dacheindeckung der Fläche (Stehfalz oder Sparren) ist nicht angegeben.",
       "eastWestUnpaired": "Ein Ost-West-System muss mit seiner Gegenhälfte gekoppelt sein.",
       "internal": "Die Statikberechnung ist unerwartet fehlgeschlagen: {detail}"
+    },
+    "bom": {
+      "zeroPack": "Artikel {articleNo}: Die Menge pro Verkaufseinheit ist null.",
+      "pieceTooLong": "Artikel {articleNo}: Ein Stück von {length} m ist länger als die Stange von {stock} m.",
+      "invalidStock": "Artikel {articleNo}: Ungültige Stangenlänge oder Schnittbreite.",
+      "invalidDiscount": "Ungültiger Rabatt für {manufacturer}: {rate}."
     }
   },
   "hud": {

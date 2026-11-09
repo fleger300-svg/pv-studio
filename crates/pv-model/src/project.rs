@@ -6,7 +6,7 @@ use specta::Type;
 use crate::geometry::{Quat, RoofFrame, Vec3};
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 use crate::layout::{ArrayLayoutParams, RoofOutlineSpec, SupportGridSpec};
-use crate::mounting::MountingStatics;
+use crate::mounting::MountingSystem;
 use crate::site::SiteParams;
 
 /// Module frame thickness (m).
@@ -194,7 +194,7 @@ pub struct PanelArray {
     pub layout: ArrayLayoutParams,
     /// Statics snapshot of the mounting system; `None` until a system is chosen.
     #[specta(optional)]
-    pub mounting: Option<MountingStatics>,
+    pub mounting: Option<MountingSystem>,
 }
 
 impl PanelArray {

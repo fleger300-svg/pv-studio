@@ -40,6 +40,11 @@ pub mod keys {
     pub const STATICS_NO_SUPPORT_GRID: &str = "errors.statics.noSupportGrid";
     pub const STATICS_EAST_WEST_UNPAIRED: &str = "errors.statics.eastWestUnpaired";
     pub const STATICS_INTERNAL: &str = "errors.statics.internal";
+    /// Bill of materials (pv-bom).
+    pub const BOM_ZERO_PACK: &str = "errors.bom.zeroPack";
+    pub const BOM_PIECE_TOO_LONG: &str = "errors.bom.pieceTooLong";
+    pub const BOM_INVALID_STOCK: &str = "errors.bom.invalidStock";
+    pub const BOM_INVALID_DISCOUNT: &str = "errors.bom.invalidDiscount";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -69,6 +74,10 @@ pub mod keys {
         STATICS_NO_SUPPORT_GRID,
         STATICS_EAST_WEST_UNPAIRED,
         STATICS_INTERNAL,
+        BOM_ZERO_PACK,
+        BOM_PIECE_TOO_LONG,
+        BOM_INVALID_STOCK,
+        BOM_INVALID_DISCOUNT,
     ];
 }
 

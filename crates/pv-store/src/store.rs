@@ -516,7 +516,7 @@ mod tests {
     #[test]
     fn statics_data_round_trips() {
         use pv_model::{
-            CpEntrySpec, CpSpec, FixationSpec, MountingStatics, SiteParams, TerrainCategory,
+            CpEntrySpec, CpSpec, FixationSpec, MountingSystem, SiteParams, TerrainCategory,
             WindZone,
         };
         let dir = tempfile::tempdir().expect("tmp");
@@ -526,7 +526,7 @@ mod tests {
         let mut site = SiteParams::new(389.88, 1.1);
         site.terrain = TerrainCategory::IV;
         p.buildings[0].site = Some(site);
-        let mut m = MountingStatics::k2_single_rail();
+        let mut m = MountingSystem::k2_single_rail();
         m.psi0_snow = Some(0.86);
         m.cp = CpSpec::Explicit {
             reference: "K2 Base".into(),
@@ -575,6 +575,31 @@ mod tests {
             .pragma_query_value(None, "foreign_keys", |r| r.get(0))
             .expect("fk");
         assert_eq!(fk, 1);
+    }
+
+    /// v5: a mounting snapshot written before parts existed opens with no parts.
+    #[test]
+    fn v4_mounting_snapshot_upgrades_without_parts() {
+        let dir = tempfile::tempdir().expect("tmp");
+        let path = dir.path().join("v4.pvproj");
+        let mut original = fixture_project();
+        original.arrays[0].mounting = Some(pv_model::MountingSystem::k2_single_rail());
+        drop(ProjectStore::create(&path, original.clone()).expect("create"));
+        {
+            let conn = Connection::open(&path).expect("raw open");
+            conn.execute_batch(
+                r#"UPDATE "array" SET mounting_json = json_remove(mounting_json, '$.parts')
+                     WHERE mounting_json IS NOT NULL;
+                   PRAGMA user_version = 4;"#,
+            )
+            .expect("downgrade to v4");
+        }
+        let reopened = ProjectStore::open(&path).expect("open v4");
+        let mut expected = original;
+        if let Some(m) = expected.arrays[0].mounting.as_mut() {
+            m.parts.clear();
+        }
+        assert_eq!(reopened.project(), &expected);
     }
 
     #[test]

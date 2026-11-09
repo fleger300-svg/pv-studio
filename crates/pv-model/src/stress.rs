@@ -7,7 +7,7 @@ use crate::geometry::Vec3;
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 use crate::layout::{ArrayLayoutParams, CrossRailSpec, SupportGridKind, SupportGridSpec};
 use crate::mounting::{
-    AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, MembraneKind, MountingStatics,
+    AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, MembraneKind, MountingSystem,
     PairCoefficientsSpec, WindZone,
 };
 use crate::project::{
@@ -334,13 +334,13 @@ fn demo_site(terrain: TerrainCategory) -> SiteParams {
 /// K2 SingleRail on the gable barns. The engine has no normative duopitch c_pe table yet:
 /// the preset uses the duopitch coefficients printed by K2 Base for project C (interior and
 /// ridge); the other edge zones take the ridge values.
-fn single_rail_on_gable() -> MountingStatics {
+fn single_rail_on_gable() -> MountingSystem {
     let entry = |zone, cp_pressure, cp_suction| CpEntrySpec {
         zone,
         cp_pressure,
         cp_suction,
     };
-    MountingStatics {
+    MountingSystem {
         cp: CpSpec::Explicit {
             reference: "Stress preset (demo): K2 Base duopitch c_pe of project C, ridge values \
                         on the other edge zones"
@@ -353,14 +353,14 @@ fn single_rail_on_gable() -> MountingStatics {
                 entry(WindZone::EaveCorner, 0.2, -1.0),
             ],
         },
-        ..MountingStatics::k2_single_rail()
+        ..MountingSystem::k2_single_rail()
     }
 }
 
 /// K2 D-Dome 6.10 on gravel, coefficients back-fitted from the K2 Base report of reference
 /// B (9 m): eave corner and interior as printed, the other edge zones take the eave-corner
 /// values.
-fn d_dome() -> MountingStatics {
+fn d_dome() -> MountingSystem {
     let k = |cp_east, cp_west| PairCoefficientsSpec {
         cp_east,
         cp_west,
@@ -376,7 +376,7 @@ fn d_dome() -> MountingStatics {
         uplift: k(-0.028, -0.324),
         sliding: k(0.079, -0.273),
     };
-    MountingStatics {
+    MountingSystem {
         name: "K2 D-Dome 6.10".into(),
         module_mass_kg: 21.5,
         system_mass_per_module_kg: 2.25,
@@ -407,6 +407,8 @@ fn d_dome() -> MountingStatics {
             friction_coefficient: 0.7,
             friction_source: "K2 Base report".into(),
         }),
+        // Concrete blocks are bought locally: no part in the K2 list.
+        parts: Vec::new(),
     }
 }
 

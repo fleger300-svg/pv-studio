@@ -104,6 +104,12 @@
       "noSupportGrid": "The roof covering of the face (standing seams or rafters) is not specified.",
       "eastWestUnpaired": "An east-west system must be paired with its opposite half.",
       "internal": "The statics calculation failed unexpectedly: {detail}"
+    },
+    "bom": {
+      "zeroPack": "Article {articleNo}: the quantity per sale unit is zero.",
+      "pieceTooLong": "Article {articleNo}: a {length} m piece is longer than the {stock} m bar.",
+      "invalidStock": "Article {articleNo}: invalid bar length or saw cut.",
+      "invalidDiscount": "Invalid discount for {manufacturer}: {rate}."
     }
   },
   "hud": {

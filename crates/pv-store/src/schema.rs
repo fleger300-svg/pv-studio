@@ -125,6 +125,12 @@ const MIGRATIONS: &[&str] = &[
     ALTER TABLE building_v4 RENAME TO building;
     ALTER TABLE "array" ADD COLUMN mounting_json TEXT;
     "#,
+    // v5: mounting systems carry their parts (pv-bom); snapshots written before have none.
+    r#"
+    UPDATE "array"
+       SET mounting_json = json_set(mounting_json, '$.parts', json('[]'))
+     WHERE mounting_json IS NOT NULL AND json_extract(mounting_json, '$.parts') IS NULL;
+    "#,
 ];
 
 /// Latest schema version known to this build.

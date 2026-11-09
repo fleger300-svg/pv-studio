@@ -104,6 +104,12 @@
       "noSupportGrid": "La couverture du pan (joints debout ou chevrons) n'est pas renseignée.",
       "eastWestUnpaired": "Un système est-ouest doit être associé à sa moitié opposée.",
       "internal": "Le calcul statique a échoué de façon inattendue : {detail}"
+    },
+    "bom": {
+      "zeroPack": "Article {articleNo} : la quantité par unité de vente est nulle.",
+      "pieceTooLong": "Article {articleNo} : une pièce de {length} m dépasse la barre de {stock} m.",
+      "invalidStock": "Article {articleNo} : longueur de barre ou largeur de coupe invalide.",
+      "invalidDiscount": "Remise invalide pour {manufacturer} : {rate}."
     }
   },
   "hud": {

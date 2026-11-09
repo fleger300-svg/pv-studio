@@ -8,10 +8,10 @@ use pv_layout::model::{grid_spec, relayout_fixed};
 use pv_layout::{layout_east_west, Search};
 use pv_model::{
     AeroZoneSpec, ArrayGrid, ArrayId, ArrayLayoutParams, BallastSpec, BlockParams, Building,
-    BuildingId, ConsequenceClass, CpSpec, CrossRailSpec, MembraneKind, ModuleState,
-    MountingStatics, Orientation, PairCoefficientsSpec, PanelArray, Project, ProjectId,
-    RoofEdgeKind, RoofFace, RoofFaceId, RoofKind, RoofOutlineSpec, ServiceLifeModel, SiteParams,
-    SnowExposure, SupportGridKind, SupportGridSpec, TerrainCategory, WindZone,
+    BuildingId, ConsequenceClass, CpSpec, CrossRailSpec, MembraneKind, ModuleState, MountingSystem,
+    Orientation, PairCoefficientsSpec, PanelArray, Project, ProjectId, RoofEdgeKind, RoofFace,
+    RoofFaceId, RoofKind, RoofOutlineSpec, ServiceLifeModel, SiteParams, SnowExposure,
+    SupportGridKind, SupportGridSpec, TerrainCategory, WindZone,
 };
 use serde::Deserialize;
 
@@ -160,7 +160,7 @@ pub fn ref_a_roof1() -> Project {
                 rails: Some(k2_rails()),
                 ..ArrayLayoutParams::default()
             },
-            mounting: Some(MountingStatics::k2_single_rail()),
+            mounting: Some(MountingSystem::k2_single_rail()),
         };
         let s = grid_spec(&a);
         a.grid = ArrayGrid {
@@ -279,7 +279,7 @@ pub fn ref_b_east_west() -> Project {
         }),
         ..ArrayLayoutParams::default()
     };
-    let mounting = MountingStatics {
+    let mounting = MountingSystem {
         name: "K2 D-Dome 6.10".into(),
         module_mass_kg: 21.5,
         system_mass_per_module_kg: 2.25,
@@ -288,6 +288,7 @@ pub fn ref_b_east_west() -> Project {
         cp: CpSpec::Standard,
         rails: None,
         ballast: Some(d_dome_ref_b_h9()),
+        parts: Vec::new(),
     };
     let mk = |az: f64| PanelArray {
         id: ArrayId::new(),

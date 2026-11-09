@@ -196,6 +196,24 @@ export type ArraySummary_Serialize = {
 	halfFootprint: [number, number],
 };
 
+/**  One article of a manufacturer's catalogue. */
+export type Article = {
+	/**  Manufacturer's article number (e.g. `2004393`). */
+	articleNo: string,
+	manufacturer: string,
+	/**  Manufacturer's label, shown when no translation exists. */
+	label: string,
+	/**  Translated descriptions by language (`fr`, `de`, `en`); may be empty. */
+	descriptions: { [key in string]: string },
+	/**  Mass of one piece [kg]. */
+	unitMassKg: number,
+	/**  Pieces per sale unit (pack, bundle). */
+	packQty: number,
+	/**  List price of one piece, in `currency`; 0 when unknown. */
+	listPrice: number,
+	currency: string,
+};
+
 /**  Ballast data of an aerodynamic (east-west) system. */
 export type BallastSpec = {
 	manufacturer: string,
@@ -361,6 +379,28 @@ export type CrossRailSpec_Serialize = {
 	maxCantileverM?: number | null,
 };
 
+/**
+ *  What a part's quantity is counted from (closed set: the bill-of-materials engine knows how
+ *  to count each of them on a laid-out field).
+ */
+export type Driver = 
+/**  One per roof fixation (standing-seam clamp, hanger bolt…). */
+{ kind: "fixation" } | 
+/**  One per crossing of a top and a bottom rail. */
+{ kind: "climber" } | 
+/**  Two per top rail (end clamps). */
+{ kind: "topRailEnd" } | 
+/**  Modules − 1 per top rail (middle clamps). */
+{ kind: "topRailInnerJoint" } | 
+/**  One per active module. */
+{ kind: "module" } | 
+/**  One per ballast block. */
+{ kind: "ballastBlock" } | 
+/**  Stock bars the rail pieces of `layer` are cut from. */
+{ kind: "railBars"; layer: RailLayerKind; stock_length_m: number; 
+/**  Saw cut lost between two pieces of a bar [m]. */
+kerf_m: number };
+
 export type EdgeSetback = {
 	kind: RoofEdgeKind,
 	distanceM: number,
@@ -488,11 +528,11 @@ export type ModulePosition = {
 	v: number,
 };
 
-/**  Statics snapshot of a field's mounting system. */
-export type MountingStatics = MountingStatics_Serialize | MountingStatics_Deserialize;
+/**  Snapshot of a field's mounting system: statics data and parts. */
+export type MountingSystem = MountingSystem_Serialize | MountingSystem_Deserialize;
 
-/**  Statics snapshot of a field's mounting system. */
-export type MountingStatics_Deserialize = {
+/**  Snapshot of a field's mounting system: statics data and parts. */
+export type MountingSystem_Deserialize = {
 	/**  Product name shown in reports. */
 	name: string,
 	/**  Mass of one module [kg] (module datasheet). */
@@ -508,10 +548,12 @@ export type MountingStatics_Deserialize = {
 	rails?: RailStatics_Deserialize | null,
 	/**  Aerodynamic ballasted system (east-west on flat roofs). */
 	ballast?: BallastSpec | null,
+	/**  Parts of the system and the rules giving their quantities (bill of materials). */
+	parts: PartRule[],
 };
 
-/**  Statics snapshot of a field's mounting system. */
-export type MountingStatics_Serialize = {
+/**  Snapshot of a field's mounting system: statics data and parts. */
+export type MountingSystem_Serialize = {
 	/**  Product name shown in reports. */
 	name: string,
 	/**  Mass of one module [kg] (module datasheet). */
@@ -527,6 +569,8 @@ export type MountingStatics_Serialize = {
 	rails?: RailStatics_Serialize | null,
 	/**  Aerodynamic ballasted system (east-west on flat roofs). */
 	ballast?: BallastSpec | null,
+	/**  Parts of the system and the rules giving their quantities (bill of materials). */
+	parts: PartRule[],
 };
 
 /**  Kind of an obstacle on the roof. */
@@ -568,7 +612,7 @@ export type PanelArray_Deserialize = {
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Deserialize,
 	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
-	mounting?: MountingStatics_Deserialize | null,
+	mounting?: MountingSystem_Deserialize | null,
 };
 
 export type PanelArray_Serialize = {
@@ -585,7 +629,15 @@ export type PanelArray_Serialize = {
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Serialize,
 	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
-	mounting?: MountingStatics_Serialize | null,
+	mounting?: MountingSystem_Serialize | null,
+};
+
+/**  One part of a system: an article, counted by `driver`, `per` pieces each time. */
+export type PartRule = {
+	article: Article,
+	driver: Driver,
+	/**  Pieces per counted item (ignored for rail bars). */
+	per: number,
 };
 
 export type PlatformInfo = {
@@ -634,6 +686,12 @@ export type ProjectSummary_Serialize = {
 	canUndo: boolean,
 	canRedo: boolean,
 };
+
+/**
+ *  Layer of a cross-rail system: rails of different layers are never cut from the same bar
+ *  (K2 Base cuts top and bottom rails separately).
+ */
+export type RailLayerKind = "top" | "bottom";
 
 /**  Cross-section and material of a rail. */
 export type RailSectionSpec = {

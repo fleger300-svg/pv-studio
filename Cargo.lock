@@ -2391,6 +2391,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-bom"
+version = "0.1.0"
+dependencies = [
+ "pv-model",
+ "serde",
+ "serde_json",
+ "specta",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "pv-geo"
 version = "0.1.0"
 dependencies = [
