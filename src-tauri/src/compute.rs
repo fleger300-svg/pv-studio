@@ -228,3 +228,41 @@ pub async fn list_bom_snapshots(
             .collect())
     })
 }
+
+/// A frozen bill of materials, read back for an export.
+#[derive(Debug, Clone, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct FrozenBom {
+    pub info: BomSnapshotInfo,
+    pub bom: pv_bom::Bom,
+    pub pricing: pv_model::Pricing,
+}
+
+/// One frozen bill of materials, exactly as it was recorded.
+#[tauri::command]
+#[specta::specta]
+pub async fn get_bom_snapshot(
+    state: State<'_, AppState>,
+    id: u32,
+) -> Result<FrozenBom, CommandError> {
+    state.with(|store| {
+        let info = store
+            .bom_snapshots()
+            .map_err(CommandError::from)?
+            .into_iter()
+            .find(|s| s.id == i64::from(id))
+            .ok_or_else(|| CommandError::new(keys::BOM_STALE))?;
+        let (bom, pricing) = store
+            .bom_snapshot_json(i64::from(id))
+            .map_err(CommandError::from)?
+            .ok_or_else(|| CommandError::new(keys::BOM_STALE))?;
+        let parse = |e: serde_json::Error| {
+            CommandError::new(keys::STORE_FAILURE).with_text("detail", e.to_string())
+        };
+        Ok(FrozenBom {
+            info: info.into(),
+            bom: serde_json::from_str(&bom).map_err(parse)?,
+            pricing: serde_json::from_str(&pricing).map_err(parse)?,
+        })
+    })
+}

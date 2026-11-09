@@ -42,6 +42,14 @@ export const commands = {
 	freezeBom: (label: string) => typedError<BomSnapshotInfo, CommandError>(__TAURI_INVOKE("freeze_bom", { label })),
 	/**  Frozen bills of materials of the open project, oldest first. */
 	listBomSnapshots: () => typedError<BomSnapshotInfo[], CommandError>(__TAURI_INVOKE("list_bom_snapshots")),
+	/**  One frozen bill of materials, exactly as it was recorded. */
+	getBomSnapshot: (id: number) => typedError<FrozenBom_Serialize, CommandError>(__TAURI_INVOKE("get_bom_snapshot", { id })),
+	/**
+	 *  Saves `bytes` as an Excel file. Without `path`, asks the user where (native dialog,
+	 *  `suggested_name` pre-filled); `None` when the user cancels. With `path` (automation,
+	 *  e.g. tests), writes there without asking.
+	 */
+	saveExport: (suggestedName: string, bytes: number[], path: string | null) => typedError<string | null, CommandError>(__TAURI_INVOKE("save_export", { suggestedName, bytes, path })),
 	/**  Facts about the host that the WebView cannot report reliably. */
 	platformInfo: () => __TAURI_INVOKE<PlatformInfo>("platform_info"),
 	/**
@@ -637,6 +645,23 @@ export type FixationSpec = {
 	parallelKn: number,
 };
 
+/**  A frozen bill of materials, read back for an export. */
+export type FrozenBom = FrozenBom_Serialize | FrozenBom_Deserialize;
+
+/**  A frozen bill of materials, read back for an export. */
+export type FrozenBom_Deserialize = {
+	info: BomSnapshotInfo,
+	bom: Bom_Deserialize,
+	pricing: Pricing,
+};
+
+/**  A frozen bill of materials, read back for an export. */
+export type FrozenBom_Serialize = {
+	info: BomSnapshotInfo,
+	bom: Bom_Serialize,
+	pricing: Pricing,
+};
+
 /**  Direction of an expansion joint line. */
 export type JointAxis = 
 /**  Line `u = position`: cuts the rails running along `u`. */
@@ -648,6 +673,13 @@ export type JointAxis =
 export type LayoutAnchor = 
 /**  Lower-left corner (eave, left verge): K2 Base convention. */
 "lowerLeft" | "lowerRight" | "upperLeft" | "upperRight" | "centre";
+
+/**  Discount granted by a manufacturer. */
+export type ManufacturerDiscount = {
+	manufacturer: string,
+	/**  Fraction of the list price, in `[0, 1)` (0.35 = −35 %). */
+	rate: number,
+};
 
 /**  Roof membrane under a ballasted system. */
 export type MembraneKind = "epdm" | "bitumen" | "pvc" | "tpo" | "gravel" | "green";
@@ -790,6 +822,11 @@ export type PlatformInfo = {
 	arch: string,
 	/**  Whether the Rust side is a debug build (benchmarks should use release builds). */
 	debugBuild: boolean,
+};
+
+/**  Pricing of a project. */
+export type Pricing = {
+	discounts: ManufacturerDiscount[],
 };
 
 /**  Identifies a project. */

@@ -164,5 +164,40 @@
     "percent": "{value} %",
     "metres": "{value} m",
     "disclaimer": "Vordimensionierung nach SIA 261, vor der Ausführung zu prüfen."
+  },
+  "bom": {
+    "title": "Stückliste",
+    "total": "Total",
+    "price": "Gesamtpreis",
+    "currency": "CHF",
+    "mass": "Gesamtgewicht",
+    "kg": "{value} kg",
+    "saleUnits": "Verkaufseinheiten",
+    "savedBars": "Eingesparte Stangen",
+    "discount": "Rabatt {manufacturer}",
+    "view": "Stückliste anzeigen",
+    "export": "Nach Excel exportieren",
+    "exporting": "Export läuft…",
+    "exported": "Datei gespeichert: {path}",
+    "pending": "Stückliste wird berechnet…",
+    "empty": "Keine Teile: Die Montagesysteme der Felder enthalten keine Artikel.",
+    "close": "Schliessen",
+    "percent": "{value} %",
+    "savedBarsNote": "Durch Wiederverwendung von Reststücken eingesparte Stangen: Artikel {articleNo}, {perFaces} Stangen pro Dachfläche, {project} im Projekt ({saved} weniger).",
+    "fileName": "Stückliste",
+    "snapshotLabel": "Excel-Export vom {date}",
+    "columns": {
+      "articleNo": "Art.-Nr.",
+      "description": "Artikelbezeichnung",
+      "quantity": "Anzahl",
+      "mass": "Gewicht",
+      "saleUnits": "Anzahl Verkaufseinheiten",
+      "packQty": "Menge pro Verkaufseinheit",
+      "listPrice": "Listenpreis",
+      "discountRate": "Rabattsatz",
+      "unitPrice": "Einzelpreis",
+      "price": "Preis"
+    },
+    "noPrices": "Listenpreise nicht erfasst"
   }
 }

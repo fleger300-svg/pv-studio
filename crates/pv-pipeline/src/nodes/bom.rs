@@ -13,7 +13,9 @@ use super::ballast::Ballast;
 use super::layout::Hardware;
 use super::{array_of, kind};
 use crate::error::bom_error;
-use crate::inputs::{ArrayIn, FaceIn, ModulesIn, MountingIn, PricingIn, ProjectIndexIn};
+use crate::inputs::{
+    ArrayIn, BuildingIn, FaceIn, ModulesIn, MountingIn, PricingIn, ProjectIndexIn,
+};
 
 fn mm(length_m: f64) -> f64 {
     (length_m * 1000.0).round() / 1000.0
@@ -31,6 +33,8 @@ impl Derived for FieldCountsNode {
         array_of(i)?;
         let array = ctx.get::<ArrayIn>(i)?;
         let face = ctx.get::<FaceIn>(Instance::Face(array.roof_face_id))?;
+        // Tab title as K2 names it: building and roof face (« Bât 9A Toiture Sud »).
+        let building = ctx.get::<BuildingIn>(Instance::Building(face.building_id))?;
         let mounting = ctx.get::<MountingIn>(i)?;
         let parts = mounting
             .as_ref()
@@ -40,7 +44,7 @@ impl Derived for FieldCountsNode {
         let mut counts = FieldCounts {
             face: FaceRef {
                 id: face.id.0.to_string(),
-                name: face.name.clone(),
+                name: format!("{} · {}", building.name, face.name),
             },
             modules: 0,
             top_rails: Vec::new(),

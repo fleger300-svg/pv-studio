@@ -164,5 +164,40 @@
     "percent": "{value} %",
     "metres": "{value} m",
     "disclaimer": "Pre-dimensioning to SIA 261, to be validated before execution."
+  },
+  "bom": {
+    "title": "Bill of materials",
+    "total": "Total",
+    "price": "Total price",
+    "currency": "CHF",
+    "mass": "Total weight",
+    "kg": "{value} kg",
+    "saleUnits": "Sale units",
+    "savedBars": "Bars saved",
+    "discount": "{manufacturer} discount",
+    "view": "View the bill of materials",
+    "export": "Export to Excel",
+    "exporting": "Exporting…",
+    "exported": "File saved: {path}",
+    "pending": "Computing the bill of materials…",
+    "empty": "No parts: the fields' mounting systems declare no articles.",
+    "close": "Close",
+    "percent": "{value} %",
+    "savedBarsNote": "Bars saved by reusing offcuts: article {articleNo}, {perFaces} bars face by face, {project} on the project ({saved} fewer).",
+    "fileName": "Bill of materials",
+    "snapshotLabel": "Excel export of {date}",
+    "columns": {
+      "articleNo": "Art. no",
+      "description": "Article description",
+      "quantity": "Quantity",
+      "mass": "Weight",
+      "saleUnits": "Number of sale units",
+      "packQty": "Quantity per sale unit",
+      "listPrice": "List price",
+      "discountRate": "Discount rate",
+      "unitPrice": "Unit price",
+      "price": "Price"
+    },
+    "noPrices": "List prices not set"
   }
 }

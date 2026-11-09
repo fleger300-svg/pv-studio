@@ -185,3 +185,24 @@ fn top_rail_lengths_give_the_module_counts() {
     assert_eq!(modules_on(2.388), 2);
     assert_eq!(modules_on(1.234), 1);
 }
+
+/// Writes (with `UPDATE_FIXTURES=1`) or verifies the bill of materials consumed by the front
+/// end's K2-format tests (`apps/desktop/src/bom/*.test.ts`), so that the Excel export is
+/// checked on the exact tables the engine produces.
+#[test]
+fn typescript_fixture_is_up_to_date() {
+    let (bom, _) = reference_bom();
+    let json = serde_json::to_string_pretty(&bom).unwrap() + "\n";
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../testdata/fixtures/bom-k2.json");
+    if std::env::var_os("UPDATE_FIXTURES").is_some() {
+        std::fs::write(&path, &json).unwrap();
+    }
+    let on_disk = std::fs::read_to_string(&path)
+        .expect("fixture missing: run `UPDATE_FIXTURES=1 cargo test -p pv-bom`");
+    assert_eq!(
+        on_disk.replace("\r\n", "\n"),
+        json,
+        "fixture out of date (UPDATE_FIXTURES=1)"
+    );
+}

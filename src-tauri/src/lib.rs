@@ -4,6 +4,7 @@
 mod bench;
 mod commands;
 mod compute;
+mod export;
 mod state;
 
 use std::sync::Arc;
@@ -41,6 +42,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             compute::get_bom,
             compute::freeze_bom,
             compute::list_bom_snapshots,
+            compute::get_bom_snapshot,
+            export::save_export,
             bench::platform_info,
             bench::write_bench_report,
         ])
@@ -72,6 +75,7 @@ pub fn run() {
     export_bindings(&builder).expect("failed to export TypeScript bindings");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(AppState::default())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {

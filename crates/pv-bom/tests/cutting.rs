@@ -25,7 +25,11 @@ fn every_piece_is_placed_once_and_no_bar_overflows() {
         // 12 m).
         let pieces: Vec<f64> = (0..n)
             .map(|_| {
-                let max_mm = if rng.next().is_multiple_of(5) { 12_000 } else { 4_800 };
+                let max_mm = if rng.next().is_multiple_of(5) {
+                    12_000
+                } else {
+                    4_800
+                };
                 (200 + rng.next() % (max_mm - 199)) as f64 / 1000.0
             })
             .collect();

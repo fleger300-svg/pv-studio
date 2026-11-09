@@ -164,5 +164,40 @@
     "percent": "{value} %",
     "metres": "{value} m",
     "disclaimer": "Pré-dimensionnement selon SIA 261, à faire valider pour exécution."
+  },
+  "bom": {
+    "title": "Nomenclature",
+    "total": "Total",
+    "price": "Prix total",
+    "currency": "CHF",
+    "mass": "Poids total",
+    "kg": "{value} kg",
+    "saleUnits": "Unités de vente",
+    "savedBars": "Barres économisées",
+    "discount": "Remise {manufacturer}",
+    "view": "Voir la nomenclature",
+    "export": "Exporter Excel",
+    "exporting": "Export en cours…",
+    "exported": "Fichier enregistré : {path}",
+    "pending": "Calcul de la nomenclature…",
+    "empty": "Aucune pièce : le système de montage des champs ne déclare pas d'articles.",
+    "close": "Fermer",
+    "percent": "{value} %",
+    "savedBarsNote": "Barres économisées par réutilisation des chutes : article {articleNo}, {perFaces} barres pan par pan, {project} sur le projet ({saved} de moins).",
+    "fileName": "Nomenclature",
+    "snapshotLabel": "Export Excel du {date}",
+    "columns": {
+      "articleNo": "Art. no",
+      "description": "Description de l'article",
+      "quantity": "Nombre",
+      "mass": "Poids",
+      "saleUnits": "Nombre d'unités de vente",
+      "packQty": "Quantité par unité de vente",
+      "listPrice": "Prix catalogue",
+      "discountRate": "Taux de remise",
+      "unitPrice": "Prix à l'unité",
+      "price": "Prix"
+    },
+    "noPrices": "Prix catalogue non renseignés"
   }
 }

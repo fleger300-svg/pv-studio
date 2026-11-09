@@ -3,11 +3,11 @@
 
 use std::collections::BTreeMap;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use specta::Type;
 
 /// One article line (K2 columns).
-#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct BomLine {
     pub article_no: String,
@@ -32,7 +32,7 @@ pub struct BomLine {
 }
 
 /// One tab: a roof face, or the project total.
-#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct BomTable {
     /// `None` for the Total.
@@ -45,7 +45,7 @@ pub struct BomTable {
 
 /// Bars saved on the project by reusing offcuts across faces: the face tabs need
 /// `per_faces` bars (each face cut alone), the Total `project`.
-#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct SavedBars {
     pub article_no: String,
@@ -54,7 +54,7 @@ pub struct SavedBars {
 }
 
 /// The bill of materials of a project.
-#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Bom {
     pub faces: Vec<BomTable>,
