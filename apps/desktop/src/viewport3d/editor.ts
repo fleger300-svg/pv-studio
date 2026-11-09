@@ -70,10 +70,12 @@ export class Editor {
     this.attached = true;
     this.box = new BoxSelectClient(this.panels.data);
     const unlisten = await events.modelChanged.listen((e) => {
-      const { canUndo, canRedo, moduleIds } = e.payload;
+      const { canUndo, canRedo, moduleIds, reload } = e.payload;
       const store = useProjectStore.getState();
       store.setCounters({ ...store.counters, canUndo, canRedo });
-      void this.sync(moduleIds);
+      // Entities changed: the viewport is rebuilt from a new summary (this editor included).
+      if (reload) void store.reload();
+      else void this.sync(moduleIds);
     });
     // `detach()` may have run while awaiting.
     if (this.isAttached()) this.unlisten = unlisten;

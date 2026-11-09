@@ -112,6 +112,11 @@
       "invalidDiscount": "Invalid discount for {manufacturer}: {rate}.",
       "stale": "The bill of materials is still being computed: try again in a moment.",
       "invalidPiece": "Article {articleNo}: invalid rail piece length ({length} m)."
+    },
+    "entity": {
+      "unknown": "This {kind, select, building {building} roofFace {roof face} array {array} other {element}} no longer exists.",
+      "reference": "Reference to a missing {kind, select, building {building} roofFace {roof face} array {array} other {element}}.",
+      "invalid": "Invalid value for {field}."
     }
   },
   "hud": {

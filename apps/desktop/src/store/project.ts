@@ -13,8 +13,9 @@ export interface ProjectCounters {
 /** Read-only projection of the project owned by Rust. */
 interface ProjectState {
   /**
-   * Static description of the open project. Never replaced while the project is open: the
-   * viewport builds its GPU meshes from it, and edits must not rebuild them.
+   * Static description of the open project. The viewport builds its GPU meshes from it:
+   * module edits never replace it; only commands that change entities (buildings, roof
+   * faces, arrays, added or removed modules) do, through `reload`.
    */
   summary: ProjectSummary | null;
   /** Decoded PVS1 buffer (typed arrays; updated in place by the viewport on sync). */
@@ -28,6 +29,11 @@ interface ProjectState {
   loadPreset: (preset: StressPreset) => Promise<void>;
   /** Applies the counters returned by Rust after a command. */
   setCounters: (counters: ProjectCounters) => void;
+  /**
+   * Re-reads the summary and every module after a command that changed entities or
+   * renumbered modules: the viewport rebuilds its meshes from the new objects.
+   */
+  reload: () => Promise<void>;
 }
 
 function toCommandError(e: unknown): CommandError {
@@ -70,5 +76,17 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
 
   setCounters: (counters) => {
     set({ counters });
+  },
+
+  reload: async () => {
+    if (!get().summary) return;
+    try {
+      const summary = await unwrap(api.getProjectSummary());
+      const modules = decodeModuleBuffer(await unwrap(api.getModuleBuffer()));
+      const { canUndo, canRedo, activeModuleCount } = summary;
+      set({ summary, modules, counters: { canUndo, canRedo, activeModuleCount } });
+    } catch (e) {
+      set({ error: toCommandError(e) });
+    }
   },
 }));

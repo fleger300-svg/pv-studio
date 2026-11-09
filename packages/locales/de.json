@@ -112,6 +112,11 @@
       "invalidDiscount": "Ungültiger Rabatt für {manufacturer}: {rate}.",
       "stale": "Die Stückliste wird noch berechnet: Bitte gleich erneut versuchen.",
       "invalidPiece": "Artikel {articleNo}: Ungültige Länge eines Schienenstücks ({length} m)."
+    },
+    "entity": {
+      "unknown": "{kind, select, building {Dieses Gebäude} roofFace {Diese Dachfläche} array {Dieses Modulfeld} other {Dieses Element}} existiert nicht mehr.",
+      "reference": "Verweis auf {kind, select, building {ein fehlendes Gebäude} roofFace {eine fehlende Dachfläche} array {ein fehlendes Modulfeld} other {ein fehlendes Element}}.",
+      "invalid": "Ungültiger Wert für {field}."
     }
   },
   "hud": {

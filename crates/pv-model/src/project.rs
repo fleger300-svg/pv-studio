@@ -286,6 +286,10 @@ pub enum ProjectInvariantError {
     UnknownRoofFace(usize),
     #[error("modules of array {0} are not contiguous")]
     NonContiguousArray(usize),
+    #[error("roof face {0} references an unknown building")]
+    UnknownBuilding(usize),
+    #[error("modules of array {0} come before those of an earlier array")]
+    ArraysOutOfOrder(usize),
 }
 
 impl Project {
@@ -294,6 +298,11 @@ impl Project {
     /// # Errors
     /// Returns the first violated invariant.
     pub fn validate(&self) -> Result<(), ProjectInvariantError> {
+        for (i, f) in self.roof_faces.iter().enumerate() {
+            if !self.buildings.iter().any(|b| b.id == f.building_id) {
+                return Err(ProjectInvariantError::UnknownBuilding(i));
+            }
+        }
         for (i, a) in self.arrays.iter().enumerate() {
             if !self.roof_faces.iter().any(|f| f.id == a.roof_face_id) {
                 return Err(ProjectInvariantError::UnknownRoofFace(i));
@@ -312,11 +321,33 @@ impl Project {
                 if seen[ai] {
                     return Err(ProjectInvariantError::NonContiguousArray(ai));
                 }
+                // Canonical order (what `compact_modules` produces): blocks follow the arrays.
+                if last_array.is_some_and(|l| l > ai) {
+                    return Err(ProjectInvariantError::ArraysOutOfOrder(ai));
+                }
                 seen[ai] = true;
                 last_array = Some(ai);
             }
         }
         Ok(())
+    }
+
+    /// Renumbers the modules canonically: blocks in array order, each block in its current
+    /// order, ids = positions. Deterministic: the same modules give the same ids, which is
+    /// what makes the inverse of a structural command exact.
+    pub fn compact_modules(&mut self) {
+        let order: std::collections::HashMap<ArrayId, usize> = self
+            .arrays
+            .iter()
+            .enumerate()
+            .map(|(i, a)| (a.id, i))
+            .collect();
+        // Stable: keeps the order inside each block.
+        self.modules
+            .sort_by_key(|m| order.get(&m.array_id).copied().unwrap_or(usize::MAX));
+        for (i, m) in self.modules.iter_mut().enumerate() {
+            m.id = ModuleId(u32::try_from(i).unwrap_or(u32::MAX));
+        }
     }
 
     #[must_use]

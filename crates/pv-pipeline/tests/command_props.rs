@@ -1,6 +1,8 @@
 //! G4 property: over random sequences of *real* commands (`ProjectStore`: layout validation,
 //! journal, undo / redo), the incrementally updated graph always equals a graph built from
 //! scratch on the same project, node by node — and so do the compute thread's results.
+//! E1: the sequences include entity commands (arrays re-laid out, edited, removed; roof
+//! faces edited) and batches.
 
 mod common;
 
@@ -10,7 +12,7 @@ use std::time::Duration;
 
 use common::*;
 use pv_graph::{CancelToken, Instance};
-use pv_model::{ArrayId, Command, ModuleId, ModuleState, Project};
+use pv_model::{ArrayId, Command, ModuleId, ModuleSlot, ModuleState, Project};
 use pv_pipeline::{
     sync_changes, sync_project, ComputeEvent, ComputeHandle, FieldOutcome, FieldStatics,
 };
@@ -23,13 +25,91 @@ enum Op {
     Redo,
 }
 
+fn slots(p: &Project, a: ArrayId) -> Vec<ModuleSlot> {
+    p.modules
+        .iter()
+        .filter(|m| m.array_id == a)
+        .map(|m| ModuleSlot {
+            row: m.row,
+            col: m.col,
+            u: m.u,
+            v: m.v,
+            state: m.state,
+            string_index: m.string_index,
+        })
+        .collect()
+}
+
+/// E1 entity commands: structural re-layouts, entity edits and removals, batches.
+fn random_entity_command(rng: &mut Rng, p: &Project) -> Option<Command> {
+    let array = |rng: &mut Rng| -> Option<&pv_model::PanelArray> {
+        (!p.arrays.is_empty()).then(|| &p.arrays[rng.below(p.arrays.len() as u64) as usize])
+    };
+    Some(match rng.below(6) {
+        // Re-laid out with some modules gone for good (ids renumbered).
+        0 | 1 => {
+            let a = array(rng)?.id;
+            Command::SetArrayModules {
+                array_id: a,
+                modules: slots(p, a)
+                    .into_iter()
+                    .filter(|_| rng.below(6) > 0)
+                    .collect(),
+            }
+        }
+        // A roof face slightly steeper (zones and loads change).
+        2 => {
+            let mut f = p.roof_faces[rng.below(p.roof_faces.len() as u64) as usize].clone();
+            f.tilt_deg = (f.tilt_deg + 2.0).min(45.0);
+            Command::UpsertRoofFace {
+                face: Box::new(f),
+                at: None,
+            }
+        }
+        // An array unpaired / re-paired (east-west systems).
+        3 => {
+            let mut a = array(rng)?.clone();
+            a.layout.paired_with = match a.layout.paired_with {
+                Some(_) => None,
+                None => p.arrays.iter().map(|o| o.id).find(|o| *o != a.id),
+            };
+            Command::UpsertArray {
+                array: Box::new(a),
+                at: None,
+            }
+        }
+        4 => Command::RemoveArray { id: array(rng)?.id },
+        // A batch: a re-layout and a discount, undone as one.
+        _ => {
+            let a = array(rng)?.id;
+            let mut modules = slots(p, a);
+            modules.truncate(modules.len() / 2);
+            Command::Batch {
+                commands: vec![
+                    Command::SetArrayModules {
+                        array_id: a,
+                        modules,
+                    },
+                    Command::SetDiscount {
+                        manufacturer: "K2 Systems".into(),
+                        rate: Some(0.2),
+                    },
+                ],
+            }
+        }
+    })
+}
+
 fn random_op(rng: &mut Rng, p: &Project) -> Op {
     let n = p.modules.len() as u64;
+    if n == 0 {
+        return Op::Undo;
+    }
     let some = |rng: &mut Rng, k: u64| -> Vec<ModuleId> {
         let start = rng.below(n);
         (0..k).map(|j| ModuleId(((start + j) % n) as u32)).collect()
     };
-    match rng.below(13) {
+    match rng.below(16) {
         // Small moves (stay in the gaps: mostly accepted, rarely change zones).
         0..=3 => {
             let k = 1 + rng.below(4);
@@ -73,6 +153,7 @@ fn random_op(rng: &mut Rng, p: &Project) -> Op {
             }
         }
         9 | 10 => Op::Undo,
+        13 | 14 => random_entity_command(rng, p).map_or(Op::Undo, Op::Command),
         // A discount (or its removal) on the K2 material.
         11 => Op::Command(Command::SetDiscount {
             manufacturer: "K2 Systems".into(),

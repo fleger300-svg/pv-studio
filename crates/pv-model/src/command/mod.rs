@@ -6,9 +6,14 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::ids::ModuleId;
-use crate::pricing::ManufacturerDiscount;
-use crate::project::{ModuleState, Project};
+use crate::ids::{ArrayId, BuildingId, ModuleId, RoofFaceId};
+use crate::project::{Building, ModuleState, PanelArray, Project, RoofFace};
+
+mod batch;
+mod entities;
+mod modules;
+mod pricing;
+mod structure;
 
 /// i18n keys of every error the back-end can return. The front-end translates them; never
 /// show raw keys. A test checks that each key exists in `packages/locales/en.json`.
@@ -48,6 +53,10 @@ pub mod keys {
     pub const BOM_INVALID_STOCK: &str = "errors.bom.invalidStock";
     pub const BOM_INVALID_DISCOUNT: &str = "errors.bom.invalidDiscount";
     pub const BOM_STALE: &str = "errors.bom.stale";
+    /// Entity commands (buildings, roof faces, arrays).
+    pub const ENTITY_UNKNOWN: &str = "errors.entity.unknown";
+    pub const ENTITY_REFERENCE: &str = "errors.entity.reference";
+    pub const ENTITY_INVALID: &str = "errors.entity.invalid";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -83,6 +92,9 @@ pub mod keys {
         BOM_INVALID_STOCK,
         BOM_INVALID_DISCOUNT,
         BOM_STALE,
+        ENTITY_UNKNOWN,
+        ENTITY_REFERENCE,
+        ENTITY_INVALID,
     ];
 }
 
@@ -92,6 +104,19 @@ pub struct ModulePosition {
     pub id: ModuleId,
     pub u: f64,
     pub v: f64,
+}
+
+/// One module of an array, without its id (ids are assigned canonically, see
+/// [`Project::compact_modules`]). Used by [`Command::SetArrayModules`].
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ModuleSlot {
+    pub row: u32,
+    pub col: u32,
+    pub u: f64,
+    pub v: f64,
+    pub state: ModuleState,
+    pub string_index: u32,
 }
 
 /// A serialisable model change.
@@ -116,16 +141,59 @@ pub enum Command {
         manufacturer: String,
         rate: Option<f64>,
     },
+    /// Replaces the building with the same id, or inserts it at `at` (clamped; `None`: last).
+    UpsertBuilding {
+        building: Box<Building>,
+        at: Option<u32>,
+    },
+    /// Removes a building with its roof faces, arrays and modules.
+    RemoveBuilding { id: BuildingId },
+    /// Replaces the roof face with the same id, or inserts it at `at`.
+    UpsertRoofFace {
+        face: Box<RoofFace>,
+        at: Option<u32>,
+    },
+    /// Removes a roof face with its arrays and modules.
+    RemoveRoofFace { id: RoofFaceId },
+    /// Replaces the array with the same id (its modules are kept), or inserts it at `at`.
+    UpsertArray {
+        array: Box<PanelArray>,
+        at: Option<u32>,
+    },
+    /// Removes an array with its modules; arrays paired with it are unpaired.
+    RemoveArray { id: ArrayId },
+    /// Replaces all modules of an array. Structural: module ids are renumbered.
+    SetArrayModules {
+        array_id: ArrayId,
+        modules: Vec<ModuleSlot>,
+    },
+    /// Several commands applied as one, all or nothing.
+    Batch { commands: Vec<Command> },
 }
 
 /// What a command changed.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeSet {
-    /// Sorted, unique.
+    /// Modules whose position or state changed. Sorted, unique; empty when `structure`.
     pub module_ids: Vec<ModuleId>,
     /// The project's pricing (discounts) changed.
     pub pricing: bool,
+    /// Buildings added, changed or removed. Sorted, unique.
+    pub buildings: Vec<BuildingId>,
+    /// Roof faces added, changed or removed. Sorted, unique.
+    pub faces: Vec<RoofFaceId>,
+    /// Arrays added, changed or removed. Sorted, unique.
+    pub arrays: Vec<ArrayId>,
+    /// Modules were added or removed for good: ids were renumbered, every module-indexed
+    /// view (GPU buffers, selections) must be rebuilt.
+    pub structure: bool,
+}
+
+fn union<T: Ord + Copy>(a: &mut Vec<T>, b: &[T]) {
+    a.extend_from_slice(b);
+    a.sort_unstable();
+    a.dedup();
 }
 
 impl ChangeSet {
@@ -134,13 +202,37 @@ impl ChangeSet {
     pub fn modules(module_ids: Vec<ModuleId>) -> Self {
         Self {
             module_ids,
-            pricing: false,
+            ..Self::default()
+        }
+    }
+
+    /// Whether only module positions / states (and pricing) changed: no entity, no structure.
+    #[must_use]
+    pub fn modules_only(&self) -> bool {
+        !self.structure
+            && self.buildings.is_empty()
+            && self.faces.is_empty()
+            && self.arrays.is_empty()
+    }
+
+    /// Accumulates `other` (applied after `self`).
+    pub fn merge(&mut self, other: ChangeSet) {
+        self.pricing |= other.pricing;
+        self.structure |= other.structure;
+        union(&mut self.buildings, &other.buildings);
+        union(&mut self.faces, &other.faces);
+        union(&mut self.arrays, &other.arrays);
+        if self.structure {
+            // Ids before a renumbering mean nothing after it: everything is reloaded.
+            self.module_ids.clear();
+        } else {
+            union(&mut self.module_ids, &other.module_ids);
         }
     }
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.module_ids.is_empty() && !self.pricing
+        self.module_ids.is_empty() && !self.pricing && self.modules_only()
     }
 }
 
@@ -184,111 +276,32 @@ impl CommandError {
     }
 }
 
-fn unique_sorted(ids: &[ModuleId]) -> Vec<ModuleId> {
-    let mut v = ids.to_vec();
-    v.sort_unstable();
-    v.dedup();
-    v
-}
-
-fn check_known(project: &Project, ids: &[ModuleId]) -> Result<(), CommandError> {
-    let unknown = ids
-        .iter()
-        .filter(|id| project.module(**id).is_none())
-        .count();
-    if unknown > 0 {
-        return Err(CommandError::new(keys::UNKNOWN_MODULE).with_number("count", unknown as f64));
-    }
-    Ok(())
-}
-
-/// Validates that every `(id, u, v)` keeps the module inside its roof face.
-fn check_positions(
-    project: &Project,
-    targets: &[(ModuleId, f64, f64)],
-) -> Result<(), CommandError> {
-    let mut outside = 0usize;
-    for &(id, u, v) in targets {
-        if !u.is_finite() || !v.is_finite() {
-            return Err(CommandError::new(keys::INVALID_NUMBER));
-        }
-        let m = &project.modules[id.index()];
-        let (array, face) = project
-            .module_context(m)
-            .ok_or_else(|| CommandError::new(keys::UNKNOWN_MODULE).with_number("count", 1.0))?;
-        if !Project::fits_on_roof(array, face, u, v) {
-            outside += 1;
-        }
-    }
-    if outside > 0 {
-        return Err(CommandError::new(keys::OUT_OF_ROOF).with_number("count", outside as f64));
-    }
-    Ok(())
-}
-
-fn set_state(
-    project: &mut Project,
-    ids: &[ModuleId],
-    from: ModuleState,
-    to: ModuleState,
-) -> ChangeSet {
-    let mut changed = Vec::new();
-    for &id in ids {
-        let m = &mut project.modules[id.index()];
-        if m.state == from {
-            m.state = to;
-            changed.push(id);
-        }
-    }
-    ChangeSet::modules(changed)
-}
-
 impl Command {
     /// The command that undoes `self`, computed against the state *before* `apply`.
     #[must_use]
     pub fn inverse(&self, project: &Project) -> Command {
-        let known = |ids: &[ModuleId]| -> Vec<ModuleId> {
-            unique_sorted(ids)
-                .into_iter()
-                .filter(|id| project.module(*id).is_some())
-                .collect()
-        };
-        let snapshot = |ids: Vec<ModuleId>| Command::SetModulePositions {
-            positions: ids
-                .into_iter()
-                .map(|id| {
-                    let m = &project.modules[id.index()];
-                    ModulePosition { id, u: m.u, v: m.v }
-                })
-                .collect(),
-        };
-        let with_state = |ids: &[ModuleId], state: ModuleState| -> Vec<ModuleId> {
-            known(ids)
-                .into_iter()
-                .filter(|id| project.modules[id.index()].state == state)
-                .collect()
-        };
         match self {
-            Command::MoveModules { ids, .. } => snapshot(known(ids)),
+            Command::MoveModules { ids, .. } => modules::inverse_move(project, ids),
             Command::SetModulePositions { positions } => {
-                let ids: Vec<ModuleId> = positions.iter().map(|p| p.id).collect();
-                snapshot(known(&ids))
+                modules::inverse_set_positions(project, positions)
             }
-            Command::RemoveModules { ids } => Command::RestoreModules {
-                ids: with_state(ids, ModuleState::Active),
-            },
-            Command::RestoreModules { ids } => Command::RemoveModules {
-                ids: with_state(ids, ModuleState::Removed),
-            },
-            Command::SetDiscount { manufacturer, .. } => Command::SetDiscount {
-                manufacturer: manufacturer.clone(),
-                rate: project
-                    .pricing
-                    .discounts
-                    .iter()
-                    .find(|d| &d.manufacturer == manufacturer)
-                    .map(|d| d.rate),
-            },
+            Command::RemoveModules { ids } => modules::inverse_remove(project, ids),
+            Command::RestoreModules { ids } => modules::inverse_restore(project, ids),
+            Command::SetDiscount { manufacturer, .. } => {
+                pricing::inverse_discount(project, manufacturer)
+            }
+            Command::UpsertBuilding { building, .. } => {
+                entities::inverse_upsert_building(project, building)
+            }
+            Command::RemoveBuilding { id } => entities::inverse_remove_building(project, *id),
+            Command::UpsertRoofFace { face, .. } => entities::inverse_upsert_face(project, face),
+            Command::RemoveRoofFace { id } => entities::inverse_remove_face(project, *id),
+            Command::UpsertArray { array, .. } => entities::inverse_upsert_array(project, array),
+            Command::RemoveArray { id } => entities::inverse_remove_array(project, *id),
+            Command::SetArrayModules { array_id, .. } => {
+                structure::inverse_set_modules(project, *array_id)
+            }
+            Command::Batch { commands } => batch::inverse_batch(project, commands),
         }
     }
 
@@ -298,99 +311,31 @@ impl Command {
     /// A [`CommandError`] with an i18n key (see [`keys`]).
     pub fn apply(&self, project: &mut Project) -> Result<ChangeSet, CommandError> {
         match self {
-            Command::MoveModules { ids, du, dv } => {
-                if !du.is_finite() || !dv.is_finite() {
-                    return Err(CommandError::new(keys::INVALID_NUMBER));
-                }
-                let ids = unique_sorted(ids);
-                check_known(project, &ids)?;
-                let targets: Vec<(ModuleId, f64, f64)> = ids
-                    .iter()
-                    .map(|&id| {
-                        let m = &project.modules[id.index()];
-                        (id, m.u + du, m.v + dv)
-                    })
-                    .collect();
-                check_positions(project, &targets)?;
-                for &(id, u, v) in &targets {
-                    let m = &mut project.modules[id.index()];
-                    m.u = u;
-                    m.v = v;
-                }
-                Ok(ChangeSet::modules(ids))
-            }
+            Command::MoveModules { ids, du, dv } => modules::apply_move(project, ids, *du, *dv),
             Command::SetModulePositions { positions } => {
-                let ids: Vec<ModuleId> = positions.iter().map(|p| p.id).collect();
-                if unique_sorted(&ids).len() != ids.len() {
-                    return Err(CommandError::new(keys::MISMATCHED_LENGTHS));
-                }
-                check_known(project, &ids)?;
-                let targets: Vec<(ModuleId, f64, f64)> =
-                    positions.iter().map(|p| (p.id, p.u, p.v)).collect();
-                check_positions(project, &targets)?;
-                for p in positions {
-                    let m = &mut project.modules[p.id.index()];
-                    m.u = p.u;
-                    m.v = p.v;
-                }
-                Ok(ChangeSet::modules(unique_sorted(&ids)))
+                modules::apply_set_positions(project, positions)
             }
             Command::RemoveModules { ids } => {
-                let ids = unique_sorted(ids);
-                check_known(project, &ids)?;
-                Ok(set_state(
-                    project,
-                    &ids,
-                    ModuleState::Active,
-                    ModuleState::Removed,
-                ))
+                modules::apply_state(project, ids, ModuleState::Active, ModuleState::Removed)
             }
             Command::RestoreModules { ids } => {
-                let ids = unique_sorted(ids);
-                check_known(project, &ids)?;
-                Ok(set_state(
-                    project,
-                    &ids,
-                    ModuleState::Removed,
-                    ModuleState::Active,
-                ))
+                modules::apply_state(project, ids, ModuleState::Removed, ModuleState::Active)
             }
             Command::SetDiscount { manufacturer, rate } => {
-                if let Some(r) = rate {
-                    if !(r.is_finite() && (0.0..1.0).contains(r)) {
-                        return Err(CommandError::new(keys::INVALID_DISCOUNT)
-                            .with_text("manufacturer", manufacturer.clone())
-                            .with_number("rate", *r));
-                    }
-                }
-                let discounts = &mut project.pricing.discounts;
-                let current = discounts
-                    .iter()
-                    .position(|d| &d.manufacturer == manufacturer);
-                let changed = match (current, rate) {
-                    (Some(i), Some(r)) if discounts[i].rate == *r => false,
-                    (Some(i), Some(r)) => {
-                        discounts[i].rate = *r;
-                        true
-                    }
-                    (Some(i), None) => {
-                        discounts.remove(i);
-                        true
-                    }
-                    (None, Some(r)) => {
-                        discounts.push(ManufacturerDiscount {
-                            manufacturer: manufacturer.clone(),
-                            rate: *r,
-                        });
-                        true
-                    }
-                    (None, None) => false,
-                };
-                Ok(ChangeSet {
-                    module_ids: Vec::new(),
-                    pricing: changed,
-                })
+                pricing::apply_discount(project, manufacturer, *rate)
             }
+            Command::UpsertBuilding { building, at } => {
+                entities::apply_upsert_building(project, building, *at)
+            }
+            Command::RemoveBuilding { id } => entities::apply_remove_building(project, *id),
+            Command::UpsertRoofFace { face, at } => entities::apply_upsert_face(project, face, *at),
+            Command::RemoveRoofFace { id } => entities::apply_remove_face(project, *id),
+            Command::UpsertArray { array, at } => entities::apply_upsert_array(project, array, *at),
+            Command::RemoveArray { id } => entities::apply_remove_array(project, *id),
+            Command::SetArrayModules { array_id, modules } => {
+                structure::apply_set_modules(project, *array_id, modules)
+            }
+            Command::Batch { commands } => batch::apply_batch(project, commands),
         }
     }
 }

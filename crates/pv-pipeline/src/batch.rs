@@ -82,9 +82,14 @@ pub fn batch_for_project(project: &Project) -> InputBatch {
     }
 }
 
-/// After a module command: the module lists of the arrays it touched.
+/// After a command: the module lists of the arrays it touched. A command that changed
+/// entities or renumbered modules sends every input instead (unchanged ones are no-ops, and
+/// the index forgets what was removed).
 #[must_use]
 pub fn batch_for_changes(project: &Project, changes: &ChangeSet) -> InputBatch {
+    if !changes.modules_only() {
+        return batch_for_project(project);
+    }
     let arrays: BTreeSet<ArrayId> = changes
         .module_ids
         .iter()

@@ -106,8 +106,8 @@ fn a_discount_recomputes_the_bom_only() {
         }],
     };
     let changes = ChangeSet {
-        module_ids: vec![],
         pricing: true,
+        ..ChangeSet::default()
     };
     sync_changes(&mut g, &p, &changes).unwrap();
     let s = pass(&mut g);
