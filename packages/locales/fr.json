@@ -69,7 +69,8 @@
     },
     "command": {
       "invalidNumber": "La commande contient une valeur numérique invalide.",
-      "mismatchedLengths": "Les données de la commande sont incohérentes."
+      "mismatchedLengths": "Les données de la commande sont incohérentes.",
+      "invalidDiscount": "Remise invalide pour {manufacturer} : {rate} (attendu entre 0 et 1)."
     },
     "history": {
       "nothingToUndo": "Rien à annuler.",
@@ -107,9 +108,10 @@
     },
     "bom": {
       "zeroPack": "Article {articleNo} : la quantité par unité de vente est nulle.",
-      "pieceTooLong": "Article {articleNo} : une pièce de {length} m dépasse la barre de {stock} m.",
       "invalidStock": "Article {articleNo} : longueur de barre ou largeur de coupe invalide.",
-      "invalidDiscount": "Remise invalide pour {manufacturer} : {rate}."
+      "invalidDiscount": "Remise invalide pour {manufacturer} : {rate}.",
+      "stale": "La nomenclature est encore en cours de calcul : réessayez dans un instant.",
+      "invalidPiece": "Article {articleNo} : longueur de pièce de rail invalide ({length} m)."
     }
   },
   "hud": {

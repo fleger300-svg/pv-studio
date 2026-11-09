@@ -127,5 +127,6 @@ pub fn fixture_project() -> Project {
         roof_faces: vec![south, flat],
         arrays: vec![coplanar, rack],
         modules,
+        pricing: pv_model::Pricing::default(),
     }
 }

@@ -7,11 +7,15 @@
 use std::collections::BTreeSet;
 
 use pv_graph::{Graph, GraphError, Instance};
-use pv_model::{ArrayId, Building, ChangeSet, ModuleInstance, PanelArray, Project, RoofFace};
+use pv_model::{
+    ArrayId, Building, ChangeSet, ModuleInstance, PanelArray, Pricing, Project, RoofFace,
+};
 
 use crate::inputs::{
-    ArrayIn, BuildingIn, FaceIn, ModulesIn, MountingIn, ProjectIndex, ProjectIndexIn, SiteIn,
+    ArrayIn, BuildingIn, FaceIn, ModulesIn, MountingIn, PricingIn, ProjectIndex, ProjectIndexIn,
+    SiteIn,
 };
+use crate::nodes::bom::ProjectBom;
 use crate::nodes::summary::FieldStatics;
 
 /// Inputs to set on the graph.
@@ -23,6 +27,8 @@ pub struct InputBatch {
     pub faces: Vec<RoofFace>,
     pub arrays: Vec<PanelArray>,
     pub modules: Vec<(ArrayId, Vec<ModuleInstance>)>,
+    /// Full syncs, and commands that changed the pricing.
+    pub pricing: Option<Pricing>,
 }
 
 /// What applying a batch changed.
@@ -72,6 +78,7 @@ pub fn batch_for_project(project: &Project) -> InputBatch {
             .iter()
             .map(|a| (a.id, modules_of(project, a.id)))
             .collect(),
+        pricing: Some(project.pricing.clone()),
     }
 }
 
@@ -89,6 +96,7 @@ pub fn batch_for_changes(project: &Project, changes: &ChangeSet) -> InputBatch {
             .into_iter()
             .map(|a| (a, modules_of(project, a)))
             .collect(),
+        pricing: changes.pricing.then(|| project.pricing.clone()),
         ..InputBatch::default()
     }
 }
@@ -115,8 +123,12 @@ pub fn apply_batch(graph: &mut Graph, batch: InputBatch) -> Result<SyncReport, G
         }
         report.inputs_changed +=
             usize::from(graph.set_input::<ProjectIndexIn>(Instance::Project, index)?);
+        graph.watch::<ProjectBom>(Instance::Project)?;
     }
     let mut changed = 0;
+    if let Some(p) = batch.pricing {
+        changed += usize::from(graph.set_input::<PricingIn>(Instance::Project, p)?);
+    }
     for mut b in batch.buildings {
         let i = Instance::Building(b.id);
         let site = b.site.take();

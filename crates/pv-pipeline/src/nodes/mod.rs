@@ -5,6 +5,7 @@ use pv_model::command::keys;
 use pv_model::{ArrayId, BuildingId, CommandError, RoofFaceId};
 
 pub mod ballast;
+pub mod bom;
 pub mod descent;
 pub mod geometry;
 pub mod layout;

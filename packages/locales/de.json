@@ -69,7 +69,8 @@
     },
     "command": {
       "invalidNumber": "Der Befehl enthält einen ungültigen Zahlenwert.",
-      "mismatchedLengths": "Die Befehlsdaten sind widersprüchlich."
+      "mismatchedLengths": "Die Befehlsdaten sind widersprüchlich.",
+      "invalidDiscount": "Ungültiger Rabatt für {manufacturer}: {rate} (erwartet zwischen 0 und 1)."
     },
     "history": {
       "nothingToUndo": "Nichts rückgängig zu machen.",
@@ -107,9 +108,10 @@
     },
     "bom": {
       "zeroPack": "Artikel {articleNo}: Die Menge pro Verkaufseinheit ist null.",
-      "pieceTooLong": "Artikel {articleNo}: Ein Stück von {length} m ist länger als die Stange von {stock} m.",
       "invalidStock": "Artikel {articleNo}: Ungültige Stangenlänge oder Schnittbreite.",
-      "invalidDiscount": "Ungültiger Rabatt für {manufacturer}: {rate}."
+      "invalidDiscount": "Ungültiger Rabatt für {manufacturer}: {rate}.",
+      "stale": "Die Stückliste wird noch berechnet: Bitte gleich erneut versuchen.",
+      "invalidPiece": "Artikel {articleNo}: Ungültige Länge eines Schienenstücks ({length} m)."
     }
   },
   "hud": {

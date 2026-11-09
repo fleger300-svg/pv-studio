@@ -7,6 +7,7 @@ use crate::geometry::{Quat, RoofFrame, Vec3};
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 use crate::layout::{ArrayLayoutParams, RoofOutlineSpec, SupportGridSpec};
 use crate::mounting::MountingSystem;
+use crate::pricing::Pricing;
 use crate::site::SiteParams;
 
 /// Module frame thickness (m).
@@ -270,6 +271,8 @@ pub struct Project {
     pub arrays: Vec<PanelArray>,
     /// Invariant: `modules[i].id == ModuleId(i)`, and modules of one array are contiguous.
     pub modules: Vec<ModuleInstance>,
+    /// Commercial conditions (discount per manufacturer).
+    pub pricing: Pricing,
 }
 
 /// Error raised when a project violates a structural invariant.
@@ -444,6 +447,7 @@ pub(crate) mod fixtures {
             roof_faces: vec![face],
             arrays: vec![array],
             modules,
+            pricing: crate::pricing::Pricing::default(),
         }
     }
 }

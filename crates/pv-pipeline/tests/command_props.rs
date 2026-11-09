@@ -29,7 +29,7 @@ fn random_op(rng: &mut Rng, p: &Project) -> Op {
         let start = rng.below(n);
         (0..k).map(|j| ModuleId(((start + j) % n) as u32)).collect()
     };
-    match rng.below(12) {
+    match rng.below(13) {
         // Small moves (stay in the gaps: mostly accepted, rarely change zones).
         0..=3 => {
             let k = 1 + rng.below(4);
@@ -73,6 +73,11 @@ fn random_op(rng: &mut Rng, p: &Project) -> Op {
             }
         }
         9 | 10 => Op::Undo,
+        // A discount (or its removal) on the K2 material.
+        11 => Op::Command(Command::SetDiscount {
+            manufacturer: "K2 Systems".into(),
+            rate: (rng.below(3) > 0).then(|| rng.below(50) as f64 / 100.0),
+        }),
         _ => Op::Redo,
     }
 }
@@ -84,7 +89,7 @@ fn apply(store: &mut ProjectStore, op: &Op) -> Option<pv_model::ChangeSet> {
         Op::Undo => store.undo(),
         Op::Redo => store.redo(),
     };
-    r.ok().filter(|c| !c.module_ids.is_empty())
+    r.ok().filter(|c| !c.is_empty())
 }
 
 fn run_sequences(base: &Project, name: &str, sequences: u64, steps: usize) -> (usize, usize) {

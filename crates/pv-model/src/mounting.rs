@@ -247,6 +247,12 @@ pub enum Driver {
     Module,
     /// One per ballast block.
     BallastBlock,
+    /// One per splice of the rails of `layer` longer than a bar of `stock_length_m`
+    /// (rail connectors).
+    RailJoint {
+        layer: RailLayerKind,
+        stock_length_m: f64,
+    },
     /// Stock bars the rail pieces of `layer` are cut from.
     RailBars {
         layer: RailLayerKind,

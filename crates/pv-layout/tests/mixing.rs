@@ -145,6 +145,7 @@ fn project(b: Building, f: RoofFace, arrays: Vec<PanelArray>, layouts: &[ArrayLa
         roof_faces: vec![f],
         arrays,
         modules,
+        pricing: pv_model::Pricing::default(),
     }
 }
 

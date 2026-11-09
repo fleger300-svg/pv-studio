@@ -6,6 +6,7 @@ use pv_model::{ArrayId, CommandError};
 use serde::Serialize;
 use specta::Type;
 
+use crate::nodes::bom::ProjectBom;
 use crate::nodes::summary::{FieldStatics, FieldStaticsResult};
 
 /// Outcome of a field's statics.
@@ -62,4 +63,41 @@ pub fn field_reports(graph: &mut Graph, ready: &[ResultReady], seq: u32) -> Vec<
             },
         })
         .collect()
+}
+
+/// Outcome of the bill of materials.
+#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[serde(rename_all = "camelCase", tag = "status")]
+pub enum BomOutcome {
+    Ok { bom: pv_bom::Bom },
+    Failed { error: CommandError },
+}
+
+/// Bill of materials of the project, tagged like the field reports.
+#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct BomReport {
+    pub seq: u32,
+    /// Fingerprint of its inputs (hex): stored with frozen bills of materials.
+    pub input_fingerprint: String,
+    pub outcome: BomOutcome,
+}
+
+/// The bill of materials, if it is among the results a pass produced.
+pub fn bom_report(graph: &mut Graph, ready: &[ResultReady], seq: u32) -> Option<BomReport> {
+    let r = ready
+        .iter()
+        .find(|r| r.key.kind.0 == <ProjectBom as pv_graph::Kind>::NAME)?;
+    Some(BomReport {
+        seq,
+        input_fingerprint: format!("{:016x}", r.input_fingerprint),
+        outcome: match graph.get::<ProjectBom>(Instance::Project) {
+            Ok(bom) => BomOutcome::Ok {
+                bom: (*bom).clone(),
+            },
+            Err(e) => BomOutcome::Failed {
+                error: command_error(&e),
+            },
+        },
+    })
 }

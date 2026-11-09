@@ -40,3 +40,23 @@ pub fn layout_error(e: &LayoutError) -> CommandError {
             .with_text("detail", other.to_string()),
     }
 }
+
+#[must_use]
+pub fn bom_error(e: &pv_bom::BomError) -> CommandError {
+    use pv_bom::BomError;
+    let error = CommandError::new(e.key());
+    match e {
+        BomError::ZeroPack { article_no } | BomError::InvalidStock { article_no, .. } => {
+            error.with_text("articleNo", article_no.clone())
+        }
+        BomError::InvalidPiece {
+            article_no,
+            length_m,
+        } => error
+            .with_text("articleNo", article_no.clone())
+            .with_number("length", *length_m),
+        BomError::InvalidDiscount { manufacturer, rate } => error
+            .with_text("manufacturer", manufacturer.clone())
+            .with_number("rate", *rate),
+    }
+}

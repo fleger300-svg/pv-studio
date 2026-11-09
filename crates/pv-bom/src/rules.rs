@@ -3,6 +3,7 @@
 use pv_model::{Driver, PartRule, RailLayerKind};
 
 use crate::counts::FieldCounts;
+use crate::cutting::joints;
 
 /// Quantity of a counted part on one field; `None` for rail bars (cut, see
 /// [`crate::cutting`]).
@@ -19,6 +20,13 @@ pub fn counted(rule: &PartRule, c: &FieldCounts) -> Option<u64> {
             .sum(),
         Driver::Module => c.modules.into(),
         Driver::BallastBlock => c.ballast_blocks.into(),
+        Driver::RailJoint {
+            layer,
+            stock_length_m,
+        } => rail_pieces(layer, c)
+            .iter()
+            .map(|&l| joints(l, stock_length_m))
+            .sum(),
         Driver::RailBars { .. } => return None,
     };
     Some(n * u64::from(rule.per))

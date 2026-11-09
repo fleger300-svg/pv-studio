@@ -40,9 +40,9 @@ use pv_graph::{Graph, GraphError};
 
 pub use batch::{apply_batch, batch_for_changes, batch_for_project, InputBatch};
 pub use nodes::summary::{FieldStatics, FieldStaticsResult, ZoneDecision};
-pub use report::{FieldOutcome, FieldReport};
+pub use report::{BomOutcome, BomReport, FieldOutcome, FieldReport};
 pub use sync::{sync_changes, sync_project, SyncReport};
-pub use worker::{ComputeEvent, ComputeHandle, EventSink, WorkerLink};
+pub use worker::{ComputeEvent, ComputeHandle, EventSink, PassOutput, WorkerLink};
 
 /// Registers every pipeline kind in `graph`.
 ///
@@ -58,6 +58,7 @@ pub fn register(graph: &mut Graph) -> Result<(), GraphError> {
     graph.register_input::<MountingIn>()?;
     graph.register_input::<ModulesIn>()?;
     graph.register_input::<ProjectIndexIn>()?;
+    graph.register_input::<PricingIn>()?;
     graph.register::<geometry::Outline>()?;
     graph.register::<geometry::Roof>()?;
     graph.register::<geometry::ZoneGeom>()?;
@@ -70,6 +71,8 @@ pub fn register(graph: &mut Graph) -> Result<(), GraphError> {
     graph.register::<descent::Descent>()?;
     graph.register::<ballast::Ballast>()?;
     graph.register::<summary::FieldStatics>()?;
+    graph.register::<bom::FieldCountsNode>()?;
+    graph.register::<bom::ProjectBom>()?;
     Ok(())
 }
 

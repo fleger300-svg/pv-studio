@@ -69,7 +69,8 @@
     },
     "command": {
       "invalidNumber": "The command contains an invalid number.",
-      "mismatchedLengths": "The command data is inconsistent."
+      "mismatchedLengths": "The command data is inconsistent.",
+      "invalidDiscount": "Invalid discount for {manufacturer}: {rate} (expected between 0 and 1)."
     },
     "history": {
       "nothingToUndo": "Nothing to undo.",
@@ -107,9 +108,10 @@
     },
     "bom": {
       "zeroPack": "Article {articleNo}: the quantity per sale unit is zero.",
-      "pieceTooLong": "Article {articleNo}: a {length} m piece is longer than the {stock} m bar.",
       "invalidStock": "Article {articleNo}: invalid bar length or saw cut.",
-      "invalidDiscount": "Invalid discount for {manufacturer}: {rate}."
+      "invalidDiscount": "Invalid discount for {manufacturer}: {rate}.",
+      "stale": "The bill of materials is still being computed: try again in a moment.",
+      "invalidPiece": "Article {articleNo}: invalid rail piece length ({length} m)."
     }
   },
   "hud": {

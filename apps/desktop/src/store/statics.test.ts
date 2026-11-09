@@ -17,7 +17,7 @@ function report(arrayId: string, seq: number): FieldReport {
 }
 
 function ready(seq: number, fields: FieldReport[], extra: Partial<ResultReady_Serialize> = {}) {
-  return { seq, fields, removed: [], reset: false, ...extra };
+  return { seq, fields, bom: null, removed: [], reset: false, ...extra };
 }
 
 describe('statics reports', () => {

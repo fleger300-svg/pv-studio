@@ -14,7 +14,7 @@ use pv_graph::{serde_fingerprint, Input, Instance, Kind};
 use pv_model::fingerprint::fingerprint_bytes;
 use pv_model::{
     ArrayId, Building, BuildingId, ModuleInstance, ModuleState, MountingSystem, PanelArray,
-    RoofFace, RoofFaceId, SiteParams,
+    Pricing, RoofFace, RoofFaceId, SiteParams,
 };
 use serde::Serialize;
 
@@ -62,6 +62,12 @@ serde_input!(
     MountingIn,
     "in.mounting",
     Option<MountingSystem>
+);
+serde_input!(
+    /// Commercial conditions of the project (discounts).
+    PricingIn,
+    "in.pricing",
+    Pricing
 );
 serde_input!(
     /// Ids of every entity of the project.

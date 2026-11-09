@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { events } from '../bindings';
 import { api, unwrap } from '../ipc';
 import { useProjectStore } from '../store/project';
+import { useBomStore } from '../store/bom';
 import { useStaticsStore } from '../store/statics';
 
 /**
@@ -15,6 +16,7 @@ export function useStaticsSync(): void {
   useEffect(() => {
     const store = useStaticsStore.getState();
     store.clear();
+    useBomStore.getState().clear();
     let disposed = false;
     // Read through a call: TypeScript would narrow the flag across `await`.
     const isDisposed = () => disposed;
@@ -23,6 +25,7 @@ export function useStaticsSync(): void {
       const fns = await Promise.all([
         events.resultReady.listen((e) => {
           useStaticsStore.getState().applyReady(e.payload);
+          useBomStore.getState().apply(e.payload.bom, e.payload.reset);
         }),
         events.computeState.listen((e) => {
           useStaticsStore.getState().applyState(e.payload.busy, e.payload.seq);
@@ -40,6 +43,8 @@ export function useStaticsSync(): void {
         try {
           const snapshot = await unwrap(api.getStaticsSnapshot());
           if (!isDisposed()) useStaticsStore.getState().applySnapshot(snapshot);
+          const bom = await unwrap(api.getBom());
+          if (!isDisposed()) useBomStore.getState().apply(bom, false);
         } catch {
           // No project open on the Rust side (yet): the events will fill the store.
         }

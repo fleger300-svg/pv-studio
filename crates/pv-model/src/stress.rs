@@ -62,6 +62,7 @@ impl Builder {
                 roof_faces: Vec::new(),
                 arrays: Vec::new(),
                 modules: Vec::new(),
+                pricing: crate::pricing::Pricing::default(),
             },
         }
     }

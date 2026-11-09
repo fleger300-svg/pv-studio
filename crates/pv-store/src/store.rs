@@ -5,13 +5,23 @@ use std::path::{Path, PathBuf};
 use pv_model::command::keys;
 use pv_model::{
     ArrayGrid, ArrayId, ArrayLayoutParams, Building, BuildingId, ChangeSet, Command, CommandError,
-    ModuleId, ModuleInstance, ModuleState, Orientation, PanelArray, Project, ProjectId, RoofFace,
-    RoofFaceId, RoofKind,
+    ModuleId, ModuleInstance, ModuleState, Orientation, PanelArray, Pricing, Project, ProjectId,
+    RoofFace, RoofFaceId, RoofKind,
 };
 use rusqlite::{params, Connection, OptionalExtension, Row, Transaction};
 use uuid::Uuid;
 
 use crate::{buffer, schema, StoreError};
+
+/// A frozen bill of materials (its JSON is read with `bom_snapshot_json`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BomSnapshotRecord {
+    pub id: i64,
+    pub created_at: String,
+    pub label: String,
+    pub seq: u32,
+    pub input_fingerprint: String,
+}
 
 /// Who issued a command (`command_log.author`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -168,12 +178,12 @@ impl ProjectStore {
     pub fn apply(&mut self, cmd: &Command, author: Author) -> Result<ChangeSet, StoreError> {
         let inverse = cmd.inverse(&self.project);
         let changes = cmd.apply(&mut self.project)?;
-        if changes.module_ids.is_empty() {
+        if changes.is_empty() {
             return Ok(changes);
         }
         // Layout rules on the resulting state (setbacks, obstacles, collisions, distance
         // between arrays). Commands that only remove modules cannot break them.
-        if !matches!(cmd, Command::RemoveModules { .. }) {
+        if !changes.module_ids.is_empty() && !matches!(cmd, Command::RemoveModules { .. }) {
             if let Err(e) = pv_layout::validate_module_positions(&self.project, &changes.module_ids)
             {
                 let _ = inverse.apply(&mut self.project);
@@ -191,7 +201,7 @@ impl ProjectStore {
                     serde_json::to_string(&inverse)?
                 ],
             )?;
-            persist_modules(&tx, &self.project, &changes.module_ids)?;
+            persist(&tx, &self.project, &changes)?;
             tx.commit()?;
             Ok(())
         })();
@@ -247,7 +257,7 @@ impl ProjectStore {
                 "UPDATE command_log SET undone = ?1 WHERE seq = ?2",
                 params![undone, seq],
             )?;
-            persist_modules(&tx, &self.project, &changes.module_ids)?;
+            persist(&tx, &self.project, &changes)?;
             tx.commit()?;
             Ok(())
         })();
@@ -256,6 +266,71 @@ impl ProjectStore {
             return Err(e);
         }
         Ok(changes)
+    }
+
+    /// Records a frozen bill of materials (not a model change: not journalled, never
+    /// modified). `bom_json` is the serialised `pv_bom::Bom`.
+    ///
+    /// # Errors
+    /// Storage errors.
+    pub fn save_bom_snapshot(
+        &self,
+        label: &str,
+        seq: u32,
+        input_fingerprint: &str,
+        bom_json: &str,
+    ) -> Result<BomSnapshotRecord, StoreError> {
+        self.conn.execute(
+            "INSERT INTO bom_snapshot (label, seq, input_fingerprint, pricing_json, bom_json)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![
+                label,
+                seq,
+                input_fingerprint,
+                serde_json::to_string(&self.project.pricing)?,
+                bom_json
+            ],
+        )?;
+        let id = self.conn.last_insert_rowid();
+        self.bom_snapshots()?
+            .into_iter()
+            .find(|s| s.id == id)
+            .ok_or_else(|| StoreError::Corrupt("bom snapshot not found".into()))
+    }
+
+    /// Frozen bills of materials, oldest first.
+    ///
+    /// # Errors
+    /// Storage errors.
+    pub fn bom_snapshots(&self) -> Result<Vec<BomSnapshotRecord>, StoreError> {
+        Ok(self
+            .conn
+            .prepare("SELECT id, created_at, label, seq, input_fingerprint FROM bom_snapshot ORDER BY id")?
+            .query_map([], |r| {
+                Ok(BomSnapshotRecord {
+                    id: r.get(0)?,
+                    created_at: r.get(1)?,
+                    label: r.get(2)?,
+                    seq: r.get(3)?,
+                    input_fingerprint: r.get(4)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?)
+    }
+
+    /// The JSON of a frozen bill of materials and the pricing it was computed with.
+    ///
+    /// # Errors
+    /// Storage errors; `None` for an unknown id.
+    pub fn bom_snapshot_json(&self, id: i64) -> Result<Option<(String, String)>, StoreError> {
+        Ok(self
+            .conn
+            .query_row(
+                "SELECT bom_json, pricing_json FROM bom_snapshot WHERE id = ?1",
+                params![id],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .optional()?)
     }
 
     /// Whether `undo` / `redo` would do something.
@@ -284,11 +359,15 @@ impl ProjectStore {
     }
 }
 
-fn persist_modules(
-    tx: &Transaction<'_>,
-    project: &Project,
-    ids: &[ModuleId],
-) -> Result<(), StoreError> {
+/// Writes what `changes` touched.
+fn persist(tx: &Transaction<'_>, project: &Project, changes: &ChangeSet) -> Result<(), StoreError> {
+    if changes.pricing {
+        tx.execute(
+            "UPDATE project SET pricing_json = ?1",
+            params![serde_json::to_string(&project.pricing)?],
+        )?;
+    }
+    let ids = &changes.module_ids;
     let mut stmt =
         tx.prepare_cached("UPDATE module_instance SET u = ?1, v = ?2, state = ?3 WHERE id = ?4")?;
     for id in ids {
@@ -300,8 +379,12 @@ fn persist_modules(
 
 fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
     tx.execute(
-        "INSERT INTO project (id, name) VALUES (?1, ?2)",
-        params![p.id.0.to_string(), p.name],
+        "INSERT INTO project (id, name, pricing_json) VALUES (?1, ?2, ?3)",
+        params![
+            p.id.0.to_string(),
+            p.name,
+            serde_json::to_string(&p.pricing)?
+        ],
     )?;
     for (ord, b) in p.buildings.iter().enumerate() {
         tx.execute(
@@ -366,10 +449,18 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
 }
 
 fn load_project(conn: &Connection) -> Result<Project, StoreError> {
-    let (id, name): (Uuid, String) = conn
-        .query_row("SELECT id, name FROM project LIMIT 1", [], |r| {
-            Ok((uuid_col(r, 0)?, r.get(1)?))
-        })
+    let (id, name, pricing): (Uuid, String, Pricing) = conn
+        .query_row(
+            "SELECT id, name, pricing_json FROM project LIMIT 1",
+            [],
+            |r| {
+                Ok((
+                    uuid_col(r, 0)?,
+                    r.get(1)?,
+                    json_with_defaults::<Pricing>(r, 2)?,
+                ))
+            },
+        )
         .optional()?
         .ok_or_else(|| StoreError::Corrupt("no project row".into()))?;
 
@@ -486,6 +577,7 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
         roof_faces,
         arrays,
         modules,
+        pricing,
     })
 }
 
@@ -563,6 +655,8 @@ mod tests {
             conn.execute_batch(
                 r#"ALTER TABLE building DROP COLUMN site_json;
                    ALTER TABLE "array" DROP COLUMN mounting_json;
+                   ALTER TABLE project DROP COLUMN pricing_json;
+                   DROP TABLE bom_snapshot;
                    PRAGMA user_version = 3;"#,
             )
             .expect("downgrade to v3");
@@ -575,6 +669,56 @@ mod tests {
             .pragma_query_value(None, "foreign_keys", |r| r.get(0))
             .expect("fk");
         assert_eq!(fk, 1);
+    }
+
+    /// v6: the discount is a journalled command, persisted, undone and redone like any other.
+    #[test]
+    fn discounts_are_commands() {
+        let dir = tempfile::tempdir().expect("tmp");
+        let path = dir.path().join("pricing.pvproj");
+        let mut s = ProjectStore::create(&path, fixture_project()).expect("create");
+        let set = |rate| Command::SetDiscount {
+            manufacturer: "K2 Systems".into(),
+            rate,
+        };
+        let c = s.apply(&set(Some(0.35)), Author::User).expect("discount");
+        assert!(c.pricing);
+        assert_eq!(s.history_state().expect("h"), (true, false));
+        // The same rate again is not journalled.
+        assert!(s
+            .apply(&set(Some(0.35)), Author::User)
+            .expect("same")
+            .is_empty());
+        let with = s.project().clone();
+        drop(s);
+        let mut s = ProjectStore::open(&path).expect("reopen");
+        assert_eq!(s.project(), &with);
+        assert!(s.undo().expect("undo").pricing);
+        assert_eq!(s.project().pricing, pv_model::Pricing::default());
+        drop(s);
+        let mut s = ProjectStore::open(&path).expect("reopen after undo");
+        assert_eq!(s.project().pricing, pv_model::Pricing::default());
+        s.redo().expect("redo");
+        assert_eq!(s.project(), &with);
+    }
+
+    #[test]
+    fn bom_snapshots_are_immutable_records() {
+        let dir = tempfile::tempdir().expect("tmp");
+        let s = new_store(&dir);
+        let a = s
+            .save_bom_snapshot("Offre 1", 7, "00ff", r#"{"total":1}"#)
+            .expect("save");
+        let b = s
+            .save_bom_snapshot("Offre 2", 9, "0aaa", r#"{"total":2}"#)
+            .expect("save");
+        assert_eq!((a.label.as_str(), a.seq), ("Offre 1", 7));
+        assert!(b.id > a.id);
+        assert_eq!(s.bom_snapshots().expect("list"), vec![a.clone(), b]);
+        let (bom, pricing) = s.bom_snapshot_json(a.id).expect("read").expect("exists");
+        assert_eq!(bom, r#"{"total":1}"#);
+        assert_eq!(pricing, r#"{"discounts":[]}"#);
+        assert!(s.bom_snapshot_json(999).expect("read").is_none());
     }
 
     /// v5: a mounting snapshot written before parts existed opens with no parts.
@@ -590,6 +734,8 @@ mod tests {
             conn.execute_batch(
                 r#"UPDATE "array" SET mounting_json = json_remove(mounting_json, '$.parts')
                      WHERE mounting_json IS NOT NULL;
+                   ALTER TABLE project DROP COLUMN pricing_json;
+                   DROP TABLE bom_snapshot;
                    PRAGMA user_version = 4;"#,
             )
             .expect("downgrade to v4");
@@ -686,6 +832,8 @@ mod tests {
                    ALTER TABLE "array" DROP COLUMN grid_block_extra_v;
                    ALTER TABLE "array" DROP COLUMN mounting_json;
                    ALTER TABLE building DROP COLUMN site_json;
+                   ALTER TABLE project DROP COLUMN pricing_json;
+                   DROP TABLE bom_snapshot;
                    PRAGMA user_version = 1;"#,
             )
             .expect("downgrade to v1");

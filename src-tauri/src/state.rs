@@ -39,6 +39,11 @@ impl AppState {
         self.seq.fetch_add(1, Ordering::AcqRel) + 1
     }
 
+    /// Sequence number of the last command sent to the compute thread.
+    pub fn current_seq(&self) -> u32 {
+        self.seq.load(Ordering::Acquire)
+    }
+
     /// Closes the open project, if any (releases the SQLite file).
     pub fn clear(&self) {
         *self.lock() = None;
@@ -57,7 +62,7 @@ impl AppState {
     /// After a successful command (called with the store lock held, so that batches reach
     /// the compute thread in command order).
     pub fn submit(&self, store: &ProjectStore, changes: &ChangeSet) {
-        if changes.module_ids.is_empty() {
+        if changes.is_empty() {
             return;
         }
         if let Some(c) = self.compute.get() {

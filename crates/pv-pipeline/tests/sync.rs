@@ -34,14 +34,7 @@ fn incremental_sync_equals_full_sync() {
             1 => m.state = ModuleState::Removed,
             _ => m.v -= 0.003,
         }
-        sync_changes(
-            &mut incremental,
-            &p,
-            &ChangeSet {
-                module_ids: vec![id],
-            },
-        )
-        .unwrap();
+        sync_changes(&mut incremental, &p, &ChangeSet::modules(vec![id])).unwrap();
         if step % 4 == 0 {
             incremental.run_auto(&CancelToken::new()).unwrap();
         }

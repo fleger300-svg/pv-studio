@@ -188,6 +188,7 @@ pub fn ref_a_roof1() -> Project {
         roof_faces: vec![face],
         arrays,
         modules,
+        pricing: pv_model::Pricing::default(),
     }
 }
 
@@ -317,6 +318,7 @@ pub fn ref_b_east_west() -> Project {
         roof_faces: vec![face],
         arrays: vec![west, east],
         modules,
+        pricing: pv_model::Pricing::default(),
     }
 }
 
@@ -389,6 +391,13 @@ pub fn compare_with_full(inc: &mut Graph, p: &Project) -> Result<(), String> {
             if ours != theirs {
                 diffs.push(format!("array {} {name} differs", a.id.0));
             }
+        }
+    }
+    {
+        use pv_pipeline::nodes::bom::ProjectBom;
+        let project = Instance::Project;
+        if json::<ProjectBom>(inc, project) != json::<ProjectBom>(&mut full, project) {
+            diffs.push("project BOM differs".into());
         }
     }
     if diffs.is_empty() {

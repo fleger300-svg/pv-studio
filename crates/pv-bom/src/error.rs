@@ -6,12 +6,8 @@ use pv_model::command::keys;
 pub enum BomError {
     #[error("article {article_no}: pack quantity is 0")]
     ZeroPack { article_no: String },
-    #[error("article {article_no}: a {length_m} m piece is longer than the {stock_m} m bar")]
-    PieceLongerThanStock {
-        article_no: String,
-        length_m: f64,
-        stock_m: f64,
-    },
+    #[error("article {article_no}: invalid rail piece length {length_m} m")]
+    InvalidPiece { article_no: String, length_m: f64 },
     #[error("article {article_no}: invalid bar length {stock_m} m or saw cut {kerf_m} m")]
     InvalidStock {
         article_no: String,
@@ -28,7 +24,7 @@ impl BomError {
     pub fn key(&self) -> &'static str {
         match self {
             BomError::ZeroPack { .. } => keys::BOM_ZERO_PACK,
-            BomError::PieceLongerThanStock { .. } => keys::BOM_PIECE_TOO_LONG,
+            BomError::InvalidPiece { .. } => keys::BOM_INVALID_PIECE,
             BomError::InvalidStock { .. } => keys::BOM_INVALID_STOCK,
             BomError::InvalidDiscount { .. } => keys::BOM_INVALID_DISCOUNT,
         }

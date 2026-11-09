@@ -38,6 +38,9 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::undo,
             commands::redo,
             compute::get_statics_snapshot,
+            compute::get_bom,
+            compute::freeze_bom,
+            compute::list_bom_snapshots,
             bench::platform_info,
             bench::write_bench_report,
         ])

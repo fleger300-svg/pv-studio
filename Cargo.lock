@@ -2445,6 +2445,7 @@ dependencies = [
 name = "pv-pipeline"
 version = "0.1.0"
 dependencies = [
+ "pv-bom",
  "pv-geo",
  "pv-graph",
  "pv-layout",
