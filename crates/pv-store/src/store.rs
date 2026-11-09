@@ -516,12 +516,13 @@ fn upsert_building(
     b: &Building,
 ) -> Result<(), StoreError> {
     tx.prepare_cached(
-        "INSERT INTO building (id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+        "INSERT INTO building (id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json, footprint_json, roof_json)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)
          ON CONFLICT(id) DO UPDATE SET project_id = excluded.project_id, ord = excluded.ord, name = excluded.name,
              origin_x = excluded.origin_x, origin_y = excluded.origin_y, origin_z = excluded.origin_z,
              size_x = excluded.size_x, size_y = excluded.size_y, eave_height_m = excluded.eave_height_m,
-             ridge_height_m = excluded.ridge_height_m, roof_kind = excluded.roof_kind, site_json = excluded.site_json",
+             ridge_height_m = excluded.ridge_height_m, roof_kind = excluded.roof_kind, site_json = excluded.site_json,
+             footprint_json = excluded.footprint_json, roof_json = excluded.roof_json",
     )?
     .execute(params![
         b.id.0.to_string(), project.0.to_string(), ord as i64, b.name,
@@ -529,6 +530,8 @@ fn upsert_building(
         b.eave_height_m, b.ridge_height_m,
         roof_kind_str(b.roof_kind),
         b.site.as_ref().map(serde_json::to_string).transpose()?,
+        serde_json::to_string(&b.footprint)?,
+        b.roof.as_ref().map(serde_json::to_string).transpose()?,
     ])?;
     Ok(())
 }
@@ -640,15 +643,22 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
 
     let buildings = conn
         .prepare(
-            "SELECT id, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json
+            "SELECT id, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json, footprint_json, roof_json
              FROM building ORDER BY ord",
         )?
         .query_map([], |r| {
+            let size_m: [f64; 2] = [r.get(5)?, r.get(6)?];
+            let mut footprint: Vec<[f64; 2]> = json_col(r, 11)?.unwrap_or_default();
+            if footprint.is_empty() {
+                // Written before v7: the rectangle the size described.
+                footprint = pv_model::rectangle_footprint(size_m);
+            }
             Ok(Building {
                 id: BuildingId(uuid_col(r, 0)?),
                 name: r.get(1)?,
                 origin: [r.get(2)?, r.get(3)?, r.get(4)?],
-                size_m: [r.get(5)?, r.get(6)?],
+                footprint,
+                size_m,
                 eave_height_m: r.get(7)?,
                 ridge_height_m: r.get(8)?,
                 roof_kind: enum_col(r, 9, |s| match s {
@@ -658,6 +668,7 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
                     "monopitch" => Some(RoofKind::Monopitch),
                     _ => None,
                 })?,
+                roof: json_col(r, 12)?,
                 site: json_col(r, 10)?,
             })
         })?
@@ -910,6 +921,8 @@ mod tests {
                      WHERE mounting_json IS NOT NULL;
                    ALTER TABLE project DROP COLUMN pricing_json;
                    DROP TABLE bom_snapshot;
+                   ALTER TABLE building DROP COLUMN footprint_json;
+                   ALTER TABLE building DROP COLUMN roof_json;
                    PRAGMA user_version = 4;"#,
             )
             .expect("downgrade to v4");

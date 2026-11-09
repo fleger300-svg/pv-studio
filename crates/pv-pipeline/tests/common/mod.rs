@@ -109,10 +109,12 @@ pub fn ref_a_roof1() -> Project {
         id: BuildingId::new(),
         name: "A".into(),
         origin: [0.0, 0.0, 0.0],
+        footprint: pv_model::rectangle_footprint([26.18, 12.86]),
         size_m: [26.18, 12.86],
         eave_height_m: height - 2.0,
         ridge_height_m: height,
         roof_kind: RoofKind::Hipped,
+        roof: None,
         site: Some(site),
     };
     let rf = &layout.roof_1_face;
@@ -244,10 +246,12 @@ pub fn ref_b_east_west() -> Project {
         id: BuildingId::new(),
         name: "B".into(),
         origin: [0.0, 0.0, 0.0],
+        footprint: pv_model::rectangle_footprint([24.0, 12.0]),
         size_m: [24.0, 12.0],
         eave_height_m: height,
         ridge_height_m: height,
         roof_kind: RoofKind::Flat,
+        roof: None,
         site: Some(site),
     };
     let face = RoofFace {

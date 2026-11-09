@@ -73,6 +73,7 @@ export function flatRoofFixture(): { summary: ProjectSummary; data: ModuleData }
         halfFootprint: [0.567, 0.881],
       },
     ],
+    walls: [],
     canUndo: false,
     canRedo: false,
   };

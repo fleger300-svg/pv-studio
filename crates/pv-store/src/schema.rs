@@ -145,6 +145,12 @@ const MIGRATIONS: &[&str] = &[
         bom_json          TEXT NOT NULL
     ) STRICT;
     "#,
+    // v7: footprint polygon and roof specification per building (pv-roof). Buildings written
+    // before have an empty footprint: the loader rebuilds their rectangle from size_x/size_y.
+    r#"
+    ALTER TABLE building ADD COLUMN footprint_json TEXT NOT NULL DEFAULT '[]';
+    ALTER TABLE building ADD COLUMN roof_json TEXT;
+    "#,
 ];
 
 /// Latest schema version known to this build.

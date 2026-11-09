@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::geometry::RoofFrame;
-use crate::ids::ProjectId;
+use crate::ids::{BuildingId, ProjectId};
 use crate::project::{
     Building, PanelArray, Project, RoofFace, MODULES_PER_STRING, MODULE_PEAK_POWER_WP,
     MODULE_THICKNESS_M,
@@ -33,6 +33,21 @@ pub struct ArraySummary {
     pub half_footprint: [f64; 2],
 }
 
+/// One wall of a building: vertical, on footprint edge `start → end` (world plan, m), from
+/// the ground up to the roof.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct WallSummary {
+    pub building_id: BuildingId,
+    pub start: [f64; 2],
+    pub end: [f64; 2],
+    /// World height of the wall's foot, m.
+    pub base_z: f64,
+    /// Top of the wall, `(s, z)`: distance from `start` along the edge and world height,
+    /// from `s = 0` to `s = length`.
+    pub profile: Vec<[f64; 2]>,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectSummary {
@@ -48,6 +63,8 @@ pub struct ProjectSummary {
     pub buildings: Vec<Building>,
     pub roof_faces: Vec<RoofFaceSummary>,
     pub arrays: Vec<ArraySummary>,
+    /// Walls of every building (filled by the application with `pv_roof::walls`).
+    pub walls: Vec<WallSummary>,
     pub can_undo: bool,
     pub can_redo: bool,
 }
@@ -104,6 +121,7 @@ impl ProjectSummary {
             buildings: project.buildings.clone(),
             roof_faces,
             arrays,
+            walls: Vec::new(),
             can_undo,
             can_redo,
         }

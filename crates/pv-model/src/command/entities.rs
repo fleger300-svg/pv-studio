@@ -59,6 +59,10 @@ fn validate_building(b: &Building) -> Result<(), CommandError> {
     if b.ridge_height_m < b.eave_height_m {
         return Err(invalid("ridgeHeightM"));
     }
+    crate::roof::validate_footprint(&b.footprint).map_err(|e| invalid(e.field()))?;
+    if let Some(spec) = &b.roof {
+        crate::roof::validate_roof_spec(spec, &b.footprint).map_err(|e| invalid(e.field()))?;
+    }
     Ok(())
 }
 
