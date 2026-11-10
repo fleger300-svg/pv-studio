@@ -253,6 +253,41 @@ impl Default for Search {
     }
 }
 
+/// Scores offsets on every core (they are independent); results in input order, so the
+/// search stays deterministic.
+fn score_all(
+    candidates: &[(f64, f64)],
+    score: &(dyn Fn(f64, f64) -> (usize, f64) + Sync),
+) -> Vec<((usize, f64), f64, f64)> {
+    let threads = std::thread::available_parallelism()
+        .map_or(1, std::num::NonZeroUsize::get)
+        .min(candidates.len().div_ceil(16))
+        .max(1);
+    if threads == 1 {
+        return candidates
+            .iter()
+            .map(|&(du, dv)| (score(du, dv), du, dv))
+            .collect();
+    }
+    let chunk = candidates.len().div_ceil(threads);
+    std::thread::scope(|s| {
+        let parts: Vec<_> = candidates
+            .chunks(chunk)
+            .map(|part| {
+                s.spawn(move || {
+                    part.iter()
+                        .map(|&(du, dv)| (score(du, dv), du, dv))
+                        .collect::<Vec<_>>()
+                })
+            })
+            .collect();
+        parts
+            .into_iter()
+            .flat_map(|h| h.join().expect("scoring thread"))
+            .collect()
+    })
+}
+
 /// Fills the region with as many modules as possible: tries lattice offsets over one block
 /// period (coarse, then fine around the best), plus the offsets that put a module edge on
 /// the region's anchor-side bounds. Ties go to the layout closest to the anchor (or to the
@@ -324,31 +359,65 @@ pub fn fill(region: Region<'_>, spec: GridSpec, search: Search) -> Placement {
             .filter(|&x| x < period)
             .collect()
     };
-    let mut scored: Vec<((usize, f64), f64, f64)> = Vec::new();
-    for dv in steps(pv, search.coarse_m) {
-        for du in steps(pu, search.coarse_m) {
-            scored.push((score(du, dv), du, dv));
+    // Every offset costs one acceptance test per cell. Large fields (thousands of cells,
+    // mounting blocks of several metres) would need tens of millions of tests: the coarse
+    // grid is then sized by a budget of tests, and the refinement goes down in levels
+    // (step ÷ 4, ±2 steps around the best) to the fine step. Small fields keep the
+    // exhaustive fine search around the coarse optimum.
+    const TEST_BUDGET: f64 = 4.0e6;
+    let cells = f64::from(rows) * f64::from(cols);
+    let max_steps = (TEST_BUDGET / cells.max(1.0)).sqrt().clamp(12.0, 40.0);
+    let coarse_u = search.coarse_m.max(pu / max_steps);
+    let coarse_v = search.coarse_m.max(pv / max_steps);
+    let mut candidates = Vec::new();
+    for dv in steps(pv, coarse_v) {
+        for du in steps(pu, coarse_u) {
+            candidates.push((du, dv));
         }
     }
-    scored.sort_by(|a, b| b.0 .0.cmp(&a.0 .0).then(a.0 .1.total_cmp(&b.0 .1)));
-    scored.truncate(search.refine_best.max(1));
+    let mut scored = score_all(&candidates, &score);
+    let keep = search.refine_best.max(1);
+    let rank = |s: &mut Vec<((usize, f64), f64, f64)>| {
+        s.sort_by(|a, b| b.0 .0.cmp(&a.0 .0).then(a.0 .1.total_cmp(&b.0 .1)));
+        s.truncate(keep);
+    };
+    rank(&mut scored);
 
     let mut best = scored[0];
-    let n = (search.coarse_m / search.fine_m).round() as i32;
-    for &(_, du0, dv0) in &scored {
-        for j in -n..=n {
-            for i in -n..=n {
-                let (du, dv) = (
-                    du0 + f64::from(i) * search.fine_m,
-                    dv0 + f64::from(j) * search.fine_m,
-                );
-                if du < 0.0 || dv < 0.0 {
-                    continue;
+    let around = |scored: &[((usize, f64), f64, f64)], step_u: f64, step_v: f64, n: i32| {
+        let mut out = Vec::new();
+        for &(_, du0, dv0) in scored {
+            for j in -n..=n {
+                for i in -n..=n {
+                    let (du, dv) = (du0 + f64::from(i) * step_u, dv0 + f64::from(j) * step_v);
+                    if du >= 0.0 && dv >= 0.0 {
+                        out.push((du, dv));
+                    }
                 }
-                let sc = score(du, dv);
-                if better(sc, best.0) {
-                    best = (sc, du, dv);
-                }
+            }
+        }
+        score_all(&out, &score)
+    };
+    if coarse_u > search.coarse_m || coarse_v > search.coarse_m {
+        let (mut su_step, mut sv_step) = (coarse_u, coarse_v);
+        while su_step > search.fine_m || sv_step > search.fine_m {
+            su_step = (su_step / 4.0).max(search.fine_m);
+            sv_step = (sv_step / 4.0).max(search.fine_m);
+            let mut level = around(&scored, su_step, sv_step, 2);
+            level.extend(scored.iter().copied());
+            rank(&mut level);
+            scored = level;
+        }
+        for &c in &scored {
+            if better(c.0, best.0) {
+                best = c;
+            }
+        }
+    } else {
+        let n = (search.coarse_m / search.fine_m).round() as i32;
+        for c in around(&scored, search.fine_m, search.fine_m, n) {
+            if better(c.0, best.0) {
+                best = c;
             }
         }
     }

@@ -5,6 +5,7 @@ mod bench;
 mod commands;
 mod compute;
 mod export;
+mod layout;
 mod roof;
 mod state;
 
@@ -42,6 +43,9 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             roof::roof_preset,
             roof::roof_form,
             roof::roof_from_form,
+            layout::default_array,
+            layout::plan_layout,
+            layout::apply_layout,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

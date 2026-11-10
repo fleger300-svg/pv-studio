@@ -7,6 +7,7 @@ import { BomPanel } from '../bom/BomPanel';
 import type { ColorMode } from '../viewport3d/PanelMeshes';
 import { BuildingPanel } from '../panels/BuildingPanel';
 import { RoofPanel } from '../panels/RoofPanel';
+import { ArraysPanel } from '../panels/ArraysPanel';
 import { useWorkflowStore } from '../store/workflow';
 
 /**
@@ -45,6 +46,7 @@ function LayoutPanels() {
 
   return (
     <aside className="app__right">
+      <ArraysPanel />
       <Panel title={t('selection.title')}>
         <Stat label={t('selection.count')} value={t('selection.modules', { count })} />
         <Stat label={t('selection.power')} value={t('selection.kwp', { kwp })} />

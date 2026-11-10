@@ -2505,6 +2505,7 @@ name = "pv-studio"
 version = "0.1.0"
 dependencies = [
  "pv-bom",
+ "pv-layout",
  "pv-model",
  "pv-pipeline",
  "pv-roof",

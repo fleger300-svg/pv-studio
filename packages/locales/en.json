@@ -339,5 +339,32 @@
     "footprint": "footprint",
     "roofEdges": "roof edges",
     "roof": "roof"
+  },
+  "arrays": {
+    "title": "Arrays",
+    "titleOn": "Arrays · {face}",
+    "noFace": "Click a roof face in the 3D view to see and lay out its arrays.",
+    "none": "No array on this face.",
+    "item": "Array {n}",
+    "modules": "Modules",
+    "power": "Peak power",
+    "orientation": "Module orientation",
+    "orientations": {
+      "portrait": "Portrait",
+      "landscape": "Landscape"
+    },
+    "moduleLength": "Module length",
+    "moduleWidth": "Module width",
+    "gapU": "Gap along the eave",
+    "gapV": "Gap up the slope",
+    "edgeSetback": "Edge setback",
+    "obstacleClearance": "Clearance to obstacles",
+    "otherArrays": "Distance to other arrays",
+    "mounting": "Mounting system",
+    "noMounting": "None",
+    "relayout": "Lay out automatically",
+    "clear": "Clear the array",
+    "delete": "Delete the array",
+    "add": "Add an array (laid out automatically)"
   }
 }

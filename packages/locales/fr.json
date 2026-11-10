@@ -339,5 +339,32 @@
     "footprint": "emprise",
     "roofEdges": "arêtes du toit",
     "roof": "toit"
+  },
+  "arrays": {
+    "title": "Champs",
+    "titleOn": "Champs · {face}",
+    "noFace": "Cliquez sur un pan de toiture dans la vue 3D pour voir et calepiner ses champs.",
+    "none": "Aucun champ sur ce pan.",
+    "item": "Champ {n}",
+    "modules": "Modules",
+    "power": "Puissance crête",
+    "orientation": "Orientation des modules",
+    "orientations": {
+      "portrait": "Portrait",
+      "landscape": "Paysage"
+    },
+    "moduleLength": "Longueur du module",
+    "moduleWidth": "Largeur du module",
+    "gapU": "Écart le long de l’égout",
+    "gapV": "Écart dans la pente",
+    "edgeSetback": "Retrait des bords",
+    "obstacleClearance": "Distance aux obstacles",
+    "otherArrays": "Distance aux autres champs",
+    "mounting": "Système de montage",
+    "noMounting": "Aucun",
+    "relayout": "Calepiner automatiquement",
+    "clear": "Vider le champ",
+    "delete": "Supprimer le champ",
+    "add": "Ajouter un champ (calepiné automatiquement)"
   }
 }

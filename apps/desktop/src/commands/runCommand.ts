@@ -38,19 +38,33 @@ export async function runCommand(
   cmd?: Command,
   onTiming?: ((t: CommandTiming) => void) | null,
 ): Promise<ApplyResult | null> {
+  if (kind === 'apply' && !cmd) return null;
+  return runApplied(
+    kind,
+    () =>
+      kind === 'apply' && cmd
+        ? unwrap(api.applyCommand(cmd))
+        : kind === 'undo'
+          ? unwrap(api.undo())
+          : unwrap(api.redo()),
+    onTiming,
+  );
+}
+
+/**
+ * Same path for back-end calls that build and apply their command in Rust (a layout of
+ * thousands of modules is not sent to the front-end and back).
+ */
+export async function runApplied(
+  kind: CommandTiming['kind'],
+  call: () => Promise<ApplyResult>,
+  onTiming?: ((t: CommandTiming) => void) | null,
+): Promise<ApplyResult | null> {
   if (busy) return null;
   busy = true;
   const started = performance.now();
   try {
-    let result: ApplyResult;
-    if (kind === 'apply') {
-      if (!cmd) return null;
-      result = await unwrap(api.applyCommand(cmd));
-    } else if (kind === 'undo') {
-      result = await unwrap(api.undo());
-    } else {
-      result = await unwrap(api.redo());
-    }
+    const result = await call();
     onTiming?.({ kind, roundTripMs: performance.now() - started, rustUs: result.rustUs });
     useProjectStore.getState().setCounters({
       canUndo: result.canUndo,

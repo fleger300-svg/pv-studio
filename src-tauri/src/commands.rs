@@ -265,7 +265,7 @@ pub struct ModelChanged {
     pub can_redo: bool,
 }
 
-fn finish(
+pub(crate) fn finish(
     app: &AppHandle,
     state: &AppState,
     store: &ProjectStore,

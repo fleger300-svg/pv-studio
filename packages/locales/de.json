@@ -339,5 +339,32 @@
     "footprint": "Grundriss",
     "roofEdges": "Dachkanten",
     "roof": "Dach"
+  },
+  "arrays": {
+    "title": "Modulfelder",
+    "titleOn": "Modulfelder · {face}",
+    "noFace": "Klicken Sie in der 3D-Ansicht auf eine Dachfläche, um ihre Modulfelder zu sehen und zu belegen.",
+    "none": "Kein Modulfeld auf dieser Dachfläche.",
+    "item": "Modulfeld {n}",
+    "modules": "Module",
+    "power": "Spitzenleistung",
+    "orientation": "Modulausrichtung",
+    "orientations": {
+      "portrait": "Hochformat",
+      "landscape": "Querformat"
+    },
+    "moduleLength": "Modullänge",
+    "moduleWidth": "Modulbreite",
+    "gapU": "Abstand entlang der Traufe",
+    "gapV": "Abstand in Falllinie",
+    "edgeSetback": "Randabstand",
+    "obstacleClearance": "Abstand zu Hindernissen",
+    "otherArrays": "Abstand zu anderen Modulfeldern",
+    "mounting": "Montagesystem",
+    "noMounting": "Keines",
+    "relayout": "Automatisch belegen",
+    "clear": "Modulfeld leeren",
+    "delete": "Modulfeld löschen",
+    "add": "Modulfeld hinzufügen (automatisch belegt)"
   }
 }

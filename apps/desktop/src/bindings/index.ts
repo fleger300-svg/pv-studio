@@ -51,6 +51,19 @@ export const commands = {
 	roofForm: (footprint: ([number, number])[], spec: RoofSpec_Deserialize, eaveHeightM: number) => typedError<RoofForm, CommandError>(__TAURI_INVOKE("roof_form", { footprint, spec, eaveHeightM })),
 	/**  The per-edge specification of a form (`None` for a custom roof: keep the edges). */
 	roofFromForm: (footprint: ([number, number])[], form: RoofForm) => typedError<RoofSpec_Serialize | null, CommandError>(__TAURI_INVOKE("roof_from_form", { footprint, form })),
+	/**  A new array for a roof face (reference module, K2 SingleRail, usual gaps and setbacks). */
+	defaultArray: (faceId: RoofFaceId) => typedError<PanelArray_Serialize, CommandError>(__TAURI_INVOKE("default_array", { faceId })),
+	/**
+	 *  The batch that gives `array` (new or changed) its settings and lays out its whole face
+	 *  again. Pure: nothing changes until the front-end applies it.
+	 */
+	planLayout: (array: PanelArray_Deserialize) => typedError<Command_Serialize, CommandError>(__TAURI_INVOKE("plan_layout", { array })),
+	/**
+	 *  Plans and applies the layout of `array`'s face in one call (the journal records the
+	 *  explicit batch, like `apply_command`): large fields do not send their thousands of
+	 *  module slots to the front-end and back.
+	 */
+	applyLayout: (array: PanelArray_Deserialize) => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("apply_layout", { array })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
