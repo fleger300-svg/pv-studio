@@ -19,6 +19,7 @@ specta.workspace = true
 
 [dev-dependencies]
 pv-store.workspace = true
+pv-roof.workspace = true
 serde_json.workspace = true
 tempfile = "3"
 
