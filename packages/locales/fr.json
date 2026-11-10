@@ -29,7 +29,10 @@
     "presets": {
       "residential": "Résidentiel · ~1 000 modules",
       "industrial": "Industriel · ~10 000 modules"
-    }
+    },
+    "files": "Projet",
+    "new": "Nouveau projet…",
+    "open": "Ouvrir…"
   },
   "tools": {
     "label": "Outils",
@@ -38,7 +41,8 @@
     "move": "Déplacer",
     "delete": "Supprimer la sélection",
     "undo": "Annuler",
-    "redo": "Rétablir"
+    "redo": "Rétablir",
+    "frame": "Recadrer la vue 3D sur le projet"
   },
   "selection": {
     "title": "Sélection",
@@ -60,7 +64,8 @@
   },
   "viewport": {
     "label": "Vue 3D",
-    "empty": "Créez ou ouvrez un projet pour l'afficher en 3D."
+    "empty": "Créez ou ouvrez un projet pour l'afficher en 3D.",
+    "emptySite": "Site vide : tracez un bâtiment sur le plan."
   },
   "errors": {
     "module": {
@@ -120,6 +125,10 @@
     },
     "roof": {
       "reentrantCorner": "Les arêtes {a} et {b} forment un angle rentrant : elles doivent toutes deux avoir une pente (pas de pignon) et la même hauteur d’égout (et, avec un débord, la même pente)."
+    },
+    "ui": {
+      "render": "Cette partie de l’écran n’a pas pu s’afficher (le projet n’est pas affecté).",
+      "retry": "Réessayer"
     }
   },
   "hud": {
@@ -171,7 +180,8 @@
     "zones": "Zones de vent",
     "percent": "{value} %",
     "metres": "{value} m",
-    "disclaimer": "Pré-dimensionnement selon SIA 261, à faire valider pour exécution."
+    "disclaimer": "Pré-dimensionnement selon SIA 261, à faire valider pour exécution.",
+    "noArrays": "Aucun champ : la statique apparaîtra après le calepinage."
   },
   "bom": {
     "title": "Nomenclature",
@@ -206,6 +216,195 @@
       "unitPrice": "Prix à l'unité",
       "price": "Prix"
     },
-    "noPrices": "Prix catalogue non renseignés"
+    "noPrices": "Prix catalogue non renseignés",
+    "noModules": "Aucun module posé : la nomenclature apparaîtra après le calepinage."
+  },
+  "plan": {
+    "label": "Plan 2D",
+    "grid": "Grille {step} m",
+    "fit": "Ajuster à la vue",
+    "empty": "Aucun bâtiment sur ce site pour l’instant.",
+    "splitter": "Redimensionner le plan et la vue 3D",
+    "tools": {
+      "label": "Outils du plan",
+      "select": "Édition",
+      "rect": "Rectangle",
+      "polygon": "Polygone"
+    },
+    "hints": {
+      "selectNone": "Cliquez sur un bâtiment pour le modifier, ou tracez-en un au rectangle (R) ou au polygone (P).",
+      "select": "Glissez un sommet, le « + » d’une arête pour en ajouter un, le bâtiment pour le déplacer. Suppr retire le sommet sélectionné ; double-cliquez une cote pour la saisir. Alt : sans aimantation.",
+      "rect": "Faites glisser pour tracer un rectangle. Alt : sans aimantation.",
+      "polygon": "Cliquez pour placer les sommets ; fermez sur le premier sommet, par double-clic ou avec Entrée. Retour arrière retire le dernier, Échap abandonne."
+    },
+    "errors": {
+      "selfIntersecting": "Le contour se croise lui-même."
+    },
+    "edgeLength": "Longueur de l’arête (m)"
+  },
+  "building": {
+    "defaultName": "Bâtiment {n}",
+    "title": "Bâtiment",
+    "none": "Sélectionnez un bâtiment sur le plan, ou tracez-en un.",
+    "name": "Nom",
+    "eaveHeight": "Hauteur d’égout",
+    "ridgeHeight": "Hauteur de faîtage",
+    "size": "Dimensions",
+    "delete": "Supprimer le bâtiment"
+  },
+  "roof": {
+    "shape": "Type de toit",
+    "shapes": {
+      "gable": "Deux pans",
+      "hipped": "Croupe",
+      "halfHipped": "Demi-croupe",
+      "monopitch": "Un pan",
+      "flat": "Plat",
+      "custom": "Personnalisé (par arête)"
+    },
+    "pitch": "Pente",
+    "pitchAll": "Pente (toutes les arêtes en pente)",
+    "endPitch": "Pente des croupes",
+    "endEave": "Égout des croupes",
+    "lowEdge": "Arête basse",
+    "edgeLabel": "Arête {n} · {length} m",
+    "overhang": "Débord",
+    "kind": "Forme obtenue",
+    "kinds": {
+      "gable": "Deux pans",
+      "hipped": "Croupe",
+      "monopitch": "Un pan",
+      "flat": "Plat"
+    },
+    "edges": {
+      "show": "Réglages par arête",
+      "hide": "Masquer les réglages par arête",
+      "title": "Arêtes",
+      "gable": "Pignon",
+      "eave": "Égout (vide : celui du bâtiment)"
+    },
+    "facesTitle": "Pans de toiture",
+    "faceTitle": "Pan",
+    "noFaces": "Ce bâtiment n’a pas de pan.",
+    "noFace": "Sélectionnez un pan dans la liste ou sur le plan.",
+    "faceMeta": "{tilt}° · orienté {azimuth}°",
+    "faceName": "Nom du pan",
+    "tilt": "Inclinaison",
+    "azimuth": "Orientation (0° = nord)",
+    "area": "Surface",
+    "covering": "Couverture",
+    "coverings": {
+      "none": "Non précisée",
+      "standingSeam": "Joint debout",
+      "rafters": "Chevrons / pannes"
+    },
+    "spacing": "Entraxe",
+    "gridOrigin": "Position du premier"
+  },
+  "obstacles": {
+    "title": "Obstacles",
+    "none": "Aucun obstacle sur ce pan.",
+    "name": "Nom",
+    "kind": "Type",
+    "kinds": {
+      "chimney": "Cheminée",
+      "skylight": "Fenêtre de toit",
+      "vent": "Ventilation",
+      "dormer": "Lucarne",
+      "keepOut": "Zone à garder libre"
+    },
+    "u": "Centre le long de l’égout",
+    "v": "Centre dans la pente",
+    "width": "Largeur",
+    "length": "Longueur",
+    "height": "Hauteur",
+    "delete": "Supprimer l’obstacle",
+    "add": "Ajouter un obstacle",
+    "defaultName": "Obstacle {n}"
+  },
+  "forms": {
+    "notANumber": "Entrez un nombre.",
+    "outOfRange": "Entre {min} et {max}.",
+    "required": "Ce champ est obligatoire."
+  },
+  "fields": {
+    "azimuthDeg": "orientation",
+    "azimuthOffsetDeg": "décalage d’orientation",
+    "eaveHeightM": "hauteur d’égout",
+    "heightM": "hauteur",
+    "moduleLengthM": "longueur de module",
+    "moduleWidthM": "largeur de module",
+    "outline": "contour",
+    "overhangM": "débord",
+    "pitchDeg": "pente",
+    "ridgeHeightM": "hauteur de faîtage",
+    "sizeM": "dimensions",
+    "tiltDeg": "inclinaison",
+    "tiltOnRoofDeg": "inclinaison sur le toit",
+    "widthM": "largeur",
+    "origin": "position",
+    "supportGrid": "couverture",
+    "footprint": "emprise",
+    "roofEdges": "arêtes du toit",
+    "roof": "toit"
+  },
+  "arrays": {
+    "title": "Champs",
+    "titleOn": "Champs · {face}",
+    "noFace": "Cliquez sur un pan de toiture dans la vue 3D pour voir et calepiner ses champs.",
+    "none": "Aucun champ sur ce pan.",
+    "item": "Champ {n}",
+    "modules": "Modules",
+    "power": "Puissance crête",
+    "orientation": "Orientation des modules",
+    "orientations": {
+      "portrait": "Portrait",
+      "landscape": "Paysage"
+    },
+    "moduleLength": "Longueur du module",
+    "moduleWidth": "Largeur du module",
+    "gapU": "Écart le long de l’égout",
+    "gapV": "Écart dans la pente",
+    "edgeSetback": "Retrait des bords",
+    "obstacleClearance": "Distance aux obstacles",
+    "otherArrays": "Distance aux autres champs",
+    "mounting": "Système de montage",
+    "noMounting": "Aucun",
+    "relayout": "Calepiner automatiquement",
+    "clear": "Vider le champ",
+    "delete": "Supprimer le champ",
+    "add": "Ajouter un champ (calepiné automatiquement)"
+  },
+  "site": {
+    "title": "Site (statique SIA 261)",
+    "missing": "Renseignez l’altitude et la pression dynamique de référence q_p0 du site : la statique en a besoin.",
+    "altitude": "Altitude",
+    "snowCorrection": "Correction de la carte de neige",
+    "qp0": "Pression dynamique de référence q_p0",
+    "thermal": "Coefficient thermique C_t",
+    "serviceLife": "Durée d’utilisation",
+    "years": "ans",
+    "terrain": "Catégorie de terrain",
+    "terrains": {
+      "II": "II · lacs, rase campagne",
+      "IIa": "IIa · campagne, quelques obstacles",
+      "III": "III · localités, zones boisées",
+      "IV": "IV · centres urbains"
+    },
+    "exposure": "Exposition à la neige",
+    "exposures": {
+      "windswept": "Exposé au vent",
+      "normal": "Normale",
+      "sheltered": "Abritée"
+    },
+    "consequence": "Classe de conséquences",
+    "lifeModel": "Prise en compte de la durée d’utilisation",
+    "lifeModels": {
+      "en1991": "Selon SN EN 1991 (c_prob)",
+      "explicit": "Facteurs fixés par l’ingénieur"
+    },
+    "snowFactor": "Facteur neige",
+    "windFactor": "Facteur vent",
+    "applyAll": "Appliquer ce site à tous les bâtiments"
   }
 }

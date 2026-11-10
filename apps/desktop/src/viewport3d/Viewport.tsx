@@ -14,7 +14,11 @@ import { Interaction } from './Interaction';
 import { ipcCallCount } from '../ipc';
 import { FrameProbe } from '../perf/FrameProbe';
 import { usePerfStore } from '../perf/perfStore';
+import { usePlanStore } from '../store/plan';
+import { useProjectStore } from '../store/project';
+import { useSelectionStore } from '../store/selection';
 import { useViewStore } from '../store/view';
+import { useWorkflowStore } from '../store/workflow';
 import { useUiStore } from '../store/ui';
 
 // World frame is ENU with z up.
@@ -38,6 +42,7 @@ function Scene({ summary, modules }: SceneProps) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const sun = useRef<DirectionalLight>(null);
   const colorMode = useViewStore((s) => s.colorMode);
+  const ground = tokens[useUiStore((s) => s.theme)].ground;
 
   const panels = useMemo(() => new PanelMeshes(summary, modules), [summary, modules]);
   // Static shadows: light and geometry do not move with the camera, so the shadow map is
@@ -69,7 +74,17 @@ function Scene({ summary, modules }: SceneProps) {
     void editor.attach();
     useViewStore.setState({ editor, three: getThree, selectionCount: editor.selection.size });
     // Dev-only automation handle (stripped from production builds).
-    if (import.meta.env.DEV) window.__pv = { editor, three: getThree, ipcCallCount };
+    if (import.meta.env.DEV) {
+      window.__pv = {
+        editor,
+        three: getThree,
+        ipcCallCount,
+        project: useProjectStore,
+        selection: useSelectionStore,
+        workflow: useWorkflowStore,
+        plan: usePlanStore,
+      };
+    }
     return () => {
       useViewStore.setState({ editor: null, three: null, selectionCount: 0 });
       editor.detach();
@@ -88,8 +103,23 @@ function Scene({ summary, modules }: SceneProps) {
   const center = useMemo(() => bounds.getCenter(new Vector3()), [bounds]);
   const radius = useMemo(() => bounds.getSize(new Vector3()).length() / 2, [bounds]);
 
-  // Frame the project once per load: from the south-east, looking down ~35°.
+  // Frame the project once per load, when the first building appears on an empty site,
+  // and on request (toolbar): from the south-east, looking down ~35°. Edits keep the
+  // user's camera.
+  const frameRequest = useViewStore((s) => s.frameRequest);
+  const framed = useRef<{ project: string; empty: boolean; request: number } | null>(null);
+  const empty = summary.buildings.length === 0 && modules.count === 0;
   useLayoutEffect(() => {
+    const f = framed.current;
+    if (
+      f &&
+      f.project === summary.projectId &&
+      f.request === frameRequest &&
+      !(f.empty && !empty)
+    ) {
+      return;
+    }
+    framed.current = { project: summary.projectId, empty, request: frameRequest };
     // Three.js objects are mutable by design; read them from the store inside the effect.
     const { camera } = getThree();
     const dir = new Vector3(0.35, -0.8, 0.6).normalize();
@@ -100,7 +130,7 @@ function Scene({ summary, modules }: SceneProps) {
     controls.current?.target.copy(center);
     controls.current?.update();
     invalidate();
-  }, [getThree, center, radius, invalidate]);
+  }, [getThree, center, radius, invalidate, summary.projectId, empty, frameRequest]);
 
   // Sun with a shadow camera fitted tightly around the project.
   useLayoutEffect(() => {
@@ -142,7 +172,7 @@ function Scene({ summary, modules }: SceneProps) {
       />
       <mesh position={[center.x, center.y, 0]} receiveShadow>
         <planeGeometry args={[radius * 8, radius * 8]} />
-        <meshStandardMaterial color="#c8cdbf" roughness={1} />
+        <meshStandardMaterial color={ground} roughness={1} />
       </mesh>
       <Buildings summary={summary} />
       <primitive object={panels.group} />

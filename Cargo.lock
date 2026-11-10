@@ -2466,7 +2466,9 @@ version = "0.1.0"
 dependencies = [
  "pv-geo",
  "pv-model",
+ "serde",
  "serde_json",
+ "specta",
  "thiserror 2.0.21",
  "uuid",
 ]
@@ -2503,6 +2505,7 @@ name = "pv-studio"
 version = "0.1.0"
 dependencies = [
  "pv-bom",
+ "pv-layout",
  "pv-model",
  "pv-pipeline",
  "pv-roof",

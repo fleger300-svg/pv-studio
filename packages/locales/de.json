@@ -29,7 +29,10 @@
     "presets": {
       "residential": "Wohnbau · ~1000 Module",
       "industrial": "Industrie · ~10 000 Module"
-    }
+    },
+    "files": "Projekt",
+    "new": "Neues Projekt…",
+    "open": "Öffnen…"
   },
   "tools": {
     "label": "Werkzeuge",
@@ -38,7 +41,8 @@
     "move": "Verschieben",
     "delete": "Auswahl löschen",
     "undo": "Rückgängig",
-    "redo": "Wiederherstellen"
+    "redo": "Wiederherstellen",
+    "frame": "Projekt in der 3D-Ansicht einpassen"
   },
   "selection": {
     "title": "Auswahl",
@@ -60,7 +64,8 @@
   },
   "viewport": {
     "label": "3D-Ansicht",
-    "empty": "Erstellen oder öffnen Sie ein Projekt, um es in 3D anzuzeigen."
+    "empty": "Erstellen oder öffnen Sie ein Projekt, um es in 3D anzuzeigen.",
+    "emptySite": "Leeres Grundstück: Zeichnen Sie ein Gebäude im Plan."
   },
   "errors": {
     "module": {
@@ -120,6 +125,10 @@
     },
     "roof": {
       "reentrantCorner": "Die Kanten {a} und {b} bilden eine einspringende Ecke: Beide brauchen eine Neigung (keine Giebelwand) und dieselbe Traufhöhe (bei einem Dachüberstand auch dieselbe Neigung)."
+    },
+    "ui": {
+      "render": "Dieser Bildschirmbereich konnte nicht angezeigt werden (das Projekt ist nicht betroffen).",
+      "retry": "Erneut versuchen"
     }
   },
   "hud": {
@@ -171,7 +180,8 @@
     "zones": "Windzonen",
     "percent": "{value} %",
     "metres": "{value} m",
-    "disclaimer": "Vordimensionierung nach SIA 261, vor der Ausführung zu prüfen."
+    "disclaimer": "Vordimensionierung nach SIA 261, vor der Ausführung zu prüfen.",
+    "noArrays": "Kein Modulfeld: Die Statik erscheint nach der Belegung."
   },
   "bom": {
     "title": "Stückliste",
@@ -206,6 +216,195 @@
       "unitPrice": "Einzelpreis",
       "price": "Preis"
     },
-    "noPrices": "Listenpreise nicht erfasst"
+    "noPrices": "Listenpreise nicht erfasst",
+    "noModules": "Keine Module verlegt: Die Stückliste erscheint nach der Belegung."
+  },
+  "plan": {
+    "label": "2D-Plan",
+    "grid": "Raster {step} m",
+    "fit": "In Ansicht einpassen",
+    "empty": "Auf diesem Grundstück steht noch kein Gebäude.",
+    "splitter": "Plan und 3D-Ansicht in der Grösse anpassen",
+    "tools": {
+      "label": "Planwerkzeuge",
+      "select": "Bearbeiten",
+      "rect": "Rechteck",
+      "polygon": "Polygon"
+    },
+    "hints": {
+      "selectNone": "Klicken Sie auf ein Gebäude, um es zu bearbeiten, oder zeichnen Sie eines mit dem Rechteck (R) oder dem Polygon (P).",
+      "select": "Ziehen Sie einen Eckpunkt, das « + » einer Kante, um einen hinzuzufügen, oder das Gebäude, um es zu verschieben. Entf entfernt den gewählten Eckpunkt; Doppelklick auf ein Mass, um es einzugeben. Alt: ohne Fangen.",
+      "rect": "Ziehen Sie, um ein Rechteck zu zeichnen. Alt: ohne Fangen.",
+      "polygon": "Klicken Sie, um die Eckpunkte zu setzen; schliessen Sie am ersten Eckpunkt, per Doppelklick oder mit Enter. Rücktaste entfernt den letzten, Esc bricht ab."
+    },
+    "errors": {
+      "selfIntersecting": "Der Umriss schneidet sich selbst."
+    },
+    "edgeLength": "Kantenlänge (m)"
+  },
+  "building": {
+    "defaultName": "Gebäude {n}",
+    "title": "Gebäude",
+    "none": "Wählen Sie ein Gebäude im Plan aus oder zeichnen Sie eines.",
+    "name": "Name",
+    "eaveHeight": "Traufhöhe",
+    "ridgeHeight": "Firsthöhe",
+    "size": "Abmessungen",
+    "delete": "Gebäude löschen"
+  },
+  "roof": {
+    "shape": "Dachform",
+    "shapes": {
+      "gable": "Satteldach",
+      "hipped": "Walmdach",
+      "halfHipped": "Krüppelwalmdach",
+      "monopitch": "Pultdach",
+      "flat": "Flachdach",
+      "custom": "Benutzerdefiniert (je Kante)"
+    },
+    "pitch": "Neigung",
+    "pitchAll": "Neigung (alle geneigten Kanten)",
+    "endPitch": "Neigung der Walme",
+    "endEave": "Traufe der Walme",
+    "lowEdge": "Untere Kante",
+    "edgeLabel": "Kante {n} · {length} m",
+    "overhang": "Dachüberstand",
+    "kind": "Ergebende Form",
+    "kinds": {
+      "gable": "Satteldach",
+      "hipped": "Walmdach",
+      "monopitch": "Pultdach",
+      "flat": "Flachdach"
+    },
+    "edges": {
+      "show": "Einstellungen je Kante",
+      "hide": "Einstellungen je Kante ausblenden",
+      "title": "Kanten",
+      "gable": "Giebelwand",
+      "eave": "Traufe (leer: die des Gebäudes)"
+    },
+    "facesTitle": "Dachflächen",
+    "faceTitle": "Dachfläche",
+    "noFaces": "Dieses Gebäude hat keine Dachfläche.",
+    "noFace": "Wählen Sie eine Dachfläche in der Liste oder im Plan.",
+    "faceMeta": "{tilt}° · Ausrichtung {azimuth}°",
+    "faceName": "Name der Dachfläche",
+    "tilt": "Neigung",
+    "azimuth": "Ausrichtung (0° = Norden)",
+    "area": "Fläche",
+    "covering": "Eindeckung",
+    "coverings": {
+      "none": "Nicht angegeben",
+      "standingSeam": "Stehfalz",
+      "rafters": "Sparren / Pfetten"
+    },
+    "spacing": "Abstand",
+    "gridOrigin": "Lage des ersten"
+  },
+  "obstacles": {
+    "title": "Hindernisse",
+    "none": "Keine Hindernisse auf dieser Dachfläche.",
+    "name": "Name",
+    "kind": "Art",
+    "kinds": {
+      "chimney": "Kamin",
+      "skylight": "Dachfenster",
+      "vent": "Lüftung",
+      "dormer": "Gaube",
+      "keepOut": "Freizuhaltende Fläche"
+    },
+    "u": "Mitte entlang der Traufe",
+    "v": "Mitte in Falllinie",
+    "width": "Breite",
+    "length": "Länge",
+    "height": "Höhe",
+    "delete": "Hindernis löschen",
+    "add": "Hindernis hinzufügen",
+    "defaultName": "Hindernis {n}"
+  },
+  "forms": {
+    "notANumber": "Geben Sie eine Zahl ein.",
+    "outOfRange": "Zwischen {min} und {max}.",
+    "required": "Dieses Feld ist erforderlich."
+  },
+  "fields": {
+    "azimuthDeg": "Ausrichtung",
+    "azimuthOffsetDeg": "Ausrichtungsversatz",
+    "eaveHeightM": "Traufhöhe",
+    "heightM": "Höhe",
+    "moduleLengthM": "Modullänge",
+    "moduleWidthM": "Modulbreite",
+    "outline": "Umriss",
+    "overhangM": "Dachüberstand",
+    "pitchDeg": "Neigung",
+    "ridgeHeightM": "Firsthöhe",
+    "sizeM": "Abmessungen",
+    "tiltDeg": "Neigung",
+    "tiltOnRoofDeg": "Neigung auf dem Dach",
+    "widthM": "Breite",
+    "origin": "Lage",
+    "supportGrid": "Eindeckung",
+    "footprint": "Grundriss",
+    "roofEdges": "Dachkanten",
+    "roof": "Dach"
+  },
+  "arrays": {
+    "title": "Modulfelder",
+    "titleOn": "Modulfelder · {face}",
+    "noFace": "Klicken Sie in der 3D-Ansicht auf eine Dachfläche, um ihre Modulfelder zu sehen und zu belegen.",
+    "none": "Kein Modulfeld auf dieser Dachfläche.",
+    "item": "Modulfeld {n}",
+    "modules": "Module",
+    "power": "Spitzenleistung",
+    "orientation": "Modulausrichtung",
+    "orientations": {
+      "portrait": "Hochformat",
+      "landscape": "Querformat"
+    },
+    "moduleLength": "Modullänge",
+    "moduleWidth": "Modulbreite",
+    "gapU": "Abstand entlang der Traufe",
+    "gapV": "Abstand in Falllinie",
+    "edgeSetback": "Randabstand",
+    "obstacleClearance": "Abstand zu Hindernissen",
+    "otherArrays": "Abstand zu anderen Modulfeldern",
+    "mounting": "Montagesystem",
+    "noMounting": "Keines",
+    "relayout": "Automatisch belegen",
+    "clear": "Modulfeld leeren",
+    "delete": "Modulfeld löschen",
+    "add": "Modulfeld hinzufügen (automatisch belegt)"
+  },
+  "site": {
+    "title": "Standort (Statik SIA 261)",
+    "missing": "Geben Sie die Höhe und den Referenzwert des Staudrucks q_p0 des Standorts ein: Die Statik braucht sie.",
+    "altitude": "Höhe ü. M.",
+    "snowCorrection": "Korrektur der Schneekarte",
+    "qp0": "Referenzwert des Staudrucks q_p0",
+    "thermal": "Wärmekoeffizient C_t",
+    "serviceLife": "Nutzungsdauer",
+    "years": "Jahre",
+    "terrain": "Geländekategorie",
+    "terrains": {
+      "II": "II · Seen, offenes Gelände",
+      "IIa": "IIa · Land, wenige Hindernisse",
+      "III": "III · Ortschaften, Wälder",
+      "IV": "IV · Stadtzentren"
+    },
+    "exposure": "Schneeexposition",
+    "exposures": {
+      "windswept": "Windexponiert",
+      "normal": "Normal",
+      "sheltered": "Geschützt"
+    },
+    "consequence": "Schadenfolgeklasse",
+    "lifeModel": "Berücksichtigung der Nutzungsdauer",
+    "lifeModels": {
+      "en1991": "Nach SN EN 1991 (c_prob)",
+      "explicit": "Vom Ingenieur festgelegte Faktoren"
+    },
+    "snowFactor": "Schneefaktor",
+    "windFactor": "Windfaktor",
+    "applyAll": "Diesen Standort auf alle Gebäude anwenden"
   }
 }

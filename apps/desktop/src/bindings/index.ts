@@ -17,6 +17,17 @@ export const commands = {
 	createStressProject: (preset: StressPreset, path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("create_stress_project", { preset, path })),
 	/**  Opens an existing `.pvproj` file (applying migrations) and makes it the open project. */
 	openProject: (path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("open_project", { path })),
+	/**
+	 *  Creates an empty project file and opens it. Without `path`, asks where (native « Enregistrer
+	 *  sous » dialog); `None` when the user cancels. An existing file is never replaced
+	 *  (`errors.store.alreadyExists`): choosing a free name is the user's call.
+	 */
+	newProject: (path: string | null) => typedError<ProjectSummary_Serialize | null, CommandError>(__TAURI_INVOKE("new_project", { path })),
+	/**
+	 *  Opens a project chosen in the native « Ouvrir » dialog (or at `path`, for automation);
+	 *  `None` when the user cancels.
+	 */
+	openProjectDialog: (path: string | null) => typedError<ProjectSummary_Serialize | null, CommandError>(__TAURI_INVOKE("open_project_dialog", { path })),
 	/**  Summary of the open project (reloaded after a command that changed entities). */
 	getProjectSummary: () => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("get_project_summary")),
 	/**
@@ -25,6 +36,34 @@ export const commands = {
 	 *  `apply_command` (one journal entry, one undo).
 	 */
 	planRoof: (building: Building_Deserialize) => typedError<Command_Serialize, CommandError>(__TAURI_INVOKE("plan_roof", { building })),
+	/**
+	 *  The roof `building` would get. Errors are the ones applying it would give (invalid
+	 *  footprint, re-entrant corner with the edges involved…), so the editor can show them
+	 *  while the user is still dragging.
+	 */
+	previewRoof: (building: Building_Deserialize) => typedError<RoofPreview, CommandError>(__TAURI_INVOKE("preview_roof", { building })),
+	/**
+	 *  The roof specification of a preset on a footprint (the main axis is the long side of
+	 *  its minimum-area rectangle; a monopitch drains over the longest edge facing south).
+	 */
+	roofPreset: (footprint: ([number, number])[], preset: RoofPreset, pitchDeg: number, overhangM: number) => typedError<RoofSpec_Serialize, CommandError>(__TAURI_INVOKE("roof_preset", { footprint, preset, pitchDeg, overhangM })),
+	/**  The roof of a building as the form shows it (type and a few numbers, or « custom »). */
+	roofForm: (footprint: ([number, number])[], spec: RoofSpec_Deserialize, eaveHeightM: number) => typedError<RoofForm, CommandError>(__TAURI_INVOKE("roof_form", { footprint, spec, eaveHeightM })),
+	/**  The per-edge specification of a form (`None` for a custom roof: keep the edges). */
+	roofFromForm: (footprint: ([number, number])[], form: RoofForm) => typedError<RoofSpec_Serialize | null, CommandError>(__TAURI_INVOKE("roof_from_form", { footprint, form })),
+	/**  A new array for a roof face (reference module, K2 SingleRail, usual gaps and setbacks). */
+	defaultArray: (faceId: RoofFaceId) => typedError<PanelArray_Serialize, CommandError>(__TAURI_INVOKE("default_array", { faceId })),
+	/**
+	 *  The batch that gives `array` (new or changed) its settings and lays out its whole face
+	 *  again. Pure: nothing changes until the front-end applies it.
+	 */
+	planLayout: (array: PanelArray_Deserialize) => typedError<Command_Serialize, CommandError>(__TAURI_INVOKE("plan_layout", { array })),
+	/**
+	 *  Plans and applies the layout of `array`'s face in one call (the journal records the
+	 *  explicit batch, like `apply_command`): large fields do not send their thousands of
+	 *  module slots to the front-end and back.
+	 */
+	applyLayout: (array: PanelArray_Deserialize) => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("apply_layout", { array })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -958,6 +997,13 @@ export type PlatformInfo = {
 	debugBuild: boolean,
 };
 
+/**  One generated face, projected on the ground (world east, north; m). */
+export type PreviewFace = {
+	polygon: ([number, number])[],
+	/**  One per polygon edge. */
+	edgeKinds: RoofEdgeKind[],
+};
+
 /**  Pricing of a project. */
 export type Pricing = {
 	discounts: ManufacturerDiscount[],
@@ -1177,6 +1223,20 @@ export type RoofFace_Serialize = {
 	supportGrid?: SupportGridSpec | null,
 };
 
+/**  A roof specification as the form shows it. */
+export type RoofForm = {
+	shape: RoofShape,
+	/**  Pitch of the long sides (the single slope of a monopitch roof), degrees. */
+	pitchDeg: number,
+	/**  Pitch of the hipped ends, degrees. */
+	endPitchDeg: number,
+	/**  Eave height of the half-hipped ends above the ground, m. */
+	endEaveM: number,
+	/**  Footprint edge a monopitch roof drains over. */
+	lowEdge: number,
+	overhangM: number,
+};
+
 /**  Orthonormal frame of a planar roof face, derived from tilt and azimuth. */
 export type RoofFrame = {
 	/**  World position of roof `(u, v) = (0, 0)`. */
@@ -1241,6 +1301,21 @@ export type RoofOutlineSpec_Serialize = {
 	edgeKinds: RoofEdgeKind[],
 	obstacles: RoofObstacle_Serialize[],
 };
+
+/**  Roof types offered for a footprint. */
+export type RoofPreset = "gable" | "hipped" | "monopitch" | "flat";
+
+/**  What the roof of a building would be (nothing is changed). */
+export type RoofPreview = {
+	faces: PreviewFace[],
+	roofKind: RoofKind,
+	ridgeHeightM: number,
+};
+
+/**  Roof types of the building form. */
+export type RoofShape = "gable" | "hipped" | "halfHipped" | "monopitch" | "flat" | 
+/**  Edges set one by one (the per-edge table). */
+"custom";
 
 /**  How the roof of a building is generated from its footprint. */
 export type RoofSpec = RoofSpec_Serialize | RoofSpec_Deserialize;

@@ -34,7 +34,12 @@ export default defineConfig([
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
-    files: ['packages/locales/scripts/**', '**/vite.config.ts', 'eslint.config.js'],
+    files: [
+      'packages/locales/scripts/**',
+      '**/vite.config.ts',
+      'eslint.config.js',
+      'apps/desktop/e2e/**',
+    ],
     languageOptions: { globals: { ...globals.node } },
   },
 ]);

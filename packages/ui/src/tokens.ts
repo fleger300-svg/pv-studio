@@ -22,6 +22,8 @@ export const tokens = {
     text: '#1B1B1F',
     textMuted: '#5E5E66',
     viewportBg: '#DCE3EA',
+    /** Ground plane of the 3D viewport. */
+    ground: '#C8CDBF',
   },
   dark: {
     bg: '#141416',
@@ -31,6 +33,7 @@ export const tokens = {
     text: '#EDEDEF',
     textMuted: '#A0A0A8',
     viewportBg: '#202328',
+    ground: '#3A3F3A',
   },
   radius: { sm: '4px', md: '6px', lg: '10px' },
   space: { xs: '4px', sm: '8px', md: '12px', lg: '16px', xl: '24px' },

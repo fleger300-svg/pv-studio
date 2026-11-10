@@ -169,7 +169,31 @@ pub fn plan_roof_with(
         .iter()
         .filter(|f| f.building_id == b.id)
         .collect();
-    let matches = match_faces(&roof.faces, &old);
+    // Faces are compared in the building's own frame: a building moved as a whole keeps its
+    // faces (and the arrays on them), and its obstacles move with it.
+    let shift = project
+        .buildings
+        .iter()
+        .find(|x| x.id == b.id)
+        .map_or([0.0; 3], |prev| {
+            [
+                b.origin[0] - prev.origin[0],
+                b.origin[1] - prev.origin[1],
+                b.origin[2] - prev.origin[2],
+            ]
+        });
+    let shifted: Vec<RoofFace> = old
+        .iter()
+        .map(|f| {
+            let mut s = (*f).clone();
+            for (o, d) in s.origin.iter_mut().zip(shift) {
+                *o += d;
+            }
+            s
+        })
+        .collect();
+    let shifted_refs: Vec<&RoofFace> = shifted.iter().collect();
+    let matches = match_faces(&roof.faces, &shifted_refs);
     let mut commands = vec![Command::UpsertBuilding {
         building: Box::new(b),
         at: None,
@@ -183,7 +207,7 @@ pub fn plan_roof_with(
                 face.id = prev.id;
                 face.name.clone_from(&prev.name);
                 face.support_grid.clone_from(&prev.support_grid);
-                carry_obstacles(prev, &mut face);
+                carry_obstacles(&shifted[o], &mut face);
                 if &face != prev {
                     commands.push(Command::UpsertRoofFace {
                         face: Box::new(face),

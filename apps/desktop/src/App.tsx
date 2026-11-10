@@ -3,12 +3,16 @@ import { TopBar } from './shell/TopBar';
 import { WorkflowSteps } from './shell/WorkflowSteps';
 import { ProjectPicker } from './shell/ProjectPicker';
 import { SidePanel } from './shell/SidePanel';
+import { Splitter } from './shell/Splitter';
 import { Toolbar } from './shell/Toolbar';
 import { Toasts } from './shell/Toasts';
+import { ErrorBoundary } from './shell/ErrorBoundary';
+import { useShortcuts } from './commands/shortcuts';
+import { PlanView } from './editor2d/PlanView';
+import { usePlanStore } from './store/plan';
 import { useProjectStore } from './store/project';
-import { useViewStore } from './store/view';
+import { isPlanStep, useWorkflowStore } from './store/workflow';
 import { Viewport } from './viewport3d/Viewport';
-import { useEditorShortcuts } from './viewport3d/Interaction';
 import { Hud, useHudShortcut } from './perf/Hud';
 import { useStaticsSync } from './statics/useStatics';
 
@@ -16,10 +20,12 @@ export function App() {
   const { t } = useTranslation();
   const summary = useProjectStore((s) => s.summary);
   const modules = useProjectStore((s) => s.modules);
-  const editor = useViewStore((s) => s.editor);
-  useEditorShortcuts(editor);
+  const step = useWorkflowStore((s) => s.step);
+  const ratio = usePlanStore((s) => s.ratio);
+  useShortcuts();
   useHudShortcut();
   useStaticsSync();
+  const split = isPlanStep(step);
   return (
     <div className="app">
       <TopBar projectName={summary?.name ?? null} />
@@ -27,16 +33,33 @@ export function App() {
         <WorkflowSteps />
         <ProjectPicker />
       </aside>
-      <main className="app__viewport" aria-label={t('viewport.label')}>
-        {summary && modules ? (
-          <>
-            <Viewport summary={summary} modules={modules} />
-            <Toolbar />
-            <Hud />
-          </>
-        ) : (
-          <p className="viewport-empty">{t('viewport.empty')}</p>
-        )}
+      <main
+        className={split ? 'app__viewport app__viewport--split' : 'app__viewport'}
+        style={{ '--plan-ratio': ratio } as React.CSSProperties}
+      >
+        <ErrorBoundary>
+          {summary && modules ? (
+            <>
+              {/* The 3D view keeps its place in the tree: switching steps never rebuilds it. */}
+              {split && (
+                <section className="app__plan" aria-label={t('plan.label')}>
+                  <PlanView summary={summary} />
+                </section>
+              )}
+              {split && <Splitter />}
+              <section className="app__3d" aria-label={t('viewport.label')}>
+                <Viewport summary={summary} modules={modules} />
+                {summary.buildings.length === 0 && (
+                  <p className="viewport-hint">{t('viewport.emptySite')}</p>
+                )}
+                <Toolbar modules={!split} />
+                <Hud />
+              </section>
+            </>
+          ) : (
+            <p className="viewport-empty">{t('viewport.empty')}</p>
+          )}
+        </ErrorBoundary>
         <Toasts />
       </main>
       <SidePanel />

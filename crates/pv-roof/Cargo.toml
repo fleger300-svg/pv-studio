@@ -10,6 +10,8 @@ rust-version.workspace = true
 [dependencies]
 pv-geo.workspace = true
 pv-model.workspace = true
+serde.workspace = true
+specta.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]

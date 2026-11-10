@@ -29,7 +29,10 @@
     "presets": {
       "residential": "Residential · ~1,000 modules",
       "industrial": "Industrial · ~10,000 modules"
-    }
+    },
+    "files": "Project",
+    "new": "New project…",
+    "open": "Open…"
   },
   "tools": {
     "label": "Tools",
@@ -38,7 +41,8 @@
     "move": "Move",
     "delete": "Delete selection",
     "undo": "Undo",
-    "redo": "Redo"
+    "redo": "Redo",
+    "frame": "Frame the project in the 3D view"
   },
   "selection": {
     "title": "Selection",
@@ -60,7 +64,8 @@
   },
   "viewport": {
     "label": "3D viewport",
-    "empty": "Create or open a project to display it in 3D."
+    "empty": "Create or open a project to display it in 3D.",
+    "emptySite": "Empty site: draw a building on the plan."
   },
   "errors": {
     "module": {
@@ -120,6 +125,10 @@
     },
     "roof": {
       "reentrantCorner": "Edges {a} and {b} meet at a re-entrant corner: both need a pitch (no gable wall) and the same eave height (and, with an overhang, the same pitch)."
+    },
+    "ui": {
+      "render": "This part of the screen could not be displayed (the project is not affected).",
+      "retry": "Retry"
     }
   },
   "hud": {
@@ -171,7 +180,8 @@
     "zones": "Wind zones",
     "percent": "{value} %",
     "metres": "{value} m",
-    "disclaimer": "Pre-dimensioning to SIA 261, to be validated before execution."
+    "disclaimer": "Pre-dimensioning to SIA 261, to be validated before execution.",
+    "noArrays": "No array: the statics will appear once the roof is laid out."
   },
   "bom": {
     "title": "Bill of materials",
@@ -206,6 +216,195 @@
       "unitPrice": "Unit price",
       "price": "Price"
     },
-    "noPrices": "List prices not set"
+    "noPrices": "List prices not set",
+    "noModules": "No module laid out: the bill of materials will appear once the roof is laid out."
+  },
+  "plan": {
+    "label": "2D plan",
+    "grid": "Grid {step} m",
+    "fit": "Fit to view",
+    "empty": "No building on this site yet.",
+    "splitter": "Resize the plan and the 3D view",
+    "tools": {
+      "label": "Plan tools",
+      "select": "Edit",
+      "rect": "Rectangle",
+      "polygon": "Polygon"
+    },
+    "hints": {
+      "selectNone": "Click a building to edit it, or draw one with the rectangle (R) or the polygon (P).",
+      "select": "Drag a vertex, the « + » of an edge to add one, the building to move it. Delete removes the selected vertex; double-click a dimension to type it. Alt: no snapping.",
+      "rect": "Drag to draw a rectangle. Alt: no snapping.",
+      "polygon": "Click to place the vertices; close on the first vertex, by double-clicking or with Enter. Backspace removes the last one, Escape abandons."
+    },
+    "errors": {
+      "selfIntersecting": "The outline crosses itself."
+    },
+    "edgeLength": "Edge length (m)"
+  },
+  "building": {
+    "defaultName": "Building {n}",
+    "title": "Building",
+    "none": "Select a building on the plan, or draw one.",
+    "name": "Name",
+    "eaveHeight": "Eave height",
+    "ridgeHeight": "Ridge height",
+    "size": "Dimensions",
+    "delete": "Delete the building"
+  },
+  "roof": {
+    "shape": "Roof type",
+    "shapes": {
+      "gable": "Gable",
+      "hipped": "Hipped",
+      "halfHipped": "Half-hipped",
+      "monopitch": "Monopitch",
+      "flat": "Flat",
+      "custom": "Custom (per edge)"
+    },
+    "pitch": "Pitch",
+    "pitchAll": "Pitch (every sloped edge)",
+    "endPitch": "Pitch of the hipped ends",
+    "endEave": "Eave of the hipped ends",
+    "lowEdge": "Low edge",
+    "edgeLabel": "Edge {n} · {length} m",
+    "overhang": "Overhang",
+    "kind": "Resulting shape",
+    "kinds": {
+      "gable": "Gable",
+      "hipped": "Hipped",
+      "monopitch": "Monopitch",
+      "flat": "Flat"
+    },
+    "edges": {
+      "show": "Per-edge settings",
+      "hide": "Hide the per-edge settings",
+      "title": "Edges",
+      "gable": "Gable wall",
+      "eave": "Eave (empty: the building’s)"
+    },
+    "facesTitle": "Roof faces",
+    "faceTitle": "Face",
+    "noFaces": "This building has no roof face.",
+    "noFace": "Select a face in the list or on the plan.",
+    "faceMeta": "{tilt}° · facing {azimuth}°",
+    "faceName": "Face name",
+    "tilt": "Tilt",
+    "azimuth": "Azimuth (0° = north)",
+    "area": "Area",
+    "covering": "Covering",
+    "coverings": {
+      "none": "Not specified",
+      "standingSeam": "Standing seam",
+      "rafters": "Rafters / purlins"
+    },
+    "spacing": "Spacing",
+    "gridOrigin": "Position of the first one"
+  },
+  "obstacles": {
+    "title": "Obstacles",
+    "none": "No obstacle on this face.",
+    "name": "Name",
+    "kind": "Type",
+    "kinds": {
+      "chimney": "Chimney",
+      "skylight": "Roof window",
+      "vent": "Vent",
+      "dormer": "Dormer",
+      "keepOut": "Area kept free"
+    },
+    "u": "Centre along the eave",
+    "v": "Centre up the slope",
+    "width": "Width",
+    "length": "Length",
+    "height": "Height",
+    "delete": "Delete the obstacle",
+    "add": "Add an obstacle",
+    "defaultName": "Obstacle {n}"
+  },
+  "forms": {
+    "notANumber": "Enter a number.",
+    "outOfRange": "Between {min} and {max}.",
+    "required": "This field is required."
+  },
+  "fields": {
+    "azimuthDeg": "azimuth",
+    "azimuthOffsetDeg": "azimuth offset",
+    "eaveHeightM": "eave height",
+    "heightM": "height",
+    "moduleLengthM": "module length",
+    "moduleWidthM": "module width",
+    "outline": "outline",
+    "overhangM": "overhang",
+    "pitchDeg": "pitch",
+    "ridgeHeightM": "ridge height",
+    "sizeM": "dimensions",
+    "tiltDeg": "tilt",
+    "tiltOnRoofDeg": "tilt on the roof",
+    "widthM": "width",
+    "origin": "position",
+    "supportGrid": "covering",
+    "footprint": "footprint",
+    "roofEdges": "roof edges",
+    "roof": "roof"
+  },
+  "arrays": {
+    "title": "Arrays",
+    "titleOn": "Arrays · {face}",
+    "noFace": "Click a roof face in the 3D view to see and lay out its arrays.",
+    "none": "No array on this face.",
+    "item": "Array {n}",
+    "modules": "Modules",
+    "power": "Peak power",
+    "orientation": "Module orientation",
+    "orientations": {
+      "portrait": "Portrait",
+      "landscape": "Landscape"
+    },
+    "moduleLength": "Module length",
+    "moduleWidth": "Module width",
+    "gapU": "Gap along the eave",
+    "gapV": "Gap up the slope",
+    "edgeSetback": "Edge setback",
+    "obstacleClearance": "Clearance to obstacles",
+    "otherArrays": "Distance to other arrays",
+    "mounting": "Mounting system",
+    "noMounting": "None",
+    "relayout": "Lay out automatically",
+    "clear": "Clear the array",
+    "delete": "Delete the array",
+    "add": "Add an array (laid out automatically)"
+  },
+  "site": {
+    "title": "Site (statics, SIA 261)",
+    "missing": "Enter the altitude and the reference peak velocity pressure q_p0 of the site: the statics need them.",
+    "altitude": "Altitude",
+    "snowCorrection": "Snow map correction",
+    "qp0": "Reference peak velocity pressure q_p0",
+    "thermal": "Thermal coefficient C_t",
+    "serviceLife": "Design service life",
+    "years": "years",
+    "terrain": "Terrain category",
+    "terrains": {
+      "II": "II · lakes, open country",
+      "IIa": "IIa · country, few obstacles",
+      "III": "III · villages, woodland",
+      "IV": "IV · city centres"
+    },
+    "exposure": "Snow exposure",
+    "exposures": {
+      "windswept": "Windswept",
+      "normal": "Normal",
+      "sheltered": "Sheltered"
+    },
+    "consequence": "Consequence class",
+    "lifeModel": "Service life adjustment",
+    "lifeModels": {
+      "en1991": "SN EN 1991 (c_prob)",
+      "explicit": "Factors set by the engineer"
+    },
+    "snowFactor": "Snow factor",
+    "windFactor": "Wind factor",
+    "applyAll": "Apply this site to every building"
   }
 }

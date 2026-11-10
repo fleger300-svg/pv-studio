@@ -32,13 +32,7 @@ pub fn statics_error(e: &StaticsError) -> CommandError {
 
 #[must_use]
 pub fn layout_error(e: &LayoutError) -> CommandError {
-    match e {
-        LayoutError::Outline(_)
-        | LayoutError::EdgeKindCount { .. }
-        | LayoutError::ObstacleOffRoof { .. } => CommandError::new(keys::LAYOUT_INVALID_OUTLINE),
-        other => CommandError::new(keys::LAYOUT_INVALID_PARAMETERS)
-            .with_text("detail", other.to_string()),
-    }
+    e.command_error()
 }
 
 #[must_use]

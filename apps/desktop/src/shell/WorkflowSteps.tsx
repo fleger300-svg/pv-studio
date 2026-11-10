@@ -1,32 +1,42 @@
 import { useTranslation } from 'react-i18next';
+import { useProjectStore } from '../store/project';
+import { STEPS, useWorkflowStore } from '../store/workflow';
 
-const STEPS = [
-  { key: 'building', enabled: false },
-  { key: 'roof', enabled: false },
-  { key: 'layout', enabled: true },
-  { key: 'connection', enabled: false },
-] as const;
-
-/** Workflow steps. Only "Layout" is active in the prototype. */
+/** Workflow steps: building, roof, layout (the connection step comes later). */
 export function WorkflowSteps() {
   const { t } = useTranslation();
+  const step = useWorkflowStore((s) => s.step);
+  const setStep = useWorkflowStore((s) => s.setStep);
+  const open = useProjectStore((s) => s.summary !== null);
   return (
     <nav className="workflow" aria-label={t('workflow.title')}>
       <h2 className="workflow__title">{t('workflow.title')}</h2>
       <ol className="workflow__list">
-        {STEPS.map((step, i) => (
-          <li key={step.key}>
+        {STEPS.map((key, i) => (
+          <li key={key}>
             <button
               type="button"
               className="workflow__step"
-              disabled={!step.enabled}
-              aria-current={step.enabled ? 'step' : undefined}
-              title={step.enabled ? undefined : t('workflow.unavailable')}
+              disabled={!open}
+              aria-current={open && step === key ? 'step' : undefined}
+              onClick={() => {
+                setStep(key);
+              }}
             >
-              {t('workflow.step', { index: i + 1, label: t(`workflow.${step.key}`) })}
+              {t('workflow.step', { index: i + 1, label: t(`workflow.${key}`) })}
             </button>
           </li>
         ))}
+        <li>
+          <button
+            type="button"
+            className="workflow__step"
+            disabled
+            title={t('workflow.unavailable')}
+          >
+            {t('workflow.step', { index: STEPS.length + 1, label: t('workflow.connection') })}
+          </button>
+        </li>
       </ol>
     </nav>
   );

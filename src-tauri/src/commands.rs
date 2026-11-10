@@ -5,13 +5,15 @@ use std::time::Instant;
 
 use pv_model::command::keys;
 use pv_model::{
-    Building, ChangeSet, Command, CommandError, ModuleId, ProjectSummary, RoofFace, StressPreset,
+    Building, ChangeSet, Command, CommandError, ModuleId, Project, ProjectSummary, RoofFace,
+    StressPreset,
 };
 use pv_store::{Author, ProjectStore};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri::ipc::{InvokeResponseBody, IpcResponse, Response};
 use tauri::{AppHandle, Manager, State};
+use tauri_plugin_dialog::DialogExt;
 use tauri_specta::Event;
 
 use crate::state::AppState;
@@ -92,6 +94,78 @@ pub async fn stress_project_path(
         StressPreset::Industrial10k => "stress-industrial-10k.pvproj",
     };
     Ok(dir.join(name).display().to_string())
+}
+
+fn failure(e: impl std::fmt::Display) -> CommandError {
+    CommandError::new(keys::STORE_FAILURE).with_text("detail", e.to_string())
+}
+
+/// The project's name: the file name without its extension.
+fn name_of(path: &std::path::Path) -> String {
+    path.file_stem().map_or_else(
+        || "Project".to_owned(),
+        |s| s.to_string_lossy().into_owned(),
+    )
+}
+
+/// Creates an empty project file and opens it. Without `path`, asks where (native « Enregistrer
+/// sous » dialog); `None` when the user cancels. An existing file is never replaced
+/// (`errors.store.alreadyExists`): choosing a free name is the user's call.
+#[tauri::command]
+#[specta::specta]
+pub async fn new_project(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    path: Option<String>,
+) -> Result<Option<ProjectSummary>, CommandError> {
+    let path = match path {
+        Some(p) => PathBuf::from(p),
+        None => {
+            let chosen = app
+                .dialog()
+                .file()
+                .set_file_name("Projet.pvproj")
+                .add_filter("PV Studio", &["pvproj"])
+                .blocking_save_file();
+            match chosen {
+                Some(file) => file.into_path().map_err(failure)?,
+                None => return Ok(None),
+            }
+        }
+    };
+    let store = ProjectStore::create(&path, Project::empty(&name_of(&path)))?;
+    let result = summary(&store)?;
+    state.set(store);
+    Ok(Some(result))
+}
+
+/// Opens a project chosen in the native « Ouvrir » dialog (or at `path`, for automation);
+/// `None` when the user cancels.
+#[tauri::command]
+#[specta::specta]
+pub async fn open_project_dialog(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    path: Option<String>,
+) -> Result<Option<ProjectSummary>, CommandError> {
+    let path = match path {
+        Some(p) => PathBuf::from(p),
+        None => {
+            let chosen = app
+                .dialog()
+                .file()
+                .add_filter("PV Studio", &["pvproj"])
+                .blocking_pick_file();
+            match chosen {
+                Some(file) => file.into_path().map_err(failure)?,
+                None => return Ok(None),
+            }
+        }
+    };
+    let store = ProjectStore::open(&path)?;
+    let result = summary(&store)?;
+    state.set(store);
+    Ok(Some(result))
 }
 
 /// Builds a synthetic project into a new `.pvproj` file and opens it. Stress projects are
@@ -191,7 +265,7 @@ pub struct ModelChanged {
     pub can_redo: bool,
 }
 
-fn finish(
+pub(crate) fn finish(
     app: &AppHandle,
     state: &AppState,
     store: &ProjectStore,

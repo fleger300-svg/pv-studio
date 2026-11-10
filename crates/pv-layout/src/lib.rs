@@ -23,6 +23,7 @@ pub mod grid;
 pub mod joints;
 pub mod mixing;
 pub mod model;
+pub mod plan;
 pub mod rails;
 pub mod roof;
 pub mod setbacks;
@@ -37,6 +38,7 @@ pub use grid::{
 pub use joints::{JointRules, JointSource};
 pub use mixing::{layout_face, FieldLayout, FieldPlan};
 pub use model::{layout_array, layout_east_west, relayout_fixed, ArrayLayout};
+pub use plan::{default_array, plan_layout};
 pub use rails::{
     cross_rails, fixations, CrossRailParams, Fixations, Rail, RailLayer, RailLayout, TopSupports,
 };

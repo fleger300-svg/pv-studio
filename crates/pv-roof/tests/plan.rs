@@ -193,3 +193,47 @@ fn invalid_specs_are_refused() {
         Err(pv_roof::RoofError::Invalid("roofEdges"))
     );
 }
+
+#[test]
+fn a_moved_building_keeps_its_faces_arrays_and_obstacles() {
+    let mut p = StressPreset::Residential1k.build();
+    let mut b = p.buildings[0].clone();
+    b.roof = Some(presets::gable(&b.footprint, 30.0, 0.0));
+    let cmd = plan_roof_with(&p, &b, ids()).unwrap();
+    cmd.apply(&mut p).unwrap();
+    let before = faces_of(&p, b.id);
+    let fi = p.roof_faces.iter().position(|f| f.id == before[0]).unwrap();
+    let (w, h) = (p.roof_faces[fi].width_m, p.roof_faces[fi].height_m);
+    p.roof_faces[fi].outline = Some(RoofOutlineSpec {
+        vertices_uv: vec![[0.0, 0.0], [w, 0.0], [w, h], [0.0, h]],
+        edge_kinds: vec![
+            pv_model::RoofEdgeKind::Eave,
+            pv_model::RoofEdgeKind::Verge,
+            pv_model::RoofEdgeKind::Ridge,
+            pv_model::RoofEdgeKind::Verge,
+        ],
+        obstacles: vec![RoofObstacle {
+            name: "Chimney".into(),
+            kind: ObstacleKind::Chimney,
+            footprint_uv: vec![[10.0, 3.0], [11.0, 3.0], [11.0, 4.0], [10.0, 4.0]],
+            height_m: 1.0,
+            clearance_m: None,
+        }],
+    });
+    let arrays = p.arrays.len();
+    // Moved 100 m east and 60 m north: far from where it was.
+    let mut moved = p.buildings[0].clone();
+    moved.origin[0] += 100.0;
+    moved.origin[1] += 60.0;
+    let cmd = plan_roof_with(&p, &moved, ids()).unwrap();
+    apply_exactly(&mut p, &cmd);
+    assert_eq!(faces_of(&p, b.id), before, "same faces");
+    assert_eq!(p.arrays.len(), arrays, "arrays kept");
+    let f = p.roof_faces.iter().find(|f| f.id == before[0]).unwrap();
+    let ob = &f.outline.as_ref().unwrap().obstacles[0];
+    let [u, v] = ob.footprint_uv[0];
+    assert!(
+        (u - 10.0).abs() < 1e-9 && (v - 3.0).abs() < 1e-9,
+        "same place on the face"
+    );
+}

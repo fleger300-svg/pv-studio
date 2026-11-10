@@ -3,7 +3,17 @@ import { IconButton } from '@pv/ui';
 import { useProjectStore } from '../store/project';
 import { useViewStore, type Tool } from '../store/view';
 import { usePerfStore } from '../perf/perfStore';
-import { IconBox, IconDelete, IconGauge, IconMove, IconRedo, IconSelect, IconUndo } from './icons';
+import { redo, undo } from '../commands/shortcuts';
+import {
+  IconBox,
+  IconDelete,
+  IconFit,
+  IconGauge,
+  IconMove,
+  IconRedo,
+  IconSelect,
+  IconUndo,
+} from './icons';
 
 const TOOLS: readonly { tool: Tool; icon: () => React.JSX.Element }[] = [
   { tool: 'select', icon: IconSelect },
@@ -11,8 +21,10 @@ const TOOLS: readonly { tool: Tool; icon: () => React.JSX.Element }[] = [
   { tool: 'move', icon: IconMove },
 ];
 
-/** Floating viewport toolbar: tools and history. */
-export function Toolbar() {
+/**
+ * Floating viewport toolbar: module tools (layout step only) and history (everywhere).
+ */
+export function Toolbar({ modules }: { modules: boolean }) {
   const { t } = useTranslation();
   const tool = useViewStore((s) => s.tool);
   const setTool = useViewStore((s) => s.setTool);
@@ -22,40 +34,47 @@ export function Toolbar() {
   const canRedo = useProjectStore((s) => s.counters.canRedo);
   const hudVisible = usePerfStore((s) => s.hudVisible);
   const toggleHud = usePerfStore((s) => s.toggleHud);
+  const requestFrame = useViewStore((s) => s.requestFrame);
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('tools.label')}>
-      {TOOLS.map(({ tool: id, icon: Icon }) => (
-        <IconButton
-          key={id}
-          label={t(`tools.${id}`)}
-          icon={<Icon />}
-          active={tool === id}
-          onClick={() => {
-            setTool(id);
-          }}
-        />
-      ))}
-      <span className="toolbar__sep" aria-hidden="true" />
-      <IconButton
-        label={t('tools.delete')}
-        icon={<IconDelete />}
-        disabled={!editor || selectionCount === 0}
-        onClick={() => void editor?.removeSelected()}
-      />
+      {modules &&
+        TOOLS.map(({ tool: id, icon: Icon }) => (
+          <IconButton
+            key={id}
+            label={t(`tools.${id}`)}
+            icon={<Icon />}
+            active={tool === id}
+            onClick={() => {
+              setTool(id);
+            }}
+          />
+        ))}
+      {modules && (
+        <>
+          <span className="toolbar__sep" aria-hidden="true" />
+          <IconButton
+            label={t('tools.delete')}
+            icon={<IconDelete />}
+            disabled={!editor || selectionCount === 0}
+            onClick={() => void editor?.removeSelected()}
+          />
+        </>
+      )}
       <IconButton
         label={t('tools.undo')}
         icon={<IconUndo />}
-        disabled={!editor || !canUndo}
-        onClick={() => void editor?.undo()}
+        disabled={!canUndo}
+        onClick={() => void undo()}
       />
       <IconButton
         label={t('tools.redo')}
         icon={<IconRedo />}
-        disabled={!editor || !canRedo}
-        onClick={() => void editor?.redo()}
+        disabled={!canRedo}
+        onClick={() => void redo()}
       />
       <span className="toolbar__sep" aria-hidden="true" />
+      <IconButton label={t('tools.frame')} icon={<IconFit />} onClick={requestFrame} />
       <IconButton
         label={t('hud.toggle')}
         icon={<IconGauge />}

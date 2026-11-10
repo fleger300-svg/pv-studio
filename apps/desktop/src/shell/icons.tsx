@@ -49,3 +49,18 @@ export const IconDelete = () => (
     <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
   </svg>
 );
+export const IconFit = () => (
+  <svg {...base}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </svg>
+);
+export const IconRect = () => (
+  <svg {...base}>
+    <rect x="4" y="6" width="16" height="12" />
+  </svg>
+);
+export const IconPolygon = () => (
+  <svg {...base}>
+    <path d="M4 18V6h9v5h7v7z" />
+  </svg>
+);
