@@ -1,9 +1,9 @@
 import { Vector3 } from 'three';
-import type { ApplyResult, Command, CommandError, ProjectSummary } from '../bindings';
+import type { Command, ProjectSummary } from '../bindings';
 import { events } from '../bindings';
-import { api, BackendError, unwrap } from '../ipc';
+import { commandBusy, runCommand, type CommandTiming } from '../commands/runCommand';
+import { api, unwrap } from '../ipc';
 import { useProjectStore } from '../store/project';
-import { useToastStore } from '../store/toast';
 import { useViewStore } from '../store/view';
 import { BoxSelectClient } from '../workers/boxSelectClient';
 import type { NdcRect } from '../workers/selectInRect';
@@ -18,14 +18,7 @@ import {
 } from './PanelMeshes';
 import { vec3 } from './frames';
 
-/** Timing of one command round trip, reported to the performance HUD. */
-export interface CommandTiming {
-  kind: 'apply' | 'undo' | 'redo';
-  /** Front-measured invoke → result, ms. */
-  roundTripMs: number;
-  /** Time spent in Rust, µs (from `ApplyResult`). */
-  rustUs: number;
-}
+export type { CommandTiming } from '../commands/runCommand';
 
 /** Drag offsets below this (m) are treated as a click, not a move. */
 const MIN_MOVE_M = 0.005;
@@ -39,7 +32,6 @@ export class Editor {
   readonly selection = new Set<number>();
   private drag: { ids: number[]; startU: number; startV: number; du: number; dv: number } | null =
     null;
-  private busy = false;
   private colorMode: ColorMode = 'default';
   private readonly axes: { u: Vector3; v: Vector3 }[];
   private readonly scratch = new Vector3();
@@ -172,7 +164,7 @@ export class Editor {
 
   /** Starts a drag of the current selection at roof point `(u, v)`. */
   beginDrag(u: number, v: number): boolean {
-    if (this.busy || this.selection.size === 0) return false;
+    if (commandBusy() || this.selection.size === 0) return false;
     this.drag = { ids: Array.from(this.selection), startU: u, startV: v, du: 0, dv: 0 };
     return true;
   }
@@ -244,33 +236,9 @@ export class Editor {
     return this.run('redo');
   }
 
-  /** Applies a command (or undo/redo), times the round trip and reports errors as toasts. */
+  /** Applies a command (or undo/redo) through the shared command path; `false` if refused. */
   async run(kind: CommandTiming['kind'], cmd?: Command): Promise<boolean> {
-    if (this.busy) return false;
-    this.busy = true;
-    const started = performance.now();
-    try {
-      let result: ApplyResult;
-      if (kind === 'apply' && cmd) result = await unwrap(api.applyCommand(cmd));
-      else if (kind === 'undo') result = await unwrap(api.undo());
-      else result = await unwrap(api.redo());
-      this.onCommand?.({ kind, roundTripMs: performance.now() - started, rustUs: result.rustUs });
-      useProjectStore.getState().setCounters({
-        canUndo: result.canUndo,
-        canRedo: result.canRedo,
-        activeModuleCount: result.activeModuleCount,
-      });
-      return true;
-    } catch (e) {
-      const message: CommandError =
-        e instanceof BackendError
-          ? { key: e.key, params: e.params }
-          : { key: 'errors.store.failure', params: { detail: String(e) } };
-      useToastStore.getState().push(message);
-      return false;
-    } finally {
-      this.busy = false;
-    }
+    return (await runCommand(kind, cmd, this.onCommand)) !== null;
   }
 
   /** Pulls the exact state of changed modules from Rust (binary) and updates the GPU. */

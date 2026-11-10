@@ -304,6 +304,20 @@ pub enum ProjectInvariantError {
 }
 
 impl Project {
+    /// A new project with nothing in it (a blank site: buildings are drawn next).
+    #[must_use]
+    pub fn empty(name: &str) -> Self {
+        Self {
+            id: ProjectId::new(),
+            name: name.to_owned(),
+            buildings: Vec::new(),
+            roof_faces: Vec::new(),
+            arrays: Vec::new(),
+            modules: Vec::new(),
+            pricing: Pricing::default(),
+        }
+    }
+
     /// Checks the invariants relied upon by commands and by the binary encoder.
     ///
     /// # Errors

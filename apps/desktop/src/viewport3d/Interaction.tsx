@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
 import { Matrix4, Raycaster, Vector2 } from 'three';
+import { useSelectionStore } from '../store/selection';
 import { useViewStore } from '../store/view';
 import type { Editor } from './editor';
 import { hitRoofs, planeUV, type V3 } from './roofHit';
@@ -118,6 +119,10 @@ export function Interaction({ editor }: { editor: Editor }) {
       if (Math.hypot(e.clientX - g.x, e.clientY - g.y) > CLICK_TOLERANCE_PX) return; // orbit
       const { origin, dir } = ray(e);
       const hit = hitRoofs(editor.summary.roofFaces, origin, dir);
+      // The clicked roof face (and its building) becomes the shared selection.
+      const face = hit ? editor.summary.roofFaces[hit.faceIndex]?.face : undefined;
+      if (face) useSelectionStore.getState().selectFace(face.id, face.buildingId);
+      else if (!e.shiftKey) useSelectionStore.getState().clear();
       const id = hit ? editor.pick(hit.faceIndex, hit.u, hit.v) : null;
       if (id === null) {
         if (!e.shiftKey) editor.clearSelection();
@@ -153,34 +158,4 @@ export function Interaction({ editor }: { editor: Editor }) {
   }, [gl, getThree, editor]);
 
   return null;
-}
-
-/** Keyboard shortcuts: Delete, Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z (and Ctrl+Y), Escape. */
-export function useEditorShortcuts(editor: Editor | null): void {
-  useEffect(() => {
-    if (!editor) return;
-    const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (target?.closest('input, select, textarea, [contenteditable="true"]')) return;
-      const mod = e.ctrlKey || e.metaKey;
-      const key = e.key.toLowerCase();
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        void editor.removeSelected();
-      } else if (mod && key === 'z') {
-        e.preventDefault();
-        void (e.shiftKey ? editor.redo() : editor.undo());
-      } else if (mod && key === 'y') {
-        e.preventDefault();
-        void editor.redo();
-      } else if (e.key === 'Escape') {
-        if (editor.dragging) editor.cancelDrag();
-        else editor.clearSelection();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [editor]);
 }

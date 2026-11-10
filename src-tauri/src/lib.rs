@@ -33,6 +33,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::stress_project_path,
             commands::create_stress_project,
             commands::open_project,
+            commands::new_project,
+            commands::open_project_dialog,
             commands::get_project_summary,
             commands::plan_roof,
             commands::get_module_buffer,

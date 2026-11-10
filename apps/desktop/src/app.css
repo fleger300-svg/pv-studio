@@ -105,6 +105,71 @@ body,
   min-width: 0;
   min-height: 0;
 }
+/* Plan and building steps: 2D plan | splitter | 3D view. */
+.app__viewport--split {
+  display: grid;
+  grid-template-columns: calc(var(--plan-ratio, 0.5) * 100%) 6px minmax(0, 1fr);
+}
+.app__3d {
+  position: relative;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.app__viewport:not(.app__viewport--split) .app__3d {
+  position: absolute;
+  inset: 0;
+}
+.app__plan {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: var(--color-bg);
+}
+.splitter {
+  cursor: col-resize;
+  background: var(--color-border);
+}
+.splitter:hover,
+.splitter:focus-visible {
+  background: var(--color-accent);
+  outline: none;
+}
+.plan-view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+.plan-view:active {
+  cursor: grabbing;
+}
+.plan-view__overlay {
+  position: absolute;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.plan-view__empty {
+  position: absolute;
+  top: 40%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
 .viewport-empty {
   position: absolute;
   inset: 0;

@@ -17,6 +17,17 @@ export const commands = {
 	createStressProject: (preset: StressPreset, path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("create_stress_project", { preset, path })),
 	/**  Opens an existing `.pvproj` file (applying migrations) and makes it the open project. */
 	openProject: (path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("open_project", { path })),
+	/**
+	 *  Creates an empty project file and opens it. Without `path`, asks where (native « Enregistrer
+	 *  sous » dialog); `None` when the user cancels. An existing file is never replaced
+	 *  (`errors.store.alreadyExists`): choosing a free name is the user's call.
+	 */
+	newProject: (path: string | null) => typedError<ProjectSummary_Serialize | null, CommandError>(__TAURI_INVOKE("new_project", { path })),
+	/**
+	 *  Opens a project chosen in the native « Ouvrir » dialog (or at `path`, for automation);
+	 *  `None` when the user cancels.
+	 */
+	openProjectDialog: (path: string | null) => typedError<ProjectSummary_Serialize | null, CommandError>(__TAURI_INVOKE("open_project_dialog", { path })),
 	/**  Summary of the open project (reloaded after a command that changed entities). */
 	getProjectSummary: () => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("get_project_summary")),
 	/**

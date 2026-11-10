@@ -29,7 +29,10 @@
     "presets": {
       "residential": "Résidentiel · ~1 000 modules",
       "industrial": "Industriel · ~10 000 modules"
-    }
+    },
+    "files": "Projet",
+    "new": "Nouveau projet…",
+    "open": "Ouvrir…"
   },
   "tools": {
     "label": "Outils",
@@ -207,5 +210,12 @@
       "price": "Prix"
     },
     "noPrices": "Prix catalogue non renseignés"
+  },
+  "plan": {
+    "label": "Plan 2D",
+    "grid": "Grille {step} m",
+    "fit": "Ajuster à la vue",
+    "empty": "Aucun bâtiment sur ce site pour l’instant.",
+    "splitter": "Redimensionner le plan et la vue 3D"
   }
 }

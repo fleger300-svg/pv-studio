@@ -29,7 +29,10 @@
     "presets": {
       "residential": "Residential · ~1,000 modules",
       "industrial": "Industrial · ~10,000 modules"
-    }
+    },
+    "files": "Project",
+    "new": "New project…",
+    "open": "Open…"
   },
   "tools": {
     "label": "Tools",
@@ -207,5 +210,12 @@
       "price": "Price"
     },
     "noPrices": "List prices not set"
+  },
+  "plan": {
+    "label": "2D plan",
+    "grid": "Grid {step} m",
+    "fit": "Fit to view",
+    "empty": "No building on this site yet.",
+    "splitter": "Resize the plan and the 3D view"
   }
 }

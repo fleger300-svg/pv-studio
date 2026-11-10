@@ -29,7 +29,10 @@
     "presets": {
       "residential": "Wohnbau · ~1000 Module",
       "industrial": "Industrie · ~10 000 Module"
-    }
+    },
+    "files": "Projekt",
+    "new": "Neues Projekt…",
+    "open": "Öffnen…"
   },
   "tools": {
     "label": "Werkzeuge",
@@ -207,5 +210,12 @@
       "price": "Preis"
     },
     "noPrices": "Listenpreise nicht erfasst"
+  },
+  "plan": {
+    "label": "2D-Plan",
+    "grid": "Raster {step} m",
+    "fit": "In Ansicht einpassen",
+    "empty": "Auf diesem Grundstück steht noch kein Gebäude.",
+    "splitter": "Plan und 3D-Ansicht in der Grösse anpassen"
   }
 }
