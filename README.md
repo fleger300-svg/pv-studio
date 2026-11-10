@@ -177,6 +177,25 @@ the east-west ballast: the whole half (5 040 pairs) is one mounting block, so a 
 its ballast. The stress presets carry demo statics data (see `pv-model` `stress.rs`): a demo site,
 and on the gable barns the duopitch c_pe printed by K2 (no normative duopitch table yet).
 
+### Editing (E3, 2026-11-10)
+
+Same Windows machine, release build. Editing benchmark `node apps/desktop/e2e/bench-editing.mjs <dir>`
+(report [`bench-editing-windows-2026-11-10.json`](testdata/results/bench-editing-windows-2026-11-10.json)),
+then the in-app benchmark again on both presets (`node apps/desktop/e2e/bench-viewport.mjs <dir>`,
+reports `bench-*-20261110*.json`): every budget still met.
+
+| Operation | Budget | Windows |
+|---|---|---|
+| Roof preview while a footprint vertex is dragged (`preview_roof`, one call per frame) | < 16 ms (one frame) | ✅ median 2.9 ms, p95 4.2 ms |
+| Roof regenerated as a command (`plan_roof` + `apply_command`) | — | 13 ms round trip (0.6 ms in Rust) |
+| Layout setting typed in the arrays panel → face laid out again, model reloaded (1k preset) | — | median 58 ms, max 64 ms |
+| Automatic layout, 11 060 modules east-west (`apply_layout`) | — | 0.59 s (0.58 s in Rust) |
+| Statics after a 100-module drag (1k / 10k) | < 100 ms | ✅ 15.9 ms / 22.7 ms |
+| Project open → first frame (1k / 10k) | < 1 s / < 3 s | ✅ 89 ms / 107 ms |
+
+The 10k layout was 25 s before the offset search was parallelised and refined in levels
+(`pv-layout` `fill`); the K2 reference module counts are unchanged.
+
 ### macOS run (to do)
 
 On a Mac with Xcode command-line tools: `pnpm install && pnpm tauri build --no-bundle`. Then run

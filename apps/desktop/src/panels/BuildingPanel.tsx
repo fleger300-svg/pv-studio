@@ -20,6 +20,7 @@ import { edgeLength } from '../editor2d/polygonEdit';
 import { CheckField, NumberField, TextField } from '../forms/fields';
 import { api, unwrap } from '../ipc';
 import { usePlanStore } from '../store/plan';
+import { SiteSection } from './SiteSection';
 import { useProjectStore } from '../store/project';
 import { useSelectionStore } from '../store/selection';
 
@@ -223,6 +224,7 @@ function BuildingForm({ summary, building: b }: { summary: ProjectSummary; build
         {advanced ? t('roof.edges.hide') : t('roof.edges.show')}
       </Button>
       {advanced && spec && <EdgeTable building={b} spec={spec} onEdges={withEdges} />}
+      <SiteSection building={b} />
       <Button
         variant="secondary"
         onClick={() => void runCommand('apply', { type: 'RemoveBuilding', id: b.id })}

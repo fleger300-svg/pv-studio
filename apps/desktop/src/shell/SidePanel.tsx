@@ -9,6 +9,7 @@ import { BuildingPanel } from '../panels/BuildingPanel';
 import { RoofPanel } from '../panels/RoofPanel';
 import { ArraysPanel } from '../panels/ArraysPanel';
 import { useWorkflowStore } from '../store/workflow';
+import { ErrorBoundary } from './ErrorBoundary';
 
 /**
  * Right-hand panel, by step: the building form, the roof faces, or (layout) selection,
@@ -19,14 +20,18 @@ export function SidePanel() {
   if (step === 'building') {
     return (
       <aside className="app__right">
-        <BuildingPanel />
+        <ErrorBoundary>
+          <BuildingPanel />
+        </ErrorBoundary>
       </aside>
     );
   }
   if (step === 'roof') {
     return (
       <aside className="app__right">
-        <RoofPanel />
+        <ErrorBoundary>
+          <RoofPanel />
+        </ErrorBoundary>
       </aside>
     );
   }
@@ -46,24 +51,26 @@ function LayoutPanels() {
 
   return (
     <aside className="app__right">
-      <ArraysPanel />
-      <Panel title={t('selection.title')}>
-        <Stat label={t('selection.count')} value={t('selection.modules', { count })} />
-        <Stat label={t('selection.power')} value={t('selection.kwp', { kwp })} />
-      </Panel>
-      <Panel title={t('display.title')}>
-        <Select<ColorMode>
-          label={t('display.colorMode')}
-          value={colorMode}
-          options={[
-            { value: 'default', label: t('display.colorModes.default') },
-            { value: 'string', label: t('display.colorModes.string') },
-          ]}
-          onChange={setColorMode}
-        />
-      </Panel>
-      <StaticsPanel />
-      <BomPanel />
+      <ErrorBoundary>
+        <ArraysPanel />
+        <Panel title={t('selection.title')}>
+          <Stat label={t('selection.count')} value={t('selection.modules', { count })} />
+          <Stat label={t('selection.power')} value={t('selection.kwp', { kwp })} />
+        </Panel>
+        <Panel title={t('display.title')}>
+          <Select<ColorMode>
+            label={t('display.colorMode')}
+            value={colorMode}
+            options={[
+              { value: 'default', label: t('display.colorModes.default') },
+              { value: 'string', label: t('display.colorModes.string') },
+            ]}
+            onChange={setColorMode}
+          />
+        </Panel>
+        <StaticsPanel />
+        <BomPanel />
+      </ErrorBoundary>
     </aside>
   );
 }

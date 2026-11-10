@@ -41,7 +41,8 @@
     "move": "Move",
     "delete": "Delete selection",
     "undo": "Undo",
-    "redo": "Redo"
+    "redo": "Redo",
+    "frame": "Frame the project in the 3D view"
   },
   "selection": {
     "title": "Selection",
@@ -63,7 +64,8 @@
   },
   "viewport": {
     "label": "3D viewport",
-    "empty": "Create or open a project to display it in 3D."
+    "empty": "Create or open a project to display it in 3D.",
+    "emptySite": "Empty site: draw a building on the plan."
   },
   "errors": {
     "module": {
@@ -123,6 +125,10 @@
     },
     "roof": {
       "reentrantCorner": "Edges {a} and {b} meet at a re-entrant corner: both need a pitch (no gable wall) and the same eave height (and, with an overhang, the same pitch)."
+    },
+    "ui": {
+      "render": "This part of the screen could not be displayed (the project is not affected).",
+      "retry": "Retry"
     }
   },
   "hud": {
@@ -174,7 +180,8 @@
     "zones": "Wind zones",
     "percent": "{value} %",
     "metres": "{value} m",
-    "disclaimer": "Pre-dimensioning to SIA 261, to be validated before execution."
+    "disclaimer": "Pre-dimensioning to SIA 261, to be validated before execution.",
+    "noArrays": "No array: the statics will appear once the roof is laid out."
   },
   "bom": {
     "title": "Bill of materials",
@@ -209,7 +216,8 @@
       "unitPrice": "Unit price",
       "price": "Price"
     },
-    "noPrices": "List prices not set"
+    "noPrices": "List prices not set",
+    "noModules": "No module laid out: the bill of materials will appear once the roof is laid out."
   },
   "plan": {
     "label": "2D plan",
@@ -366,5 +374,37 @@
     "clear": "Clear the array",
     "delete": "Delete the array",
     "add": "Add an array (laid out automatically)"
+  },
+  "site": {
+    "title": "Site (statics, SIA 261)",
+    "missing": "Enter the altitude and the reference peak velocity pressure q_p0 of the site: the statics need them.",
+    "altitude": "Altitude",
+    "snowCorrection": "Snow map correction",
+    "qp0": "Reference peak velocity pressure q_p0",
+    "thermal": "Thermal coefficient C_t",
+    "serviceLife": "Design service life",
+    "years": "years",
+    "terrain": "Terrain category",
+    "terrains": {
+      "II": "II · lakes, open country",
+      "IIa": "IIa · country, few obstacles",
+      "III": "III · villages, woodland",
+      "IV": "IV · city centres"
+    },
+    "exposure": "Snow exposure",
+    "exposures": {
+      "windswept": "Windswept",
+      "normal": "Normal",
+      "sheltered": "Sheltered"
+    },
+    "consequence": "Consequence class",
+    "lifeModel": "Service life adjustment",
+    "lifeModels": {
+      "en1991": "SN EN 1991 (c_prob)",
+      "explicit": "Factors set by the engineer"
+    },
+    "snowFactor": "Snow factor",
+    "windFactor": "Wind factor",
+    "applyAll": "Apply this site to every building"
   }
 }

@@ -215,6 +215,16 @@ body,
   color: var(--color-text-muted);
   pointer-events: none;
 }
+.viewport-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 45%;
+  margin: 0;
+  text-align: center;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
 .viewport-empty {
   position: absolute;
   inset: 0;
@@ -603,4 +613,12 @@ body,
 .face-list__meta {
   color: var(--color-text-muted);
   font-size: 12px;
+}
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  color: var(--color-text);
 }

@@ -15,13 +15,20 @@ interface ViewState {
   editor: Editor | null;
   /** R3F state accessor of the mounted canvas (camera, controls, invalidate) for the benchmark. */
   three: (() => RootState) | null;
+  /** Bumped to frame the whole project in the 3D view again. */
+  frameRequest: number;
   setColorMode: (mode: ColorMode) => void;
   setTool: (tool: Tool) => void;
+  requestFrame: () => void;
 }
 
 export const useViewStore = create<ViewState>()((set) => ({
   colorMode: 'default',
   tool: 'select',
+  frameRequest: 0,
+  requestFrame: () => {
+    set((s) => ({ frameRequest: s.frameRequest + 1 }));
+  },
   selectionCount: 0,
   editor: null,
   three: null,

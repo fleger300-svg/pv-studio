@@ -4,7 +4,16 @@ import { useProjectStore } from '../store/project';
 import { useViewStore, type Tool } from '../store/view';
 import { usePerfStore } from '../perf/perfStore';
 import { redo, undo } from '../commands/shortcuts';
-import { IconBox, IconDelete, IconGauge, IconMove, IconRedo, IconSelect, IconUndo } from './icons';
+import {
+  IconBox,
+  IconDelete,
+  IconFit,
+  IconGauge,
+  IconMove,
+  IconRedo,
+  IconSelect,
+  IconUndo,
+} from './icons';
 
 const TOOLS: readonly { tool: Tool; icon: () => React.JSX.Element }[] = [
   { tool: 'select', icon: IconSelect },
@@ -25,6 +34,7 @@ export function Toolbar({ modules }: { modules: boolean }) {
   const canRedo = useProjectStore((s) => s.counters.canRedo);
   const hudVisible = usePerfStore((s) => s.hudVisible);
   const toggleHud = usePerfStore((s) => s.toggleHud);
+  const requestFrame = useViewStore((s) => s.requestFrame);
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('tools.label')}>
@@ -64,6 +74,7 @@ export function Toolbar({ modules }: { modules: boolean }) {
         onClick={() => void redo()}
       />
       <span className="toolbar__sep" aria-hidden="true" />
+      <IconButton label={t('tools.frame')} icon={<IconFit />} onClick={requestFrame} />
       <IconButton
         label={t('hud.toggle')}
         icon={<IconGauge />}

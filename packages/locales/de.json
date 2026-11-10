@@ -41,7 +41,8 @@
     "move": "Verschieben",
     "delete": "Auswahl löschen",
     "undo": "Rückgängig",
-    "redo": "Wiederherstellen"
+    "redo": "Wiederherstellen",
+    "frame": "Projekt in der 3D-Ansicht einpassen"
   },
   "selection": {
     "title": "Auswahl",
@@ -63,7 +64,8 @@
   },
   "viewport": {
     "label": "3D-Ansicht",
-    "empty": "Erstellen oder öffnen Sie ein Projekt, um es in 3D anzuzeigen."
+    "empty": "Erstellen oder öffnen Sie ein Projekt, um es in 3D anzuzeigen.",
+    "emptySite": "Leeres Grundstück: Zeichnen Sie ein Gebäude im Plan."
   },
   "errors": {
     "module": {
@@ -123,6 +125,10 @@
     },
     "roof": {
       "reentrantCorner": "Die Kanten {a} und {b} bilden eine einspringende Ecke: Beide brauchen eine Neigung (keine Giebelwand) und dieselbe Traufhöhe (bei einem Dachüberstand auch dieselbe Neigung)."
+    },
+    "ui": {
+      "render": "Dieser Bildschirmbereich konnte nicht angezeigt werden (das Projekt ist nicht betroffen).",
+      "retry": "Erneut versuchen"
     }
   },
   "hud": {
@@ -174,7 +180,8 @@
     "zones": "Windzonen",
     "percent": "{value} %",
     "metres": "{value} m",
-    "disclaimer": "Vordimensionierung nach SIA 261, vor der Ausführung zu prüfen."
+    "disclaimer": "Vordimensionierung nach SIA 261, vor der Ausführung zu prüfen.",
+    "noArrays": "Kein Modulfeld: Die Statik erscheint nach der Belegung."
   },
   "bom": {
     "title": "Stückliste",
@@ -209,7 +216,8 @@
       "unitPrice": "Einzelpreis",
       "price": "Preis"
     },
-    "noPrices": "Listenpreise nicht erfasst"
+    "noPrices": "Listenpreise nicht erfasst",
+    "noModules": "Keine Module verlegt: Die Stückliste erscheint nach der Belegung."
   },
   "plan": {
     "label": "2D-Plan",
@@ -366,5 +374,37 @@
     "clear": "Modulfeld leeren",
     "delete": "Modulfeld löschen",
     "add": "Modulfeld hinzufügen (automatisch belegt)"
+  },
+  "site": {
+    "title": "Standort (Statik SIA 261)",
+    "missing": "Geben Sie die Höhe und den Referenzwert des Staudrucks q_p0 des Standorts ein: Die Statik braucht sie.",
+    "altitude": "Höhe ü. M.",
+    "snowCorrection": "Korrektur der Schneekarte",
+    "qp0": "Referenzwert des Staudrucks q_p0",
+    "thermal": "Wärmekoeffizient C_t",
+    "serviceLife": "Nutzungsdauer",
+    "years": "Jahre",
+    "terrain": "Geländekategorie",
+    "terrains": {
+      "II": "II · Seen, offenes Gelände",
+      "IIa": "IIa · Land, wenige Hindernisse",
+      "III": "III · Ortschaften, Wälder",
+      "IV": "IV · Stadtzentren"
+    },
+    "exposure": "Schneeexposition",
+    "exposures": {
+      "windswept": "Windexponiert",
+      "normal": "Normal",
+      "sheltered": "Geschützt"
+    },
+    "consequence": "Schadenfolgeklasse",
+    "lifeModel": "Berücksichtigung der Nutzungsdauer",
+    "lifeModels": {
+      "en1991": "Nach SN EN 1991 (c_prob)",
+      "explicit": "Vom Ingenieur festgelegte Faktoren"
+    },
+    "snowFactor": "Schneefaktor",
+    "windFactor": "Windfaktor",
+    "applyAll": "Diesen Standort auf alle Gebäude anwenden"
   }
 }

@@ -1,6 +1,7 @@
 import {
   BufferGeometry,
   Color,
+  ExtrudeGeometry,
   Float32BufferAttribute,
   Matrix4,
   Shape,
@@ -76,5 +77,32 @@ export function roofsGeometry(summary: ProjectSummary): BufferGeometry | null {
     geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
     return geometry;
   });
+  return parts.length ? mergeGeometries(parts) : null;
+}
+
+/** Thickness drawn for obstacles without height (areas kept free), m. */
+const FLAT_OBSTACLE_M = 0.02;
+
+/**
+ * Roof obstacles (chimneys, windows…): their footprint on the face extruded along the
+ * face's outward normal by their height.
+ */
+export function obstaclesGeometry(summary: ProjectSummary): BufferGeometry | null {
+  const parts: BufferGeometry[] = [];
+  for (const { face, frame } of summary.roofFaces) {
+    for (const o of face.outline?.obstacles ?? []) {
+      if (o.footprintUv.length < 3) continue;
+      const geometry = new ExtrudeGeometry(
+        shapeOf(o.footprintUv.map(([u, v]): [number, number] => [u, v])),
+        {
+          depth: Math.max(o.heightM, FLAT_OBSTACLE_M),
+          bevelEnabled: false,
+        },
+      );
+      geometry.deleteAttribute('uv');
+      geometry.applyMatrix4(roofMatrix(frame));
+      parts.push(geometry);
+    }
+  }
   return parts.length ? mergeGeometries(parts) : null;
 }

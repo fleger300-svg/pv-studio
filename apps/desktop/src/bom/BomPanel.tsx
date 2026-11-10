@@ -104,7 +104,10 @@ export function BomPanel() {
   };
 
   let body;
-  if (!report) {
+  if (summary.arrays.every((x) => x.moduleCount === 0)) {
+    // Nothing laid out yet: no bill of materials to speak of.
+    body = <p className="statics__state">{t('bom.noModules')}</p>;
+  } else if (!report) {
     body = <p className="statics__state">{t('bom.pending')}</p>;
   } else if (report.outcome.status === 'failed') {
     const { error } = report.outcome;

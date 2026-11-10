@@ -9,7 +9,10 @@ import { chromium } from 'playwright-core';
 
 export async function connect() {
   const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
-  const page = browser.contexts()[0].pages()[0];
+  // Several PV Studio windows may share the debugging port (a release build left open next
+  // to the dev one): prefer the dev window (Vite server), else the first one.
+  const pages = browser.contexts().flatMap((c) => c.pages());
+  const page = pages.find((p) => p.url().startsWith('http://localhost:1420')) ?? pages[0];
   await page.setViewportSize({ width: 1440, height: 900 }).catch(() => {});
   return { browser, page };
 }

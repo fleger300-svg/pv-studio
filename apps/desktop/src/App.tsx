@@ -6,6 +6,7 @@ import { SidePanel } from './shell/SidePanel';
 import { Splitter } from './shell/Splitter';
 import { Toolbar } from './shell/Toolbar';
 import { Toasts } from './shell/Toasts';
+import { ErrorBoundary } from './shell/ErrorBoundary';
 import { useShortcuts } from './commands/shortcuts';
 import { PlanView } from './editor2d/PlanView';
 import { usePlanStore } from './store/plan';
@@ -36,24 +37,29 @@ export function App() {
         className={split ? 'app__viewport app__viewport--split' : 'app__viewport'}
         style={{ '--plan-ratio': ratio } as React.CSSProperties}
       >
-        {summary && modules ? (
-          <>
-            {/* The 3D view keeps its place in the tree: switching steps never rebuilds it. */}
-            {split && (
-              <section className="app__plan" aria-label={t('plan.label')}>
-                <PlanView summary={summary} />
+        <ErrorBoundary>
+          {summary && modules ? (
+            <>
+              {/* The 3D view keeps its place in the tree: switching steps never rebuilds it. */}
+              {split && (
+                <section className="app__plan" aria-label={t('plan.label')}>
+                  <PlanView summary={summary} />
+                </section>
+              )}
+              {split && <Splitter />}
+              <section className="app__3d" aria-label={t('viewport.label')}>
+                <Viewport summary={summary} modules={modules} />
+                {summary.buildings.length === 0 && (
+                  <p className="viewport-hint">{t('viewport.emptySite')}</p>
+                )}
+                <Toolbar modules={!split} />
+                <Hud />
               </section>
-            )}
-            {split && <Splitter />}
-            <section className="app__3d" aria-label={t('viewport.label')}>
-              <Viewport summary={summary} modules={modules} />
-              <Toolbar modules={!split} />
-              <Hud />
-            </section>
-          </>
-        ) : (
-          <p className="viewport-empty">{t('viewport.empty')}</p>
-        )}
+            </>
+          ) : (
+            <p className="viewport-empty">{t('viewport.empty')}</p>
+          )}
+        </ErrorBoundary>
         <Toasts />
       </main>
       <SidePanel />

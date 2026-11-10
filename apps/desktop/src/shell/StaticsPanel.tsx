@@ -67,6 +67,7 @@ export function StaticsPanel() {
         {busy ? t('statics.computing') : t('statics.upToDate')}
       </p>
       {failure && <p className="statics__error">{t(failure.key, failure.params)}</p>}
+      {summary.arrays.length === 0 && <p className="statics__state">{t('statics.noArrays')}</p>}
       <ul className="statics__list">
         {summary.arrays.map((a, i) => {
           const report = fields[a.array.id];

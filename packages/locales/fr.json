@@ -41,7 +41,8 @@
     "move": "Déplacer",
     "delete": "Supprimer la sélection",
     "undo": "Annuler",
-    "redo": "Rétablir"
+    "redo": "Rétablir",
+    "frame": "Recadrer la vue 3D sur le projet"
   },
   "selection": {
     "title": "Sélection",
@@ -63,7 +64,8 @@
   },
   "viewport": {
     "label": "Vue 3D",
-    "empty": "Créez ou ouvrez un projet pour l'afficher en 3D."
+    "empty": "Créez ou ouvrez un projet pour l'afficher en 3D.",
+    "emptySite": "Site vide : tracez un bâtiment sur le plan."
   },
   "errors": {
     "module": {
@@ -123,6 +125,10 @@
     },
     "roof": {
       "reentrantCorner": "Les arêtes {a} et {b} forment un angle rentrant : elles doivent toutes deux avoir une pente (pas de pignon) et la même hauteur d’égout (et, avec un débord, la même pente)."
+    },
+    "ui": {
+      "render": "Cette partie de l’écran n’a pas pu s’afficher (le projet n’est pas affecté).",
+      "retry": "Réessayer"
     }
   },
   "hud": {
@@ -174,7 +180,8 @@
     "zones": "Zones de vent",
     "percent": "{value} %",
     "metres": "{value} m",
-    "disclaimer": "Pré-dimensionnement selon SIA 261, à faire valider pour exécution."
+    "disclaimer": "Pré-dimensionnement selon SIA 261, à faire valider pour exécution.",
+    "noArrays": "Aucun champ : la statique apparaîtra après le calepinage."
   },
   "bom": {
     "title": "Nomenclature",
@@ -209,7 +216,8 @@
       "unitPrice": "Prix à l'unité",
       "price": "Prix"
     },
-    "noPrices": "Prix catalogue non renseignés"
+    "noPrices": "Prix catalogue non renseignés",
+    "noModules": "Aucun module posé : la nomenclature apparaîtra après le calepinage."
   },
   "plan": {
     "label": "Plan 2D",
@@ -366,5 +374,37 @@
     "clear": "Vider le champ",
     "delete": "Supprimer le champ",
     "add": "Ajouter un champ (calepiné automatiquement)"
+  },
+  "site": {
+    "title": "Site (statique SIA 261)",
+    "missing": "Renseignez l’altitude et la pression dynamique de référence q_p0 du site : la statique en a besoin.",
+    "altitude": "Altitude",
+    "snowCorrection": "Correction de la carte de neige",
+    "qp0": "Pression dynamique de référence q_p0",
+    "thermal": "Coefficient thermique C_t",
+    "serviceLife": "Durée d’utilisation",
+    "years": "ans",
+    "terrain": "Catégorie de terrain",
+    "terrains": {
+      "II": "II · lacs, rase campagne",
+      "IIa": "IIa · campagne, quelques obstacles",
+      "III": "III · localités, zones boisées",
+      "IV": "IV · centres urbains"
+    },
+    "exposure": "Exposition à la neige",
+    "exposures": {
+      "windswept": "Exposé au vent",
+      "normal": "Normale",
+      "sheltered": "Abritée"
+    },
+    "consequence": "Classe de conséquences",
+    "lifeModel": "Prise en compte de la durée d’utilisation",
+    "lifeModels": {
+      "en1991": "Selon SN EN 1991 (c_prob)",
+      "explicit": "Facteurs fixés par l’ingénieur"
+    },
+    "snowFactor": "Facteur neige",
+    "windFactor": "Facteur vent",
+    "applyAll": "Appliquer ce site à tous les bâtiments"
   }
 }

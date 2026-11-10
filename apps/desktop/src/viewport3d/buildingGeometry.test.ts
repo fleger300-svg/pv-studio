@@ -1,7 +1,7 @@
 import { Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import type { BufferGeometry } from 'three';
-import { roofsGeometry, wallGeometry } from './buildingGeometry';
+import { obstaclesGeometry, roofsGeometry, wallGeometry } from './buildingGeometry';
 import { flatRoofFixture } from './testSummary';
 
 function triangles(g: BufferGeometry): Vector3[][] {
@@ -78,5 +78,46 @@ describe('roofsGeometry', () => {
     expect(area(tris)).toBeCloseTo(12, 9);
     // Placed by the face frame (flat roof at z = 3).
     expect(tris.flat().every((p) => Math.abs(p.z - 3) < 1e-9)).toBe(true);
+  });
+});
+
+describe('obstaclesGeometry', () => {
+  it('extrudes an obstacle along the face normal by its height', () => {
+    const { summary } = flatRoofFixture();
+    const face = summary.roofFaces[0];
+    if (!face) throw new Error('fixture');
+    face.face = {
+      ...face.face,
+      outline: {
+        verticesUv: [
+          [0, 0],
+          [10, 0],
+          [10, 8],
+          [0, 8],
+        ],
+        edgeKinds: ['parapet', 'parapet', 'parapet', 'parapet'],
+        obstacles: [
+          {
+            name: 'Chimney',
+            kind: 'chimney',
+            footprintUv: [
+              [4, 4],
+              [5, 4],
+              [5, 5],
+              [4, 5],
+            ],
+            heightM: 1.2,
+          },
+        ],
+      },
+    };
+    const g = obstaclesGeometry(summary);
+    expect(g).not.toBeNull();
+    g?.computeBoundingBox();
+    const box = g?.boundingBox;
+    // Flat roof at z = 3: the chimney rises 1.2 m above it (float32 positions).
+    expect(box?.min.z).toBeCloseTo(3, 5);
+    expect(box?.max.z).toBeCloseTo(4.2, 5);
+    expect(box?.max.x).toBeCloseTo(box ? box.min.x + 1 : 0, 5);
   });
 });
