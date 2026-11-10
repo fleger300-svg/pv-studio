@@ -17,6 +17,8 @@ export const commands = {
 	createStressProject: (preset: StressPreset, path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("create_stress_project", { preset, path })),
 	/**  Opens an existing `.pvproj` file (applying migrations) and makes it the open project. */
 	openProject: (path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("open_project", { path })),
+	/**  Summary of the open project (reloaded after a command that changed entities). */
+	getProjectSummary: () => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("get_project_summary")),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -406,10 +408,21 @@ export type Building_Serialize = {
 
 /**  What a command changed. */
 export type ChangeSet = {
-	/**  Sorted, unique. */
+	/**  Modules whose position or state changed. Sorted, unique; empty when `structure`. */
 	moduleIds: ModuleId[],
 	/**  The project's pricing (discounts) changed. */
 	pricing: boolean,
+	/**  Buildings added, changed or removed. Sorted, unique. */
+	buildings: BuildingId[],
+	/**  Roof faces added, changed or removed. Sorted, unique. */
+	faces: RoofFaceId[],
+	/**  Arrays added, changed or removed. Sorted, unique. */
+	arrays: ArrayId[],
+	/**
+	 *  Modules were added or removed for good: ids were renumbered, every module-indexed
+	 *  view (GPU buffers, selections) must be rebuilt.
+	 */
+	structure: boolean,
 };
 
 /**  A serialisable model change. */
@@ -435,7 +448,23 @@ export type Command_Deserialize =
  */
 { type: "SetModulePositions"; positions: ModulePosition[] } | 
 /**  Sets (`Some`) or removes (`None`) the discount of a manufacturer on the whole project. */
-{ type: "SetDiscount"; manufacturer: string; rate?: number | null };
+{ type: "SetDiscount"; manufacturer: string; rate?: number | null } | 
+/**  Replaces the building with the same id, or inserts it at `at` (clamped; `None`: last). */
+{ type: "UpsertBuilding"; building: Building_Deserialize; at?: number | null } | 
+/**  Removes a building with its roof faces, arrays and modules. */
+{ type: "RemoveBuilding"; id: BuildingId } | 
+/**  Replaces the roof face with the same id, or inserts it at `at`. */
+{ type: "UpsertRoofFace"; face: RoofFace_Deserialize; at?: number | null } | 
+/**  Removes a roof face with its arrays and modules. */
+{ type: "RemoveRoofFace"; id: RoofFaceId } | 
+/**  Replaces the array with the same id (its modules are kept), or inserts it at `at`. */
+{ type: "UpsertArray"; array: PanelArray_Deserialize; at?: number | null } | 
+/**  Removes an array with its modules; arrays paired with it are unpaired. */
+{ type: "RemoveArray"; id: ArrayId } | 
+/**  Replaces all modules of an array. Structural: module ids are renumbered. */
+{ type: "SetArrayModules"; array_id: ArrayId; modules: ModuleSlot[] } | 
+/**  Several commands applied as one, all or nothing. */
+{ type: "Batch"; commands: Command_Deserialize[] };
 
 /**  A serialisable model change. */
 export type Command_Serialize = 
@@ -451,7 +480,23 @@ export type Command_Serialize =
  */
 { type: "SetModulePositions"; positions: ModulePosition[] } | 
 /**  Sets (`Some`) or removes (`None`) the discount of a manufacturer on the whole project. */
-{ type: "SetDiscount"; manufacturer: string; rate: number | null };
+{ type: "SetDiscount"; manufacturer: string; rate: number | null } | 
+/**  Replaces the building with the same id, or inserts it at `at` (clamped; `None`: last). */
+{ type: "UpsertBuilding"; building: Building_Serialize; at: number | null } | 
+/**  Removes a building with its roof faces, arrays and modules. */
+{ type: "RemoveBuilding"; id: BuildingId } | 
+/**  Replaces the roof face with the same id, or inserts it at `at`. */
+{ type: "UpsertRoofFace"; face: RoofFace_Serialize; at: number | null } | 
+/**  Removes a roof face with its arrays and modules. */
+{ type: "RemoveRoofFace"; id: RoofFaceId } | 
+/**  Replaces the array with the same id (its modules are kept), or inserts it at `at`. */
+{ type: "UpsertArray"; array: PanelArray_Serialize; at: number | null } | 
+/**  Removes an array with its modules; arrays paired with it are unpaired. */
+{ type: "RemoveArray"; id: ArrayId } | 
+/**  Replaces all modules of an array. Structural: module ids are renumbered. */
+{ type: "SetArrayModules"; array_id: ArrayId; modules: ModuleSlot[] } | 
+/**  Several commands applied as one, all or nothing. */
+{ type: "Batch"; commands: Command_Serialize[] };
 
 /**  A pass could not run. */
 export type ComputeFailed = {
@@ -686,7 +731,13 @@ export type MembraneKind = "epdm" | "bitumen" | "pvc" | "tpo" | "gravel" | "gree
 
 /**  Emitted after every applied command, undo or redo. */
 export type ModelChanged = {
+	/**  Modules whose position or state changed (empty when `reload`). */
 	moduleIds: ModuleId[],
+	/**
+	 *  Entities changed or module ids were renumbered: the front-end reloads the project
+	 *  summary and the module buffer (`get_project_summary`, `get_module_buffer`).
+	 */
+	reload: boolean,
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -703,6 +754,21 @@ export type ModulePosition = {
 	u: number,
 	v: number,
 };
+
+/**
+ *  One module of an array, without its id (ids are assigned canonically, see
+ *  [`Project::compact_modules`]). Used by [`Command::SetArrayModules`].
+ */
+export type ModuleSlot = {
+	row: number,
+	col: number,
+	u: number,
+	v: number,
+	state: ModuleState,
+	stringIndex: number,
+};
+
+export type ModuleState = "active" | "removed";
 
 /**  Snapshot of a field's mounting system: statics data and parts. */
 export type MountingSystem = MountingSystem_Serialize | MountingSystem_Deserialize;

@@ -111,6 +111,15 @@ pub async fn open_project(
     Ok(result)
 }
 
+/// Summary of the open project (reloaded after a command that changed entities).
+#[tauri::command]
+#[specta::specta]
+pub async fn get_project_summary(
+    state: State<'_, AppState>,
+) -> Result<ProjectSummary, CommandError> {
+    state.with(|store| summary(store))
+}
+
 /// Binary buffer of every module of the open project.
 #[tauri::command]
 #[specta::specta]
@@ -145,7 +154,11 @@ pub struct ApplyResult {
 #[serde(rename_all = "camelCase")]
 #[tauri_specta(event_name = "model:changed")]
 pub struct ModelChanged {
+    /// Modules whose position or state changed (empty when `reload`).
     pub module_ids: Vec<ModuleId>,
+    /// Entities changed or module ids were renumbered: the front-end reloads the project
+    /// summary and the module buffer (`get_project_summary`, `get_module_buffer`).
+    pub reload: bool,
     pub can_undo: bool,
     pub can_redo: bool,
 }
@@ -163,6 +176,7 @@ fn finish(
     let (can_undo, can_redo) = store.history_state().map_err(CommandError::from)?;
     let event = ModelChanged {
         module_ids: changes.module_ids.clone(),
+        reload: !changes.modules_only(),
         can_undo,
         can_redo,
     };

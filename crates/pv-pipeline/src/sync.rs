@@ -17,7 +17,7 @@ pub fn sync_project(graph: &mut Graph, project: &Project) -> Result<SyncReport, 
     apply_batch(graph, batch_for_project(project))
 }
 
-/// After a module command: sets the module lists of the arrays it touched.
+/// After a command: sets the inputs it changed (see [`batch_for_changes`]).
 ///
 /// # Errors
 /// Only if the pipeline kinds are not registered in `graph`.

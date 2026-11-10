@@ -183,12 +183,9 @@ impl ProjectStore {
         }
         // Layout rules on the resulting state (setbacks, obstacles, collisions, distance
         // between arrays). Commands that only remove modules cannot break them.
-        if !changes.module_ids.is_empty() && !matches!(cmd, Command::RemoveModules { .. }) {
-            if let Err(e) = pv_layout::validate_module_positions(&self.project, &changes.module_ids)
-            {
-                let _ = inverse.apply(&mut self.project);
-                return Err(StoreError::Command(e));
-            }
+        if let Err(e) = validate_layout(&self.project, cmd, &changes) {
+            let _ = inverse.apply(&mut self.project);
+            return Err(StoreError::Command(e));
         }
         let result = (|| -> Result<(), StoreError> {
             let tx = self.conn.transaction()?;
@@ -359,6 +356,59 @@ impl ProjectStore {
     }
 }
 
+/// Layout rules on the state after `cmd`:
+/// - moved modules: setbacks, obstacles, collisions, distance between arrays;
+/// - changed faces and arrays: the outline must give a buildable area for each array;
+/// - new modules (structural change): the same rules as moved ones, for the active modules
+///   of the changed arrays.
+///
+/// Editing a face or an array does not re-check the modules already on it: the statics and
+/// layout reports show what no longer fits, the user decides.
+fn validate_layout(
+    project: &Project,
+    cmd: &Command,
+    changes: &ChangeSet,
+) -> Result<(), CommandError> {
+    if !changes.module_ids.is_empty() && !matches!(cmd, Command::RemoveModules { .. }) {
+        pv_layout::validate_module_positions(project, &changes.module_ids)?;
+    }
+    if changes.modules_only() {
+        return Ok(());
+    }
+    let arrays: Vec<&PanelArray> = project
+        .arrays
+        .iter()
+        .filter(|a| changes.arrays.contains(&a.id) || changes.faces.contains(&a.roof_face_id))
+        .collect();
+    for a in &arrays {
+        if let Some(face) = project.roof_face(a.roof_face_id) {
+            pv_layout::model::buildable_area(face, a)
+                .map_err(|_| CommandError::new(keys::LAYOUT_INVALID_OUTLINE))?;
+        }
+    }
+    let mut laid_out = Vec::new();
+    laid_out_arrays(cmd, &mut laid_out);
+    if !laid_out.is_empty() {
+        let new: Vec<ModuleId> = project
+            .modules
+            .iter()
+            .filter(|m| m.state == ModuleState::Active && laid_out.contains(&m.array_id))
+            .map(|m| m.id)
+            .collect();
+        pv_layout::validate_module_positions(project, &new)?;
+    }
+    Ok(())
+}
+
+/// Arrays whose modules `cmd` replaces (`SetArrayModules`, also inside batches).
+fn laid_out_arrays(cmd: &Command, out: &mut Vec<ArrayId>) {
+    match cmd {
+        Command::SetArrayModules { array_id, .. } => out.push(*array_id),
+        Command::Batch { commands } => commands.iter().for_each(|c| laid_out_arrays(c, out)),
+        _ => {}
+    }
+}
+
 /// Writes what `changes` touched.
 fn persist(tx: &Transaction<'_>, project: &Project, changes: &ChangeSet) -> Result<(), StoreError> {
     if changes.pricing {
@@ -367,12 +417,186 @@ fn persist(tx: &Transaction<'_>, project: &Project, changes: &ChangeSet) -> Resu
             params![serde_json::to_string(&project.pricing)?],
         )?;
     }
-    let ids = &changes.module_ids;
+    if !changes.modules_only() {
+        persist_entities(tx, project, changes)?;
+    }
+    if changes.structure {
+        // Ids were renumbered: the module table is rewritten.
+        tx.execute("DELETE FROM module_instance", [])?;
+        insert_modules(tx, &project.modules)?;
+        return Ok(());
+    }
     let mut stmt =
         tx.prepare_cached("UPDATE module_instance SET u = ?1, v = ?2, state = ?3 WHERE id = ?4")?;
-    for id in ids {
+    for id in &changes.module_ids {
         let m = &project.modules[id.index()];
         stmt.execute(params![m.u, m.v, state_str(m.state), m.id.0])?;
+    }
+    Ok(())
+}
+
+/// Entities added, changed or removed, then the `ord` columns of all entities rewritten.
+/// Rows are upserted (`ON CONFLICT … DO UPDATE`), never replaced: `REPLACE` deletes the row
+/// first, which would cascade to its faces, arrays and modules.
+fn persist_entities(
+    tx: &Transaction<'_>,
+    project: &Project,
+    changes: &ChangeSet,
+) -> Result<(), StoreError> {
+    // Removals (children first; the foreign keys cascade anyway).
+    for id in &changes.arrays {
+        if project.array_index(*id).is_none() {
+            tx.execute(
+                r#"DELETE FROM "array" WHERE id = ?1"#,
+                params![id.0.to_string()],
+            )?;
+        }
+    }
+    for id in &changes.faces {
+        if project.roof_face(*id).is_none() {
+            tx.execute(
+                "DELETE FROM roof_face WHERE id = ?1",
+                params![id.0.to_string()],
+            )?;
+        }
+    }
+    for id in &changes.buildings {
+        if !project.buildings.iter().any(|b| b.id == *id) {
+            tx.execute(
+                "DELETE FROM building WHERE id = ?1",
+                params![id.0.to_string()],
+            )?;
+        }
+    }
+    // Free every ord (`"array".ord` is UNIQUE) before writing the final ones.
+    for table in ["building", "roof_face", r#""array""#] {
+        tx.execute(&format!("UPDATE {table} SET ord = -ord - 1"), [])?;
+    }
+    for (ord, b) in project.buildings.iter().enumerate() {
+        if changes.buildings.contains(&b.id) {
+            upsert_building(tx, project.id, ord, b)?;
+        }
+    }
+    for (ord, f) in project.roof_faces.iter().enumerate() {
+        if changes.faces.contains(&f.id) {
+            upsert_face(tx, ord, f)?;
+        }
+    }
+    for (ord, a) in project.arrays.iter().enumerate() {
+        if changes.arrays.contains(&a.id) {
+            upsert_array(tx, ord, a)?;
+        }
+    }
+    for (table, ids) in [
+        (
+            "building",
+            project.buildings.iter().map(|b| b.id.0).collect::<Vec<_>>(),
+        ),
+        (
+            "roof_face",
+            project.roof_faces.iter().map(|f| f.id.0).collect(),
+        ),
+        (
+            r#""array""#,
+            project.arrays.iter().map(|a| a.id.0).collect(),
+        ),
+    ] {
+        let mut stmt = tx.prepare_cached(&format!("UPDATE {table} SET ord = ?1 WHERE id = ?2"))?;
+        for (ord, id) in ids.iter().enumerate() {
+            stmt.execute(params![ord as i64, id.to_string()])?;
+        }
+    }
+    Ok(())
+}
+
+fn upsert_building(
+    tx: &Transaction<'_>,
+    project: ProjectId,
+    ord: usize,
+    b: &Building,
+) -> Result<(), StoreError> {
+    tx.prepare_cached(
+        "INSERT INTO building (id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+         ON CONFLICT(id) DO UPDATE SET project_id = excluded.project_id, ord = excluded.ord, name = excluded.name,
+             origin_x = excluded.origin_x, origin_y = excluded.origin_y, origin_z = excluded.origin_z,
+             size_x = excluded.size_x, size_y = excluded.size_y, eave_height_m = excluded.eave_height_m,
+             ridge_height_m = excluded.ridge_height_m, roof_kind = excluded.roof_kind, site_json = excluded.site_json",
+    )?
+    .execute(params![
+        b.id.0.to_string(), project.0.to_string(), ord as i64, b.name,
+        b.origin[0], b.origin[1], b.origin[2], b.size_m[0], b.size_m[1],
+        b.eave_height_m, b.ridge_height_m,
+        roof_kind_str(b.roof_kind),
+        b.site.as_ref().map(serde_json::to_string).transpose()?,
+    ])?;
+    Ok(())
+}
+
+fn upsert_face(tx: &Transaction<'_>, ord: usize, f: &RoofFace) -> Result<(), StoreError> {
+    tx.prepare_cached(
+        "INSERT INTO roof_face (id, building_id, ord, name, origin_x, origin_y, origin_z, tilt_deg, azimuth_deg, width_m, height_m, outline_json, support_grid_json)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+         ON CONFLICT(id) DO UPDATE SET building_id = excluded.building_id, ord = excluded.ord, name = excluded.name,
+             origin_x = excluded.origin_x, origin_y = excluded.origin_y, origin_z = excluded.origin_z,
+             tilt_deg = excluded.tilt_deg, azimuth_deg = excluded.azimuth_deg, width_m = excluded.width_m,
+             height_m = excluded.height_m, outline_json = excluded.outline_json, support_grid_json = excluded.support_grid_json",
+    )?
+    .execute(params![
+        f.id.0.to_string(), f.building_id.0.to_string(), ord as i64, f.name,
+        f.origin[0], f.origin[1], f.origin[2], f.tilt_deg, f.azimuth_deg, f.width_m, f.height_m,
+        f.outline.as_ref().map(serde_json::to_string).transpose()?,
+        f.support_grid.as_ref().map(serde_json::to_string).transpose()?,
+    ])?;
+    Ok(())
+}
+
+fn upsert_array(tx: &Transaction<'_>, ord: usize, a: &PanelArray) -> Result<(), StoreError> {
+    tx.prepare_cached(
+        r#"INSERT INTO "array" (id, roof_face_id, ord, module_length_m, module_width_m, orientation, tilt_on_roof_deg, azimuth_offset_deg,
+                                grid_rows, grid_cols, grid_origin_u, grid_origin_v, grid_pitch_u, grid_pitch_v,
+                                grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)
+           ON CONFLICT(id) DO UPDATE SET roof_face_id = excluded.roof_face_id, ord = excluded.ord,
+               module_length_m = excluded.module_length_m, module_width_m = excluded.module_width_m,
+               orientation = excluded.orientation, tilt_on_roof_deg = excluded.tilt_on_roof_deg,
+               azimuth_offset_deg = excluded.azimuth_offset_deg, grid_rows = excluded.grid_rows,
+               grid_cols = excluded.grid_cols, grid_origin_u = excluded.grid_origin_u,
+               grid_origin_v = excluded.grid_origin_v, grid_pitch_u = excluded.grid_pitch_u,
+               grid_pitch_v = excluded.grid_pitch_v, grid_block_cols = excluded.grid_block_cols,
+               grid_block_rows = excluded.grid_block_rows, grid_block_extra_u = excluded.grid_block_extra_u,
+               grid_block_extra_v = excluded.grid_block_extra_v, layout_json = excluded.layout_json,
+               mounting_json = excluded.mounting_json"#,
+    )?
+    .execute(params![
+        a.id.0.to_string(), a.roof_face_id.0.to_string(), ord as i64,
+        a.module_length_m, a.module_width_m,
+        match a.orientation { Orientation::Portrait => "portrait", Orientation::Landscape => "landscape" },
+        a.tilt_on_roof_deg, a.azimuth_offset_deg,
+        a.grid.rows, a.grid.cols, a.grid.origin_u, a.grid.origin_v, a.grid.pitch_u, a.grid.pitch_v,
+        a.grid.block_cols, a.grid.block_rows, a.grid.block_extra_u, a.grid.block_extra_v,
+        serde_json::to_string(&a.layout)?,
+        a.mounting.as_ref().map(serde_json::to_string).transpose()?,
+    ])?;
+    Ok(())
+}
+
+fn insert_modules(tx: &Transaction<'_>, modules: &[ModuleInstance]) -> Result<(), StoreError> {
+    let mut stmt = tx.prepare_cached(
+        "INSERT INTO module_instance (id, array_id, grid_row, grid_col, u, v, state, string_index)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+    )?;
+    for m in modules {
+        stmt.execute(params![
+            m.id.0,
+            m.array_id.0.to_string(),
+            m.row,
+            m.col,
+            m.u,
+            m.v,
+            state_str(m.state),
+            m.string_index,
+        ])?;
     }
     Ok(())
 }
@@ -387,65 +611,15 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
         ],
     )?;
     for (ord, b) in p.buildings.iter().enumerate() {
-        tx.execute(
-            "INSERT INTO building (id, project_id, ord, name, origin_x, origin_y, origin_z, size_x, size_y, eave_height_m, ridge_height_m, roof_kind, site_json)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
-            params![
-                b.id.0.to_string(), p.id.0.to_string(), ord as i64, b.name,
-                b.origin[0], b.origin[1], b.origin[2], b.size_m[0], b.size_m[1],
-                b.eave_height_m, b.ridge_height_m,
-                roof_kind_str(b.roof_kind),
-                b.site.as_ref().map(serde_json::to_string).transpose()?,
-            ],
-        )?;
+        upsert_building(tx, p.id, ord, b)?;
     }
     for (ord, f) in p.roof_faces.iter().enumerate() {
-        tx.execute(
-            "INSERT INTO roof_face (id, building_id, ord, name, origin_x, origin_y, origin_z, tilt_deg, azimuth_deg, width_m, height_m, outline_json, support_grid_json)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
-            params![
-                f.id.0.to_string(), f.building_id.0.to_string(), ord as i64, f.name,
-                f.origin[0], f.origin[1], f.origin[2], f.tilt_deg, f.azimuth_deg, f.width_m, f.height_m,
-                f.outline.as_ref().map(serde_json::to_string).transpose()?,
-                f.support_grid.as_ref().map(serde_json::to_string).transpose()?,
-            ],
-        )?;
+        upsert_face(tx, ord, f)?;
     }
     for (ord, a) in p.arrays.iter().enumerate() {
-        tx.execute(
-            r#"INSERT INTO "array" (id, roof_face_id, ord, module_length_m, module_width_m, orientation, tilt_on_roof_deg, azimuth_offset_deg,
-                                    grid_rows, grid_cols, grid_origin_u, grid_origin_v, grid_pitch_u, grid_pitch_v,
-                                    grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json)
-               VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)"#,
-            params![
-                a.id.0.to_string(), a.roof_face_id.0.to_string(), ord as i64,
-                a.module_length_m, a.module_width_m,
-                match a.orientation { Orientation::Portrait => "portrait", Orientation::Landscape => "landscape" },
-                a.tilt_on_roof_deg, a.azimuth_offset_deg,
-                a.grid.rows, a.grid.cols, a.grid.origin_u, a.grid.origin_v, a.grid.pitch_u, a.grid.pitch_v,
-                a.grid.block_cols, a.grid.block_rows, a.grid.block_extra_u, a.grid.block_extra_v,
-                serde_json::to_string(&a.layout)?,
-                a.mounting.as_ref().map(serde_json::to_string).transpose()?,
-            ],
-        )?;
+        upsert_array(tx, ord, a)?;
     }
-    let mut stmt = tx.prepare(
-        "INSERT INTO module_instance (id, array_id, grid_row, grid_col, u, v, state, string_index)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-    )?;
-    for m in &p.modules {
-        stmt.execute(params![
-            m.id.0,
-            m.array_id.0.to_string(),
-            m.row,
-            m.col,
-            m.u,
-            m.v,
-            state_str(m.state),
-            m.string_index,
-        ])?;
-    }
-    Ok(())
+    insert_modules(tx, &p.modules)
 }
 
 fn load_project(conn: &Connection) -> Result<Project, StoreError> {

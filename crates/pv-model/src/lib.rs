@@ -23,7 +23,7 @@ pub mod summary;
 pub mod units;
 
 pub use article::Article;
-pub use command::{ChangeSet, Command, CommandError, ErrorParam};
+pub use command::{ChangeSet, Command, CommandError, ErrorParam, ModulePosition, ModuleSlot};
 pub use fingerprint::fingerprint;
 pub use geometry::{Quat, RoofFrame, Vec3};
 pub use ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
