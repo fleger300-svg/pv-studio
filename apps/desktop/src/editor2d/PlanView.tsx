@@ -65,6 +65,7 @@ interface PlanColors {
   text: string;
   accent: string;
   error: string;
+  obstacle: string;
   edge: Record<RoofEdgeKind, string>;
 }
 
@@ -86,6 +87,7 @@ function usePlanColors(): PlanColors {
       text,
       accent: v('--color-accent', '#ff6727'),
       error: dark ? '#ff6b6b' : '#d32f2f',
+      obstacle: dark ? 'rgba(200,200,210,0.55)' : 'rgba(60,60,70,0.45)',
       edge: {
         eave: muted,
         verge: muted,
@@ -222,6 +224,7 @@ export function PlanView({ summary }: { summary: ProjectSummary }) {
   const fitRequest = usePlanStore((s) => s.fitRequest);
   const requestFit = usePlanStore((s) => s.requestFit);
   const toolId = usePlanStore((s) => s.tool);
+  const highlightEdge = usePlanStore((s) => s.highlightEdge);
   const setTool = usePlanStore((s) => s.setTool);
   const selectedBuilding = useSelectionStore((s) => s.buildingId);
   const selectedFace = useSelectionStore((s) => s.faceId);
@@ -593,6 +596,36 @@ export function PlanView({ summary }: { summary: ProjectSummary }) {
                   />
                 )),
               )}
+              {faces
+                .filter((f) => !draftOf(f.buildingId))
+                .flatMap((f) =>
+                  f.obstacles.map((o, i) => (
+                    <Line
+                      key={'obstacle-' + f.id + '-' + String(i)}
+                      points={flat(o)}
+                      closed
+                      fill={colors.obstacle}
+                      stroke={colors.footprintStroke}
+                      strokeWidth={1}
+                      strokeScaleEnabled={false}
+                    />
+                  )),
+                )}
+              {highlightEdge !== null &&
+                !draft &&
+                (() => {
+                  const fp = buildings.find((b) => b.id === selectedBuilding)?.footprint;
+                  const a = fp?.[highlightEdge];
+                  const b = fp?.[(highlightEdge + 1) % (fp.length || 1)];
+                  return a && b ? (
+                    <Line
+                      points={flat([a, b])}
+                      stroke={colors.accent}
+                      strokeWidth={5}
+                      strokeScaleEnabled={false}
+                    />
+                  ) : null;
+                })()}
               {closedDraft &&
                 [...redEdges].map((i) => (
                   <Line

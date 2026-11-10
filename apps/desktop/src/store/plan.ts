@@ -11,6 +11,9 @@ interface PlanState {
   /** Width share of the plan in the split view (0.2 to 0.8). */
   ratio: number;
   tool: ToolId;
+  /** Edge of the selected building highlighted from the panels (per-edge table). */
+  highlightEdge: number | null;
+  setHighlightEdge: (edge: number | null) => void;
   /**
    * Keys for the plan (set by the mounted plan view): `true` when the plan used the key, so
    * the default shortcut must not run.
@@ -39,6 +42,10 @@ export const usePlanStore = create<PlanState>()((set) => ({
   fitRequest: 0,
   ratio: initialRatio(),
   tool: 'select',
+  highlightEdge: null,
+  setHighlightEdge: (highlightEdge) => {
+    set({ highlightEdge });
+  },
   keyHandler: null,
   setTool: (tool) => {
     set({ tool });

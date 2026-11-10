@@ -1,4 +1,11 @@
-import type { Building, ProjectSummary, RoofKind, RoofPreset, RoofSpec } from '../bindings';
+import type {
+  Building,
+  ProjectSummary,
+  RoofFace,
+  RoofKind,
+  RoofPreset,
+  RoofSpec,
+} from '../bindings';
 import { runCommand, toCommandError } from '../commands/runCommand';
 import { api, unwrap } from '../ipc';
 import { useSelectionStore } from '../store/selection';
@@ -122,14 +129,37 @@ export async function commitDraft(
       building = draftBuilding(summary, draft);
     }
     if (!building) return false;
-    const cmd = await unwrap(api.planRoof(building));
-    const ok = (await runCommand('apply', cmd)) !== null;
+    const ok = await commitBuilding(building);
     if (ok) useSelectionStore.getState().selectBuilding(building.id);
     return ok;
   } catch (e) {
     useToastStore.getState().push(toCommandError(e));
     return false;
   }
+}
+
+/**
+ * A building (new or changed) with its regenerated roof, as one command. Failures are
+ * reported as toasts; `false` then.
+ */
+export async function commitBuilding(building: Building): Promise<boolean> {
+  try {
+    const cmd = await unwrap(api.planRoof(building));
+    return (await runCommand('apply', cmd)) !== null;
+  } catch (e) {
+    useToastStore.getState().push(toCommandError(e));
+    return false;
+  }
+}
+
+/** A change of a building that does not touch its roof (its name): one command. */
+export async function commitBuildingOnly(building: Building): Promise<boolean> {
+  return (await runCommand('apply', { type: 'UpsertBuilding', building, at: null })) !== null;
+}
+
+/** A changed roof face (name, covering, obstacles): one command. */
+export async function commitFace(face: RoofFace): Promise<boolean> {
+  return (await runCommand('apply', { type: 'UpsertRoofFace', face, at: null })) !== null;
 }
 
 /** Name of the next new building: « Bâtiment N », N one past the highest in use. */

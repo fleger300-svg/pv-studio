@@ -5,9 +5,34 @@ import { useViewStore } from '../store/view';
 import { StaticsPanel } from './StaticsPanel';
 import { BomPanel } from '../bom/BomPanel';
 import type { ColorMode } from '../viewport3d/PanelMeshes';
+import { BuildingPanel } from '../panels/BuildingPanel';
+import { RoofPanel } from '../panels/RoofPanel';
+import { useWorkflowStore } from '../store/workflow';
 
-/** Right-hand panel: selection info and display options for the layout step. */
+/**
+ * Right-hand panel, by step: the building form, the roof faces, or (layout) selection,
+ * display options, statics and bill of materials.
+ */
 export function SidePanel() {
+  const step = useWorkflowStore((s) => s.step);
+  if (step === 'building') {
+    return (
+      <aside className="app__right">
+        <BuildingPanel />
+      </aside>
+    );
+  }
+  if (step === 'roof') {
+    return (
+      <aside className="app__right">
+        <RoofPanel />
+      </aside>
+    );
+  }
+  return <LayoutPanels />;
+}
+
+function LayoutPanels() {
   const { t, i18n } = useTranslation();
   const colorMode = useViewStore((s) => s.colorMode);
   const setColorMode = useViewStore((s) => s.setColorMode);

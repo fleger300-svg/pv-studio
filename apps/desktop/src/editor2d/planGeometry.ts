@@ -23,14 +23,16 @@ export interface PlanFace {
   name: string;
   polygon: Point[];
   edges: PlanEdge[];
+  /** Obstacles projected on the ground. */
+  obstacles: Point[][];
   /** Downslope compass direction (°) and pitch (°), for the slope arrow. */
   azimuthDeg: number;
   tiltDeg: number;
 }
 
 /** Default edge kinds of a face without outline (see `RoofOutline::from_face`). */
-const RECT_PITCHED: RoofEdgeKind[] = ['eave', 'verge', 'ridge', 'verge'];
-const RECT_FLAT: RoofEdgeKind[] = ['parapet', 'parapet', 'parapet', 'parapet'];
+export const RECT_PITCHED: RoofEdgeKind[] = ['eave', 'verge', 'ridge', 'verge'];
+export const RECT_FLAT: RoofEdgeKind[] = ['parapet', 'parapet', 'parapet', 'parapet'];
 
 /** Roof `(u, v)` → world plan `(east, north)`. */
 export function uvToPlan(frame: RoofFrame, u: number, v: number): Point {
@@ -64,6 +66,9 @@ export function planFaces(summary: ProjectSummary): PlanFace[] {
       name: face.name,
       polygon,
       edges,
+      obstacles: (face.outline?.obstacles ?? []).map((o) =>
+        o.footprintUv.map(([u, v]) => uvToPlan(frame, u, v)),
+      ),
       azimuthDeg: face.azimuthDeg,
       tiltDeg: face.tiltDeg,
     };

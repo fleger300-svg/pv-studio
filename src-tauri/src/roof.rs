@@ -114,3 +114,24 @@ mod tests {
         assert_eq!(south_low_edge(&rotated), 1);
     }
 }
+
+/// The roof of a building as the form shows it (type and a few numbers, or « custom »).
+#[tauri::command]
+#[specta::specta]
+pub async fn roof_form(
+    footprint: Vec<[f64; 2]>,
+    spec: RoofSpec,
+    eave_height_m: f64,
+) -> Result<pv_roof::form::RoofForm, CommandError> {
+    Ok(pv_roof::form::form_of(&footprint, &spec, eave_height_m))
+}
+
+/// The per-edge specification of a form (`None` for a custom roof: keep the edges).
+#[tauri::command]
+#[specta::specta]
+pub async fn roof_from_form(
+    footprint: Vec<[f64; 2]>,
+    form: pv_roof::form::RoofForm,
+) -> Result<Option<RoofSpec>, CommandError> {
+    Ok(pv_roof::form::spec_of(&footprint, &form))
+}

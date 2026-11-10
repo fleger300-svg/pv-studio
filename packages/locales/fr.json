@@ -235,6 +235,109 @@
     "edgeLength": "Longueur de l’arête (m)"
   },
   "building": {
-    "defaultName": "Bâtiment {n}"
+    "defaultName": "Bâtiment {n}",
+    "title": "Bâtiment",
+    "none": "Sélectionnez un bâtiment sur le plan, ou tracez-en un.",
+    "name": "Nom",
+    "eaveHeight": "Hauteur d’égout",
+    "ridgeHeight": "Hauteur de faîtage",
+    "size": "Dimensions",
+    "delete": "Supprimer le bâtiment"
+  },
+  "roof": {
+    "shape": "Type de toit",
+    "shapes": {
+      "gable": "Deux pans",
+      "hipped": "Croupe",
+      "halfHipped": "Demi-croupe",
+      "monopitch": "Un pan",
+      "flat": "Plat",
+      "custom": "Personnalisé (par arête)"
+    },
+    "pitch": "Pente",
+    "pitchAll": "Pente (toutes les arêtes en pente)",
+    "endPitch": "Pente des croupes",
+    "endEave": "Égout des croupes",
+    "lowEdge": "Arête basse",
+    "edgeLabel": "Arête {n} · {length} m",
+    "overhang": "Débord",
+    "kind": "Forme obtenue",
+    "kinds": {
+      "gable": "Deux pans",
+      "hipped": "Croupe",
+      "monopitch": "Un pan",
+      "flat": "Plat"
+    },
+    "edges": {
+      "show": "Réglages par arête",
+      "hide": "Masquer les réglages par arête",
+      "title": "Arêtes",
+      "gable": "Pignon",
+      "eave": "Égout (vide : celui du bâtiment)"
+    },
+    "facesTitle": "Pans de toiture",
+    "faceTitle": "Pan",
+    "noFaces": "Ce bâtiment n’a pas de pan.",
+    "noFace": "Sélectionnez un pan dans la liste ou sur le plan.",
+    "faceMeta": "{tilt}° · orienté {azimuth}°",
+    "faceName": "Nom du pan",
+    "tilt": "Inclinaison",
+    "azimuth": "Orientation (0° = nord)",
+    "area": "Surface",
+    "covering": "Couverture",
+    "coverings": {
+      "none": "Non précisée",
+      "standingSeam": "Joint debout",
+      "rafters": "Chevrons / pannes"
+    },
+    "spacing": "Entraxe",
+    "gridOrigin": "Position du premier"
+  },
+  "obstacles": {
+    "title": "Obstacles",
+    "none": "Aucun obstacle sur ce pan.",
+    "name": "Nom",
+    "kind": "Type",
+    "kinds": {
+      "chimney": "Cheminée",
+      "skylight": "Fenêtre de toit",
+      "vent": "Ventilation",
+      "dormer": "Lucarne",
+      "keepOut": "Zone à garder libre"
+    },
+    "u": "Centre le long de l’égout",
+    "v": "Centre dans la pente",
+    "width": "Largeur",
+    "length": "Longueur",
+    "height": "Hauteur",
+    "delete": "Supprimer l’obstacle",
+    "add": "Ajouter un obstacle",
+    "defaultName": "Obstacle {n}"
+  },
+  "forms": {
+    "notANumber": "Entrez un nombre.",
+    "outOfRange": "Entre {min} et {max}.",
+    "required": "Ce champ est obligatoire."
+  },
+  "fields": {
+    "azimuthDeg": "orientation",
+    "azimuthOffsetDeg": "décalage d’orientation",
+    "eaveHeightM": "hauteur d’égout",
+    "heightM": "hauteur",
+    "moduleLengthM": "longueur de module",
+    "moduleWidthM": "largeur de module",
+    "outline": "contour",
+    "overhangM": "débord",
+    "pitchDeg": "pente",
+    "ridgeHeightM": "hauteur de faîtage",
+    "sizeM": "dimensions",
+    "tiltDeg": "inclinaison",
+    "tiltOnRoofDeg": "inclinaison sur le toit",
+    "widthM": "largeur",
+    "origin": "position",
+    "supportGrid": "couverture",
+    "footprint": "emprise",
+    "roofEdges": "arêtes du toit",
+    "roof": "toit"
   }
 }

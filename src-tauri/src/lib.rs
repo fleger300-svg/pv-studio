@@ -40,6 +40,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::plan_roof,
             roof::preview_roof,
             roof::roof_preset,
+            roof::roof_form,
+            roof::roof_from_form,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

@@ -235,6 +235,109 @@
     "edgeLength": "Kantenlänge (m)"
   },
   "building": {
-    "defaultName": "Gebäude {n}"
+    "defaultName": "Gebäude {n}",
+    "title": "Gebäude",
+    "none": "Wählen Sie ein Gebäude im Plan aus oder zeichnen Sie eines.",
+    "name": "Name",
+    "eaveHeight": "Traufhöhe",
+    "ridgeHeight": "Firsthöhe",
+    "size": "Abmessungen",
+    "delete": "Gebäude löschen"
+  },
+  "roof": {
+    "shape": "Dachform",
+    "shapes": {
+      "gable": "Satteldach",
+      "hipped": "Walmdach",
+      "halfHipped": "Krüppelwalmdach",
+      "monopitch": "Pultdach",
+      "flat": "Flachdach",
+      "custom": "Benutzerdefiniert (je Kante)"
+    },
+    "pitch": "Neigung",
+    "pitchAll": "Neigung (alle geneigten Kanten)",
+    "endPitch": "Neigung der Walme",
+    "endEave": "Traufe der Walme",
+    "lowEdge": "Untere Kante",
+    "edgeLabel": "Kante {n} · {length} m",
+    "overhang": "Dachüberstand",
+    "kind": "Ergebende Form",
+    "kinds": {
+      "gable": "Satteldach",
+      "hipped": "Walmdach",
+      "monopitch": "Pultdach",
+      "flat": "Flachdach"
+    },
+    "edges": {
+      "show": "Einstellungen je Kante",
+      "hide": "Einstellungen je Kante ausblenden",
+      "title": "Kanten",
+      "gable": "Giebelwand",
+      "eave": "Traufe (leer: die des Gebäudes)"
+    },
+    "facesTitle": "Dachflächen",
+    "faceTitle": "Dachfläche",
+    "noFaces": "Dieses Gebäude hat keine Dachfläche.",
+    "noFace": "Wählen Sie eine Dachfläche in der Liste oder im Plan.",
+    "faceMeta": "{tilt}° · Ausrichtung {azimuth}°",
+    "faceName": "Name der Dachfläche",
+    "tilt": "Neigung",
+    "azimuth": "Ausrichtung (0° = Norden)",
+    "area": "Fläche",
+    "covering": "Eindeckung",
+    "coverings": {
+      "none": "Nicht angegeben",
+      "standingSeam": "Stehfalz",
+      "rafters": "Sparren / Pfetten"
+    },
+    "spacing": "Abstand",
+    "gridOrigin": "Lage des ersten"
+  },
+  "obstacles": {
+    "title": "Hindernisse",
+    "none": "Keine Hindernisse auf dieser Dachfläche.",
+    "name": "Name",
+    "kind": "Art",
+    "kinds": {
+      "chimney": "Kamin",
+      "skylight": "Dachfenster",
+      "vent": "Lüftung",
+      "dormer": "Gaube",
+      "keepOut": "Freizuhaltende Fläche"
+    },
+    "u": "Mitte entlang der Traufe",
+    "v": "Mitte in Falllinie",
+    "width": "Breite",
+    "length": "Länge",
+    "height": "Höhe",
+    "delete": "Hindernis löschen",
+    "add": "Hindernis hinzufügen",
+    "defaultName": "Hindernis {n}"
+  },
+  "forms": {
+    "notANumber": "Geben Sie eine Zahl ein.",
+    "outOfRange": "Zwischen {min} und {max}.",
+    "required": "Dieses Feld ist erforderlich."
+  },
+  "fields": {
+    "azimuthDeg": "Ausrichtung",
+    "azimuthOffsetDeg": "Ausrichtungsversatz",
+    "eaveHeightM": "Traufhöhe",
+    "heightM": "Höhe",
+    "moduleLengthM": "Modullänge",
+    "moduleWidthM": "Modulbreite",
+    "outline": "Umriss",
+    "overhangM": "Dachüberstand",
+    "pitchDeg": "Neigung",
+    "ridgeHeightM": "Firsthöhe",
+    "sizeM": "Abmessungen",
+    "tiltDeg": "Neigung",
+    "tiltOnRoofDeg": "Neigung auf dem Dach",
+    "widthM": "Breite",
+    "origin": "Lage",
+    "supportGrid": "Eindeckung",
+    "footprint": "Grundriss",
+    "roofEdges": "Dachkanten",
+    "roof": "Dach"
   }
 }

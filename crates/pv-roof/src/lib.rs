@@ -19,6 +19,7 @@
 pub mod classify;
 pub mod envelope;
 pub mod faces;
+pub mod form;
 pub mod input;
 pub mod plan;
 pub mod presets;

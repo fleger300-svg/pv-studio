@@ -493,3 +493,114 @@ body,
   font-weight: 600;
   border-bottom: none;
 }
+
+/* Panels: forms */
+.panel-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.panel-subtitle {
+  margin: var(--space-md) 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.form-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.form-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 5px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.form-input:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -1px;
+}
+.form-input--error {
+  border-color: #d32f2f;
+}
+.form-field__unit {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  min-width: 1.5em;
+}
+.form-field__error {
+  color: #d32f2f;
+  font-size: 12px;
+}
+:root[data-theme='dark'] .form-field__error {
+  color: #ff6b6b;
+}
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 13px;
+}
+.form-grid {
+  display: grid;
+  /* Columns may shrink below their content (inputs), or the panel scrolls sideways. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+.form-grid .form-field,
+.edge-table .form-field,
+.obstacle-list .form-field {
+  min-width: 0;
+}
+.edge-table,
+.obstacle-list,
+.face-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.edge-table__row,
+.obstacle-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.edge-table__row:hover {
+  border-color: var(--color-accent);
+}
+.edge-table__title {
+  font-size: 12px;
+  font-weight: 600;
+}
+.face-list__item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font: inherit;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.face-list__item[aria-current='true'] {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+.face-list__meta {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}

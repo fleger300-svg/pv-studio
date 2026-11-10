@@ -235,6 +235,109 @@
     "edgeLength": "Edge length (m)"
   },
   "building": {
-    "defaultName": "Building {n}"
+    "defaultName": "Building {n}",
+    "title": "Building",
+    "none": "Select a building on the plan, or draw one.",
+    "name": "Name",
+    "eaveHeight": "Eave height",
+    "ridgeHeight": "Ridge height",
+    "size": "Dimensions",
+    "delete": "Delete the building"
+  },
+  "roof": {
+    "shape": "Roof type",
+    "shapes": {
+      "gable": "Gable",
+      "hipped": "Hipped",
+      "halfHipped": "Half-hipped",
+      "monopitch": "Monopitch",
+      "flat": "Flat",
+      "custom": "Custom (per edge)"
+    },
+    "pitch": "Pitch",
+    "pitchAll": "Pitch (every sloped edge)",
+    "endPitch": "Pitch of the hipped ends",
+    "endEave": "Eave of the hipped ends",
+    "lowEdge": "Low edge",
+    "edgeLabel": "Edge {n} · {length} m",
+    "overhang": "Overhang",
+    "kind": "Resulting shape",
+    "kinds": {
+      "gable": "Gable",
+      "hipped": "Hipped",
+      "monopitch": "Monopitch",
+      "flat": "Flat"
+    },
+    "edges": {
+      "show": "Per-edge settings",
+      "hide": "Hide the per-edge settings",
+      "title": "Edges",
+      "gable": "Gable wall",
+      "eave": "Eave (empty: the building’s)"
+    },
+    "facesTitle": "Roof faces",
+    "faceTitle": "Face",
+    "noFaces": "This building has no roof face.",
+    "noFace": "Select a face in the list or on the plan.",
+    "faceMeta": "{tilt}° · facing {azimuth}°",
+    "faceName": "Face name",
+    "tilt": "Tilt",
+    "azimuth": "Azimuth (0° = north)",
+    "area": "Area",
+    "covering": "Covering",
+    "coverings": {
+      "none": "Not specified",
+      "standingSeam": "Standing seam",
+      "rafters": "Rafters / purlins"
+    },
+    "spacing": "Spacing",
+    "gridOrigin": "Position of the first one"
+  },
+  "obstacles": {
+    "title": "Obstacles",
+    "none": "No obstacle on this face.",
+    "name": "Name",
+    "kind": "Type",
+    "kinds": {
+      "chimney": "Chimney",
+      "skylight": "Roof window",
+      "vent": "Vent",
+      "dormer": "Dormer",
+      "keepOut": "Area kept free"
+    },
+    "u": "Centre along the eave",
+    "v": "Centre up the slope",
+    "width": "Width",
+    "length": "Length",
+    "height": "Height",
+    "delete": "Delete the obstacle",
+    "add": "Add an obstacle",
+    "defaultName": "Obstacle {n}"
+  },
+  "forms": {
+    "notANumber": "Enter a number.",
+    "outOfRange": "Between {min} and {max}.",
+    "required": "This field is required."
+  },
+  "fields": {
+    "azimuthDeg": "azimuth",
+    "azimuthOffsetDeg": "azimuth offset",
+    "eaveHeightM": "eave height",
+    "heightM": "height",
+    "moduleLengthM": "module length",
+    "moduleWidthM": "module width",
+    "outline": "outline",
+    "overhangM": "overhang",
+    "pitchDeg": "pitch",
+    "ridgeHeightM": "ridge height",
+    "sizeM": "dimensions",
+    "tiltDeg": "tilt",
+    "tiltOnRoofDeg": "tilt on the roof",
+    "widthM": "width",
+    "origin": "position",
+    "supportGrid": "covering",
+    "footprint": "footprint",
+    "roofEdges": "roof edges",
+    "roof": "roof"
   }
 }
