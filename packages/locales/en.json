@@ -117,6 +117,9 @@
       "unknown": "This {kind, select, building {building} roofFace {roof face} array {array} other {element}} no longer exists.",
       "reference": "Reference to a missing {kind, select, building {building} roofFace {roof face} array {array} other {element}}.",
       "invalid": "Invalid value for {field}."
+    },
+    "roof": {
+      "reentrantCorner": "Edges {a} and {b} meet at a re-entrant corner: both need a pitch (no gable wall) and the same eave height (and, with an overhang, the same pitch)."
     }
   },
   "hud": {

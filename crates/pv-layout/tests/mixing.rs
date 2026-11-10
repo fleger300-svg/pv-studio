@@ -16,10 +16,12 @@ fn building() -> Building {
         id: BuildingId::new(),
         name: "b".into(),
         origin: [0.0, 0.0, 0.0],
+        footprint: pv_model::rectangle_footprint([20.0, 12.0]),
         size_m: [20.0, 12.0],
         eave_height_m: 6.0,
         ridge_height_m: 9.0,
         roof_kind: RoofKind::Gable,
+        roof: None,
         site: None,
     }
 }

@@ -17,6 +17,7 @@ pub mod layout;
 pub mod mounting;
 pub mod pricing;
 pub mod project;
+pub mod roof;
 pub mod site;
 pub mod stress;
 pub mod summary;
@@ -42,6 +43,7 @@ pub use project::{
     ArrayGrid, Building, ModuleInstance, ModuleState, Orientation, PanelArray, Project, RoofFace,
     RoofKind, MODULES_PER_STRING, MODULE_MOUNT_GAP_M, MODULE_THICKNESS_M,
 };
+pub use roof::{rectangle_footprint, EdgeRoof, RoofSpec};
 pub use site::{ConsequenceClass, ServiceLifeModel, SiteParams, SnowExposure, TerrainCategory};
 pub use stress::StressPreset;
-pub use summary::{ArraySummary, ProjectSummary, RoofFaceSummary};
+pub use summary::{ArraySummary, ProjectSummary, RoofFaceSummary, WallSummary};

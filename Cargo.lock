@@ -2435,6 +2435,7 @@ dependencies = [
 name = "pv-model"
 version = "0.1.0"
 dependencies = [
+ "pv-geo",
  "serde",
  "serde_json",
  "specta",
@@ -2457,6 +2458,17 @@ dependencies = [
  "serde_json",
  "specta",
  "tempfile",
+]
+
+[[package]]
+name = "pv-roof"
+version = "0.1.0"
+dependencies = [
+ "pv-geo",
+ "pv-model",
+ "serde_json",
+ "thiserror 2.0.21",
+ "uuid",
 ]
 
 [[package]]
@@ -2493,6 +2505,7 @@ dependencies = [
  "pv-bom",
  "pv-model",
  "pv-pipeline",
+ "pv-roof",
  "pv-store",
  "serde",
  "serde_json",

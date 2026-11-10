@@ -4,7 +4,9 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use pv_model::command::keys;
-use pv_model::{ChangeSet, Command, CommandError, ModuleId, ProjectSummary, StressPreset};
+use pv_model::{
+    Building, ChangeSet, Command, CommandError, ModuleId, ProjectSummary, RoofFace, StressPreset,
+};
 use pv_store::{Author, ProjectStore};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -38,12 +40,38 @@ impl Type for ModuleBuffer {
 
 fn summary(store: &ProjectStore) -> Result<ProjectSummary, CommandError> {
     let (can_undo, can_redo) = store.history_state().map_err(CommandError::from)?;
-    Ok(ProjectSummary::new(
-        store.project(),
+    let project = store.project();
+    let mut summary = ProjectSummary::new(
+        project,
         store.path().display().to_string(),
         can_undo,
         can_redo,
-    ))
+    );
+    summary.walls = project
+        .buildings
+        .iter()
+        .flat_map(|b| {
+            let faces: Vec<&RoofFace> = project
+                .roof_faces
+                .iter()
+                .filter(|f| f.building_id == b.id)
+                .collect();
+            pv_roof::walls(b, &faces)
+        })
+        .collect();
+    Ok(summary)
+}
+
+/// The command batch that gives `building` (new or edited, with a roof specification) its
+/// generated roof. Pure: nothing changes until the front-end applies it with
+/// `apply_command` (one journal entry, one undo).
+#[tauri::command]
+#[specta::specta]
+pub async fn plan_roof(
+    state: State<'_, AppState>,
+    building: Building,
+) -> Result<Command, CommandError> {
+    state.with(|store| Ok(pv_roof::plan_roof(store.project(), &building)?))
 }
 
 /// Default location of a stress project file (in the app data directory).

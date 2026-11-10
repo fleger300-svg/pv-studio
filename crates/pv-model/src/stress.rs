@@ -139,10 +139,12 @@ fn residential_1k() -> Project {
             id: BuildingId::new(),
             name: format!("Barn {}", i + 1),
             origin: [cx, 0.0, 0.0],
+            footprint: crate::roof::rectangle_footprint([LENGTH, DEPTH]),
             size_m: [LENGTH, DEPTH],
             eave_height_m: EAVE,
             ridge_height_m: ridge,
             roof_kind: RoofKind::Gable,
+            roof: None,
             site: Some(demo_site(TerrainCategory::III)),
         };
         let bid = building.id;
@@ -238,10 +240,12 @@ fn industrial_10k() -> Project {
         id: BuildingId::new(),
         name: "Hall".into(),
         origin: [0.0, 0.0, 0.0],
+        footprint: crate::roof::rectangle_footprint([WIDTH, DEPTH]),
         size_m: [WIDTH, DEPTH],
         eave_height_m: HEIGHT,
         ridge_height_m: HEIGHT,
         roof_kind: RoofKind::Flat,
+        roof: None,
         site: Some(demo_site(TerrainCategory::IV)),
     };
     let bid = building.id;

@@ -8,6 +8,7 @@ use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 use crate::layout::{ArrayLayoutParams, RoofOutlineSpec, SupportGridSpec};
 use crate::mounting::MountingSystem;
 use crate::pricing::Pricing;
+use crate::roof::RoofSpec;
 use crate::site::SiteParams;
 
 /// Module frame thickness (m).
@@ -33,20 +34,30 @@ pub enum RoofKind {
     Monopitch,
 }
 
-/// Simple building volume: a box from the ground to the eave, plus the roof faces on top.
+/// A building: walls on its footprint from the ground to the eave, plus the roof faces on
+/// top (generated from `roof` by `pv-roof`, or placed one by one).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Building {
     pub id: BuildingId,
     pub name: String,
-    /// Centre of the footprint at ground level (world ENU, m).
+    /// Reference point at ground level (world ENU, m): the centre of the footprint for a
+    /// rectangle.
     pub origin: Vec3,
-    /// Footprint size along x (east) and y (north), m.
+    /// Footprint polygon, counter-clockwise, relative to `origin` (east, north), m.
+    pub footprint: Vec<[f64; 2]>,
+    /// Size of the footprint's minimum-area enclosing rectangle (long side first for
+    /// generated roofs), m. Used by the statics (building dimensions `b`, `d`).
     pub size_m: [f64; 2],
     pub eave_height_m: f64,
     /// Ridge height above ground; equals `eave_height_m` for a flat roof.
     pub ridge_height_m: f64,
     pub roof_kind: RoofKind,
+    /// How the roof is generated from the footprint; `None`: roof faces placed one by one
+    /// (imports, presets). `roof_kind`, `ridge_height_m` and `size_m` are then given, not
+    /// derived.
+    #[specta(optional)]
+    pub roof: Option<RoofSpec>,
     /// Site data for the statics; `None` until the site step fills it.
     #[specta(optional)]
     pub site: Option<SiteParams>,
@@ -412,10 +423,12 @@ pub(crate) mod fixtures {
             id: BuildingId::new(),
             name: "B1".into(),
             origin: [5.0, 0.0, 0.0],
+            footprint: crate::roof::rectangle_footprint([10.0, 10.4]),
             size_m: [10.0, 10.4],
             eave_height_m: 6.0,
             ridge_height_m: 9.0,
             roof_kind: RoofKind::Gable,
+            roof: None,
             site: None,
         };
         let face = RoofFace {

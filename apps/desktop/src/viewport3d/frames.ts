@@ -34,10 +34,11 @@ export function sceneBounds(summary: ProjectSummary, modules: ModuleData): Box3 
     );
   }
   for (const b of summary.buildings) {
-    const [x, y] = b.origin;
-    const [sx, sy] = b.sizeM;
-    box.expandByPoint(p.set(x - sx / 2, y - sy / 2, 0));
-    box.expandByPoint(p.set(x + sx / 2, y + sy / 2, b.ridgeHeightM));
+    const [x, y, z] = b.origin;
+    for (const [dx, dy] of b.footprint) {
+      box.expandByPoint(p.set(x + dx, y + dy, z));
+      box.expandByPoint(p.set(x + dx, y + dy, z + b.ridgeHeightM));
+    }
   }
   if (box.isEmpty()) box.set(new Vector3(-10, -10, 0), new Vector3(10, 10, 5));
   return box;

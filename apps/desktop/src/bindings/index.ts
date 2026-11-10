@@ -19,6 +19,12 @@ export const commands = {
 	openProject: (path: string) => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("open_project", { path })),
 	/**  Summary of the open project (reloaded after a command that changed entities). */
 	getProjectSummary: () => typedError<ProjectSummary_Serialize, CommandError>(__TAURI_INVOKE("get_project_summary")),
+	/**
+	 *  The command batch that gives `building` (new or edited, with a roof specification) its
+	 *  generated roof. Pure: nothing changes until the front-end applies it with
+	 *  `apply_command` (one journal entry, one undo).
+	 */
+	planRoof: (building: Building_Deserialize) => typedError<Command_Serialize, CommandError>(__TAURI_INVOKE("plan_roof", { building })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -368,40 +374,77 @@ export type Bom_Serialize = {
 	savedBars: SavedBars[],
 };
 
-/**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
+/**
+ *  A building: walls on its footprint from the ground to the eave, plus the roof faces on
+ *  top (generated from `roof` by `pv-roof`, or placed one by one).
+ */
 export type Building = Building_Serialize | Building_Deserialize;
 
 /**  Identifies a building. */
 export type BuildingId = string;
 
-/**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
+/**
+ *  A building: walls on its footprint from the ground to the eave, plus the roof faces on
+ *  top (generated from `roof` by `pv-roof`, or placed one by one).
+ */
 export type Building_Deserialize = {
 	id: BuildingId,
 	name: string,
-	/**  Centre of the footprint at ground level (world ENU, m). */
+	/**
+	 *  Reference point at ground level (world ENU, m): the centre of the footprint for a
+	 *  rectangle.
+	 */
 	origin: [number, number, number],
-	/**  Footprint size along x (east) and y (north), m. */
+	/**  Footprint polygon, counter-clockwise, relative to `origin` (east, north), m. */
+	footprint: ([number, number])[],
+	/**
+	 *  Size of the footprint's minimum-area enclosing rectangle (long side first for
+	 *  generated roofs), m. Used by the statics (building dimensions `b`, `d`).
+	 */
 	sizeM: [number, number],
 	eaveHeightM: number,
 	/**  Ridge height above ground; equals `eave_height_m` for a flat roof. */
 	ridgeHeightM: number,
 	roofKind: RoofKind,
+	/**
+	 *  How the roof is generated from the footprint; `None`: roof faces placed one by one
+	 *  (imports, presets). `roof_kind`, `ridge_height_m` and `size_m` are then given, not
+	 *  derived.
+	 */
+	roof?: RoofSpec_Deserialize | null,
 	/**  Site data for the statics; `None` until the site step fills it. */
 	site?: SiteParams | null,
 };
 
-/**  Simple building volume: a box from the ground to the eave, plus the roof faces on top. */
+/**
+ *  A building: walls on its footprint from the ground to the eave, plus the roof faces on
+ *  top (generated from `roof` by `pv-roof`, or placed one by one).
+ */
 export type Building_Serialize = {
 	id: BuildingId,
 	name: string,
-	/**  Centre of the footprint at ground level (world ENU, m). */
+	/**
+	 *  Reference point at ground level (world ENU, m): the centre of the footprint for a
+	 *  rectangle.
+	 */
 	origin: [number, number, number],
-	/**  Footprint size along x (east) and y (north), m. */
+	/**  Footprint polygon, counter-clockwise, relative to `origin` (east, north), m. */
+	footprint: ([number, number])[],
+	/**
+	 *  Size of the footprint's minimum-area enclosing rectangle (long side first for
+	 *  generated roofs), m. Used by the statics (building dimensions `b`, `d`).
+	 */
 	sizeM: [number, number],
 	eaveHeightM: number,
 	/**  Ridge height above ground; equals `eave_height_m` for a flat roof. */
 	ridgeHeightM: number,
 	roofKind: RoofKind,
+	/**
+	 *  How the roof is generated from the footprint; `None`: roof faces placed one by one
+	 *  (imports, presets). `roof_kind`, `ridge_height_m` and `size_m` are then given, not
+	 *  derived.
+	 */
+	roof?: RoofSpec_Serialize | null,
 	/**  Site data for the statics; `None` until the site step fills it. */
 	site?: SiteParams | null,
 };
@@ -597,6 +640,31 @@ export type Driver =
 { kind: "railBars"; layer: RailLayerKind; stock_length_m: number; 
 /**  Saw cut lost between two pieces of a bar [m]. */
 kerf_m: number };
+
+/**  Roof data of one footprint edge. */
+export type EdgeRoof = EdgeRoof_Serialize | EdgeRoof_Deserialize;
+
+/**  Roof data of one footprint edge. */
+export type EdgeRoof_Deserialize = {
+	/**  Pitch of the roof plane rising from this edge, degrees in `]0, 90]`; 90 = gable wall. */
+	pitchDeg: number,
+	/**
+	 *  Height of this edge's eave above the ground, m; `None`: the building's eave height.
+	 *  Higher than the building's eave on a half-hipped end.
+	 */
+	eaveHeightM?: number | null,
+};
+
+/**  Roof data of one footprint edge. */
+export type EdgeRoof_Serialize = {
+	/**  Pitch of the roof plane rising from this edge, degrees in `]0, 90]`; 90 = gable wall. */
+	pitchDeg: number,
+	/**
+	 *  Height of this edge's eave above the ground, m; `None`: the building's eave height.
+	 *  Higher than the building's eave on a half-hipped end.
+	 */
+	eaveHeightM?: number | null,
+};
 
 export type EdgeSetback = {
 	kind: RoofEdgeKind,
@@ -913,6 +981,8 @@ export type ProjectSummary_Deserialize = {
 	buildings: Building_Deserialize[],
 	roofFaces: RoofFaceSummary_Deserialize[],
 	arrays: ArraySummary_Deserialize[],
+	/**  Walls of every building (filled by the application with `pv_roof::walls`). */
+	walls: WallSummary[],
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -930,6 +1000,8 @@ export type ProjectSummary_Serialize = {
 	buildings: Building_Serialize[],
 	roofFaces: RoofFaceSummary_Serialize[],
 	arrays: ArraySummary_Serialize[],
+	/**  Walls of every building (filled by the application with `pv_roof::walls`). */
+	walls: WallSummary[],
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -1170,6 +1242,31 @@ export type RoofOutlineSpec_Serialize = {
 	obstacles: RoofObstacle_Serialize[],
 };
 
+/**  How the roof of a building is generated from its footprint. */
+export type RoofSpec = RoofSpec_Serialize | RoofSpec_Deserialize;
+
+/**  How the roof of a building is generated from its footprint. */
+export type RoofSpec_Deserialize = {
+	/**
+	 *  One per footprint edge (edge `i` joins footprint vertices `i` and `i + 1`). All edges
+	 *  vertical: a flat roof.
+	 */
+	edges: EdgeRoof_Deserialize[],
+	/**  Horizontal overhang of the roof beyond the walls, m (same on every edge). */
+	overhangM: number,
+};
+
+/**  How the roof of a building is generated from its footprint. */
+export type RoofSpec_Serialize = {
+	/**
+	 *  One per footprint edge (edge `i` joins footprint vertices `i` and `i + 1`). All edges
+	 *  vertical: a flat roof.
+	 */
+	edges: EdgeRoof_Serialize[],
+	/**  Horizontal overhang of the roof beyond the walls, m (same on every edge). */
+	overhangM: number,
+};
+
 /**
  *  Bars saved on the project by reusing offcuts across faces: the face tabs need
  *  `per_faces` bars (each face cut alone), the Total `project`.
@@ -1248,6 +1345,23 @@ export type SupportGridSpec = {
 
 /**  SIA 261 terrain category (tab. 4). */
 export type TerrainCategory = "II" | "IIa" | "III" | "IV";
+
+/**
+ *  One wall of a building: vertical, on footprint edge `start → end` (world plan, m), from
+ *  the ground up to the roof.
+ */
+export type WallSummary = {
+	buildingId: BuildingId,
+	start: [number, number],
+	end: [number, number],
+	/**  World height of the wall's foot, m. */
+	baseZ: number,
+	/**
+	 *  Top of the wall, `(s, z)`: distance from `start` along the edge and world height,
+	 *  from `s = 0` to `s = length`.
+	 */
+	profile: ([number, number])[],
+};
 
 /**  Wind zone of a roof face (SN EN 1991-1-4, K2 Base nomenclature). */
 export type WindZone = "interior" | "ridge" | "verge" | "eave" | "eaveCorner";

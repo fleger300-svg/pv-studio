@@ -1,0 +1,20 @@
+[package]
+name = "pv-roof"
+description = "PV Studio roof generator: footprint + roof specification -> roof faces (lower envelope of the edge planes, weighted straight skeleton), walls, and the command batch that applies them"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-geo.workspace = true
+pv-model.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

@@ -12,20 +12,24 @@ pub fn fixture_project() -> Project {
         id: BuildingId::new(),
         name: "House".into(),
         origin: [5.0, 0.0, 0.0],
+        footprint: pv_model::rectangle_footprint([10.0, 8.0]),
         size_m: [10.0, 8.0],
         eave_height_m: 5.0,
         ridge_height_m: 7.0,
         roof_kind: RoofKind::Gable,
+        roof: None,
         site: None,
     };
     let shed = Building {
         id: BuildingId::new(),
         name: "Shed".into(),
         origin: [20.0, 0.0, 0.0],
+        footprint: pv_model::rectangle_footprint([8.0, 6.0]),
         size_m: [8.0, 6.0],
         eave_height_m: 3.0,
         ridge_height_m: 3.0,
         roof_kind: RoofKind::Flat,
+        roof: None,
         site: None,
     };
     let south = RoofFace {

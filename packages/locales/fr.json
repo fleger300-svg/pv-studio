@@ -117,6 +117,9 @@
       "unknown": "{kind, select, building {Ce bâtiment} roofFace {Ce pan de toit} array {Ce champ} other {Cet élément}} n'existe plus.",
       "reference": "Référence à {kind, select, building {un bâtiment inexistant} roofFace {un pan de toit inexistant} array {un champ inexistant} other {un élément inexistant}}.",
       "invalid": "Valeur invalide pour {field}."
+    },
+    "roof": {
+      "reentrantCorner": "Les arêtes {a} et {b} forment un angle rentrant : elles doivent toutes deux avoir une pente (pas de pignon) et la même hauteur d’égout (et, avec un débord, la même pente)."
     }
   },
   "hud": {
