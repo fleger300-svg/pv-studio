@@ -36,6 +36,17 @@ export const commands = {
 	 *  `apply_command` (one journal entry, one undo).
 	 */
 	planRoof: (building: Building_Deserialize) => typedError<Command_Serialize, CommandError>(__TAURI_INVOKE("plan_roof", { building })),
+	/**
+	 *  The roof `building` would get. Errors are the ones applying it would give (invalid
+	 *  footprint, re-entrant corner with the edges involved…), so the editor can show them
+	 *  while the user is still dragging.
+	 */
+	previewRoof: (building: Building_Deserialize) => typedError<RoofPreview, CommandError>(__TAURI_INVOKE("preview_roof", { building })),
+	/**
+	 *  The roof specification of a preset on a footprint (the main axis is the long side of
+	 *  its minimum-area rectangle; a monopitch drains over the longest edge facing south).
+	 */
+	roofPreset: (footprint: ([number, number])[], preset: RoofPreset, pitchDeg: number, overhangM: number) => typedError<RoofSpec_Serialize, CommandError>(__TAURI_INVOKE("roof_preset", { footprint, preset, pitchDeg, overhangM })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -969,6 +980,13 @@ export type PlatformInfo = {
 	debugBuild: boolean,
 };
 
+/**  One generated face, projected on the ground (world east, north; m). */
+export type PreviewFace = {
+	polygon: ([number, number])[],
+	/**  One per polygon edge. */
+	edgeKinds: RoofEdgeKind[],
+};
+
 /**  Pricing of a project. */
 export type Pricing = {
 	discounts: ManufacturerDiscount[],
@@ -1251,6 +1269,16 @@ export type RoofOutlineSpec_Serialize = {
 	/**  One kind per edge. */
 	edgeKinds: RoofEdgeKind[],
 	obstacles: RoofObstacle_Serialize[],
+};
+
+/**  Roof types offered for a footprint. */
+export type RoofPreset = "gable" | "hipped" | "monopitch" | "flat";
+
+/**  What the roof of a building would be (nothing is changed). */
+export type RoofPreview = {
+	faces: PreviewFace[],
+	roofKind: RoofKind,
+	ridgeHeightM: number,
 };
 
 /**  How the roof of a building is generated from its footprint. */

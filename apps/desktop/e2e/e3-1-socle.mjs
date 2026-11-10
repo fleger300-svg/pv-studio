@@ -101,7 +101,9 @@ check(Math.abs(ratio - 0.3) < 0.02, `splitter at ${(ratio * 100).toFixed(0)} %`)
 await page.screenshot({ path: `${out}/e3-1-splitter.png` });
 
 // 7. New empty project: building step, empty plan.
-const file = path.join(out, 'e3-1-new.pvproj');
+// A fresh file per run (the previous one may still be open in the app).
+const stem = `e3-1-new-${Date.now()}`;
+const file = path.join(out, `${stem}.pvproj`);
 for (const f of [file, `${file}-wal`, `${file}-shm`]) fs.rmSync(f, { force: true });
 await hook((p) => window.__pv.project.getState().newProject(p), file);
 await waitFor(
@@ -112,7 +114,7 @@ await waitFor(
 await page.locator('.plan-view__empty').waitFor();
 check((await step()) === 'building', 'a new project opens on the building step');
 check(
-  (await page.locator('.topbar__project').innerText()) === 'e3-1-new',
+  (await page.locator('.topbar__project').innerText()) === stem,
   'project named after its file',
 );
 await page.waitForTimeout(800);

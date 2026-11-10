@@ -216,6 +216,25 @@
     "grid": "Grille {step} m",
     "fit": "Ajuster à la vue",
     "empty": "Aucun bâtiment sur ce site pour l’instant.",
-    "splitter": "Redimensionner le plan et la vue 3D"
+    "splitter": "Redimensionner le plan et la vue 3D",
+    "tools": {
+      "label": "Outils du plan",
+      "select": "Édition",
+      "rect": "Rectangle",
+      "polygon": "Polygone"
+    },
+    "hints": {
+      "selectNone": "Cliquez sur un bâtiment pour le modifier, ou tracez-en un au rectangle (R) ou au polygone (P).",
+      "select": "Glissez un sommet, le « + » d’une arête pour en ajouter un, le bâtiment pour le déplacer. Suppr retire le sommet sélectionné ; double-cliquez une cote pour la saisir. Alt : sans aimantation.",
+      "rect": "Faites glisser pour tracer un rectangle. Alt : sans aimantation.",
+      "polygon": "Cliquez pour placer les sommets ; fermez sur le premier sommet, par double-clic ou avec Entrée. Retour arrière retire le dernier, Échap abandonne."
+    },
+    "errors": {
+      "selfIntersecting": "Le contour se croise lui-même."
+    },
+    "edgeLength": "Longueur de l’arête (m)"
+  },
+  "building": {
+    "defaultName": "Bâtiment {n}"
   }
 }

@@ -216,6 +216,25 @@
     "grid": "Grid {step} m",
     "fit": "Fit to view",
     "empty": "No building on this site yet.",
-    "splitter": "Resize the plan and the 3D view"
+    "splitter": "Resize the plan and the 3D view",
+    "tools": {
+      "label": "Plan tools",
+      "select": "Edit",
+      "rect": "Rectangle",
+      "polygon": "Polygon"
+    },
+    "hints": {
+      "selectNone": "Click a building to edit it, or draw one with the rectangle (R) or the polygon (P).",
+      "select": "Drag a vertex, the « + » of an edge to add one, the building to move it. Delete removes the selected vertex; double-click a dimension to type it. Alt: no snapping.",
+      "rect": "Drag to draw a rectangle. Alt: no snapping.",
+      "polygon": "Click to place the vertices; close on the first vertex, by double-clicking or with Enter. Backspace removes the last one, Escape abandons."
+    },
+    "errors": {
+      "selfIntersecting": "The outline crosses itself."
+    },
+    "edgeLength": "Edge length (m)"
+  },
+  "building": {
+    "defaultName": "Building {n}"
   }
 }

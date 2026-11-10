@@ -216,6 +216,25 @@
     "grid": "Raster {step} m",
     "fit": "In Ansicht einpassen",
     "empty": "Auf diesem Grundstück steht noch kein Gebäude.",
-    "splitter": "Plan und 3D-Ansicht in der Grösse anpassen"
+    "splitter": "Plan und 3D-Ansicht in der Grösse anpassen",
+    "tools": {
+      "label": "Planwerkzeuge",
+      "select": "Bearbeiten",
+      "rect": "Rechteck",
+      "polygon": "Polygon"
+    },
+    "hints": {
+      "selectNone": "Klicken Sie auf ein Gebäude, um es zu bearbeiten, oder zeichnen Sie eines mit dem Rechteck (R) oder dem Polygon (P).",
+      "select": "Ziehen Sie einen Eckpunkt, das « + » einer Kante, um einen hinzuzufügen, oder das Gebäude, um es zu verschieben. Entf entfernt den gewählten Eckpunkt; Doppelklick auf ein Mass, um es einzugeben. Alt: ohne Fangen.",
+      "rect": "Ziehen Sie, um ein Rechteck zu zeichnen. Alt: ohne Fangen.",
+      "polygon": "Klicken Sie, um die Eckpunkte zu setzen; schliessen Sie am ersten Eckpunkt, per Doppelklick oder mit Enter. Rücktaste entfernt den letzten, Esc bricht ab."
+    },
+    "errors": {
+      "selfIntersecting": "Der Umriss schneidet sich selbst."
+    },
+    "edgeLength": "Kantenlänge (m)"
+  },
+  "building": {
+    "defaultName": "Gebäude {n}"
   }
 }

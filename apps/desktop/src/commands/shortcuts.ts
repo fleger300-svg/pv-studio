@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { usePerfStore } from '../perf/perfStore';
+import { usePlanStore } from '../store/plan';
 import { useSelectionStore } from '../store/selection';
 import { useViewStore } from '../store/view';
 import { useWorkflowStore } from '../store/workflow';
@@ -35,6 +36,11 @@ export function useShortcuts(): void {
       const key = e.key.toLowerCase();
       const layout = useWorkflowStore.getState().step === 'layout';
       const editor = useViewStore.getState().editor;
+      // The plan's tools first (closing a polygon, removing a vertex, tool shortcuts…).
+      if (!layout && !mod && usePlanStore.getState().keyHandler?.(e.key)) {
+        e.preventDefault();
+        return;
+      }
       if (mod && key === 'z') {
         e.preventDefault();
         void (e.shiftKey ? redo() : undo());

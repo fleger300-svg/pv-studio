@@ -5,6 +5,7 @@ mod bench;
 mod commands;
 mod compute;
 mod export;
+mod roof;
 mod state;
 
 use std::sync::Arc;
@@ -37,6 +38,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::open_project_dialog,
             commands::get_project_summary,
             commands::plan_roof,
+            roof::preview_roof,
+            roof::roof_preset,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

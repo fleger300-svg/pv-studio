@@ -1,4 +1,4 @@
-import type { ProjectSummary, RoofEdgeKind, RoofFrame } from '../bindings';
+import type { CommandError, ProjectSummary, RoofEdgeKind, RoofFrame } from '../bindings';
 import { faceOutline } from '../viewport3d/buildingGeometry';
 import type { Bounds, Point } from './viewTransform';
 
@@ -113,4 +113,15 @@ export function contains(polygon: readonly Point[], [x, y]: Point): boolean {
     if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
   }
   return inside;
+}
+
+/** Footprint edges to show in red for a refused preview (all of them if not specific). */
+export function errorEdges(error: CommandError | null, n: number): Set<number> {
+  if (!error) return new Set();
+  if (error.key === 'errors.roof.reentrantCorner') {
+    const a = Number(error.params.a) - 1;
+    const b = Number(error.params.b) - 1;
+    return new Set([a, b].filter((i) => i >= 0 && i < n));
+  }
+  return new Set(Array.from({ length: n }, (_, i) => i));
 }

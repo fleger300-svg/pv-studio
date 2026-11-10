@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { RoofFrame } from '../bindings';
 import { flatRoofFixture } from '../viewport3d/testSummary';
-import { centroid, contains, planBounds, planBuildings, planFaces, uvToPlan } from './planGeometry';
+import {
+  centroid,
+  contains,
+  errorEdges,
+  planBounds,
+  planBuildings,
+  planFaces,
+  uvToPlan,
+} from './planGeometry';
 
 describe('planGeometry', () => {
   it('projects roof (u, v) on the ground plan', () => {
@@ -57,5 +65,15 @@ describe('planGeometry', () => {
     expect(centroid(b?.footprint ?? [])).toEqual([100, 50]);
     expect(contains(b?.footprint ?? [], [100, 50])).toBe(true);
     expect(contains(b?.footprint ?? [], [106, 50])).toBe(false);
+  });
+
+  it('highlights the edges of a refused re-entrant corner, else the whole outline', () => {
+    expect([
+      ...errorEdges({ key: 'errors.roof.reentrantCorner', params: { a: 3, b: 4 } }, 6),
+    ]).toEqual([2, 3]);
+    expect(
+      errorEdges({ key: 'errors.entity.invalid', params: { field: 'footprint' } }, 4).size,
+    ).toBe(4);
+    expect(errorEdges(null, 4).size).toBe(0);
   });
 });
