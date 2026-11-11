@@ -31,7 +31,7 @@ pub use mounting::{
 };
 pub use part::{FixationCapacity, LengthRange, PartKind, PartSpec};
 pub use price::{select_price, Currency, IsoDate, PriceEntry};
-pub use resolve::{resolve_mounting, to_article, ComponentLookup};
+pub use resolve::{check_system, resolve_mounting, to_article, ComponentLookup};
 
 /// Version of the JSON shape of [`ComponentSpec`].
 pub const SPEC_VERSION: u32 = 1;

@@ -2432,6 +2432,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-library"
+version = "0.1.0"
+dependencies = [
+ "pv-model",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha2",
+ "specta",
+ "tempfile",
+ "thiserror 2.0.21",
+ "uuid",
+]
+
+[[package]]
 name = "pv-model"
 version = "0.1.0"
 dependencies = [

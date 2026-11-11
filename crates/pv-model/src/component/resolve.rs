@@ -140,10 +140,30 @@ pub fn resolve_mounting<L: ComponentLookup + ?Sized>(
     module: &Component,
     lookup: &L,
 ) -> Result<MountingSystem, CommandError> {
-    system.validate()?;
     module.validate()?;
+    let mass = module_spec(module)?.mass_kg;
+    resolve_with_module_mass(system, mass, lookup)
+}
+
+/// Checks a system and every part it refers to, without a module (what the library checks
+/// before storing a system).
+///
+/// # Errors
+/// As [`resolve_mounting`].
+pub fn check_system<L: ComponentLookup + ?Sized>(
+    system: &Component,
+    lookup: &L,
+) -> Result<(), CommandError> {
+    resolve_with_module_mass(system, 0.0, lookup).map(|_| ())
+}
+
+fn resolve_with_module_mass<L: ComponentLookup + ?Sized>(
+    system: &Component,
+    module_mass_kg: f64,
+    lookup: &L,
+) -> Result<MountingSystem, CommandError> {
+    system.validate()?;
     let spec = system_spec(system)?;
-    let module_spec = module_spec(module)?;
 
     let (rails, ballast, layer_rail) = match &spec.structure {
         MountingStructure::CrossRail {
@@ -226,7 +246,7 @@ pub fn resolve_mounting<L: ComponentLookup + ?Sized>(
 
     Ok(MountingSystem {
         name: system.label.clone(),
-        module_mass_kg: module_spec.mass_kg,
+        module_mass_kg,
         system_mass_per_module_kg: spec.statics.system_mass_per_module_kg,
         loaded_area_m2: spec.statics.loaded_area_m2,
         psi0_snow: spec.statics.psi0_snow,

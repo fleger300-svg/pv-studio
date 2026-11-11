@@ -19,12 +19,14 @@ pv-graph = { path = "crates/pv-graph" }
 pv-pipeline = { path = "crates/pv-pipeline" }
 pv-bom = { path = "crates/pv-bom" }
 pv-roof = { path = "crates/pv-roof" }
+pv-library = { path = "crates/pv-library" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "float_roundtrip"] }
 thiserror = "2.0.21"
 uuid = { version = "1.29.0", features = ["v7", "serde"] }
 rusqlite = { version = "0.41.1", features = ["bundled"] }
 specta = { version = "=2.0.0-rc.26", features = ["derive", "uuid"] }
+sha2 = "0.10.9"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

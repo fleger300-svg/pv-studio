@@ -135,7 +135,9 @@
       "invalidDate": "Invalid date: {value} (expected YYYY-MM-DD).",
       "frameHeight": "{clamp} fits frames of {min}–{max} mm; the module frame is {height} mm.",
       "support": "{system} cannot be mounted on {support, select, standingSeam {a standing-seam roof} rafters {rafters} other {this roof}}.",
-      "moduleSize": "{system} does not accept a module of {length} × {width} m."
+      "moduleSize": "{system} does not accept a module of {length} × {width} m.",
+      "staleRevision": "{component} was changed meanwhile (revision {found}, you edited revision {expected}): reload it.",
+      "exists": "Component {id} already exists in the library."
     },
     "ui": {
       "render": "This part of the screen could not be displayed (the project is not affected).",

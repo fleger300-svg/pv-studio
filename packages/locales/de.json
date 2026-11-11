@@ -135,7 +135,9 @@
       "invalidDate": "Ungültiges Datum: {value} (erwartet JJJJ-MM-TT).",
       "frameHeight": "{clamp} passt für Rahmen von {min} bis {max} mm; der Modulrahmen misst {height} mm.",
       "support": "{system} kann nicht auf {support, select, standingSeam {einem Stehfalzdach} rafters {Sparren} other {diesem Dach}} montiert werden.",
-      "moduleSize": "{system} akzeptiert kein Modul von {length} × {width} m."
+      "moduleSize": "{system} akzeptiert kein Modul von {length} × {width} m.",
+      "staleRevision": "{component} wurde inzwischen geändert (Revision {found}, Sie bearbeiteten Revision {expected}): Bitte neu laden.",
+      "exists": "Die Komponente {id} ist bereits in der Bibliothek."
     },
     "ui": {
       "render": "Dieser Bildschirmbereich konnte nicht angezeigt werden (das Projekt ist nicht betroffen).",

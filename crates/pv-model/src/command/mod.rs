@@ -69,6 +69,8 @@ pub mod keys {
     pub const COMPAT_FRAME_HEIGHT: &str = "errors.component.frameHeight";
     pub const COMPAT_SUPPORT: &str = "errors.component.support";
     pub const COMPAT_MODULE_SIZE: &str = "errors.component.moduleSize";
+    pub const COMPONENT_STALE_REVISION: &str = "errors.component.staleRevision";
+    pub const COMPONENT_EXISTS: &str = "errors.component.exists";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -117,6 +119,8 @@ pub mod keys {
         COMPAT_FRAME_HEIGHT,
         COMPAT_SUPPORT,
         COMPAT_MODULE_SIZE,
+        COMPONENT_STALE_REVISION,
+        COMPONENT_EXISTS,
     ];
 }
 

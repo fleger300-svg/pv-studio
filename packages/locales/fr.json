@@ -135,7 +135,9 @@
       "invalidDate": "Date invalide : {value} (format attendu AAAA-MM-JJ).",
       "frameHeight": "{clamp} accepte des cadres de {min} à {max} mm ; le cadre du module mesure {height} mm.",
       "support": "{system} ne peut pas être posé sur {support, select, standingSeam {un toit à joint debout} rafters {chevrons} other {ce toit}}.",
-      "moduleSize": "{system} n’accepte pas un module de {length} × {width} m."
+      "moduleSize": "{system} n’accepte pas un module de {length} × {width} m.",
+      "staleRevision": "{component} a été modifié entre-temps (révision {found}, vous éditiez la révision {expected}) : rechargez-le.",
+      "exists": "Le composant {id} existe déjà dans la bibliothèque."
     },
     "ui": {
       "render": "Cette partie de l’écran n’a pas pu s’afficher (le projet n’est pas affecté).",
