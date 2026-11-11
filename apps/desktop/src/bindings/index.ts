@@ -68,6 +68,52 @@ export const commands = {
 	 *  module slots to the front-end and back.
 	 */
 	applyLayout: (array: PanelArray_Deserialize) => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("apply_layout", { array })),
+	librarySearch: (query: SearchQuery_Deserialize) => typedError<ComponentSummary_Serialize[], CommandError>(__TAURI_INVOKE("library_search", { query })),
+	libraryComponent: (id: ComponentId) => typedError<ComponentDetail_Serialize, CommandError>(__TAURI_INVOKE("library_component", { id })),
+	/**
+	 *  A new, unsaved component of `family` with neutral values (a mounting system is created
+	 *  by duplicating an existing one: it needs its parts).
+	 */
+	libraryNewComponent: (family: ComponentFamily) => typedError<Component_Serialize, CommandError>(__TAURI_INVOKE("library_new_component", { family })),
+	/**  A copy of `id` under a new id (unsaved). */
+	libraryDuplicate: (id: ComponentId) => typedError<Component_Serialize, CommandError>(__TAURI_INVOKE("library_duplicate", { id })),
+	/**
+	 *  Stores `component`: created when new, else a new revision (`component.revision` is the
+	 *  revision it was edited from).
+	 */
+	librarySave: (component: Component_Deserialize, note: string) => typedError<Component_Serialize, CommandError>(__TAURI_INVOKE("library_save", { component, note })),
+	libraryArchive: (id: ComponentId, archived: boolean) => typedError<null, CommandError>(__TAURI_INVOKE("library_archive", { id, archived })),
+	libraryAddPrice: (price: PriceEntry_Deserialize) => typedError<PriceEntry_Serialize[], CommandError>(__TAURI_INVOKE("library_add_price", { price })),
+	libraryPreferredSupplier: () => typedError<string | null, CommandError>(__TAURI_INVOKE("library_preferred_supplier")),
+	librarySetPreferredSupplier: (name: string | null) => typedError<null, CommandError>(__TAURI_INVOKE("library_set_preferred_supplier", { name })),
+	/**
+	 *  Reads a file chosen by the user (native dialog; `path` for automation); `None` when
+	 *  cancelled. Price lists are parsed by the front end (exceljs worker).
+	 */
+	libraryPickFile: (kind: FileKind, path: string | null) => typedError<PickedFile | null, CommandError>(__TAURI_INVOKE("library_pick_file", { kind, path })),
+	/**  Previews (`apply = false`) or imports a price list. */
+	libraryImport: (request: ImportRequest, apply: boolean) => typedError<ImportReport, CommandError>(__TAURI_INVOKE("library_import", { request, apply })),
+	/**  Attaches a datasheet (PDF) to a component: a new revision. `None` when cancelled. */
+	libraryAttachDatasheet: (id: ComponentId, path: string | null) => typedError<Component_Serialize | null, CommandError>(__TAURI_INVOKE("library_attach_datasheet", { id, path })),
+	/**  A stored datasheet, base64-encoded. */
+	libraryDatasheet: (id: BlobId) => typedError<string | null, CommandError>(__TAURI_INVOKE("library_datasheet", { id })),
+	/**
+	 *  Modules and systems of the library for `array_id`, with their incompatibilities (the
+	 *  array's current module is used to judge systems).
+	 */
+	arrayChoices: (arrayId: ArrayId) => typedError<ArrayChoices_Serialize, CommandError>(__TAURI_INVOKE("array_choices", { arrayId })),
+	/**
+	 *  Sets an array's module and system (frozen from the library when the project lacks them;
+	 *  the face is laid out again when the module's size changes). One undo step.
+	 */
+	assignComponents: (arrayId: ArrayId, module: ComponentId | null, mounting: ComponentId | null) => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("assign_components", { arrayId, module, mounting })),
+	/**  Update proposals for the open project's components (library versions of today). */
+	componentUpdates: () => typedError<UpdateProposal_Serialize[], CommandError>(__TAURI_INVOKE("component_updates")),
+	/**
+	 *  Accepts the proposals of `ids` (one undo step; faces of arrays whose module changed size
+	 *  are laid out again).
+	 */
+	acceptUpdates: (ids: ComponentId[]) => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("accept_updates", { ids })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -154,6 +200,21 @@ export type Approval = {
 	/**  Document reference (e.g. ETA, abZ, test report number). */
 	reference: string,
 	issuedBy: string,
+};
+
+/**  Modules and systems an array can use. */
+export type ArrayChoices = ArrayChoices_Serialize | ArrayChoices_Deserialize;
+
+/**  Modules and systems an array can use. */
+export type ArrayChoices_Deserialize = {
+	modules: Choice_Deserialize[],
+	systems: Choice_Deserialize[],
+};
+
+/**  Modules and systems an array can use. */
+export type ArrayChoices_Serialize = {
+	modules: Choice_Serialize[],
+	systems: Choice_Serialize[],
 };
 
 /**  Regular grid on which an array's modules were laid out (used for click lookup). */
@@ -505,6 +566,9 @@ export type Building_Serialize = {
 	site?: SiteParams | null,
 };
 
+/**  Who changed the library. */
+export type ChangeAuthor = "user" | "import" | "seed" | "copilot";
+
 /**  What a command changed. */
 export type ChangeSet = ChangeSet_Serialize | ChangeSet_Deserialize;
 
@@ -548,6 +612,21 @@ export type ChangeSet_Serialize = {
 	 *  view (GPU buffers, selections) must be rebuilt.
 	 */
 	structure: boolean,
+};
+
+/**  A candidate for an array, with what makes it incompatible (empty: compatible). */
+export type Choice = Choice_Serialize | Choice_Deserialize;
+
+/**  A candidate for an array, with what makes it incompatible (empty: compatible). */
+export type Choice_Deserialize = {
+	summary: ComponentSummary_Deserialize,
+	issues: CommandError[],
+};
+
+/**  A candidate for an array, with what makes it incompatible (empty: compatible). */
+export type Choice_Serialize = {
+	summary: ComponentSummary_Serialize,
+	issues: CommandError[],
 };
 
 /**  A serialisable model change. */
@@ -660,6 +739,26 @@ export type Command_Serialize =
 /**  One revision of a catalogue entry. */
 export type Component = Component_Serialize | Component_Deserialize;
 
+/**  A component with its history and prices. */
+export type ComponentDetail = ComponentDetail_Serialize | ComponentDetail_Deserialize;
+
+/**  A component with its history and prices. */
+export type ComponentDetail_Deserialize = {
+	entry: LibraryEntry_Deserialize,
+	revisions: RevisionInfo[],
+	prices: PriceEntry_Deserialize[],
+};
+
+/**  A component with its history and prices. */
+export type ComponentDetail_Serialize = {
+	entry: LibraryEntry_Serialize,
+	revisions: RevisionInfo[],
+	prices: PriceEntry_Serialize[],
+};
+
+/**  Family of a component (the `ComponentSpec` tag, for search filters and error messages). */
+export type ComponentFamily = "module" | "mountingSystem" | "mountingPart";
+
 /**  Identifies a library component across all its revisions. */
 export type ComponentId = string;
 
@@ -709,6 +808,43 @@ export type ComponentSpec_Serialize = {
 } & MountingSystemSpec_Serialize | {
 	family: "mountingPart",
 } & PartSpec_Serialize;
+
+/**  One row of a search result (no spec: lists stay light). */
+export type ComponentSummary = ComponentSummary_Serialize | ComponentSummary_Deserialize;
+
+/**  One row of a search result (no spec: lists stay light). */
+export type ComponentSummary_Deserialize = {
+	id: ComponentId,
+	revision: number,
+	family: ComponentFamily,
+	manufacturer: string,
+	model: string,
+	articleNo: string,
+	label: string,
+	verified: boolean,
+	archived: boolean,
+	partKind?: string | null,
+	pmaxW?: number | null,
+	lengthM?: number | null,
+	widthM?: number | null,
+};
+
+/**  One row of a search result (no spec: lists stay light). */
+export type ComponentSummary_Serialize = {
+	id: ComponentId,
+	revision: number,
+	family: ComponentFamily,
+	manufacturer: string,
+	model: string,
+	articleNo: string,
+	label: string,
+	verified: boolean,
+	archived: boolean,
+	partKind?: string | null,
+	pmaxW?: number | null,
+	lengthM?: number | null,
+	widthM?: number | null,
+};
 
 /**  One revision of a catalogue entry. */
 export type Component_Deserialize = {
@@ -912,6 +1048,23 @@ export type ExpansionJointSpec = {
 	positionM: number,
 };
 
+/**  One changed field (`path` in the component's JSON, values as JSON text). */
+export type FieldChange = FieldChange_Serialize | FieldChange_Deserialize;
+
+/**  One changed field (`path` in the component's JSON, values as JSON text). */
+export type FieldChange_Deserialize = {
+	path: string,
+	before?: string | null,
+	after?: string | null,
+};
+
+/**  One changed field (`path` in the component's JSON, values as JSON text). */
+export type FieldChange_Serialize = {
+	path: string,
+	before?: string | null,
+	after?: string | null,
+};
+
 /**  Outcome of a field's statics. */
 export type FieldOutcome = FieldOutcome_Serialize | FieldOutcome_Deserialize;
 
@@ -981,6 +1134,9 @@ export type FieldStaticsResult_Serialize = {
 	ok: boolean,
 };
 
+/**  Kinds of files the library reads. */
+export type FileKind = "priceList" | "datasheet";
+
 /**  Design resistance of one roof fixation [kN]. */
 export type FixationCapacity = {
 	upliftKn: number,
@@ -1005,6 +1161,53 @@ export type FrozenBom_Serialize = {
 	pricing: Pricing,
 };
 
+/**  One cell as read from the workbook. */
+export type ImportCell = { kind: "empty" } | { kind: "text"; value: string } | { kind: "number"; value: number };
+
+/**  A difference between the list and the library, reported (never applied). */
+export type ImportDifference = {
+	articleNo: string,
+	/**  `packQty` or `label`. */
+	field: string,
+	library: string,
+	list: string,
+};
+
+/**  Outcome of an import (or of its preview). */
+export type ImportReport = {
+	/**  Articles priced (existing or created). */
+	priced: string[],
+	/**  Articles created as unverified parts. */
+	created: string[],
+	/**  Articles not in the library and not created. */
+	unknown: string[],
+	/**  Articles listed with different prices in different sheets (not imported). */
+	conflicts: string[],
+	differences: ImportDifference[],
+	/**  Sheets without recognisable headers. */
+	skippedSheets: string[],
+};
+
+/**  What to import. */
+export type ImportRequest = {
+	/**  Manufacturer of the articles (K2 lists: `K2 Systems`). */
+	manufacturer: string,
+	/**  Supplier the prices are from. */
+	supplier: string,
+	currency: Currency,
+	/**  First day of validity of the imported prices. */
+	validFrom: IsoDate,
+	/**  Create an unverified part for each unknown article (else they are only reported). */
+	createMissing: boolean,
+	sheets: ImportSheet[],
+};
+
+/**  One sheet of the workbook. */
+export type ImportSheet = {
+	name: string,
+	rows: ImportCell[][],
+};
+
 /**  Calendar date, serialised as `YYYY-MM-DD` (so string order is date order). */
 export type IsoDate = string;
 
@@ -1024,6 +1227,21 @@ export type LayoutAnchor =
 export type LengthRange = {
 	minM: number,
 	maxM: number,
+};
+
+/**  A component as the library holds it. */
+export type LibraryEntry = LibraryEntry_Serialize | LibraryEntry_Deserialize;
+
+/**  A component as the library holds it. */
+export type LibraryEntry_Deserialize = {
+	component: Component_Deserialize,
+	archived: boolean,
+};
+
+/**  A component as the library holds it. */
+export type LibraryEntry_Serialize = {
+	component: Component_Serialize,
+	archived: boolean,
 };
 
 /**  Discount granted by a manufacturer. */
@@ -1355,6 +1573,12 @@ export type PartSpec_Serialize = {
 	kind: PartKind_Serialize,
 };
 
+/**  A file chosen by the user, base64-encoded. */
+export type PickedFile = {
+	name: string,
+	base64: string,
+};
+
 export type PlatformInfo = {
 	/**  `windows`, `macos`, `linux`. */
 	os: string,
@@ -1509,6 +1733,14 @@ export type ResultReady_Serialize = {
 	removed: ArrayId[],
 	/**  Every previous result is obsolete (project opened, recovery). */
 	reset: boolean,
+};
+
+/**  One past revision of a component. */
+export type RevisionInfo = {
+	revision: number,
+	changedAt: string,
+	author: ChangeAuthor,
+	note: string,
 };
 
 /**  Kind of a roof edge (setbacks and wind zones depend on it). */
@@ -1725,6 +1957,45 @@ export type SavedBars = {
 	project: number,
 };
 
+/**  Filters of a library search; all optional. */
+export type SearchQuery = SearchQuery_Serialize | SearchQuery_Deserialize;
+
+/**  Filters of a library search; all optional. */
+export type SearchQuery_Deserialize = {
+	/**
+	 *  Words that must all appear in the manufacturer, model, article number or label
+	 *  (case-insensitive for ASCII).
+	 */
+	text?: string | null,
+	family?: ComponentFamily | null,
+	manufacturer?: string | null,
+	/**  Part kind tag (`rail`, `clamp`…), for mounting parts. */
+	partKind?: string | null,
+	minPmaxW?: number | null,
+	maxPmaxW?: number | null,
+	includeArchived: boolean,
+	/**  Default 200. */
+	limit?: number | null,
+};
+
+/**  Filters of a library search; all optional. */
+export type SearchQuery_Serialize = {
+	/**
+	 *  Words that must all appear in the manufacturer, model, article number or label
+	 *  (case-insensitive for ASCII).
+	 */
+	text?: string | null,
+	family?: ComponentFamily | null,
+	manufacturer?: string | null,
+	/**  Part kind tag (`rail`, `clamp`…), for mounting parts. */
+	partKind?: string | null,
+	minPmaxW?: number | null,
+	maxPmaxW?: number | null,
+	includeArchived: boolean,
+	/**  Default 200. */
+	limit?: number | null,
+};
+
 /**  How the service life adjusts the characteristic loads. */
 export type ServiceLifeModel = 
 /**  SN EN 1991-1-3 annex D and SN EN 1991-1-4 §4.2 (c_prob). */
@@ -1839,6 +2110,37 @@ export type SystemStatics_Serialize = {
 
 /**  SIA 261 terrain category (tab. 4). */
 export type TerrainCategory = "II" | "IIa" | "III" | "IV";
+
+/**  A newer library version of a frozen component. */
+export type UpdateProposal = UpdateProposal_Serialize | UpdateProposal_Deserialize;
+
+/**  A newer library version of a frozen component. */
+export type UpdateProposal_Deserialize = {
+	component: ComponentId,
+	label: string,
+	fromRevision: number,
+	toRevision: number,
+	/**  Data changes (revision excluded); empty when only the price changed. */
+	changes: FieldChange_Deserialize[],
+	priceBefore?: PriceEntry_Deserialize | null,
+	priceAfter?: PriceEntry_Deserialize | null,
+	/**  The snapshot that accepting the proposal freezes. */
+	proposed: ComponentSnapshot_Deserialize,
+};
+
+/**  A newer library version of a frozen component. */
+export type UpdateProposal_Serialize = {
+	component: ComponentId,
+	label: string,
+	fromRevision: number,
+	toRevision: number,
+	/**  Data changes (revision excluded); empty when only the price changed. */
+	changes: FieldChange_Serialize[],
+	priceBefore?: PriceEntry_Serialize | null,
+	priceAfter?: PriceEntry_Serialize | null,
+	/**  The snapshot that accepting the proposal freezes. */
+	proposed: ComponentSnapshot_Serialize,
+};
 
 /**
  *  One wall of a building: vertical, on footprint edge `start → end` (world plan, m), from

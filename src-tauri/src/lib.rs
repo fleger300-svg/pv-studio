@@ -6,6 +6,7 @@ mod commands;
 mod compute;
 mod export;
 mod layout;
+mod library;
 mod roof;
 mod state;
 
@@ -46,6 +47,23 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             layout::default_array,
             layout::plan_layout,
             layout::apply_layout,
+            library::library_search,
+            library::library_component,
+            library::library_new_component,
+            library::library_duplicate,
+            library::library_save,
+            library::library_archive,
+            library::library_add_price,
+            library::library_preferred_supplier,
+            library::library_set_preferred_supplier,
+            library::library_pick_file,
+            library::library_import,
+            library::library_attach_datasheet,
+            library::library_datasheet,
+            library::array_choices,
+            library::assign_components,
+            library::component_updates,
+            library::accept_updates,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

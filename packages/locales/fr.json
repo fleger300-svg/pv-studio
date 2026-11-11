@@ -386,7 +386,10 @@
     "relayout": "Calepiner automatiquement",
     "clear": "Vider le champ",
     "delete": "Supprimer le champ",
-    "add": "Ajouter un champ (calepiné automatiquement)"
+    "add": "Ajouter un champ (calepiné automatiquement)",
+    "module": "Module",
+    "genericModule": "Module générique (dimensions seules)",
+    "noMountingHint": "Choisissez un module et un système de montage dans la bibliothèque pour obtenir la statique et la nomenclature."
   },
   "site": {
     "title": "Site (statique SIA 261)",
@@ -419,5 +422,133 @@
     "snowFactor": "Facteur neige",
     "windFactor": "Facteur vent",
     "applyAll": "Appliquer ce site à tous les bâtiments"
+  },
+  "library": {
+    "title": "Bibliothèque",
+    "search": "Rechercher (fabricant, modèle, n° d’article)",
+    "family": "Famille",
+    "families": {
+      "all": "Toutes",
+      "module": "Module",
+      "mountingSystem": "Système de montage",
+      "mountingPart": "Pièce de montage"
+    },
+    "showArchived": "Afficher les archivés",
+    "newModule": "Nouveau module",
+    "newPart": "Nouvelle pièce",
+    "close": "Fermer",
+    "results": "{count, plural, one {# composant} other {# composants}}",
+    "empty": "Aucun composant ne correspond.",
+    "unverified": "non vérifié",
+    "archived": "archivé",
+    "pick": "Choisissez un composant dans la liste, ou créez-en un.",
+    "duplicate": "Dupliquer",
+    "restore": "Restaurer",
+    "archive": "Archiver",
+    "history": "Historique",
+    "revision": "Révision {n}",
+    "authors": {
+      "user": "utilisateur",
+      "import": "import",
+      "seed": "catalogue de base",
+      "copilot": "copilote"
+    },
+    "partKinds": {
+      "rail": "Rail",
+      "splice": "Éclisse",
+      "clamp": "Pince de module",
+      "fixation": "Fixation de toiture",
+      "climber": "Croisillon",
+      "ballastBlock": "Bloc de lest",
+      "other": "Autre"
+    },
+    "structures": {
+      "crossRail": "Rails croisés",
+      "ballasted": "Lesté"
+    },
+    "newTitle": "Nouveau : {family}",
+    "editTitle": "{label} · révision {n}",
+    "fields": {
+      "manufacturer": "Fabricant",
+      "model": "Modèle",
+      "articleNo": "N° d’article",
+      "label": "Libellé",
+      "lengthM": "Longueur",
+      "widthM": "Largeur",
+      "thicknessM": "Hauteur de cadre",
+      "massKg": "Masse",
+      "electrical": "Données électriques (STC)",
+      "unitMassKg": "Masse par pièce",
+      "packQty": "Pièces par unité de vente",
+      "kind": "Type",
+      "stockLengthM": "Longueur de barre",
+      "frameMin": "Hauteur de cadre min.",
+      "frameMax": "Hauteur de cadre max.",
+      "structure": "Structure",
+      "systemMass": "Masse du système par module",
+      "loadedArea": "Surface chargée",
+      "verified": "Données vérifiées sur la fiche technique"
+    },
+    "electrical": {
+      "pmaxW": "Pmax",
+      "vocV": "Voc",
+      "iscA": "Isc",
+      "vmppV": "Vmpp",
+      "imppA": "Impp",
+      "tempCoeffPmaxPctPerK": "Coeff. temp. Pmax",
+      "tempCoeffVocPctPerK": "Coeff. temp. Voc",
+      "tempCoeffIscPctPerK": "Coeff. temp. Isc",
+      "maxSystemVoltageV": "Tension système max.",
+      "bifaciality": "Bifacialité (vide : monofacial)"
+    },
+    "systemParts": "{count, plural, one {# règle de pièce} other {# règles de pièces}} (à modifier en dupliquant le système).",
+    "note": "Note de modification",
+    "create": "Créer",
+    "save": "Enregistrer une nouvelle révision",
+    "invalidNumber": "Nombre invalide.",
+    "datasheet": {
+      "title": "Fiche technique",
+      "attach": "Joindre un PDF…",
+      "show": "Afficher",
+      "none": "Aucune fiche technique."
+    },
+    "prices": {
+      "title": "Prix catalogue",
+      "none": "Aucun prix pour l’instant.",
+      "supplier": "Fournisseur",
+      "listPrice": "Prix catalogue à la pièce",
+      "from": "Valable dès le",
+      "to": "Valable jusqu’au",
+      "prefer": "Fournisseur préféré",
+      "currency": "Devise",
+      "add": "Ajouter le prix"
+    },
+    "import": {
+      "open": "Importer une liste de prix…",
+      "title": "Importer une liste de prix",
+      "choose": "Choisir le fichier Excel…",
+      "noFile": "Aucun fichier choisi.",
+      "createMissing": "Créer les articles inconnus comme pièces non vérifiées",
+      "preview": "{count, plural, one {# article sera tarifé.} other {# articles seront tarifés.}}",
+      "done": "{count, plural, one {# article tarifé.} other {# articles tarifés.}}",
+      "created": "Créés : {list}.",
+      "unknown": "Articles inconnus (non importés) : {list}.",
+      "conflicts": "Listés à des prix différents (non importés) : {list}.",
+      "difference": "Article {article} : {field} vaut {library} dans la bibliothèque, {list} dans la liste (inchangé).",
+      "fields": {
+        "packQty": "le nombre de pièces par unité de vente",
+        "label": "le libellé"
+      },
+      "run": "Importer"
+    },
+    "updates": {
+      "title": "Mises à jour de composants",
+      "available": "{count, plural, one {# mise à jour de composant est disponible.} other {# mises à jour de composants sont disponibles.}}",
+      "show": "Examiner",
+      "hide": "Masquer",
+      "revision": "révision {from} → {to}",
+      "price": "Prix catalogue {before} → {after}",
+      "accept": "{count, plural, one {Appliquer # mise à jour} other {Appliquer # mises à jour}}"
+    }
   }
 }

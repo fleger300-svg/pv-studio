@@ -386,7 +386,10 @@
     "relayout": "Lay out automatically",
     "clear": "Clear the array",
     "delete": "Delete the array",
-    "add": "Add an array (laid out automatically)"
+    "add": "Add an array (laid out automatically)",
+    "module": "Module",
+    "genericModule": "Generic module (dimensions only)",
+    "noMountingHint": "Choose a module and a mounting system from the library to get the statics and the bill of materials."
   },
   "site": {
     "title": "Site (statics, SIA 261)",
@@ -419,5 +422,133 @@
     "snowFactor": "Snow factor",
     "windFactor": "Wind factor",
     "applyAll": "Apply this site to every building"
+  },
+  "library": {
+    "title": "Library",
+    "search": "Search (manufacturer, model, article no.)",
+    "family": "Family",
+    "families": {
+      "all": "All",
+      "module": "Module",
+      "mountingSystem": "Mounting system",
+      "mountingPart": "Mounting part"
+    },
+    "showArchived": "Show archived",
+    "newModule": "New module",
+    "newPart": "New part",
+    "close": "Close",
+    "results": "{count, plural, one {# component} other {# components}}",
+    "empty": "No component matches.",
+    "unverified": "not verified",
+    "archived": "archived",
+    "pick": "Choose a component in the list, or create one.",
+    "duplicate": "Duplicate",
+    "restore": "Restore",
+    "archive": "Archive",
+    "history": "History",
+    "revision": "Revision {n}",
+    "authors": {
+      "user": "user",
+      "import": "import",
+      "seed": "base catalogue",
+      "copilot": "copilot"
+    },
+    "partKinds": {
+      "rail": "Rail",
+      "splice": "Rail connector",
+      "clamp": "Module clamp",
+      "fixation": "Roof fixation",
+      "climber": "Climber",
+      "ballastBlock": "Ballast block",
+      "other": "Other"
+    },
+    "structures": {
+      "crossRail": "Cross rails",
+      "ballasted": "Ballasted"
+    },
+    "newTitle": "New {family}",
+    "editTitle": "{label} · revision {n}",
+    "fields": {
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "articleNo": "Article no.",
+      "label": "Label",
+      "lengthM": "Length",
+      "widthM": "Width",
+      "thicknessM": "Frame height",
+      "massKg": "Mass",
+      "electrical": "Electrical data (STC)",
+      "unitMassKg": "Mass per piece",
+      "packQty": "Pieces per sale unit",
+      "kind": "Kind",
+      "stockLengthM": "Bar length",
+      "frameMin": "Frame height min",
+      "frameMax": "Frame height max",
+      "structure": "Structure",
+      "systemMass": "System mass per module",
+      "loadedArea": "Loaded area",
+      "verified": "Data checked against the datasheet"
+    },
+    "electrical": {
+      "pmaxW": "Pmax",
+      "vocV": "Voc",
+      "iscA": "Isc",
+      "vmppV": "Vmpp",
+      "imppA": "Impp",
+      "tempCoeffPmaxPctPerK": "Temp. coeff. Pmax",
+      "tempCoeffVocPctPerK": "Temp. coeff. Voc",
+      "tempCoeffIscPctPerK": "Temp. coeff. Isc",
+      "maxSystemVoltageV": "Max. system voltage",
+      "bifaciality": "Bifaciality (empty: monofacial)"
+    },
+    "systemParts": "{count, plural, one {# part rule} other {# part rules}} (edit by duplicating the system).",
+    "note": "Change note",
+    "create": "Create",
+    "save": "Save as new revision",
+    "invalidNumber": "Invalid number.",
+    "datasheet": {
+      "title": "Datasheet",
+      "attach": "Attach a PDF…",
+      "show": "Show",
+      "none": "No datasheet."
+    },
+    "prices": {
+      "title": "List prices",
+      "none": "No price yet.",
+      "supplier": "Supplier",
+      "listPrice": "List price per piece",
+      "from": "Valid from",
+      "to": "Valid until",
+      "prefer": "Preferred supplier",
+      "currency": "Currency",
+      "add": "Add the price"
+    },
+    "import": {
+      "open": "Import a price list…",
+      "title": "Import a price list",
+      "choose": "Choose the Excel file…",
+      "noFile": "No file chosen.",
+      "createMissing": "Create unknown articles as unverified parts",
+      "preview": "{count, plural, one {# article will be priced.} other {# articles will be priced.}}",
+      "done": "{count, plural, one {# article priced.} other {# articles priced.}}",
+      "created": "Created: {list}.",
+      "unknown": "Unknown articles (not imported): {list}.",
+      "conflicts": "Listed with different prices (not imported): {list}.",
+      "difference": "Article {article}: {field} is {library} in the library, {list} in the list (not changed).",
+      "fields": {
+        "packQty": "pieces per sale unit",
+        "label": "the label"
+      },
+      "run": "Import"
+    },
+    "updates": {
+      "title": "Component updates",
+      "available": "{count, plural, one {# component update is available.} other {# component updates are available.}}",
+      "show": "Review",
+      "hide": "Hide",
+      "revision": "revision {from} → {to}",
+      "price": "List price {before} → {after}",
+      "accept": "{count, plural, one {Apply # update} other {Apply # updates}}"
+    }
   }
 }

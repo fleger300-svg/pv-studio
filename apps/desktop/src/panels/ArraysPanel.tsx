@@ -1,3 +1,4 @@
+import { ArrayComponents } from '../library/ArrayComponents';
 import { useTranslation } from 'react-i18next';
 import { Button, Panel, Select, Stat } from '@pv/ui';
 import type { Orientation, PanelArray, RoofFaceId } from '../bindings';
@@ -106,6 +107,7 @@ function ArrayForm({
           unit="m"
           decimals={3}
           value={a.moduleLengthM}
+          disabled={!!a.module}
           min={0.5}
           max={3}
           onCommit={num((v) => set({ moduleLengthM: v }))}
@@ -115,6 +117,7 @@ function ArrayForm({
           unit="m"
           decimals={3}
           value={a.moduleWidthM}
+          disabled={!!a.module}
           min={0.3}
           max={2}
           onCommit={num((v) => set({ moduleWidthM: v }))}
@@ -162,7 +165,8 @@ function ArrayForm({
           onCommit={num((v) => setLayout({ minDistanceToOtherArraysM: v }))}
         />
       </div>
-      <Stat label={t('arrays.mounting')} value={mountingLabel ?? t('arrays.noMounting')} />
+      <ArrayComponents array={a} />
+      {mountingLabel === null && <p className="panel-hint">{t('arrays.noMountingHint')}</p>}
       <Button variant="secondary" onClick={() => void layOut(a)}>
         {t('arrays.relayout')}
       </Button>

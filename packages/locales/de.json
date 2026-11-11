@@ -386,7 +386,10 @@
     "relayout": "Automatisch belegen",
     "clear": "Modulfeld leeren",
     "delete": "Modulfeld löschen",
-    "add": "Modulfeld hinzufügen (automatisch belegt)"
+    "add": "Modulfeld hinzufügen (automatisch belegt)",
+    "module": "Modul",
+    "genericModule": "Generisches Modul (nur Abmessungen)",
+    "noMountingHint": "Wählen Sie ein Modul und ein Montagesystem aus der Bibliothek, um Statik und Stückliste zu erhalten."
   },
   "site": {
     "title": "Standort (Statik SIA 261)",
@@ -419,5 +422,133 @@
     "snowFactor": "Schneefaktor",
     "windFactor": "Windfaktor",
     "applyAll": "Diesen Standort auf alle Gebäude anwenden"
+  },
+  "library": {
+    "title": "Bibliothek",
+    "search": "Suchen (Hersteller, Modell, Artikelnr.)",
+    "family": "Familie",
+    "families": {
+      "all": "Alle",
+      "module": "Modul",
+      "mountingSystem": "Montagesystem",
+      "mountingPart": "Montageteil"
+    },
+    "showArchived": "Archivierte anzeigen",
+    "newModule": "Neues Modul",
+    "newPart": "Neues Teil",
+    "close": "Schliessen",
+    "results": "{count, plural, one {# Komponente} other {# Komponenten}}",
+    "empty": "Keine passende Komponente.",
+    "unverified": "nicht geprüft",
+    "archived": "archiviert",
+    "pick": "Wählen Sie eine Komponente in der Liste oder erstellen Sie eine.",
+    "duplicate": "Duplizieren",
+    "restore": "Wiederherstellen",
+    "archive": "Archivieren",
+    "history": "Verlauf",
+    "revision": "Revision {n}",
+    "authors": {
+      "user": "Benutzer",
+      "import": "Import",
+      "seed": "Grundkatalog",
+      "copilot": "Copilot"
+    },
+    "partKinds": {
+      "rail": "Schiene",
+      "splice": "Schienenverbinder",
+      "clamp": "Modulklemme",
+      "fixation": "Dachbefestigung",
+      "climber": "Kreuzverbinder",
+      "ballastBlock": "Ballaststein",
+      "other": "Andere"
+    },
+    "structures": {
+      "crossRail": "Kreuzschienen",
+      "ballasted": "Ballastiert"
+    },
+    "newTitle": "Neu: {family}",
+    "editTitle": "{label} · Revision {n}",
+    "fields": {
+      "manufacturer": "Hersteller",
+      "model": "Modell",
+      "articleNo": "Artikelnr.",
+      "label": "Bezeichnung",
+      "lengthM": "Länge",
+      "widthM": "Breite",
+      "thicknessM": "Rahmenhöhe",
+      "massKg": "Masse",
+      "electrical": "Elektrische Daten (STC)",
+      "unitMassKg": "Masse pro Stück",
+      "packQty": "Stück pro Verkaufseinheit",
+      "kind": "Art",
+      "stockLengthM": "Stangenlänge",
+      "frameMin": "Rahmenhöhe min.",
+      "frameMax": "Rahmenhöhe max.",
+      "structure": "Struktur",
+      "systemMass": "Systemmasse pro Modul",
+      "loadedArea": "Lasteinzugsfläche",
+      "verified": "Daten mit dem Datenblatt geprüft"
+    },
+    "electrical": {
+      "pmaxW": "Pmax",
+      "vocV": "Voc",
+      "iscA": "Isc",
+      "vmppV": "Vmpp",
+      "imppA": "Impp",
+      "tempCoeffPmaxPctPerK": "Temp.-Koeff. Pmax",
+      "tempCoeffVocPctPerK": "Temp.-Koeff. Voc",
+      "tempCoeffIscPctPerK": "Temp.-Koeff. Isc",
+      "maxSystemVoltageV": "Max. Systemspannung",
+      "bifaciality": "Bifazialität (leer: monofazial)"
+    },
+    "systemParts": "{count, plural, one {# Teileregel} other {# Teileregeln}} (Änderung durch Duplizieren des Systems).",
+    "note": "Änderungsnotiz",
+    "create": "Erstellen",
+    "save": "Als neue Revision speichern",
+    "invalidNumber": "Ungültige Zahl.",
+    "datasheet": {
+      "title": "Datenblatt",
+      "attach": "PDF anhängen…",
+      "show": "Anzeigen",
+      "none": "Kein Datenblatt."
+    },
+    "prices": {
+      "title": "Listenpreise",
+      "none": "Noch kein Preis.",
+      "supplier": "Lieferant",
+      "listPrice": "Listenpreis pro Stück",
+      "from": "Gültig ab",
+      "to": "Gültig bis",
+      "prefer": "Bevorzugter Lieferant",
+      "currency": "Währung",
+      "add": "Preis hinzufügen"
+    },
+    "import": {
+      "open": "Preisliste importieren…",
+      "title": "Preisliste importieren",
+      "choose": "Excel-Datei wählen…",
+      "noFile": "Keine Datei gewählt.",
+      "createMissing": "Unbekannte Artikel als ungeprüfte Teile erstellen",
+      "preview": "{count, plural, one {# Artikel wird bepreist.} other {# Artikel werden bepreist.}}",
+      "done": "{count, plural, one {# Artikel bepreist.} other {# Artikel bepreist.}}",
+      "created": "Erstellt: {list}.",
+      "unknown": "Unbekannte Artikel (nicht importiert): {list}.",
+      "conflicts": "Mit unterschiedlichen Preisen aufgeführt (nicht importiert): {list}.",
+      "difference": "Artikel {article}: {field} ist {library} in der Bibliothek, {list} in der Liste (unverändert).",
+      "fields": {
+        "packQty": "Stück pro Verkaufseinheit",
+        "label": "Bezeichnung"
+      },
+      "run": "Importieren"
+    },
+    "updates": {
+      "title": "Komponenten-Updates",
+      "available": "{count, plural, one {# Komponenten-Update ist verfügbar.} other {# Komponenten-Updates sind verfügbar.}}",
+      "show": "Prüfen",
+      "hide": "Ausblenden",
+      "revision": "Revision {from} → {to}",
+      "price": "Listenpreis {before} → {after}",
+      "accept": "{count, plural, one {# Update übernehmen} other {# Updates übernehmen}}"
+    }
   }
 }

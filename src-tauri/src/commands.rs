@@ -278,7 +278,7 @@ pub(crate) fn finish(
     let (can_undo, can_redo) = store.history_state().map_err(CommandError::from)?;
     let event = ModelChanged {
         module_ids: changes.module_ids.clone(),
-        reload: !changes.modules_only(),
+        reload: !changes.modules_only() || changes.components,
         can_undo,
         can_redo,
     };

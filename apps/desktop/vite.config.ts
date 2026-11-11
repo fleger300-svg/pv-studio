@@ -18,4 +18,7 @@ export default defineConfig({
     sourcemap: true,
   },
   worker: { format: 'es' },
+  // Pre-bundled at start-up: discovered later (first price list read / Excel export in a
+  // worker), it would make Vite reload the whole page in the middle of a session.
+  optimizeDeps: { include: ['exceljs'] },
 });

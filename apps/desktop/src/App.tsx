@@ -15,6 +15,9 @@ import { isPlanStep, useWorkflowStore } from './store/workflow';
 import { Viewport } from './viewport3d/Viewport';
 import { Hud, useHudShortcut } from './perf/Hud';
 import { useStaticsSync } from './statics/useStatics';
+import { LibraryView } from './library/LibraryView';
+import { UpdateProposals } from './library/UpdateProposals';
+import { useLibraryStore } from './store/library';
 
 export function App() {
   const { t } = useTranslation();
@@ -22,6 +25,7 @@ export function App() {
   const modules = useProjectStore((s) => s.modules);
   const step = useWorkflowStore((s) => s.step);
   const ratio = usePlanStore((s) => s.ratio);
+  const libraryOpen = useLibraryStore((s) => s.open);
   useShortcuts();
   useHudShortcut();
   useStaticsSync();
@@ -60,6 +64,12 @@ export function App() {
             <p className="viewport-empty">{t('viewport.empty')}</p>
           )}
         </ErrorBoundary>
+        <UpdateProposals />
+        {libraryOpen && (
+          <ErrorBoundary>
+            <LibraryView />
+          </ErrorBoundary>
+        )}
         <Toasts />
       </main>
       <SidePanel />
