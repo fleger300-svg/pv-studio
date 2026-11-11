@@ -1,0 +1,25 @@
+[package]
+name = "pv-secrets"
+description = "PV Studio secrets: the Anthropic API key in the OS credential store (never returned to the front end)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-model.workspace = true
+serde.workspace = true
+specta.workspace = true
+zeroize = "1.9.1"
+
+# The OS stores only: without a platform feature, keyring silently falls back to an in-memory
+# mock, which would lose the key on restart. Other platforms report "unavailable".
+[target.'cfg(windows)'.dependencies]
+keyring = { version = "3", default-features = false, features = ["windows-native"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "3", default-features = false, features = ["apple-native"] }
+
+[lints]
+workspace = true

@@ -121,6 +121,12 @@ export const commands = {
 	 *  (tests). No lock is held during the network call.
 	 */
 	libraryExtractDatasheet: (path: string | null, hint: string | null, language: string) => typedError<ExtractionResult_Serialize | null, CommandError>(__TAURI_INVOKE("library_extract_datasheet", { path, hint, language })),
+	apiKeyStatus: () => typedError<ApiKeyStatus_Serialize, CommandError>(__TAURI_INVOKE("api_key_status")),
+	/**  Stores the key typed by the user in the credential store (replacing the previous one). */
+	setApiKey: (key: string) => typedError<ApiKeyStatus_Serialize, CommandError>(__TAURI_INVOKE("set_api_key", { key })),
+	deleteApiKey: () => typedError<ApiKeyStatus_Serialize, CommandError>(__TAURI_INVOKE("delete_api_key")),
+	/**  Checks the key in use against the API (lists models: free). */
+	testApiKey: () => typedError<KeyCheck, CommandError>(__TAURI_INVOKE("test_api_key")),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -177,6 +183,29 @@ export type AeroZoneSpec = {
 	zone: WindZone,
 	uplift: PairCoefficientsSpec,
 	sliding: PairCoefficientsSpec,
+};
+
+/**  What the front end may know about the key. */
+export type ApiKeyStatus = ApiKeyStatus_Serialize | ApiKeyStatus_Deserialize;
+
+/**  What the front end may know about the key. */
+export type ApiKeyStatus_Deserialize = {
+	configured: boolean,
+	source?: KeySource | null,
+	/**  Last four characters of the key in use. */
+	hint?: string | null,
+	/**  The credential store works on this machine (saving is possible). */
+	storeAvailable: boolean,
+};
+
+/**  What the front end may know about the key. */
+export type ApiKeyStatus_Serialize = {
+	configured: boolean,
+	source?: KeySource | null,
+	/**  Last four characters of the key in use. */
+	hint?: string | null,
+	/**  The credential store works on this machine (saving is possible). */
+	storeAvailable: boolean,
 };
 
 /**  Result of `apply_command`, `undo` and `redo`. */
@@ -1250,6 +1279,18 @@ export type JointAxis =
 "constantU" | 
 /**  Line `v = position`: cuts the rails running along `v`. */
 "constantV";
+
+/**  Outcome of a key check. */
+export type KeyCheck = 
+/**  The API accepted the key. */
+"valid" | 
+/**  The API refused it (invalid, revoked, or without permission). */
+"invalid" | 
+/**  The API answered something else (rate limit, overload…): the key may be fine. */
+"inconclusive";
+
+/**  Where the key in use comes from. */
+export type KeySource = "environment" | "credentialStore";
 
 /**  Where the grid is anchored when the engine searches the best offset. */
 export type LayoutAnchor = 

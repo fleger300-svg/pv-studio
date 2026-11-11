@@ -233,8 +233,18 @@ application data folder, `PV_LIBRARY_PATH` for tests); projects freeze the compo
 | UI: create a module, assign it, accept a price update, import a list; fr/en/de | `e2e/c4-bibliotheque.mjs` | passed |
 | Datasheet extraction (Claude), unverified until reviewed | `pv-copilot`, `e2e/c5-extraction.mjs` | passed (recorded response, no API call) |
 
-Datasheet extraction needs `ANTHROPIC_API_KEY` (model `claude-opus-5-5`, structured outputs,
-server-side refusal fallback); `ANTHROPIC_BASE_URL` overrides the endpoint.
+Datasheet extraction uses model `claude-opus-5-5` (structured outputs, server-side refusal
+fallback); `ANTHROPIC_BASE_URL` overrides the endpoint.
+
+### API key (C6, 2026-11-11)
+
+The Anthropic API key is entered in **Settings** and kept in the OS credential store (Windows
+Credential Manager, macOS Keychain) by `pv-secrets`. It goes in once and never comes out: no
+command returns it, the front end only gets a status (source, last four characters). The
+`ANTHROPIC_API_KEY` environment variable overrides the stored key. « Test » calls the free
+`GET /v1/models`. `e2e/c6-cle-api.mjs` checks the whole path (malformed, revoked and valid keys,
+extraction with the stored key, removal) against a local stand-in; `PV_SECRETS_SERVICE` gives
+tests their own credential entry so that the user's real key is never touched.
 
 ### macOS run (to do)
 
@@ -326,6 +336,7 @@ Key rules, as implemented:
 | Variant field names | Fields inside enum variants stay snake_case in JSON (`stock_length_m`, `frame_height`), like the existing `Driver`. |
 | Price lists | Read by the front end (exceljs worker, as for the export); recognition, matching and cents in Rust. No new native dependency. |
 | Copilot | `pv-copilot` is pure (request and response); the shell sends the request with `reqwest` + native TLS (schannel on Windows). A component the copilot writes is never `verified`. |
+| API key storage | OS credential store through `keyring` with explicit platform features (`windows-native`, `apple-native`): without them keyring silently falls back to an in-memory mock. Rejected: `tauri-plugin-store` (plain JSON file), `tauri-plugin-stronghold` (one more password). No plain-text fallback. |
 
 ## Out of scope
 

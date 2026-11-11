@@ -14,6 +14,7 @@
 pub mod datasheet;
 
 pub use datasheet::{
-    build_request, extraction_schema, parse_response, to_component, ApiCall, ExtractedModule,
-    ExtractedPart, Extraction, API_VERSION, BETA_FALLBACK, MAX_PDF_BYTES, MODEL,
+    build_request, extraction_schema, key_check_outcome, key_check_request, parse_response,
+    to_component, ApiCall, ExtractedModule, ExtractedPart, Extraction, KeyCheck, API_VERSION,
+    BETA_FALLBACK, MAX_PDF_BYTES, MODEL,
 };

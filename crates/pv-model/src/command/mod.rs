@@ -82,6 +82,9 @@ pub mod keys {
     pub const COPILOT_INVALID: &str = "errors.copilot.invalid";
     pub const COPILOT_INCOMPLETE: &str = "errors.copilot.incomplete";
     pub const COPILOT_TOO_LARGE: &str = "errors.copilot.tooLarge";
+    /// API key (pv-secrets).
+    pub const SECRETS_FORMAT: &str = "errors.secrets.format";
+    pub const SECRETS_UNAVAILABLE: &str = "errors.secrets.unavailable";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -140,6 +143,8 @@ pub mod keys {
         COPILOT_INVALID,
         COPILOT_INCOMPLETE,
         COPILOT_TOO_LARGE,
+        SECRETS_FORMAT,
+        SECRETS_UNAVAILABLE,
     ];
 }
 

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Select, Toggle } from '@pv/ui';
 import { useLibraryStore } from '../store/library';
+import { useSettingsStore } from '../store/settings';
 import { SUPPORTED_LANGUAGES, type Language } from '@pv/locales';
 import { isLanguage, setLanguage } from '../i18n';
 import { useUiStore } from '../store/ui';
@@ -18,6 +19,8 @@ export function TopBar({ projectName }: TopBarProps) {
   const computing = useStaticsStore((s) => s.busy);
   const libraryOpen = useLibraryStore((s) => s.open);
   const setLibraryOpen = useLibraryStore((s) => s.setOpen);
+  const settingsOpen = useSettingsStore((s) => s.open);
+  const setSettingsOpen = useSettingsStore((s) => s.setOpen);
 
   return (
     <header className="topbar">
@@ -38,6 +41,15 @@ export function TopBar({ projectName }: TopBarProps) {
           }}
         >
           {t('library.title')}
+        </Button>
+        <Button
+          variant={settingsOpen ? 'primary' : 'secondary'}
+          aria-pressed={settingsOpen}
+          onClick={() => {
+            setSettingsOpen(!settingsOpen);
+          }}
+        >
+          {t('settings.open')}
         </Button>
         <Select<Language>
           label={t('topbar.language')}

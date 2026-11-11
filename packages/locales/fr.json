@@ -152,6 +152,10 @@
       "invalid": "La réponse est illisible ({detail}).",
       "incomplete": "La fiche ne donne pas : {fields}. Saisissez le composant à la main.",
       "tooLarge": "Le PDF est trop volumineux pour être envoyé ({size} Mo, au plus {max} Mo)."
+    },
+    "secrets": {
+      "format": "Ceci ne ressemble pas à une clé API Anthropic (elle commence par « sk-ant- »).",
+      "unavailable": "Le trousseau du système est inutilisable : {detail}"
     }
   },
   "hud": {
@@ -569,7 +573,39 @@
       "running": "Lecture de la fiche…",
       "done": "Composant créé à partir de la fiche : vérifiez chaque valeur, puis cochez « Données vérifiées sur la fiche technique ».",
       "warnings": "Points à vérifier",
-      "source": "extrait par IA"
+      "source": "extrait par IA",
+      "configure": "Configurer la clé API…"
+    }
+  },
+  "settings": {
+    "open": "Paramètres",
+    "title": "Paramètres",
+    "close": "Fermer",
+    "ai": {
+      "title": "Intelligence artificielle (lecture des fiches)",
+      "configured": "Clé configurée · …{hint} · {source}",
+      "notConfigured": "Aucune clé configurée : la lecture des fiches est désactivée.",
+      "sources": {
+        "environment": "variable d’environnement",
+        "credentialStore": "trousseau du système"
+      },
+      "envOverride": "La variable d’environnement ANTHROPIC_API_KEY est définie : elle est utilisée à la place de la clé enregistrée.",
+      "key": "Clé API Anthropic",
+      "placeholder": "sk-ant-…",
+      "save": "Enregistrer la clé",
+      "test": "Tester la clé",
+      "remove": "Supprimer la clé",
+      "saved": "La clé est enregistrée dans le trousseau du système.",
+      "removed": "La clé est supprimée.",
+      "testing": "Test en cours…",
+      "result": {
+        "valid": "La clé fonctionne.",
+        "invalid": "Anthropic refuse cette clé (invalide ou révoquée).",
+        "inconclusive": "Anthropic n’a pas confirmé la clé pour l’instant : réessayez plus tard."
+      },
+      "storeUnavailable": "Le trousseau du système n’est pas disponible sur cet ordinateur : la clé ne peut pas être enregistrée.",
+      "privacy": "La clé est conservée par le système d’exploitation (Gestionnaire d’identification Windows, Trousseau macOS) et n’est plus jamais affichée. La tester ne coûte rien ; chaque fiche lue est facturée par Anthropic.",
+      "help": "Créez une clé dans la console Anthropic (console.anthropic.com), rubrique API keys."
     }
   }
 }
