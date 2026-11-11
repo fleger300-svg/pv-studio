@@ -2452,6 +2452,7 @@ dependencies = [
  "pv-graph",
  "pv-layout",
  "pv-model",
+ "pv-roof",
  "pv-statics",
  "pv-store",
  "serde",

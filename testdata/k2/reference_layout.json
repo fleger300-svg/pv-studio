@@ -46,5 +46,26 @@
           { "block": [1, 0], "k2_no": 9, "eave": 0.6 },
           { "block": [2, 0], "k2_no": 10, "eave": 0.6, "right": 0.5 } ] }
     ]
+  },
+  "rebuild": {
+    "_about": "Project A rebuilt from an empty project (crates/pv-pipeline/tests/atrium_rebuild.rs). Two mirrored buildings of 26.18 x 12.86 m, ridge at 25.00 m, long sides pitched 19 deg, one end hipped (hip run 6.56 m: ridge 19.62 m), the other a gable; standing seams every 0.60 m from the eave-left corner of each face. Field origins (lower-left module corner, face frame: u along the eave from the left corner seen from outside, v up the slope) solved from every printed block distance: left / right horizontally from the block's lower corners, ridge vertically from its upper-right corner, eave from its lower edge. K2 drew the hip-right faces 26.20 m x 6.81 m (hip run 6.58 m): the origins are solved on that geometry; on the rebuilt 26.18 m faces the hip-side distances are 2 cm shorter.",
+    "buildings": [
+      { "name": "A", "hip_end": "west" },
+      { "name": "B", "hip_end": "east" }
+    ],
+    "roofs": [
+      { "roof": "roof-1", "building": "A", "azimuth_deg": 180, "hip": "left",
+        "fields": [ { "cols": 4, "rows": 4, "lower_left": [6.15, 0.70] },
+                     { "cols": 5, "rows": 4, "lower_left": [16.48, 0.62], "removed": [[3, 3]] } ] },
+      { "roof": "roof-2", "building": "B", "azimuth_deg": 180, "hip": "right",
+        "fields": [ { "cols": 5, "rows": 4, "lower_left": [1.202, 0.705] },
+                     { "cols": 3, "rows": 2, "lower_left": [14.35, 0.76] } ] },
+      { "roof": "roof-3", "building": "B", "azimuth_deg": 0, "hip": "left",
+        "fields": [ { "cols": 5, "rows": 4, "lower_left": [15.75, 0.945] },
+                     { "cols": 3, "rows": 2, "lower_left": [6.387, 0.918] } ] },
+      { "roof": "roof-4", "building": "A", "azimuth_deg": 0, "hip": "right",
+        "fields": [ { "cols": 3, "rows": 3, "lower_left": [14.41, 0.71] },
+                     { "cols": 5, "rows": 4, "lower_left": [0.448, 0.85] } ] }
+    ]
   }
 }

@@ -1,8 +1,8 @@
-//! The K2 Base checks of project A roof 1, on whatever graph state is given: wind zones per
-//! field, fixation forces and rail checks per zone (±3 %), fixation spacing and climber sets
-//! (0 deviation).
+//! The K2 Base checks of project A, on whatever graph state is given: wind zones per field
+//! (roof 1), fixation forces and rail checks per zone (±3 %), fixation spacing and climber
+//! sets per roof (0 deviation).
 
-use pv_graph::Graph;
+use pv_graph::{Graph, Instance};
 use pv_model::Project;
 use pv_pipeline::nodes::descent::Descent;
 use pv_pipeline::nodes::zones::ZoneSet;
@@ -52,8 +52,20 @@ struct ClimberRoof {
     expected: usize,
 }
 
-/// Values compared and deviations from K2 (empty: the graph reproduces the report).
+/// Values compared and deviations from K2 for roof 1 (fields 0 and 1 of `p`).
 pub fn roof1_deviations(g: &mut Graph, p: &Project) -> (usize, Vec<String>) {
+    roof_deviations(g, "roof-1", &[array(0, p), array(1, p)], true)
+}
+
+/// Values compared and deviations from K2 for the fields of one roof (empty: the graph
+/// reproduces the report). Every zone a field has is checked against K2's values for that
+/// zone; `all_zones`: K2 gives each field all five zones (printed for roof 1).
+pub fn roof_deviations(
+    g: &mut Graph,
+    roof: &str,
+    fields: &[Instance],
+    all_zones: bool,
+) -> (usize, Vec<String>) {
     let fx: DescentFile = serde_json::from_str(DESCENT).unwrap();
     let k2 = fx.descent.iter().find(|c| c.id == "ref-a").unwrap();
     let tol = fx.load_tolerance;
@@ -66,18 +78,16 @@ pub fn roof1_deviations(g: &mut Graph, p: &Project) -> (usize, Vec<String>) {
         }
     };
     let all = RoofZone::ALL.to_vec();
-    for f in 0..2 {
-        let a = array(f, p);
-        // Wind zones: K2 gives both fields of roof 1 all five zones.
+    for (f, &a) in fields.iter().enumerate() {
         let zones = g.get::<ZoneSet>(a).unwrap();
-        if *zones != all {
-            failures.push(format!("field {} zones {:?}", f + 1, zones));
+        if all_zones && *zones != all {
+            failures.push(format!("{roof} field {} zones {:?}", f + 1, zones));
         }
         let descent = g.get::<Descent>(a).unwrap();
         let descent = descent.as_ref().as_ref().expect("cross-rail field");
         for d in descent {
             let ex = k2.zones.iter().find(|z| z.zone == d.zone).unwrap();
-            let tag = format!("field {} {:?}", f + 1, d.zone);
+            let tag = format!("{roof} field {} {:?}", f + 1, d.zone);
             let ff = &d.result.fixation_forces;
             let got = [
                 ff.uls_pressure_perp,
@@ -126,9 +136,10 @@ pub fn roof1_deviations(g: &mut Graph, p: &Project) -> (usize, Vec<String>) {
         }
     }
     // Climber sets of the roof: exact.
-    let climbers: usize = (0..2)
-        .map(|f| {
-            g.get::<FieldStatics>(array(f, p))
+    let climbers: usize = fields
+        .iter()
+        .map(|&a| {
+            g.get::<FieldStatics>(a)
                 .unwrap()
                 .climbers
                 .map_or(0, |n| n as usize)
@@ -138,11 +149,11 @@ pub fn roof1_deviations(g: &mut Graph, p: &Project) -> (usize, Vec<String>) {
         .climbers
         .roofs
         .iter()
-        .find(|r| r.id == "roof-1")
+        .find(|r| r.id == roof)
         .unwrap()
         .expected;
     if climbers != expected {
-        failures.push(format!("climber sets {climbers}, K2 {expected}"));
+        failures.push(format!("{roof}: climber sets {climbers}, K2 {expected}"));
     }
     (compared, failures)
 }

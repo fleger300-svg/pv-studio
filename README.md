@@ -196,6 +196,29 @@ reports `bench-*-20261110*.json`): every budget still met.
 The 10k layout was 25 s before the offset search was parallelised and refined in levels
 (`pv-layout` `fill`); the K2 reference module counts are unchanged.
 
+### Project A rebuilt from scratch (E4, 2026-11-10)
+
+`cargo test -p pv-pipeline --test atrium_rebuild`: project A (ref-a, 4 roofs, 116 modules) is
+rebuilt from an empty project file with 15 journaled commands only: 2 generated roofs
+(19°, one hipped end, one gable), 4 face coverings (standing seam 0.60 m), 8 fields drawn on
+their faces and laid out by the engine, 1 module removed by hand. Field corners are solved
+from every block distance K2 prints (`testdata/k2/reference_layout.json`, section `rebuild`).
+511 values are compared with the K2 Base report, roof by roof:
+
+| Deliverable | Result |
+|---|---|
+| Modules per roof (35 / 26 / 26 / 29) | exact |
+| Statics per zone: fixation forces, rail utilisation (±3 %), fixation spacing | ✅ every zone of every field |
+| Top rails (cut lists), long / short bottom rail counts, climbers (106 / 78 / 78 / 90) | exact |
+| Bill of materials per roof and total: rail bars, climbers, middle and end clamps | exact |
+| Standing-seam clamps (K2 136 / 105 / 99 / 126, total 466) | 147 / 99 / 108 / 107, total 461 — documented gap |
+
+Undoing the 15 commands returns to the empty project; redoing them and reopening the file give
+the same project, bit for bit, and the same results. The seam-clamp gap is not a placement
+question: no seam phase, global or per field, reproduces K2's lengthened bottom rails (for
+example three different lengthenings in one field of roof 4), so K2 lengthens its bottom
+rails with a rule of its own that remains to be identified.
+
 ### macOS run (to do)
 
 On a Mac with Xcode command-line tools: `pnpm install && pnpm tauri build --no-bundle`. Then run
