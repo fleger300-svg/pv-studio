@@ -513,10 +513,7 @@ pub async fn library_extract_datasheet(
     hint: Option<String>,
     language: String,
 ) -> Result<Option<ExtractionResult>, CommandError> {
-    let key = std::env::var("ANTHROPIC_API_KEY")
-        .ok()
-        .filter(|k| !k.trim().is_empty())
-        .ok_or_else(|| CommandError::new(keys::COPILOT_NO_KEY))?;
+    let key = crate::settings::current_key()?;
     let Some(path) = pick(&app, FileKind::Datasheet, path)? else {
         return Ok(None);
     };
@@ -533,18 +530,14 @@ pub async fn library_extract_datasheet(
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_default();
     let call = pv_copilot::build_request(&b64(&bytes), &name, hint.as_deref(), &language);
-    let base = std::env::var("ANTHROPIC_BASE_URL")
-        .ok()
-        .filter(|b| !b.trim().is_empty())
-        .unwrap_or_else(|| "https://api.anthropic.com".to_owned());
     let client = reqwest::Client::builder()
         // A careful read of a long datasheet can take minutes.
         .timeout(std::time::Duration::from_secs(600))
         .build()
         .map_err(network)?;
     let mut request = client
-        .post(format!("{}/v1/messages", base.trim_end_matches('/')))
-        .header("x-api-key", key)
+        .post(format!("{}/v1/messages", crate::settings::api_base()))
+        .header("x-api-key", key.expose())
         .header("content-type", "application/json");
     for (name, value) in call.headers {
         request = request.header(name, value);

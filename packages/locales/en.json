@@ -152,6 +152,10 @@
       "invalid": "The answer could not be read ({detail}).",
       "incomplete": "The datasheet does not give: {fields}. Enter the component by hand.",
       "tooLarge": "The PDF is too large to send ({size} MB, at most {max} MB)."
+    },
+    "secrets": {
+      "format": "This does not look like an Anthropic API key (it starts with « sk-ant- »).",
+      "unavailable": "The system credential store cannot be used: {detail}"
     }
   },
   "hud": {
@@ -569,7 +573,39 @@
       "running": "Reading the datasheet…",
       "done": "Component created from the datasheet: check every value, then tick « Data checked against the datasheet ».",
       "warnings": "Points to check",
-      "source": "extracted by AI"
+      "source": "extracted by AI",
+      "configure": "Configure the API key…"
+    }
+  },
+  "settings": {
+    "open": "Settings",
+    "title": "Settings",
+    "close": "Close",
+    "ai": {
+      "title": "Artificial intelligence (datasheet reading)",
+      "configured": "Key configured · …{hint} · {source}",
+      "notConfigured": "No key configured: datasheet reading is disabled.",
+      "sources": {
+        "environment": "environment variable",
+        "credentialStore": "system credential store"
+      },
+      "envOverride": "The ANTHROPIC_API_KEY environment variable is set: it is used instead of the stored key.",
+      "key": "Anthropic API key",
+      "placeholder": "sk-ant-…",
+      "save": "Save the key",
+      "test": "Test the key",
+      "remove": "Remove the key",
+      "saved": "The key is saved in the system credential store.",
+      "removed": "The key is removed.",
+      "testing": "Testing…",
+      "result": {
+        "valid": "The key works.",
+        "invalid": "Anthropic refuses this key (invalid or revoked).",
+        "inconclusive": "Anthropic did not confirm the key right now: try again later."
+      },
+      "storeUnavailable": "The system credential store is not available on this computer: the key cannot be saved.",
+      "privacy": "The key is kept by the operating system (Windows Credential Manager, macOS Keychain) and never shown again. Testing it costs nothing; each datasheet read is billed by Anthropic.",
+      "help": "Create a key in the Anthropic Console (console.anthropic.com), under API keys."
     }
   }
 }

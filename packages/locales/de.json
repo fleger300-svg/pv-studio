@@ -152,6 +152,10 @@
       "invalid": "Die Antwort ist nicht lesbar ({detail}).",
       "incomplete": "Das Datenblatt enthält nicht: {fields}. Bitte die Komponente von Hand erfassen.",
       "tooLarge": "Das PDF ist zu gross zum Senden ({size} MB, höchstens {max} MB)."
+    },
+    "secrets": {
+      "format": "Dies sieht nicht wie ein Anthropic-API-Schlüssel aus (er beginnt mit « sk-ant- »).",
+      "unavailable": "Der Schlüsselbund des Systems ist nicht verwendbar: {detail}"
     }
   },
   "hud": {
@@ -569,7 +573,39 @@
       "running": "Datenblatt wird gelesen…",
       "done": "Komponente aus dem Datenblatt erstellt: Prüfen Sie jeden Wert und setzen Sie dann « Daten mit dem Datenblatt geprüft ».",
       "warnings": "Zu prüfende Punkte",
-      "source": "durch KI extrahiert"
+      "source": "durch KI extrahiert",
+      "configure": "API-Schlüssel einrichten…"
+    }
+  },
+  "settings": {
+    "open": "Einstellungen",
+    "title": "Einstellungen",
+    "close": "Schliessen",
+    "ai": {
+      "title": "Künstliche Intelligenz (Datenblätter lesen)",
+      "configured": "Schlüssel eingerichtet · …{hint} · {source}",
+      "notConfigured": "Kein Schlüssel eingerichtet: Das Lesen von Datenblättern ist deaktiviert.",
+      "sources": {
+        "environment": "Umgebungsvariable",
+        "credentialStore": "Schlüsselbund des Systems"
+      },
+      "envOverride": "Die Umgebungsvariable ANTHROPIC_API_KEY ist gesetzt: Sie wird anstelle des gespeicherten Schlüssels verwendet.",
+      "key": "Anthropic-API-Schlüssel",
+      "placeholder": "sk-ant-…",
+      "save": "Schlüssel speichern",
+      "test": "Schlüssel testen",
+      "remove": "Schlüssel entfernen",
+      "saved": "Der Schlüssel ist im Schlüsselbund des Systems gespeichert.",
+      "removed": "Der Schlüssel ist entfernt.",
+      "testing": "Test läuft…",
+      "result": {
+        "valid": "Der Schlüssel funktioniert.",
+        "invalid": "Anthropic lehnt diesen Schlüssel ab (ungültig oder widerrufen).",
+        "inconclusive": "Anthropic hat den Schlüssel gerade nicht bestätigt: Bitte später erneut versuchen."
+      },
+      "storeUnavailable": "Der Schlüsselbund des Systems ist auf diesem Computer nicht verfügbar: Der Schlüssel kann nicht gespeichert werden.",
+      "privacy": "Der Schlüssel wird vom Betriebssystem verwahrt (Windows-Anmeldeinformationsverwaltung, macOS-Schlüsselbund) und nie wieder angezeigt. Der Test ist kostenlos; jedes gelesene Datenblatt wird von Anthropic verrechnet.",
+      "help": "Erstellen Sie einen Schlüssel in der Anthropic-Konsole (console.anthropic.com) unter API keys."
     }
   }
 }

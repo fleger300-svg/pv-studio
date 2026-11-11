@@ -8,6 +8,7 @@ mod export;
 mod layout;
 mod library;
 mod roof;
+mod settings;
 mod state;
 
 use std::sync::Arc;
@@ -65,6 +66,10 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             library::component_updates,
             library::accept_updates,
             library::library_extract_datasheet,
+            settings::api_key_status,
+            settings::set_api_key,
+            settings::delete_api_key,
+            settings::test_api_key,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

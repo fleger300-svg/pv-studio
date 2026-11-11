@@ -376,3 +376,35 @@ pub fn to_component(
     component.validate()?;
     Ok((component, warnings))
 }
+
+/// Outcome of a key check.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum KeyCheck {
+    /// The API accepted the key.
+    Valid,
+    /// The API refused it (invalid, revoked, or without permission).
+    Invalid,
+    /// The API answered something else (rate limit, overload…): the key may be fine.
+    Inconclusive,
+}
+
+/// Headers of the key check: `GET /v1/models?limit=1` (lists models, costs nothing). The
+/// shell adds `x-api-key`.
+#[must_use]
+pub fn key_check_request() -> (&'static str, Vec<(&'static str, &'static str)>) {
+    (
+        "/v1/models?limit=1",
+        vec![("anthropic-version", API_VERSION)],
+    )
+}
+
+/// Reads the key check's HTTP status.
+#[must_use]
+pub fn key_check_outcome(status: u16) -> KeyCheck {
+    match status {
+        200..=299 => KeyCheck::Valid,
+        401 | 403 => KeyCheck::Invalid,
+        _ => KeyCheck::Inconclusive,
+    }
+}
