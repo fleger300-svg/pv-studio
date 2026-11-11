@@ -114,6 +114,13 @@ export const commands = {
 	 *  are laid out again).
 	 */
 	acceptUpdates: (ids: ComponentId[]) => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("accept_updates", { ids })),
+	/**
+	 *  Reads a datasheet (PDF) with Claude and creates the component it describes, unverified
+	 *  (revision 1 by the copilot, the PDF attached). `None` when the user cancels the dialog.
+	 *  The API key comes from `ANTHROPIC_API_KEY`; `ANTHROPIC_BASE_URL` overrides the endpoint
+	 *  (tests). No lock is held during the network call.
+	 */
+	libraryExtractDatasheet: (path: string | null, hint: string | null, language: string) => typedError<ExtractionResult_Serialize | null, CommandError>(__TAURI_INVOKE("library_extract_datasheet", { path, hint, language })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -822,6 +829,7 @@ export type ComponentSummary_Deserialize = {
 	articleNo: string,
 	label: string,
 	verified: boolean,
+	source: ComponentSource,
 	archived: boolean,
 	partKind?: string | null,
 	pmaxW?: number | null,
@@ -839,6 +847,7 @@ export type ComponentSummary_Serialize = {
 	articleNo: string,
 	label: string,
 	verified: boolean,
+	source: ComponentSource,
 	archived: boolean,
 	partKind?: string | null,
 	pmaxW?: number | null,
@@ -1046,6 +1055,30 @@ export type ExpansionJointSpec = {
 	axis: JointAxis,
 	/**  Roof coordinate of the line, m. */
 	positionM: number,
+};
+
+/**
+ *  A component created from its datasheet by the copilot (unverified), with the points the
+ *  user must check.
+ */
+export type ExtractionResult = ExtractionResult_Serialize | ExtractionResult_Deserialize;
+
+/**
+ *  A component created from its datasheet by the copilot (unverified), with the points the
+ *  user must check.
+ */
+export type ExtractionResult_Deserialize = {
+	component: Component_Deserialize,
+	warnings: string[],
+};
+
+/**
+ *  A component created from its datasheet by the copilot (unverified), with the points the
+ *  user must check.
+ */
+export type ExtractionResult_Serialize = {
+	component: Component_Serialize,
+	warnings: string[],
 };
 
 /**  One changed field (`path` in the component's JSON, values as JSON text). */

@@ -64,6 +64,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             library::assign_components,
             library::component_updates,
             library::accept_updates,
+            library::library_extract_datasheet,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

@@ -219,6 +219,23 @@ question: no seam phase, global or per field, reproduces K2's lengthened bottom 
 example three different lengthenings in one field of roof 4), so K2 lengthens its bottom
 rails with a rule of its own that remains to be identified.
 
+### Component library (C1–C5, 2026-11-11)
+
+Modules, mounting systems and parts come from the user's library (`library.sqlite` in the
+application data folder, `PV_LIBRARY_PATH` for tests); projects freeze the components they use.
+
+| Acceptance | Test | Result |
+|---|---|---|
+| The base catalogue rebuilds `MountingSystem::k2_single_rail()` | `pv-model` presets, `pv-library` library | exact |
+| Atrium unchanged through the library path (adoption → arrays → layout) | `pv-pipeline --test atrium_rebuild` | 511 values, as in E4 |
+| Old `.pvproj` (≤ v7) open identically | `pv-store` `v7_snapshot_becomes_components` | resolved system equal |
+| K2 BOM to the cent with prices imported from the synthetic K2 list | `pv-pipeline --test library_bom` | exact; no silent change |
+| UI: create a module, assign it, accept a price update, import a list; fr/en/de | `e2e/c4-bibliotheque.mjs` | passed |
+| Datasheet extraction (Claude), unverified until reviewed | `pv-copilot`, `e2e/c5-extraction.mjs` | passed (recorded response, no API call) |
+
+Datasheet extraction needs `ANTHROPIC_API_KEY` (model `claude-opus-5-5`, structured outputs,
+server-side refusal fallback); `ANTHROPIC_BASE_URL` overrides the endpoint.
+
 ### macOS run (to do)
 
 On a Mac with Xcode command-line tools: `pnpm install && pnpm tauri build --no-bundle`. Then run
@@ -254,7 +271,9 @@ crates/pv-geo     2D geometry (polygons, oriented rectangles)
 crates/pv-layout  roof outlines, setbacks, module grids, mounting blocks, rails, command validation
 crates/pv-statics SIA 261 snow / wind, SIA 260 combinations, load descent, ballast (traced)
 crates/pv-graph   generic dependency graph: memoised nodes, early cut-off, cancellation
-crates/pv-pipeline project → graph wiring (layout, zones, loads, descent, ballast), compute thread
+crates/pv-pipeline project → graph wiring (components, layout, zones, loads, descent, ballast, BOM), compute thread
+crates/pv-library  component library (library.sqlite): revisions, search, prices, import, datasheets, proposals
+crates/pv-copilot  datasheet extraction with Claude (request / response, no network)
 src-tauri         Tauri 2 shell: managed state, commands, model:changed event, bindings export
 apps/desktop      React app: shell, viewport3d (instanced panels, editor), perf (HUD, benchmark),
                   workers (box selection), store (Zustand projection), i18n
@@ -299,6 +318,14 @@ Key rules, as implemented:
 | Static shadow map | Re-rendered only when the model changes. During a drag preview, the moved modules' shadows update on release. |
 | `src-tauri` tests | None: on Windows a Tauri test binary lacks the application manifest and aborts. All logic is tested in `crates/*`. |
 | Event permissions | `capabilities/default.json` grants only `core:event:allow-listen` / `allow-unlisten`. |
+| Component storage | `library.sqlite` keeps each component as typed JSON with indexed generated columns (no table per family, no translation or manufacturer table: descriptions and manufacturer live in the JSON). |
+| Base catalogue ids | Fixed UUIDs (`pv_model::component::presets`): every library, project and future `.pvlib` package names the same base components. |
+| Old mounting snapshots | Converted on open into components with content-derived ids (UUID v8), checked to resolve to the same system; the undo journal of such files is cleared (its commands use the old format). |
+| Resolution | `MountingNode` in the graph rebuilds the engines' `MountingSystem` from the frozen components; the engines are unchanged. Component references are a separate graph input, so choosing another system does not invalidate the layout nodes. |
+| Adoption | A command referring to library components the project lacks is completed in Rust with their closure (one batch, one undo step); components already frozen keep their version until an update proposal is accepted. |
+| Variant field names | Fields inside enum variants stay snake_case in JSON (`stock_length_m`, `frame_height`), like the existing `Driver`. |
+| Price lists | Read by the front end (exceljs worker, as for the export); recognition, matching and cents in Rust. No new native dependency. |
+| Copilot | `pv-copilot` is pure (request and response); the shell sends the request with `reqwest` + native TLS (schannel on Windows). A component the copilot writes is never `verified`. |
 
 ## Out of scope
 

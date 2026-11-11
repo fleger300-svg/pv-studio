@@ -379,3 +379,41 @@ fn new_parts_and_systems_can_be_created() {
         .expect("closure");
     assert_eq!(snaps.len(), 7);
 }
+
+#[test]
+fn the_copilot_never_verifies() {
+    let mut lib = LibraryStore::open_in_memory().expect("open");
+    let mut m = module("AI module", 450.0);
+    m.source = ComponentSource::AiExtracted;
+    m.verified = true;
+    let created = lib
+        .create(m, ChangeAuthor::Copilot, "datasheet")
+        .expect("create");
+    assert!(!created.verified, "rev 1 by the copilot stays unverified");
+    let mut again = created.clone();
+    again.verified = true;
+    again.label = "AI module (checked)".into();
+    let by_copilot = lib
+        .update(again.clone(), ChangeAuthor::Copilot, "")
+        .expect("rev 2");
+    assert!(!by_copilot.verified);
+    again.revision = by_copilot.revision;
+    let by_user = lib
+        .update(again, ChangeAuthor::User, "checked")
+        .expect("rev 3");
+    assert!(by_user.verified, "only the user verifies");
+    let authors: Vec<ChangeAuthor> = lib
+        .revisions(by_user.id)
+        .expect("history")
+        .into_iter()
+        .map(|r| r.author)
+        .collect();
+    assert_eq!(
+        authors,
+        [
+            ChangeAuthor::Copilot,
+            ChangeAuthor::Copilot,
+            ChangeAuthor::User
+        ]
+    );
+}

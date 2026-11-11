@@ -141,6 +141,7 @@ impl LibraryStore {
         note: &str,
     ) -> Result<Component, LibraryError> {
         component.revision = 1;
+        guard_verified(&mut component, author);
         self.check(&component)?;
         if self.get(component.id)?.is_some() {
             return Err(CommandError::new(keys::COMPONENT_EXISTS)
@@ -185,6 +186,7 @@ impl LibraryStore {
             return Ok(component);
         }
         component.revision = found + 1;
+        guard_verified(&mut component, author);
         self.check(&component)?;
         let tx = self.conn.transaction()?;
         let data = serde_json::to_string(&component)?;
@@ -243,4 +245,12 @@ fn insert_revision(
         ],
     )?;
     Ok(())
+}
+
+/// Only a person verifies data: the copilot's revisions are never `verified` (a datasheet read
+/// by AI stays unverified until the user reviews it and saves a revision of their own).
+fn guard_verified(component: &mut Component, author: ChangeAuthor) {
+    if author == ChangeAuthor::Copilot {
+        component.verified = false;
+    }
 }

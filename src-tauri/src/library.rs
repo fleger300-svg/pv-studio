@@ -486,3 +486,84 @@ pub async fn accept_updates(
         finish(&app, &state, store, changes, started)
     })
 }
+
+/// A component created from its datasheet by the copilot (unverified), with the points the
+/// user must check.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ExtractionResult {
+    pub component: Component,
+    pub warnings: Vec<String>,
+}
+
+fn network(e: impl std::fmt::Display) -> CommandError {
+    CommandError::new(keys::COPILOT_NETWORK).with_text("detail", e.to_string())
+}
+
+/// Reads a datasheet (PDF) with Claude and creates the component it describes, unverified
+/// (revision 1 by the copilot, the PDF attached). `None` when the user cancels the dialog.
+/// The API key comes from `ANTHROPIC_API_KEY`; `ANTHROPIC_BASE_URL` overrides the endpoint
+/// (tests). No lock is held during the network call.
+#[tauri::command]
+#[specta::specta]
+pub async fn library_extract_datasheet(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    path: Option<String>,
+    hint: Option<String>,
+    language: String,
+) -> Result<Option<ExtractionResult>, CommandError> {
+    let key = std::env::var("ANTHROPIC_API_KEY")
+        .ok()
+        .filter(|k| !k.trim().is_empty())
+        .ok_or_else(|| CommandError::new(keys::COPILOT_NO_KEY))?;
+    let Some(path) = pick(&app, FileKind::Datasheet, path)? else {
+        return Ok(None);
+    };
+    let bytes = std::fs::read(&path).map_err(failure)?;
+    if bytes.len() > pv_copilot::MAX_PDF_BYTES {
+        #[allow(clippy::cast_precision_loss)]
+        let mb = |n: usize| (n as f64 / 1_048_576.0 * 10.0).round() / 10.0;
+        return Err(CommandError::new(keys::COPILOT_TOO_LARGE)
+            .with_number("size", mb(bytes.len()))
+            .with_number("max", mb(pv_copilot::MAX_PDF_BYTES)));
+    }
+    let name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    let call = pv_copilot::build_request(&b64(&bytes), &name, hint.as_deref(), &language);
+    let base = std::env::var("ANTHROPIC_BASE_URL")
+        .ok()
+        .filter(|b| !b.trim().is_empty())
+        .unwrap_or_else(|| "https://api.anthropic.com".to_owned());
+    let client = reqwest::Client::builder()
+        // A careful read of a long datasheet can take minutes.
+        .timeout(std::time::Duration::from_secs(600))
+        .build()
+        .map_err(network)?;
+    let mut request = client
+        .post(format!("{}/v1/messages", base.trim_end_matches('/')))
+        .header("x-api-key", key)
+        .header("content-type", "application/json");
+    for (name, value) in call.headers {
+        request = request.header(name, value);
+    }
+    let response = request
+        .body(call.body.to_string())
+        .send()
+        .await
+        .map_err(network)?;
+    let status = response.status().as_u16();
+    let text = response.text().await.map_err(network)?;
+    let extraction = pv_copilot::parse_response(status, &text)?;
+    state.with_library(|lib| {
+        let blob = lib.put_blob(&bytes, "application/pdf")?;
+        let (component, warnings) = pv_copilot::to_component(&extraction, Some(blob))?;
+        let component = lib.create(component, ChangeAuthor::Copilot, "datasheet extraction")?;
+        Ok(Some(ExtractionResult {
+            component,
+            warnings,
+        }))
+    })
+}

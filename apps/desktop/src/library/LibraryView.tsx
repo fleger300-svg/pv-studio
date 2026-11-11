@@ -7,6 +7,7 @@ import type {
   ComponentSummary_Serialize,
   Component_Serialize,
   Currency,
+  ExtractionResult,
   ModuleElectrical,
   PartKind_Serialize,
 } from '../bindings';
@@ -16,6 +17,7 @@ import { useLibraryStore } from '../store/library';
 import { useToastStore } from '../store/toast';
 import { NumInput, TextInput } from './inputs';
 import { ImportDialog } from './ImportDialog';
+import { ExtractDialog } from './ExtractDialog';
 import { base64ToBytes } from './priceList';
 
 type Family = ComponentFamily | 'all';
@@ -45,6 +47,8 @@ export function LibraryView() {
   const [rows, setRows] = useState<ComponentSummary_Serialize[]>([]);
   const [draft, setDraft] = useState<Component_Serialize | null>(null);
   const [importing, setImporting] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [extracted, setExtracted] = useState<ExtractionResult | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -122,6 +126,14 @@ export function LibraryView() {
           {t('library.import.open')}
         </Button>
         <Button
+          variant="secondary"
+          onClick={() => {
+            setExtracting(true);
+          }}
+        >
+          {t('library.extract.open')}
+        </Button>
+        <Button
           onClick={() => {
             setOpen(false);
           }}
@@ -152,6 +164,9 @@ export function LibraryView() {
                   {r.pmaxW ? ` · ${String(r.pmaxW)} W` : ''}
                 </span>
                 {!r.verified && <span className="library__badge">{t('library.unverified')}</span>}
+                {r.source === 'aiExtracted' && (
+                  <span className="library__badge">{t('library.extract.source')}</span>
+                )}
                 {r.archived && <span className="library__badge">{t('library.archived')}</span>}
               </button>
             </li>
@@ -170,14 +185,31 @@ export function LibraryView() {
               }}
             />
           ) : selected ? (
-            <ComponentDetailView
-              id={selected}
-              version={version}
-              onDuplicate={(c) => {
-                select(null);
-                setDraft(c);
-              }}
-            />
+            <>
+              {extracted?.component.id === selected && (
+                <div className="library__report" role="status">
+                  <p>{t('library.extract.done')}</p>
+                  {extracted.warnings.length > 0 && (
+                    <>
+                      <strong>{t('library.extract.warnings')}</strong>
+                      <ul>
+                        {extracted.warnings.map((w) => (
+                          <li key={w}>{w}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+              <ComponentDetailView
+                id={selected}
+                version={version}
+                onDuplicate={(c) => {
+                  select(null);
+                  setDraft(c);
+                }}
+              />
+            </>
           ) : (
             <p className="panel-hint">{t('library.pick')}</p>
           )}
@@ -187,6 +219,20 @@ export function LibraryView() {
         <ImportDialog
           onClose={() => {
             setImporting(false);
+          }}
+        />
+      )}
+      {extracting && (
+        <ExtractDialog
+          onClose={() => {
+            setExtracting(false);
+          }}
+          onExtracted={(r) => {
+            setExtracting(false);
+            setExtracted(r);
+            setDraft(null);
+            changed();
+            select(r.component.id);
           }}
         />
       )}

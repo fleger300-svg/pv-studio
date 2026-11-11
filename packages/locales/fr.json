@@ -142,6 +142,16 @@
     "ui": {
       "render": "Cette partie de l’écran n’a pas pu s’afficher (le projet n’est pas affecté).",
       "retry": "Réessayer"
+    },
+    "copilot": {
+      "noKey": "L’extraction de fiches nécessite une clé API Anthropic (variable d’environnement ANTHROPIC_API_KEY).",
+      "network": "Le service d’extraction est injoignable : {detail}",
+      "http": "Le service d’extraction a répondu par une erreur ({status}) : {detail}",
+      "refused": "Le modèle a refusé de lire ce document ({category}).",
+      "truncated": "La réponse a été tronquée : réessayez, ou saisissez les valeurs à la main.",
+      "invalid": "La réponse est illisible ({detail}).",
+      "incomplete": "La fiche ne donne pas : {fields}. Saisissez le composant à la main.",
+      "tooLarge": "Le PDF est trop volumineux pour être envoyé ({size} Mo, au plus {max} Mo)."
     }
   },
   "hud": {
@@ -549,6 +559,17 @@
       "revision": "révision {from} → {to}",
       "price": "Prix catalogue {before} → {after}",
       "accept": "{count, plural, one {Appliquer # mise à jour} other {Appliquer # mises à jour}}"
+    },
+    "extract": {
+      "open": "Extraire d’une fiche technique (IA)…",
+      "title": "Extraire un composant de sa fiche technique",
+      "privacy": "Le PDF est envoyé à Anthropic (Claude) pour être lu. Les valeurs sont enregistrées comme un nouveau composant marqué « non vérifié » jusqu’à votre relecture de la fiche.",
+      "hint": "Variante (p. ex. LR7-54HVH-490M), facultatif",
+      "run": "Choisir le PDF et extraire…",
+      "running": "Lecture de la fiche…",
+      "done": "Composant créé à partir de la fiche : vérifiez chaque valeur, puis cochez « Données vérifiées sur la fiche technique ».",
+      "warnings": "Points à vérifier",
+      "source": "extrait par IA"
     }
   }
 }

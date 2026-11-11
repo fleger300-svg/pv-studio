@@ -78,6 +78,11 @@ const MIGRATIONS: &[&str] = &[
         bytes      BLOB NOT NULL
     ) STRICT;
     "#,
+    // v2: where a component comes from (manual, import, AI extraction), for list badges.
+    r#"
+    ALTER TABLE component ADD COLUMN source TEXT
+        GENERATED ALWAYS AS (json_extract(data, '$.source')) VIRTUAL;
+    "#,
 ];
 
 /// Latest schema version known to this build.

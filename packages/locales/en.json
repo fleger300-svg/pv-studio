@@ -142,6 +142,16 @@
     "ui": {
       "render": "This part of the screen could not be displayed (the project is not affected).",
       "retry": "Retry"
+    },
+    "copilot": {
+      "noKey": "Datasheet extraction needs an Anthropic API key (ANTHROPIC_API_KEY environment variable).",
+      "network": "The extraction service could not be reached: {detail}",
+      "http": "The extraction service answered with an error ({status}): {detail}",
+      "refused": "The model declined to read this document ({category}).",
+      "truncated": "The answer was cut off: try again, or enter the values by hand.",
+      "invalid": "The answer could not be read ({detail}).",
+      "incomplete": "The datasheet does not give: {fields}. Enter the component by hand.",
+      "tooLarge": "The PDF is too large to send ({size} MB, at most {max} MB)."
     }
   },
   "hud": {
@@ -549,6 +559,17 @@
       "revision": "revision {from} → {to}",
       "price": "List price {before} → {after}",
       "accept": "{count, plural, one {Apply # update} other {Apply # updates}}"
+    },
+    "extract": {
+      "open": "Extract from a datasheet (AI)…",
+      "title": "Extract a component from its datasheet",
+      "privacy": "The PDF is sent to Anthropic (Claude) to be read. The values are saved as a new component marked « not verified » until you check them against the datasheet.",
+      "hint": "Variant (e.g. LR7-54HVH-490M), optional",
+      "run": "Choose the PDF and extract…",
+      "running": "Reading the datasheet…",
+      "done": "Component created from the datasheet: check every value, then tick « Data checked against the datasheet ».",
+      "warnings": "Points to check",
+      "source": "extracted by AI"
     }
   }
 }

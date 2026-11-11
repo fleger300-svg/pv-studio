@@ -1,6 +1,6 @@
 //! Search over the generated columns (no JSON parsing per row).
 
-use pv_model::component::ComponentFamily;
+use pv_model::component::{ComponentFamily, ComponentSource};
 use pv_model::ComponentId;
 use rusqlite::types::Value;
 use serde::{Deserialize, Serialize};
@@ -46,6 +46,7 @@ pub struct ComponentSummary {
     pub article_no: String,
     pub label: String,
     pub verified: bool,
+    pub source: ComponentSource,
     pub archived: bool,
     #[specta(optional)]
     pub part_kind: Option<String>,
@@ -74,7 +75,7 @@ impl LibraryStore {
     pub fn search(&self, query: &SearchQuery) -> Result<Vec<ComponentSummary>, LibraryError> {
         let mut sql = String::from(
             "SELECT id, revision, family, manufacturer, model, article_no, label, verified,
-                    archived, part_kind, pmax_w, length_m, width_m
+                    archived, part_kind, pmax_w, length_m, width_m, source
                FROM component WHERE 1 = 1",
         );
         let mut args: Vec<Value> = Vec::new();
@@ -138,6 +139,11 @@ impl LibraryStore {
                     pmax_w: r.get(10)?,
                     length_m: r.get(11)?,
                     width_m: r.get(12)?,
+                    source: match r.get::<_, Option<String>>(13)?.as_deref() {
+                        Some("import") => ComponentSource::Import,
+                        Some("aiExtracted") => ComponentSource::AiExtracted,
+                        _ => ComponentSource::Manual,
+                    },
                 },
             ))
         })?;

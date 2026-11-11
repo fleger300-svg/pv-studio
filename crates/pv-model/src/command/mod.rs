@@ -73,6 +73,15 @@ pub mod keys {
     pub const COMPAT_MODULE_SIZE: &str = "errors.component.moduleSize";
     pub const COMPONENT_STALE_REVISION: &str = "errors.component.staleRevision";
     pub const COMPONENT_EXISTS: &str = "errors.component.exists";
+    /// Copilot (pv-copilot): datasheet extraction.
+    pub const COPILOT_NO_KEY: &str = "errors.copilot.noKey";
+    pub const COPILOT_NETWORK: &str = "errors.copilot.network";
+    pub const COPILOT_HTTP: &str = "errors.copilot.http";
+    pub const COPILOT_REFUSED: &str = "errors.copilot.refused";
+    pub const COPILOT_TRUNCATED: &str = "errors.copilot.truncated";
+    pub const COPILOT_INVALID: &str = "errors.copilot.invalid";
+    pub const COPILOT_INCOMPLETE: &str = "errors.copilot.incomplete";
+    pub const COPILOT_TOO_LARGE: &str = "errors.copilot.tooLarge";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -123,6 +132,14 @@ pub mod keys {
         COMPAT_MODULE_SIZE,
         COMPONENT_STALE_REVISION,
         COMPONENT_EXISTS,
+        COPILOT_NO_KEY,
+        COPILOT_NETWORK,
+        COPILOT_HTTP,
+        COPILOT_REFUSED,
+        COPILOT_TRUNCATED,
+        COPILOT_INVALID,
+        COPILOT_INCOMPLETE,
+        COPILOT_TOO_LARGE,
     ];
 }
 

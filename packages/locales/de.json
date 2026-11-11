@@ -142,6 +142,16 @@
     "ui": {
       "render": "Dieser Bildschirmbereich konnte nicht angezeigt werden (das Projekt ist nicht betroffen).",
       "retry": "Erneut versuchen"
+    },
+    "copilot": {
+      "noKey": "Die Datenblatt-Extraktion benötigt einen Anthropic-API-Schlüssel (Umgebungsvariable ANTHROPIC_API_KEY).",
+      "network": "Der Extraktionsdienst ist nicht erreichbar: {detail}",
+      "http": "Der Extraktionsdienst meldete einen Fehler ({status}): {detail}",
+      "refused": "Das Modell hat das Lesen dieses Dokuments abgelehnt ({category}).",
+      "truncated": "Die Antwort wurde abgeschnitten: Bitte erneut versuchen oder die Werte von Hand eingeben.",
+      "invalid": "Die Antwort ist nicht lesbar ({detail}).",
+      "incomplete": "Das Datenblatt enthält nicht: {fields}. Bitte die Komponente von Hand erfassen.",
+      "tooLarge": "Das PDF ist zu gross zum Senden ({size} MB, höchstens {max} MB)."
     }
   },
   "hud": {
@@ -549,6 +559,17 @@
       "revision": "Revision {from} → {to}",
       "price": "Listenpreis {before} → {after}",
       "accept": "{count, plural, one {# Update übernehmen} other {# Updates übernehmen}}"
+    },
+    "extract": {
+      "open": "Aus Datenblatt extrahieren (KI)…",
+      "title": "Komponente aus ihrem Datenblatt extrahieren",
+      "privacy": "Das PDF wird zum Lesen an Anthropic (Claude) gesendet. Die Werte werden als neue Komponente gespeichert und bleiben « nicht geprüft », bis Sie sie mit dem Datenblatt abgeglichen haben.",
+      "hint": "Variante (z. B. LR7-54HVH-490M), optional",
+      "run": "PDF wählen und extrahieren…",
+      "running": "Datenblatt wird gelesen…",
+      "done": "Komponente aus dem Datenblatt erstellt: Prüfen Sie jeden Wert und setzen Sie dann « Daten mit dem Datenblatt geprüft ».",
+      "warnings": "Zu prüfende Punkte",
+      "source": "durch KI extrahiert"
     }
   }
 }
