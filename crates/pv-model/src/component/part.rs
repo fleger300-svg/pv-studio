@@ -93,7 +93,6 @@ impl PartSpec {
             {
                 Some("capacity")
             }
-            PartKind::BallastBlock if !positive(self.unit_mass_kg) => Some("unitMassKg"),
             _ => None,
         }
     }

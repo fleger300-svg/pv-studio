@@ -10,6 +10,7 @@
 //! breaking change of its shape, and the library migrates stored specs accordingly.
 
 pub mod compat;
+pub mod legacy;
 pub mod module;
 pub mod mounting;
 pub mod part;

@@ -3,10 +3,11 @@
 use std::path::{Path, PathBuf};
 
 use pv_model::command::keys;
+use pv_model::component::legacy::adopt_legacy_mounting;
 use pv_model::{
     ArrayGrid, ArrayId, ArrayLayoutParams, Building, BuildingId, ChangeSet, Command, CommandError,
-    ModuleId, ModuleInstance, ModuleState, Orientation, PanelArray, Pricing, Project, ProjectId,
-    RoofFace, RoofFaceId, RoofKind,
+    ComponentId, ComponentSnapshot, ModuleId, ModuleInstance, ModuleState, MountingSystem,
+    Orientation, PanelArray, Pricing, Project, ProjectId, RoofFace, RoofFaceId, RoofKind,
 };
 use rusqlite::{params, Connection, OptionalExtension, Row, Transaction};
 use uuid::Uuid;
@@ -150,7 +151,8 @@ impl ProjectStore {
         }
         let mut conn = Connection::open(path)?;
         schema::prepare(&mut conn)?;
-        let project = load_project(&conn)?;
+        let (mut project, legacy) = load_project(&conn)?;
+        convert_legacy(&mut conn, &mut project, &legacy)?;
         project.validate()?;
         Ok(Self {
             conn,
@@ -417,6 +419,9 @@ fn persist(tx: &Transaction<'_>, project: &Project, changes: &ChangeSet) -> Resu
             params![serde_json::to_string(&project.pricing)?],
         )?;
     }
+    if changes.components {
+        write_components(tx, project)?;
+    }
     if !changes.modules_only() {
         persist_entities(tx, project, changes)?;
     }
@@ -558,8 +563,9 @@ fn upsert_array(tx: &Transaction<'_>, ord: usize, a: &PanelArray) -> Result<(), 
     tx.prepare_cached(
         r#"INSERT INTO "array" (id, roof_face_id, ord, module_length_m, module_width_m, orientation, tilt_on_roof_deg, azimuth_offset_deg,
                                 grid_rows, grid_cols, grid_origin_u, grid_origin_v, grid_pitch_u, grid_pitch_v,
-                                grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json)
-           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)
+                                grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json,
+                                module_ref, mounting_ref)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, NULL, ?20, ?21)
            ON CONFLICT(id) DO UPDATE SET roof_face_id = excluded.roof_face_id, ord = excluded.ord,
                module_length_m = excluded.module_length_m, module_width_m = excluded.module_width_m,
                orientation = excluded.orientation, tilt_on_roof_deg = excluded.tilt_on_roof_deg,
@@ -569,7 +575,7 @@ fn upsert_array(tx: &Transaction<'_>, ord: usize, a: &PanelArray) -> Result<(), 
                grid_pitch_v = excluded.grid_pitch_v, grid_block_cols = excluded.grid_block_cols,
                grid_block_rows = excluded.grid_block_rows, grid_block_extra_u = excluded.grid_block_extra_u,
                grid_block_extra_v = excluded.grid_block_extra_v, layout_json = excluded.layout_json,
-               mounting_json = excluded.mounting_json"#,
+               mounting_json = NULL, module_ref = excluded.module_ref, mounting_ref = excluded.mounting_ref"#,
     )?
     .execute(params![
         a.id.0.to_string(), a.roof_face_id.0.to_string(), ord as i64,
@@ -579,7 +585,8 @@ fn upsert_array(tx: &Transaction<'_>, ord: usize, a: &PanelArray) -> Result<(), 
         a.grid.rows, a.grid.cols, a.grid.origin_u, a.grid.origin_v, a.grid.pitch_u, a.grid.pitch_v,
         a.grid.block_cols, a.grid.block_rows, a.grid.block_extra_u, a.grid.block_extra_v,
         serde_json::to_string(&a.layout)?,
-        a.mounting.as_ref().map(serde_json::to_string).transpose()?,
+        a.module.map(|id| id.to_string()),
+        a.mounting.map(|id| id.to_string()),
     ])?;
     Ok(())
 }
@@ -622,10 +629,13 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
     for (ord, a) in p.arrays.iter().enumerate() {
         upsert_array(tx, ord, a)?;
     }
+    write_components(tx, p)?;
     insert_modules(tx, &p.modules)
 }
 
-fn load_project(conn: &Connection) -> Result<Project, StoreError> {
+/// The project, and the old mounting snapshot of each array still to convert (files written
+/// before schema v8).
+fn load_project(conn: &Connection) -> Result<(Project, Vec<Option<MountingSystem>>), StoreError> {
     let (id, name, pricing): (Uuid, String, Pricing) = conn
         .query_row(
             "SELECT id, name, pricing_json FROM project LIMIT 1",
@@ -699,11 +709,23 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
         .prepare(
             r#"SELECT id, roof_face_id, module_length_m, module_width_m, orientation, tilt_on_roof_deg, azimuth_offset_deg,
                       grid_rows, grid_cols, grid_origin_u, grid_origin_v, grid_pitch_u, grid_pitch_v,
-                      grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json
+                      grid_block_cols, grid_block_rows, grid_block_extra_u, grid_block_extra_v, layout_json, mounting_json,
+                      module_ref, mounting_ref
                FROM "array" ORDER BY ord"#,
         )?
         .query_map([], |r| {
-            Ok(PanelArray {
+            let legacy: Option<MountingSystem> = json_col(r, 18)?;
+            let module = r
+                .get::<_, Option<String>>(19)?
+                .map(|_| uuid_col(r, 19).map(ComponentId))
+                .transpose()?;
+            let mounting = r
+                .get::<_, Option<String>>(20)?
+                .map(|_| uuid_col(r, 20).map(ComponentId))
+                .transpose()?;
+            // Old snapshot only when the array has no component yet.
+            let legacy = legacy.filter(|_| mounting.is_none());
+            Ok((legacy, PanelArray {
                 id: ArrayId(uuid_col(r, 0)?),
                 roof_face_id: RoofFaceId(uuid_col(r, 1)?),
                 module_length_m: r.get(2)?,
@@ -728,10 +750,13 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
                     block_extra_v: r.get(16)?,
                 },
                 layout: json_with_defaults::<ArrayLayoutParams>(r, 17)?,
-                mounting: json_col(r, 18)?,
-            })
+                module,
+                mounting,
+            }))
         })?
         .collect::<Result<Vec<_>, _>>()?;
+    let (legacy, arrays): (Vec<Option<MountingSystem>>, Vec<PanelArray>) =
+        arrays.into_iter().unzip();
 
     let modules = conn
         .prepare(
@@ -755,15 +780,84 @@ fn load_project(conn: &Connection) -> Result<Project, StoreError> {
         })?
         .collect::<Result<Vec<_>, _>>()?;
 
-    Ok(Project {
-        id: ProjectId(id),
-        name,
-        buildings,
-        roof_faces,
-        arrays,
-        modules,
-        pricing,
-    })
+    Ok((
+        Project {
+            id: ProjectId(id),
+            name,
+            buildings,
+            roof_faces,
+            arrays,
+            modules,
+            pricing,
+            components: load_components(conn)?,
+        },
+        legacy,
+    ))
+}
+
+/// Rewrites the frozen components.
+fn write_components(tx: &Transaction<'_>, project: &Project) -> Result<(), StoreError> {
+    tx.execute("DELETE FROM component_snapshot", [])?;
+    let mut stmt = tx.prepare_cached(
+        "INSERT INTO component_snapshot (id, revision, component_json, price_json) VALUES (?1, ?2, ?3, ?4)",
+    )?;
+    for s in &project.components {
+        stmt.execute(params![
+            s.component.id.to_string(),
+            s.component.revision,
+            serde_json::to_string(&s.component)?,
+            s.price.as_ref().map(serde_json::to_string).transpose()?,
+        ])?;
+    }
+    Ok(())
+}
+
+fn load_components(conn: &Connection) -> Result<Vec<ComponentSnapshot>, StoreError> {
+    let rows = conn
+        .prepare("SELECT component_json, price_json FROM component_snapshot ORDER BY id")?
+        .query_map([], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, Option<String>>(1)?))
+        })?
+        .collect::<Result<Vec<_>, _>>()?;
+    let mut out = rows
+        .into_iter()
+        .map(|(c, p)| {
+            Ok(ComponentSnapshot {
+                component: serde_json::from_str(&c)?,
+                price: p.as_deref().map(serde_json::from_str).transpose()?,
+            })
+        })
+        .collect::<Result<Vec<_>, StoreError>>()?;
+    // Canonical order of `Project::components` (the text order of ids is the UUID order).
+    out.sort_by_key(|s| s.component.id);
+    Ok(out)
+}
+
+/// Converts the old mounting snapshots (schema ≤ v7) into frozen components, and writes the
+/// result. Returns whether anything was converted.
+fn convert_legacy(
+    conn: &mut Connection,
+    project: &mut Project,
+    legacy: &[Option<MountingSystem>],
+) -> Result<bool, StoreError> {
+    let mut converted = false;
+    for (i, m) in legacy.iter().enumerate() {
+        if let Some(m) = m {
+            adopt_legacy_mounting(project, i, m)?;
+            converted = true;
+        }
+    }
+    if converted {
+        let tx = conn.transaction()?;
+        write_components(&tx, project)?;
+        for (ord, a) in project.arrays.iter().enumerate() {
+            upsert_array(&tx, ord, a)?;
+        }
+        // Journaled commands carry the old snapshot format: history starts afresh.
+        tx.execute("DELETE FROM command_log", [])?;
+        tx.commit()?;
+    }
+    Ok(converted)
 }
 
 #[cfg(test)]
@@ -821,10 +915,63 @@ mod tests {
                 parallel_kn: 0.34,
             });
         }
-        p.arrays[0].mounting = Some(m);
+        adopt_legacy_mounting(&mut p, 0, &m).expect("components");
         let path = dir.path().join("statics.pvproj");
         drop(ProjectStore::create(&path, p.clone()).expect("create"));
-        assert_eq!(ProjectStore::open(&path).expect("open").project(), &p);
+        let reopened = ProjectStore::open(&path).expect("open");
+        assert_eq!(reopened.project(), &p);
+        let p = reopened.project();
+        assert_eq!(p.resolve_mounting(&p.arrays[0]).expect("resolve"), Some(m));
+    }
+
+    /// Writes `m` as a pre-library snapshot (schema v7) on array 0, with a journal entry.
+    fn v7_file_with_snapshot(path: &Path, m: &MountingSystem) -> Project {
+        let original = fixture_project();
+        let mut s = ProjectStore::create(path, original.clone()).expect("create");
+        s.apply(
+            &Command::SetDiscount {
+                manufacturer: "K2 Systems".into(),
+                rate: Some(0.3),
+            },
+            Author::User,
+        )
+        .expect("journal entry");
+        let expected = s.project().clone();
+        drop(s);
+        let conn = Connection::open(path).expect("raw open");
+        conn.execute(
+            r#"UPDATE "array" SET mounting_json = ?1 WHERE ord = 0"#,
+            [serde_json::to_string(m).expect("json")],
+        )
+        .expect("snapshot");
+        conn.execute_batch(
+            r#"DROP TABLE component_snapshot;
+               ALTER TABLE "array" DROP COLUMN module_ref;
+               ALTER TABLE "array" DROP COLUMN mounting_ref;
+               PRAGMA user_version = 7;"#,
+        )
+        .expect("downgrade to v7");
+        expected
+    }
+
+    /// v8: old snapshots become frozen components resolving to the same system; the undo
+    /// journal (old command format) is cleared; reopening converts nothing more.
+    #[test]
+    fn v7_snapshot_becomes_components() {
+        let dir = tempfile::tempdir().expect("tmp");
+        let path = dir.path().join("v7.pvproj");
+        let m = MountingSystem::k2_single_rail();
+        let before = v7_file_with_snapshot(&path, &m);
+        let s = ProjectStore::open(&path).expect("open v7");
+        let p = s.project().clone();
+        assert_eq!(p.resolve_mounting(&p.arrays[0]).expect("resolve"), Some(m));
+        assert_eq!(p.arrays[1].mounting, None);
+        assert_eq!(p.components.len(), 7, "5 parts, module, system");
+        assert_eq!(p.pricing, before.pricing);
+        assert_eq!(s.history_state().expect("history"), (false, false));
+        drop(s);
+        let again = ProjectStore::open(&path).expect("reopen");
+        assert_eq!(again.project(), &p, "stable: ids derived from content");
     }
 
     /// A v3 file (before the statics columns) migrates: the building table is rebuilt
@@ -842,6 +989,9 @@ mod tests {
                    ALTER TABLE "array" DROP COLUMN mounting_json;
                    ALTER TABLE project DROP COLUMN pricing_json;
                    DROP TABLE bom_snapshot;
+                   DROP TABLE component_snapshot;
+                   ALTER TABLE "array" DROP COLUMN module_ref;
+                   ALTER TABLE "array" DROP COLUMN mounting_ref;
                    PRAGMA user_version = 3;"#,
             )
             .expect("downgrade to v3");
@@ -911,11 +1061,16 @@ mod tests {
     fn v4_mounting_snapshot_upgrades_without_parts() {
         let dir = tempfile::tempdir().expect("tmp");
         let path = dir.path().join("v4.pvproj");
-        let mut original = fixture_project();
-        original.arrays[0].mounting = Some(pv_model::MountingSystem::k2_single_rail());
+        let original = fixture_project();
         drop(ProjectStore::create(&path, original.clone()).expect("create"));
         {
             let conn = Connection::open(&path).expect("raw open");
+            let json = serde_json::to_string(&MountingSystem::k2_single_rail()).expect("json");
+            conn.execute(
+                r#"UPDATE "array" SET mounting_json = ?1 WHERE ord = 0"#,
+                [json],
+            )
+            .expect("snapshot");
             conn.execute_batch(
                 r#"UPDATE "array" SET mounting_json = json_remove(mounting_json, '$.parts')
                      WHERE mounting_json IS NOT NULL;
@@ -923,16 +1078,24 @@ mod tests {
                    DROP TABLE bom_snapshot;
                    ALTER TABLE building DROP COLUMN footprint_json;
                    ALTER TABLE building DROP COLUMN roof_json;
+                   DROP TABLE component_snapshot;
+                   ALTER TABLE "array" DROP COLUMN module_ref;
+                   ALTER TABLE "array" DROP COLUMN mounting_ref;
                    PRAGMA user_version = 4;"#,
             )
             .expect("downgrade to v4");
         }
         let reopened = ProjectStore::open(&path).expect("open v4");
-        let mut expected = original;
-        if let Some(m) = expected.arrays[0].mounting.as_mut() {
-            m.parts.clear();
-        }
-        assert_eq!(reopened.project(), &expected);
+        let p = reopened.project();
+        let expected = MountingSystem {
+            parts: Vec::new(),
+            ..MountingSystem::k2_single_rail()
+        };
+        assert_eq!(
+            p.resolve_mounting(&p.arrays[0]).expect("resolve"),
+            Some(expected)
+        );
+        assert_eq!(p.modules, original.modules);
     }
 
     #[test]
@@ -1021,6 +1184,9 @@ mod tests {
                    ALTER TABLE building DROP COLUMN site_json;
                    ALTER TABLE project DROP COLUMN pricing_json;
                    DROP TABLE bom_snapshot;
+                   DROP TABLE component_snapshot;
+                   ALTER TABLE "array" DROP COLUMN module_ref;
+                   ALTER TABLE "array" DROP COLUMN mounting_ref;
                    PRAGMA user_version = 1;"#,
             )
             .expect("downgrade to v1");

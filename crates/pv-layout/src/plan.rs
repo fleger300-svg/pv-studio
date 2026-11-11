@@ -11,7 +11,7 @@ use pv_model::project::MODULES_PER_STRING;
 use pv_model::stress::{EDGE_SETBACK_M, MODULE_GAP_M, MODULE_LENGTH_M, MODULE_WIDTH_M};
 use pv_model::{
     ArrayGrid, ArrayId, ArrayLayoutParams, Command, CommandError, CrossRailSpec, ModuleSlot,
-    ModuleState, MountingSystem, Orientation, PanelArray, Project, RoofFace,
+    ModuleState, Orientation, PanelArray, Project, RoofFace,
 };
 
 use crate::grid::{Cell, Search};
@@ -36,7 +36,8 @@ impl LayoutError {
 }
 
 /// A new array for a face: the reference module (portrait), 2 cm gaps, 30 cm setbacks,
-/// K2 SingleRail; no modules yet (the layout places them).
+/// K2 SingleRail rail geometry; no components yet (the shell assigns the library's module and
+/// system with `SetArrayComponents`) and no modules (the layout places them).
 #[must_use]
 pub fn default_array(face: &RoofFace) -> PanelArray {
     PanelArray {
@@ -64,7 +65,8 @@ pub fn default_array(face: &RoofFace) -> PanelArray {
             rails: Some(CrossRailSpec::k2_single_rail()),
             ..ArrayLayoutParams::default()
         },
-        mounting: Some(MountingSystem::k2_single_rail()),
+        module: None,
+        mounting: None,
     }
 }
 

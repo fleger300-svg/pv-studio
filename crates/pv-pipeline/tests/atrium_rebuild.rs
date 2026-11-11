@@ -16,9 +16,10 @@ use common::*;
 use pv_graph::{CancelToken, Graph, Instance};
 use pv_layout::model::grid_spec;
 use pv_layout::{default_array, plan_layout, Search};
+use pv_model::component::presets;
 use pv_model::{
-    BlockParams, Building, BuildingId, ChangeSet, Command, EdgeRoof, ModuleState, MountingSystem,
-    Orientation, Project, RoofFace, RoofKind, RoofSpec, SupportGridKind, SupportGridSpec,
+    BlockParams, Building, BuildingId, ChangeSet, Command, EdgeRoof, ModuleState, Orientation,
+    Project, RoofFace, RoofKind, RoofSpec, SupportGridKind, SupportGridSpec,
 };
 use pv_pipeline::nodes::bom::{FieldCountsNode, ProjectBom};
 use pv_pipeline::{sync_changes, sync_project, FieldStatics};
@@ -165,7 +166,8 @@ fn field(face: &RoofFace, f: &FieldIn) -> pv_model::PanelArray {
     });
     a.layout.edge_setback_m = 0.0;
     a.layout.rails = Some(k2_rails());
-    a.mounting = Some(MountingSystem::k2_single_rail());
+    a.module = Some(presets::LR7_54HVH_490M);
+    a.mounting = Some(presets::K2_SINGLE_RAIL);
     let (w, l) = grid_spec(&a).extent(f.cols, f.rows);
     // K2 prints sizes to the centimetre: half a unit of slack, as when drawing the field.
     let ([u0, v0], w, l) = (f.lower_left, w + 0.005, l + 0.005);
@@ -222,6 +224,14 @@ fn rebuild() -> Rebuilt {
         roofs: Vec::new(),
         _dir: dir,
     };
+
+    // 0. The module and the system, frozen from the component library (base catalogue).
+    let library = pv_library::LibraryStore::open_in_memory().unwrap();
+    let date = pv_model::component::IsoDate::parse("2026-11-11").unwrap();
+    let snapshots = library
+        .closure(&[presets::LR7_54HVH_490M, presets::K2_SINGLE_RAIL], &date)
+        .unwrap();
+    apply(&mut r, &Command::AdoptComponents { snapshots });
 
     // 1. Buildings: the roof generator gives each one its faces (one batch per building).
     let mut ids = BTreeMap::new();

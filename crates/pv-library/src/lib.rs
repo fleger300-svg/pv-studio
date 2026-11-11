@@ -8,6 +8,7 @@
 //!   ([`pv_model::ComponentSnapshot`], see [`snapshot`]) and get update proposals.
 //! - Library changes are not commands of a project and never enter a project journal.
 
+pub mod adoption;
 mod blobs;
 mod components;
 mod error;

@@ -98,6 +98,8 @@ pub struct PriceEntry {
     pub component: ComponentId,
     pub supplier: String,
     /// Per piece, not per pack (discounts and sale units are applied by the BOM engine).
+    /// Exported to TypeScript as `number` (exact below 2⁵³ cents).
+    #[specta(type = f64)]
     pub list_price_cents: i64,
     pub currency: Currency,
     /// First day of validity (inclusive).

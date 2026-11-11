@@ -7,12 +7,13 @@ use pv_statics::descent::{descend, CrossRailSystem, DescentResult, SupportGrid, 
 use pv_statics::RoofZone;
 use serde::Serialize;
 
+use super::components::MountingNode;
 use super::layout::Hardware;
 use super::loads::ZoneLoads;
 use super::{array_of, kind};
 use crate::convert::{fixation, rail_section, support_grid};
 use crate::error::statics_error;
-use crate::inputs::{ArrayIn, FaceIn, MountingIn};
+use crate::inputs::{ArrayIn, FaceIn};
 
 /// Descent of one zone.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -31,7 +32,7 @@ kind!(
 impl Derived for Descent {
     fn compute(ctx: &mut Ctx<'_>, i: Instance) -> Result<Option<Vec<ZoneDescent>>, GraphError> {
         array_of(i)?;
-        let mounting = ctx.get::<MountingIn>(i)?;
+        let mounting = ctx.get::<MountingNode>(i)?;
         let Some(m) = mounting.as_ref() else {
             return Err(CommandError::new(keys::STATICS_MOUNTING_MISSING).into());
         };

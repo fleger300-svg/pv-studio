@@ -51,7 +51,11 @@ export const commands = {
 	roofForm: (footprint: ([number, number])[], spec: RoofSpec_Deserialize, eaveHeightM: number) => typedError<RoofForm, CommandError>(__TAURI_INVOKE("roof_form", { footprint, spec, eaveHeightM })),
 	/**  The per-edge specification of a form (`None` for a custom roof: keep the edges). */
 	roofFromForm: (footprint: ([number, number])[], form: RoofForm) => typedError<RoofSpec_Serialize | null, CommandError>(__TAURI_INVOKE("roof_from_form", { footprint, form })),
-	/**  A new array for a roof face (reference module, K2 SingleRail, usual gaps and setbacks). */
+	/**
+	 *  A new array for a roof face: the base catalogue's module (LONGi LR7-54HVH-490M) and
+	 *  system (K2 SingleRail), usual gaps and setbacks. The components are frozen when the array
+	 *  is applied (`apply_layout` / `apply_command`).
+	 */
 	defaultArray: (faceId: RoofFaceId) => typedError<PanelArray_Serialize, CommandError>(__TAURI_INVOKE("default_array", { faceId })),
 	/**
 	 *  The batch that gives `array` (new or changed) its settings and lays out its whole face
@@ -63,17 +67,17 @@ export const commands = {
 	 *  explicit batch, like `apply_command`): large fields do not send their thousands of
 	 *  module slots to the front-end and back.
 	 */
-	applyLayout: (array: PanelArray_Deserialize) => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("apply_layout", { array })),
+	applyLayout: (array: PanelArray_Deserialize) => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("apply_layout", { array })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
 	getModuleBufferFor: (ids: ModuleId[]) => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer_for", { ids })),
 	/**  Validates, applies and journals a model command. */
-	applyCommand: (cmd: Command_Deserialize) => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("apply_command", { cmd })),
+	applyCommand: (cmd: Command_Deserialize) => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("apply_command", { cmd })),
 	/**  Undoes the last command. */
-	undo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("undo")),
+	undo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
-	redo: () => typedError<ApplyResult, CommandError>(__TAURI_INVOKE("redo")),
+	redo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("redo")),
 	/**  Latest statics results of the open project (no computation: read from the cache). */
 	getStaticsSnapshot: () => typedError<StaticsSnapshot_Serialize, CommandError>(__TAURI_INVOKE("get_statics_snapshot")),
 	/**
@@ -123,13 +127,33 @@ export type AeroZoneSpec = {
 };
 
 /**  Result of `apply_command`, `undo` and `redo`. */
-export type ApplyResult = {
-	changes: ChangeSet,
+export type ApplyResult = ApplyResult_Serialize | ApplyResult_Deserialize;
+
+/**  Result of `apply_command`, `undo` and `redo`. */
+export type ApplyResult_Deserialize = {
+	changes: ChangeSet_Deserialize,
 	/**  Time spent in Rust (validation + apply + journal), microseconds. */
 	rustUs: number,
 	canUndo: boolean,
 	canRedo: boolean,
 	activeModuleCount: number,
+};
+
+/**  Result of `apply_command`, `undo` and `redo`. */
+export type ApplyResult_Serialize = {
+	changes: ChangeSet_Serialize,
+	/**  Time spent in Rust (validation + apply + journal), microseconds. */
+	rustUs: number,
+	canUndo: boolean,
+	canRedo: boolean,
+	activeModuleCount: number,
+};
+
+/**  Type approval or technical assessment of a system. */
+export type Approval = {
+	/**  Document reference (e.g. ETA, abZ, test report number). */
+	reference: string,
+	issuedBy: string,
 };
 
 /**  Regular grid on which an array's modules were laid out (used for click lookup). */
@@ -249,6 +273,10 @@ export type ArraySummary_Deserialize = {
 	moduleSize: [number, number, number],
 	/**  Half extents of the footprint on the roof plane along (u, v), metres. */
 	halfFootprint: [number, number],
+	/**  Label of the module component (`None`: generic module). */
+	moduleLabel?: string | null,
+	/**  Label of the mounting system component (`None`: none chosen). */
+	mountingLabel?: string | null,
 };
 
 export type ArraySummary_Serialize = {
@@ -262,24 +290,10 @@ export type ArraySummary_Serialize = {
 	moduleSize: [number, number, number],
 	/**  Half extents of the footprint on the roof plane along (u, v), metres. */
 	halfFootprint: [number, number],
-};
-
-/**  One article of a manufacturer's catalogue. */
-export type Article = {
-	/**  Manufacturer's article number (e.g. `2004393`). */
-	articleNo: string,
-	manufacturer: string,
-	/**  Manufacturer's label, shown when no translation exists. */
-	label: string,
-	/**  Translated descriptions by language (`fr`, `de`, `en`); may be empty. */
-	descriptions: { [key in string]: string },
-	/**  Mass of one piece [kg]. */
-	unitMassKg: number,
-	/**  Pieces per sale unit (pack, bundle). */
-	packQty: number,
-	/**  List price of one piece, in `currency`; 0 when unknown. */
-	listPrice: number,
-	currency: string,
+	/**  Label of the module component (`None`: generic module). */
+	moduleLabel?: string | null,
+	/**  Label of the mounting system component (`None`: none chosen). */
+	mountingLabel?: string | null,
 };
 
 /**  Ballast data of an aerodynamic (east-west) system. */
@@ -299,6 +313,9 @@ export type BallastSpec = {
 	frictionCoefficient: number,
 	frictionSource: string,
 };
+
+/**  Identifies a stored file (datasheet PDF) of the component library. */
+export type BlobId = string;
 
 /**  Grouping of modules into mounting blocks (rails continuous inside a block only). */
 export type BlockParams = {
@@ -489,11 +506,37 @@ export type Building_Serialize = {
 };
 
 /**  What a command changed. */
-export type ChangeSet = {
+export type ChangeSet = ChangeSet_Serialize | ChangeSet_Deserialize;
+
+/**  What a command changed. */
+export type ChangeSet_Deserialize = {
 	/**  Modules whose position or state changed. Sorted, unique; empty when `structure`. */
 	moduleIds: ModuleId[],
 	/**  The project's pricing (discounts) changed. */
 	pricing: boolean,
+	/**  The frozen components changed (adopted, updated or forgotten). */
+	components?: boolean,
+	/**  Buildings added, changed or removed. Sorted, unique. */
+	buildings: BuildingId[],
+	/**  Roof faces added, changed or removed. Sorted, unique. */
+	faces: RoofFaceId[],
+	/**  Arrays added, changed or removed. Sorted, unique. */
+	arrays: ArrayId[],
+	/**
+	 *  Modules were added or removed for good: ids were renumbered, every module-indexed
+	 *  view (GPU buffers, selections) must be rebuilt.
+	 */
+	structure: boolean,
+};
+
+/**  What a command changed. */
+export type ChangeSet_Serialize = {
+	/**  Modules whose position or state changed. Sorted, unique; empty when `structure`. */
+	moduleIds: ModuleId[],
+	/**  The project's pricing (discounts) changed. */
+	pricing: boolean,
+	/**  The frozen components changed (adopted, updated or forgotten). */
+	components: boolean,
 	/**  Buildings added, changed or removed. Sorted, unique. */
 	buildings: BuildingId[],
 	/**  Roof faces added, changed or removed. Sorted, unique. */
@@ -545,6 +588,23 @@ export type Command_Deserialize =
 { type: "RemoveArray"; id: ArrayId } | 
 /**  Replaces all modules of an array. Structural: module ids are renumbered. */
 { type: "SetArrayModules"; array_id: ArrayId; modules: ModuleSlot[] } | 
+/**
+ *  Freezes library components into the project (identical copies already there are
+ *  skipped; a different copy with the same id is refused: use `UpdateComponents`).
+ */
+{ type: "AdoptComponents"; snapshots: ComponentSnapshot_Deserialize[] } | 
+/**  Removes frozen components no array or system refers to. */
+{ type: "ForgetComponents"; ids: ComponentId[] } | 
+/**
+ *  Replaces frozen components (accepted update proposals); arrays using an updated
+ *  module get its dimensions.
+ */
+{ type: "UpdateComponents"; snapshots: ComponentSnapshot_Deserialize[] } | 
+/**
+ *  Sets the module and mounting system of an array (checked for compatibility; the
+ *  module's dimensions are copied, a newly chosen system brings its rail geometry).
+ */
+{ type: "SetArrayComponents"; array_id: ArrayId; module?: ComponentId | null; mounting?: ComponentId | null } | 
 /**  Several commands applied as one, all or nothing. */
 { type: "Batch"; commands: Command_Deserialize[] };
 
@@ -577,8 +637,120 @@ export type Command_Serialize =
 { type: "RemoveArray"; id: ArrayId } | 
 /**  Replaces all modules of an array. Structural: module ids are renumbered. */
 { type: "SetArrayModules"; array_id: ArrayId; modules: ModuleSlot[] } | 
+/**
+ *  Freezes library components into the project (identical copies already there are
+ *  skipped; a different copy with the same id is refused: use `UpdateComponents`).
+ */
+{ type: "AdoptComponents"; snapshots: ComponentSnapshot_Serialize[] } | 
+/**  Removes frozen components no array or system refers to. */
+{ type: "ForgetComponents"; ids: ComponentId[] } | 
+/**
+ *  Replaces frozen components (accepted update proposals); arrays using an updated
+ *  module get its dimensions.
+ */
+{ type: "UpdateComponents"; snapshots: ComponentSnapshot_Serialize[] } | 
+/**
+ *  Sets the module and mounting system of an array (checked for compatibility; the
+ *  module's dimensions are copied, a newly chosen system brings its rail geometry).
+ */
+{ type: "SetArrayComponents"; array_id: ArrayId; module: ComponentId | null; mounting: ComponentId | null } | 
 /**  Several commands applied as one, all or nothing. */
 { type: "Batch"; commands: Command_Serialize[] };
+
+/**  One revision of a catalogue entry. */
+export type Component = Component_Serialize | Component_Deserialize;
+
+/**  Identifies a library component across all its revisions. */
+export type ComponentId = string;
+
+/**  A component frozen into a project, with the price it was adopted at. */
+export type ComponentSnapshot = ComponentSnapshot_Serialize | ComponentSnapshot_Deserialize;
+
+/**  A component frozen into a project, with the price it was adopted at. */
+export type ComponentSnapshot_Deserialize = {
+	component: Component_Deserialize,
+	/**  `None` when the library had no valid price at adoption. */
+	price?: PriceEntry_Deserialize | null,
+};
+
+/**  A component frozen into a project, with the price it was adopted at. */
+export type ComponentSnapshot_Serialize = {
+	component: Component_Serialize,
+	/**  `None` when the library had no valid price at adoption. */
+	price?: PriceEntry_Serialize | null,
+};
+
+/**  Where a component's data comes from. */
+export type ComponentSource = 
+/**  Entered by hand. */
+"manual" | 
+/**  Imported from a manufacturer's list (K2 xlsx, CSV). */
+"import" | 
+/**  Extracted from a datasheet by the copilot; never `verified` until reviewed. */
+"aiExtracted";
+
+/**  Family-specific data of a component (closed set; electrical families come later). */
+export type ComponentSpec = ComponentSpec_Serialize | ComponentSpec_Deserialize;
+
+/**  Family-specific data of a component (closed set; electrical families come later). */
+export type ComponentSpec_Deserialize = {
+	family: "module",
+} & ModuleSpec_Deserialize | {
+	family: "mountingSystem",
+} & MountingSystemSpec_Deserialize | {
+	family: "mountingPart",
+} & PartSpec_Deserialize;
+
+/**  Family-specific data of a component (closed set; electrical families come later). */
+export type ComponentSpec_Serialize = {
+	family: "module",
+} & ModuleSpec_Serialize | {
+	family: "mountingSystem",
+} & MountingSystemSpec_Serialize | {
+	family: "mountingPart",
+} & PartSpec_Serialize;
+
+/**  One revision of a catalogue entry. */
+export type Component_Deserialize = {
+	/**  Stable across revisions. */
+	id: ComponentId,
+	/**  1 for the first revision, +1 on every change. */
+	revision: number,
+	manufacturer: string,
+	/**  Manufacturer's model or product name (e.g. `LR7-54HVH-490M`, `SingleRail 36`). */
+	model: string,
+	/**  Manufacturer's article number; empty when the component has none (modules often). */
+	articleNo: string,
+	/**  Label shown in lists and reports when no translation exists. */
+	label: string,
+	descriptions: Descriptions_Deserialize,
+	source: ComponentSource,
+	/**  Data reviewed by a person (always `false` right after an AI extraction). */
+	verified: boolean,
+	datasheet?: BlobId | null,
+	spec: ComponentSpec_Deserialize,
+};
+
+/**  One revision of a catalogue entry. */
+export type Component_Serialize = {
+	/**  Stable across revisions. */
+	id: ComponentId,
+	/**  1 for the first revision, +1 on every change. */
+	revision: number,
+	manufacturer: string,
+	/**  Manufacturer's model or product name (e.g. `LR7-54HVH-490M`, `SingleRail 36`). */
+	model: string,
+	/**  Manufacturer's article number; empty when the component has none (modules often). */
+	articleNo: string,
+	/**  Label shown in lists and reports when no translation exists. */
+	label: string,
+	descriptions: Descriptions_Serialize,
+	source: ComponentSource,
+	/**  Data reviewed by a person (always `false` right after an AI extraction). */
+	verified: boolean,
+	datasheet?: BlobId | null,
+	spec: ComponentSpec_Serialize,
+};
 
 /**  A pass could not run. */
 export type ComputeFailed = {
@@ -651,6 +823,26 @@ export type CrossRailSpec_Serialize = {
 	fixationEdgeM: number,
 	/**  Maximum bottom-rail cantilever beyond the outer fixation, m. */
 	maxCantileverM?: number | null,
+};
+
+/**  Currency of a price (ISO 4217). */
+export type Currency = "CHF" | "EUR";
+
+/**  Translated descriptions; a missing language falls back to the manufacturer's label. */
+export type Descriptions = Descriptions_Serialize | Descriptions_Deserialize;
+
+/**  Translated descriptions; a missing language falls back to the manufacturer's label. */
+export type Descriptions_Deserialize = {
+	fr?: string | null,
+	de?: string | null,
+	en?: string | null,
+};
+
+/**  Translated descriptions; a missing language falls back to the manufacturer's label. */
+export type Descriptions_Serialize = {
+	fr?: string | null,
+	de?: string | null,
+	en?: string | null,
 };
 
 /**
@@ -790,8 +982,7 @@ export type FieldStaticsResult_Serialize = {
 };
 
 /**  Design resistance of one roof fixation [kN]. */
-export type FixationSpec = {
-	name: string,
+export type FixationCapacity = {
 	upliftKn: number,
 	pressureKn: number,
 	parallelKn: number,
@@ -814,6 +1005,9 @@ export type FrozenBom_Serialize = {
 	pricing: Pricing,
 };
 
+/**  Calendar date, serialised as `YYYY-MM-DD` (so string order is date order). */
+export type IsoDate = string;
+
 /**  Direction of an expansion joint line. */
 export type JointAxis = 
 /**  Line `u = position`: cuts the rails running along `u`. */
@@ -825,6 +1019,12 @@ export type JointAxis =
 export type LayoutAnchor = 
 /**  Lower-left corner (eave, left verge): K2 Base convention. */
 "lowerLeft" | "lowerRight" | "upperLeft" | "upperRight" | "centre";
+
+/**  Closed interval of lengths [m]. */
+export type LengthRange = {
+	minM: number,
+	maxM: number,
+};
 
 /**  Discount granted by a manufacturer. */
 export type ManufacturerDiscount = {
@@ -847,6 +1047,43 @@ export type ModelChanged = {
 	reload: boolean,
 	canUndo: boolean,
 	canRedo: boolean,
+};
+
+/**  Electrical datasheet values at STC. */
+export type ModuleElectrical = ModuleElectrical_Serialize | ModuleElectrical_Deserialize;
+
+/**  Electrical datasheet values at STC. */
+export type ModuleElectrical_Deserialize = {
+	pmaxW: number,
+	vocV: number,
+	iscA: number,
+	vmppV: number,
+	imppA: number,
+	/**  Temperature coefficients [%/K] (negative for Pmax and Voc). */
+	tempCoeffPmaxPctPerK: number,
+	tempCoeffVocPctPerK: number,
+	tempCoeffIscPctPerK: number,
+	/**  Maximum system voltage [V] (IEC: 1000 or 1500). */
+	maxSystemVoltageV: number,
+	/**  Rear/front power ratio [-]; `None` for a monofacial module. */
+	bifaciality?: number | null,
+};
+
+/**  Electrical datasheet values at STC. */
+export type ModuleElectrical_Serialize = {
+	pmaxW: number,
+	vocV: number,
+	iscA: number,
+	vmppV: number,
+	imppA: number,
+	/**  Temperature coefficients [%/K] (negative for Pmax and Voc). */
+	tempCoeffPmaxPctPerK: number,
+	tempCoeffVocPctPerK: number,
+	tempCoeffIscPctPerK: number,
+	/**  Maximum system voltage [V] (IEC: 1000 or 1500). */
+	maxSystemVoltageV: number,
+	/**  Rear/front power ratio [-]; `None` for a monofacial module. */
+	bifaciality?: number | null,
 };
 
 /**
@@ -875,51 +1112,108 @@ export type ModuleSlot = {
 	stringIndex: number,
 };
 
-export type ModuleState = "active" | "removed";
+/**  A PV module. */
+export type ModuleSpec = ModuleSpec_Serialize | ModuleSpec_Deserialize;
 
-/**  Snapshot of a field's mounting system: statics data and parts. */
-export type MountingSystem = MountingSystem_Serialize | MountingSystem_Deserialize;
-
-/**  Snapshot of a field's mounting system: statics data and parts. */
-export type MountingSystem_Deserialize = {
-	/**  Product name shown in reports. */
-	name: string,
-	/**  Mass of one module [kg] (module datasheet). */
-	moduleMassKg: number,
-	/**  Mounting system mass per module, without ballast [kg]. */
-	systemMassPerModuleKg: number,
-	/**  Loaded area for the pressure coefficients [m²] (K2 sizes the system with 10 m²). */
-	loadedAreaM2: number,
-	/**  Combination factor ψ₀ for snow, when the manufacturer's tool deviates from SIA 260. */
-	psi0Snow?: number | null,
-	cp: CpSpec,
-	/**  Cross-rail system (coplanar fields). */
-	rails?: RailStatics_Deserialize | null,
-	/**  Aerodynamic ballasted system (east-west on flat roofs). */
-	ballast?: BallastSpec | null,
-	/**  Parts of the system and the rules giving their quantities (bill of materials). */
-	parts: PartRule[],
+/**  A PV module. */
+export type ModuleSpec_Deserialize = {
+	/**  Long side [m]. */
+	lengthM: number,
+	/**  Short side [m]. */
+	widthM: number,
+	/**  Frame height [m] (what clamps are rated for). */
+	thicknessM: number,
+	massKg: number,
+	/**
+	 *  `None` until the electrical values are entered (not needed for layout, statics and
+	 *  bill of materials; required for stringing).
+	 */
+	electrical?: ModuleElectrical_Deserialize | null,
 };
 
-/**  Snapshot of a field's mounting system: statics data and parts. */
-export type MountingSystem_Serialize = {
-	/**  Product name shown in reports. */
-	name: string,
-	/**  Mass of one module [kg] (module datasheet). */
-	moduleMassKg: number,
-	/**  Mounting system mass per module, without ballast [kg]. */
-	systemMassPerModuleKg: number,
-	/**  Loaded area for the pressure coefficients [m²] (K2 sizes the system with 10 m²). */
-	loadedAreaM2: number,
-	/**  Combination factor ψ₀ for snow, when the manufacturer's tool deviates from SIA 260. */
-	psi0Snow?: number | null,
-	cp: CpSpec,
-	/**  Cross-rail system (coplanar fields). */
-	rails?: RailStatics_Serialize | null,
-	/**  Aerodynamic ballasted system (east-west on flat roofs). */
-	ballast?: BallastSpec | null,
-	/**  Parts of the system and the rules giving their quantities (bill of materials). */
-	parts: PartRule[],
+/**  A PV module. */
+export type ModuleSpec_Serialize = {
+	/**  Long side [m]. */
+	lengthM: number,
+	/**  Short side [m]. */
+	widthM: number,
+	/**  Frame height [m] (what clamps are rated for). */
+	thicknessM: number,
+	massKg: number,
+	/**
+	 *  `None` until the electrical values are entered (not needed for layout, statics and
+	 *  bill of materials; required for stringing).
+	 */
+	electrical?: ModuleElectrical_Serialize | null,
+};
+
+export type ModuleState = "active" | "removed";
+
+/**
+ *  Structural family, with the data that only exists in that family (a cross-rail system has
+ *  rails and no ballast, a ballasted system the reverse).
+ */
+export type MountingStructure = MountingStructure_Serialize | MountingStructure_Deserialize;
+
+/**
+ *  Structural family, with the data that only exists in that family (a cross-rail system has
+ *  rails and no ballast, a ballasted system the reverse).
+ */
+export type MountingStructure_Deserialize = 
+/**  Top rails on bottom rails, fixed to the roof (coplanar fields). */
+{ kind: "crossRail"; 
+/**  Rail parts ([`super::PartKind::Rail`]) of each layer. */
+top_rail: ComponentId; bottom_rail: ComponentId; 
+/**
+ *  Fixation part checked by the statics; `None`: fixations not checked (e.g. K2
+ *  standing-seam clamps, one on every seam).
+ */
+checked_fixation?: ComponentId | null } | 
+/**  Aerodynamic ballasted system (east-west on flat roofs). */
+{ kind: "ballasted"; ballast: BallastSpec };
+
+/**
+ *  Structural family, with the data that only exists in that family (a cross-rail system has
+ *  rails and no ballast, a ballasted system the reverse).
+ */
+export type MountingStructure_Serialize = 
+/**  Top rails on bottom rails, fixed to the roof (coplanar fields). */
+{ kind: "crossRail"; 
+/**  Rail parts ([`super::PartKind::Rail`]) of each layer. */
+top_rail: ComponentId; bottom_rail: ComponentId; 
+/**
+ *  Fixation part checked by the statics; `None`: fixations not checked (e.g. K2
+ *  standing-seam clamps, one on every seam).
+ */
+checked_fixation?: ComponentId | null } | 
+/**  Aerodynamic ballasted system (east-west on flat roofs). */
+{ kind: "ballasted"; ballast: BallastSpec };
+
+/**  A mounting system. */
+export type MountingSystemSpec = MountingSystemSpec_Serialize | MountingSystemSpec_Deserialize;
+
+/**  A mounting system. */
+export type MountingSystemSpec_Deserialize = {
+	structure: MountingStructure_Deserialize,
+	/**  Layout parameters a new array starts with (gaps, setbacks, rail geometry…). */
+	defaults: ArrayLayoutParams_Deserialize,
+	statics: SystemStatics_Deserialize,
+	/**  Bill-of-materials rules, in report order. */
+	parts: PartRuleRef[],
+	compatibility: SystemCompatibility_Deserialize,
+	approval?: Approval | null,
+};
+
+/**  A mounting system. */
+export type MountingSystemSpec_Serialize = {
+	structure: MountingStructure_Serialize,
+	/**  Layout parameters a new array starts with (gaps, setbacks, rail geometry…). */
+	defaults: ArrayLayoutParams_Serialize,
+	statics: SystemStatics_Serialize,
+	/**  Bill-of-materials rules, in report order. */
+	parts: PartRuleRef[],
+	compatibility: SystemCompatibility_Serialize,
+	approval?: Approval | null,
 };
 
 /**  Kind of an obstacle on the roof. */
@@ -960,8 +1254,14 @@ export type PanelArray_Deserialize = {
 	grid: ArrayGrid,
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Deserialize,
-	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
-	mounting?: MountingSystem_Deserialize | null,
+	/**
+	 *  Module component (frozen in [`Project::components`]); `None`: a generic module known
+	 *  only by its dimensions. When set, `module_length_m` / `module_width_m` are copies of
+	 *  its datasheet values (checked by [`Project::validate`]).
+	 */
+	module?: ComponentId | null,
+	/**  Mounting system component; `None` until a system is chosen. Requires `module`. */
+	mounting?: ComponentId | null,
 };
 
 export type PanelArray_Serialize = {
@@ -977,16 +1277,82 @@ export type PanelArray_Serialize = {
 	grid: ArrayGrid,
 	/**  Layout parameters (field outline, gaps, blocks, setbacks). */
 	layout: ArrayLayoutParams_Serialize,
-	/**  Statics snapshot of the mounting system; `None` until a system is chosen. */
-	mounting?: MountingSystem_Serialize | null,
+	/**
+	 *  Module component (frozen in [`Project::components`]); `None`: a generic module known
+	 *  only by its dimensions. When set, `module_length_m` / `module_width_m` are copies of
+	 *  its datasheet values (checked by [`Project::validate`]).
+	 */
+	module?: ComponentId | null,
+	/**  Mounting system component; `None` until a system is chosen. Requires `module`. */
+	mounting?: ComponentId | null,
 };
 
-/**  One part of a system: an article, counted by `driver`, `per` pieces each time. */
-export type PartRule = {
-	article: Article,
+/**  What a part is, with the data the engines need for that kind. */
+export type PartKind = PartKind_Serialize | PartKind_Deserialize;
+
+/**  What a part is, with the data the engines need for that kind. */
+export type PartKind_Deserialize = 
+/**  Rail bar, cut into pieces by the bill-of-materials engine. */
+{ kind: "rail"; stock_length_m: number; section: RailSectionSpec } | 
+/**  Rail connector. */
+{ kind: "splice" } | 
+/**  Module clamp (middle or end clamp: the system's driver says which). */
+{ kind: "clamp"; frame_height: LengthRange } | 
+/**
+ *  Roof fixation (standing-seam clamp, hanger bolt…); `capacity` is `None` when the
+ *  manufacturer gives no design value (the fixation is then not checked).
+ */
+{ kind: "fixation"; capacity?: FixationCapacity | null } | 
+/**  Connector between crossing rails. */
+{ kind: "climber" } | 
+/**  Ballast block (its mass is the part's `unit_mass_kg`). */
+{ kind: "ballastBlock" } | { kind: "other" };
+
+/**  What a part is, with the data the engines need for that kind. */
+export type PartKind_Serialize = 
+/**  Rail bar, cut into pieces by the bill-of-materials engine. */
+{ kind: "rail"; stock_length_m: number; section: RailSectionSpec } | 
+/**  Rail connector. */
+{ kind: "splice" } | 
+/**  Module clamp (middle or end clamp: the system's driver says which). */
+{ kind: "clamp"; frame_height: LengthRange } | 
+/**
+ *  Roof fixation (standing-seam clamp, hanger bolt…); `capacity` is `None` when the
+ *  manufacturer gives no design value (the fixation is then not checked).
+ */
+{ kind: "fixation"; capacity?: FixationCapacity | null } | 
+/**  Connector between crossing rails. */
+{ kind: "climber" } | 
+/**  Ballast block (its mass is the part's `unit_mass_kg`). */
+{ kind: "ballastBlock" } | { kind: "other" };
+
+/**  One part of a system: a part component, counted by `driver`, `per` pieces each time. */
+export type PartRuleRef = {
+	part: ComponentId,
 	driver: Driver,
 	/**  Pieces per counted item (ignored for rail bars). */
 	per: number,
+};
+
+/**  A mounting part. */
+export type PartSpec = PartSpec_Serialize | PartSpec_Deserialize;
+
+/**  A mounting part. */
+export type PartSpec_Deserialize = {
+	/**  Mass of one piece [kg]. */
+	unitMassKg: number,
+	/**  Pieces per sale unit (pack, bundle). */
+	packQty: number,
+	kind: PartKind_Deserialize,
+};
+
+/**  A mounting part. */
+export type PartSpec_Serialize = {
+	/**  Mass of one piece [kg]. */
+	unitMassKg: number,
+	/**  Pieces per sale unit (pack, bundle). */
+	packQty: number,
+	kind: PartKind_Serialize,
 };
 
 export type PlatformInfo = {
@@ -1002,6 +1368,41 @@ export type PreviewFace = {
 	polygon: ([number, number])[],
 	/**  One per polygon edge. */
 	edgeKinds: RoofEdgeKind[],
+};
+
+/**  List price of one piece of a component at a supplier, valid over a period. */
+export type PriceEntry = PriceEntry_Serialize | PriceEntry_Deserialize;
+
+/**  List price of one piece of a component at a supplier, valid over a period. */
+export type PriceEntry_Deserialize = {
+	component: ComponentId,
+	supplier: string,
+	/**
+	 *  Per piece, not per pack (discounts and sale units are applied by the BOM engine).
+	 *  Exported to TypeScript as `number` (exact below 2⁵³ cents).
+	 */
+	listPriceCents: number,
+	currency: Currency,
+	/**  First day of validity (inclusive). */
+	validFrom: IsoDate,
+	/**  Last day of validity (inclusive); `None` = open-ended. */
+	validTo?: IsoDate | null,
+};
+
+/**  List price of one piece of a component at a supplier, valid over a period. */
+export type PriceEntry_Serialize = {
+	component: ComponentId,
+	supplier: string,
+	/**
+	 *  Per piece, not per pack (discounts and sale units are applied by the BOM engine).
+	 *  Exported to TypeScript as `number` (exact below 2⁵³ cents).
+	 */
+	listPriceCents: number,
+	currency: Currency,
+	/**  First day of validity (inclusive). */
+	validFrom: IsoDate,
+	/**  Last day of validity (inclusive); `None` = open-ended. */
+	validTo?: IsoDate | null,
 };
 
 /**  Pricing of a project. */
@@ -1072,34 +1473,6 @@ export type RailSectionSpec = {
 	eMpa: number,
 	/**  Admissible deflection under the characteristic combination [m]. */
 	deflectionLimitM: number,
-};
-
-/**
- *  Rails and fixations of a cross-rail system (the rail *layout* rules are in
- *  [`crate::CrossRailSpec`]).
- */
-export type RailStatics = RailStatics_Serialize | RailStatics_Deserialize;
-
-/**
- *  Rails and fixations of a cross-rail system (the rail *layout* rules are in
- *  [`crate::CrossRailSpec`]).
- */
-export type RailStatics_Deserialize = {
-	topRail: RailSectionSpec,
-	bottomRail: RailSectionSpec,
-	/**  `None`: fixations not checked (K2 standing-seam clamps: one on every seam). */
-	fixation?: FixationSpec | null,
-};
-
-/**
- *  Rails and fixations of a cross-rail system (the rail *layout* rules are in
- *  [`crate::CrossRailSpec`]).
- */
-export type RailStatics_Serialize = {
-	topRail: RailSectionSpec,
-	bottomRail: RailSectionSpec,
-	/**  `None`: fixations not checked (K2 standing-seam clamps: one on every seam). */
-	fixation?: FixationSpec | null,
 };
 
 /**
@@ -1416,6 +1789,52 @@ export type SupportGridSpec = {
 	/**  `u` of one seam / rafter, m. */
 	originM: number,
 	spacingM: number,
+};
+
+/**  What a system can be mounted on and with. */
+export type SystemCompatibility = SystemCompatibility_Serialize | SystemCompatibility_Deserialize;
+
+/**  What a system can be mounted on and with. */
+export type SystemCompatibility_Deserialize = {
+	/**  Roof support grids the system fixes to; empty = no fixation (ballasted). */
+	supports: SupportGridKind[],
+	/**  Accepted module long side / short side; `None` = no limit. */
+	moduleLength?: LengthRange | null,
+	moduleWidth?: LengthRange | null,
+};
+
+/**  What a system can be mounted on and with. */
+export type SystemCompatibility_Serialize = {
+	/**  Roof support grids the system fixes to; empty = no fixation (ballasted). */
+	supports: SupportGridKind[],
+	/**  Accepted module long side / short side; `None` = no limit. */
+	moduleLength?: LengthRange | null,
+	moduleWidth?: LengthRange | null,
+};
+
+/**  Statics data common to all families. */
+export type SystemStatics = SystemStatics_Serialize | SystemStatics_Deserialize;
+
+/**  Statics data common to all families. */
+export type SystemStatics_Deserialize = {
+	/**  Mounting system mass per module, without ballast [kg]. */
+	systemMassPerModuleKg: number,
+	/**  Loaded area for the pressure coefficients [m²]. */
+	loadedAreaM2: number,
+	/**  Combination factor ψ₀ for snow, when the manufacturer's tool deviates from SIA 260. */
+	psi0Snow?: number | null,
+	cp: CpSpec,
+};
+
+/**  Statics data common to all families. */
+export type SystemStatics_Serialize = {
+	/**  Mounting system mass per module, without ballast [kg]. */
+	systemMassPerModuleKg: number,
+	/**  Loaded area for the pressure coefficients [m²]. */
+	loadedAreaM2: number,
+	/**  Combination factor ψ₀ for snow, when the manufacturer's tool deviates from SIA 260. */
+	psi0Snow?: number | null,
+	cp: CpSpec,
 };
 
 /**  SIA 261 terrain category (tab. 4). */

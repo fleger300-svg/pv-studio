@@ -100,6 +100,28 @@ fn validate_array(project: &Project, a: &PanelArray) -> Result<(), CommandError>
             return Err(reference("array"));
         }
     }
+    // Component references: frozen, of the right family, module dimensions copied.
+    let spec = |id| project.component(id).map(|s| &s.component.spec);
+    if let Some(id) = a.module {
+        let Some(crate::component::ComponentSpec::Module(m)) = spec(id) else {
+            return Err(reference("component"));
+        };
+        if (m.length_m - a.module_length_m).abs() > 1e-9
+            || (m.width_m - a.module_width_m).abs() > 1e-9
+        {
+            return Err(invalid("moduleLengthM"));
+        }
+    }
+    if let Some(id) = a.mounting {
+        if a.module.is_none()
+            || !matches!(
+                spec(id),
+                Some(crate::component::ComponentSpec::MountingSystem(_))
+            )
+        {
+            return Err(reference("component"));
+        }
+    }
     Ok(())
 }
 

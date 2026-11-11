@@ -303,6 +303,8 @@ pub async fn apply_command(
 ) -> Result<ApplyResult, CommandError> {
     state.with(|store| {
         let started = Instant::now();
+        // Library components the command refers to are frozen in the same batch.
+        let cmd = state.complete_command(store.project(), cmd)?;
         let changes = store
             .apply(&cmd, Author::User)
             .map_err(CommandError::from)?;

@@ -15,6 +15,7 @@ use pv_statics::ballast::{
 use pv_statics::{wind, RoofZone};
 use serde::Serialize;
 
+use super::components::MountingNode;
 use super::geometry::Roof;
 use super::layout::StructureNode;
 use super::loads::Site;
@@ -22,7 +23,7 @@ use super::zones::{severity, ModuleZones};
 use super::{array_of, kind};
 use crate::convert::{ballast_inputs, factors};
 use crate::error::statics_error;
-use crate::inputs::{ArrayIn, ModulesIn, MountingIn};
+use crate::inputs::{ArrayIn, ModulesIn};
 
 /// Ballast need of one pair.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -58,7 +59,7 @@ kind!(
 impl Derived for Ballast {
     fn compute(ctx: &mut Ctx<'_>, i: Instance) -> Result<Option<BallastPlan>, GraphError> {
         let id = array_of(i)?;
-        let mounting = ctx.get::<MountingIn>(i)?;
+        let mounting = ctx.get::<MountingNode>(i)?;
         let Some((m, spec)) = mounting
             .as_ref()
             .as_ref()

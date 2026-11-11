@@ -3,7 +3,10 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+use crate::command::CommandError;
+use crate::component::{resolve_mounting, ComponentSnapshot, ComponentSpec};
 use crate::geometry::{Quat, RoofFrame, Vec3};
+use crate::ids::ComponentId;
 use crate::ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
 use crate::layout::{ArrayLayoutParams, RoofOutlineSpec, SupportGridSpec};
 use crate::mounting::MountingSystem;
@@ -204,9 +207,16 @@ pub struct PanelArray {
     pub grid: ArrayGrid,
     /// Layout parameters (field outline, gaps, blocks, setbacks).
     pub layout: ArrayLayoutParams,
-    /// Statics snapshot of the mounting system; `None` until a system is chosen.
+    /// Module component (frozen in [`Project::components`]); `None`: a generic module known
+    /// only by its dimensions. When set, `module_length_m` / `module_width_m` are copies of
+    /// its datasheet values (checked by [`Project::validate`]).
+    #[serde(default)]
     #[specta(optional)]
-    pub mounting: Option<MountingSystem>,
+    pub module: Option<ComponentId>,
+    /// Mounting system component; `None` until a system is chosen. Requires `module`.
+    #[serde(default)]
+    #[specta(optional)]
+    pub mounting: Option<ComponentId>,
 }
 
 impl PanelArray {
@@ -284,6 +294,10 @@ pub struct Project {
     pub modules: Vec<ModuleInstance>,
     /// Commercial conditions (discount per manufacturer).
     pub pricing: Pricing,
+    /// Frozen copies of the library components the arrays use (parts before the systems
+    /// that refer to them), with the price adopted.
+    #[serde(default)]
+    pub components: Vec<ComponentSnapshot>,
 }
 
 /// Error raised when a project violates a structural invariant.
@@ -301,6 +315,14 @@ pub enum ProjectInvariantError {
     UnknownBuilding(usize),
     #[error("modules of array {0} come before those of an earlier array")]
     ArraysOutOfOrder(usize),
+    #[error("array {0} refers to a missing component or one of the wrong family")]
+    UnknownComponent(usize),
+    #[error("array {0}: module dimensions differ from its module component")]
+    ModuleDimensions(usize),
+    #[error("array {0} has a mounting system but no module component")]
+    MountingWithoutModule(usize),
+    #[error("component {0} is frozen twice")]
+    DuplicateComponent(String),
 }
 
 impl Project {
@@ -315,6 +337,7 @@ impl Project {
             arrays: Vec::new(),
             modules: Vec::new(),
             pricing: Pricing::default(),
+            components: Vec::new(),
         }
     }
 
@@ -323,6 +346,35 @@ impl Project {
     /// # Errors
     /// Returns the first violated invariant.
     pub fn validate(&self) -> Result<(), ProjectInvariantError> {
+        let mut ids: Vec<ComponentId> = self.components.iter().map(|s| s.component.id).collect();
+        ids.sort_unstable();
+        if let Some(w) = ids.windows(2).find(|w| w[0] == w[1]) {
+            return Err(ProjectInvariantError::DuplicateComponent(w[0].to_string()));
+        }
+        for (i, a) in self.arrays.iter().enumerate() {
+            if let Some(id) = a.module {
+                let Some(ComponentSpec::Module(m)) = self.component(id).map(|s| &s.component.spec)
+                else {
+                    return Err(ProjectInvariantError::UnknownComponent(i));
+                };
+                if (m.length_m - a.module_length_m).abs() > 1e-9
+                    || (m.width_m - a.module_width_m).abs() > 1e-9
+                {
+                    return Err(ProjectInvariantError::ModuleDimensions(i));
+                }
+            }
+            if let Some(id) = a.mounting {
+                if !matches!(
+                    self.component(id).map(|s| &s.component.spec),
+                    Some(ComponentSpec::MountingSystem(_))
+                ) {
+                    return Err(ProjectInvariantError::UnknownComponent(i));
+                }
+                if a.module.is_none() {
+                    return Err(ProjectInvariantError::MountingWithoutModule(i));
+                }
+            }
+        }
         for (i, f) in self.roof_faces.iter().enumerate() {
             if !self.buildings.iter().any(|b| b.id == f.building_id) {
                 return Err(ProjectInvariantError::UnknownBuilding(i));
@@ -373,6 +425,24 @@ impl Project {
         for (i, m) in self.modules.iter_mut().enumerate() {
             m.id = ModuleId(u32::try_from(i).unwrap_or(u32::MAX));
         }
+    }
+
+    /// The frozen component `id`.
+    #[must_use]
+    pub fn component(&self, id: ComponentId) -> Option<&ComponentSnapshot> {
+        self.components.iter().find(|s| s.component.id == id)
+    }
+
+    /// The mounting system the engines use for `array`, rebuilt from the frozen components;
+    /// `None` when no system is chosen.
+    ///
+    /// # Errors
+    /// A missing or inconsistent component (see [`resolve_mounting`]).
+    pub fn resolve_mounting(
+        &self,
+        array: &PanelArray,
+    ) -> Result<Option<MountingSystem>, CommandError> {
+        resolve_array_mounting(&self.components, array)
     }
 
     #[must_use]
@@ -427,6 +497,46 @@ impl Project {
     }
 }
 
+/// [`Project::resolve_mounting`] on the components alone (the pipeline holds them apart from
+/// the arrays).
+///
+/// # Errors
+/// A missing or inconsistent component.
+pub fn resolve_array_mounting(
+    components: &[ComponentSnapshot],
+    array: &PanelArray,
+) -> Result<Option<MountingSystem>, CommandError> {
+    resolve_component_refs(components, array.module, array.mounting)
+}
+
+/// Mounting system given by component references `(module, mounting)`.
+///
+/// # Errors
+/// A missing or inconsistent component.
+pub fn resolve_component_refs(
+    components: &[ComponentSnapshot],
+    module: Option<ComponentId>,
+    mounting: Option<ComponentId>,
+) -> Result<Option<MountingSystem>, CommandError> {
+    let Some(system) = mounting else {
+        return Ok(None);
+    };
+    let find = |id: ComponentId| {
+        components
+            .iter()
+            .find(|s| s.component.id == id)
+            .map(|s| &s.component)
+            .ok_or_else(|| {
+                CommandError::new(crate::command::keys::COMPONENT_UNKNOWN)
+                    .with_text("id", id.to_string())
+            })
+    };
+    let module = module.ok_or_else(|| {
+        CommandError::new(crate::command::keys::COMPONENT_UNKNOWN).with_text("id", "module")
+    })?;
+    resolve_mounting(find(system)?, find(module)?, components).map(Some)
+}
+
 #[cfg(test)]
 pub(crate) mod fixtures {
     use super::*;
@@ -479,6 +589,7 @@ pub(crate) mod fixtures {
                 block_extra_u: 0.0,
                 block_extra_v: 0.0,
             },
+            module: None,
             mounting: None,
             layout: ArrayLayoutParams::default(),
         };
@@ -506,6 +617,7 @@ pub(crate) mod fixtures {
             arrays: vec![array],
             modules,
             pricing: crate::pricing::Pricing::default(),
+            components: Vec::new(),
         }
     }
 }

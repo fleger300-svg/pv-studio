@@ -3,6 +3,7 @@
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock, PoisonError, RwLock};
 
+use pv_library::LibraryStore;
 use pv_model::command::keys;
 use pv_model::{ChangeSet, CommandError};
 use pv_pipeline::ComputeHandle;
@@ -21,6 +22,9 @@ pub struct AppState {
     compute: OnceLock<ComputeHandle>,
     /// Latest statics results, for the snapshot command (written by the compute thread).
     pub results: Arc<RwLock<ResultCache>>,
+    /// The user's component library (opened at start-up). Lock order: project, then
+    /// library.
+    library: Mutex<Option<LibraryStore>>,
 }
 
 impl AppState {
@@ -83,5 +87,52 @@ impl AppState {
             .as_mut()
             .ok_or_else(|| CommandError::new(keys::PROJECT_NOT_OPEN))?;
         f(store)
+    }
+
+    /// Installs the component library.
+    pub fn set_library(&self, library: LibraryStore) {
+        *self.library.lock().unwrap_or_else(PoisonError::into_inner) = Some(library);
+    }
+
+    /// Runs `f` on the component library.
+    ///
+    /// # Errors
+    /// `errors.store.failure` when the library could not be opened, or whatever `f` returns.
+    pub fn with_library<T>(
+        &self,
+        f: impl FnOnce(&mut LibraryStore) -> Result<T, CommandError>,
+    ) -> Result<T, CommandError> {
+        let mut guard = self.library.lock().unwrap_or_else(PoisonError::into_inner);
+        let library = guard.as_mut().ok_or_else(|| {
+            CommandError::new(keys::STORE_FAILURE).with_text("detail", "component library")
+        })?;
+        f(library)
+    }
+
+    /// `cmd` with the adoption of the library components it needs (see
+    /// `pv_library::adoption`); unchanged when it needs none or no library is open.
+    ///
+    /// # Errors
+    /// A component missing from the library.
+    pub fn complete_command(
+        &self,
+        project: &pv_model::Project,
+        cmd: pv_model::Command,
+    ) -> Result<pv_model::Command, CommandError> {
+        if pv_library::adoption::referenced_components(&cmd)
+            .iter()
+            .all(|&id| project.component(id).is_some())
+        {
+            return Ok(cmd);
+        }
+        self.with_library(|lib| {
+            pv_library::adoption::complete_command(
+                lib,
+                project,
+                cmd,
+                &pv_library::adoption::today(),
+            )
+            .map_err(CommandError::from)
+        })
     }
 }

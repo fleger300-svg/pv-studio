@@ -76,6 +76,7 @@ pub fn fixture_project() -> Project {
             block_extra_u: 0.0,
             block_extra_v: 0.0,
         },
+        module: None,
         mounting: None,
         layout: ArrayLayoutParams::default(),
     };
@@ -99,6 +100,7 @@ pub fn fixture_project() -> Project {
             block_extra_u: 0.0,
             block_extra_v: 0.0,
         },
+        module: None,
         mounting: None,
         layout: ArrayLayoutParams::default(),
     };
@@ -132,5 +134,6 @@ pub fn fixture_project() -> Project {
         arrays: vec![coplanar, rack],
         modules,
         pricing: pv_model::Pricing::default(),
+        components: Vec::new(),
     }
 }

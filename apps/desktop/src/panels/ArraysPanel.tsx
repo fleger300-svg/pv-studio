@@ -51,6 +51,7 @@ export function ArraysPanel() {
             array={a.array}
             modules={a.moduleCount}
             peakWp={summary.modulePeakPowerWp}
+            mountingLabel={a.mountingLabel ?? null}
           />
         ))}
       </ol>
@@ -66,11 +67,13 @@ function ArrayForm({
   array: a,
   modules,
   peakWp,
+  mountingLabel,
 }: {
   index: number;
   array: PanelArray;
   modules: number;
   peakWp: number;
+  mountingLabel: string | null;
 }) {
   const { t, i18n } = useTranslation();
   const fmt = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 });
@@ -159,7 +162,7 @@ function ArrayForm({
           onCommit={num((v) => setLayout({ minDistanceToOtherArraysM: v }))}
         />
       </div>
-      <Stat label={t('arrays.mounting')} value={a.mounting?.name ?? t('arrays.noMounting')} />
+      <Stat label={t('arrays.mounting')} value={mountingLabel ?? t('arrays.noMounting')} />
       <Button variant="secondary" onClick={() => void layOut(a)}>
         {t('arrays.relayout')}
       </Button>

@@ -97,6 +97,26 @@ pub fn run() {
             let state = app.state::<AppState>();
             let handle = compute::start(app.handle(), Arc::clone(&state.results))?;
             state.attach_compute(handle);
+            // The user's component library: `PV_LIBRARY_PATH` (tests), else the application
+            // data folder. Never on a network drive (SQLite locking).
+            let path = std::env::var_os("PV_LIBRARY_PATH")
+                .map(std::path::PathBuf::from)
+                .or_else(|| {
+                    app.path()
+                        .app_data_dir()
+                        .ok()
+                        .map(|d| d.join("library.sqlite"))
+                });
+            if let Some(path) = path {
+                if let Some(dir) = path.parent() {
+                    std::fs::create_dir_all(dir)?;
+                }
+                match pv_library::LibraryStore::open(&path) {
+                    Ok(library) => state.set_library(library),
+                    // The application still works with the components frozen in projects.
+                    Err(e) => eprintln!("component library unavailable ({}): {e}", path.display()),
+                }
+            }
             Ok(())
         })
         .run(tauri::generate_context!())

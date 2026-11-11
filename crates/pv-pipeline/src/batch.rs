@@ -8,12 +8,13 @@ use std::collections::BTreeSet;
 
 use pv_graph::{Graph, GraphError, Instance};
 use pv_model::{
-    ArrayId, Building, ChangeSet, ModuleInstance, PanelArray, Pricing, Project, RoofFace,
+    ArrayId, Building, ChangeSet, ComponentSnapshot, ModuleInstance, PanelArray, Pricing, Project,
+    RoofFace,
 };
 
 use crate::inputs::{
-    ArrayIn, BuildingIn, FaceIn, ModulesIn, MountingIn, PricingIn, ProjectIndex, ProjectIndexIn,
-    SiteIn,
+    ArrayComponentsIn, ArrayIn, BuildingIn, ComponentsIn, FaceIn, ModulesIn, PricingIn,
+    ProjectIndex, ProjectIndexIn, SiteIn,
 };
 use crate::nodes::bom::ProjectBom;
 use crate::nodes::summary::FieldStatics;
@@ -29,6 +30,8 @@ pub struct InputBatch {
     pub modules: Vec<(ArrayId, Vec<ModuleInstance>)>,
     /// Full syncs, and commands that changed the pricing.
     pub pricing: Option<Pricing>,
+    /// Full syncs, and commands that changed the frozen components.
+    pub components: Option<Vec<ComponentSnapshot>>,
 }
 
 /// What applying a batch changed.
@@ -79,6 +82,7 @@ pub fn batch_for_project(project: &Project) -> InputBatch {
             .map(|a| (a.id, modules_of(project, a.id)))
             .collect(),
         pricing: Some(project.pricing.clone()),
+        components: Some(project.components.clone()),
     }
 }
 
@@ -102,6 +106,7 @@ pub fn batch_for_changes(project: &Project, changes: &ChangeSet) -> InputBatch {
             .map(|a| (a, modules_of(project, a)))
             .collect(),
         pricing: changes.pricing.then(|| project.pricing.clone()),
+        components: changes.components.then(|| project.components.clone()),
         ..InputBatch::default()
     }
 }
@@ -143,11 +148,14 @@ pub fn apply_batch(graph: &mut Graph, batch: InputBatch) -> Result<SyncReport, G
     for f in batch.faces {
         changed += usize::from(graph.set_input::<FaceIn>(Instance::Face(f.id), f)?);
     }
+    if let Some(c) = batch.components {
+        changed += usize::from(graph.set_input::<ComponentsIn>(Instance::Project, c)?);
+    }
     for mut a in batch.arrays {
         let i = Instance::Array(a.id);
-        let mounting = a.mounting.take();
+        let refs = (a.module.take(), a.mounting.take());
         changed += usize::from(graph.set_input::<ArrayIn>(i, a)?);
-        changed += usize::from(graph.set_input::<MountingIn>(i, mounting)?);
+        changed += usize::from(graph.set_input::<ArrayComponentsIn>(i, refs)?);
         graph.watch::<FieldStatics>(i)?;
     }
     for (a, modules) in batch.modules {
