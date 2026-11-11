@@ -4,6 +4,7 @@ import { Button, Panel } from '@pv/ui';
 import type { ExtractionResult } from '../bindings';
 import { api, unwrap } from '../ipc';
 import { toCommandError } from '../commands/runCommand';
+import { useSettingsStore } from '../store/settings';
 import { useToastStore } from '../store/toast';
 import { TextInput } from './inputs';
 
@@ -22,6 +23,20 @@ export function ExtractDialog({
   const { t, i18n } = useTranslation();
   const [hint, setHint] = useState('');
   const [busy, setBusy] = useState(false);
+  const settingsOpen = useSettingsStore((s) => s.open);
+  const openSettings = useSettingsStore((s) => s.setOpen);
+  // Whether a key is configured; checked again when the settings close.
+  const [configured, setConfigured] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (settingsOpen) return;
+    unwrap(api.apiKeyStatus())
+      .then((s) => {
+        setConfigured(s.configured);
+      })
+      .catch(() => {
+        setConfigured(false);
+      });
+  }, [settingsOpen]);
 
   const run = async (path: string | null = null) => {
     setBusy(true);
@@ -50,11 +65,26 @@ export function ExtractDialog({
     >
       <Panel title={t('library.extract.title')}>
         <p className="panel-hint">{t('library.extract.privacy')}</p>
+        {configured === false && (
+          <p className="library__report" role="status">
+            {t('settings.ai.notConfigured')}
+          </p>
+        )}
         <TextInput label={t('library.extract.hint')} value={hint} onChange={setHint} />
         <div className="library__actions">
-          <Button disabled={busy} onClick={() => void run()}>
-            {busy ? t('library.extract.running') : t('library.extract.run')}
-          </Button>
+          {configured === false ? (
+            <Button
+              onClick={() => {
+                openSettings(true);
+              }}
+            >
+              {t('library.extract.configure')}
+            </Button>
+          ) : (
+            <Button disabled={busy || configured === null} onClick={() => void run()}>
+              {busy ? t('library.extract.running') : t('library.extract.run')}
+            </Button>
+          )}
           <Button variant="secondary" disabled={busy} onClick={onClose}>
             {t('library.close')}
           </Button>

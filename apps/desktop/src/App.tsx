@@ -18,6 +18,8 @@ import { useStaticsSync } from './statics/useStatics';
 import { LibraryView } from './library/LibraryView';
 import { UpdateProposals } from './library/UpdateProposals';
 import { useLibraryStore } from './store/library';
+import { SettingsView } from './settings/SettingsView';
+import { useSettingsStore } from './store/settings';
 
 export function App() {
   const { t } = useTranslation();
@@ -26,6 +28,7 @@ export function App() {
   const step = useWorkflowStore((s) => s.step);
   const ratio = usePlanStore((s) => s.ratio);
   const libraryOpen = useLibraryStore((s) => s.open);
+  const settingsOpen = useSettingsStore((s) => s.open);
   useShortcuts();
   useHudShortcut();
   useStaticsSync();
@@ -68,6 +71,11 @@ export function App() {
         {libraryOpen && (
           <ErrorBoundary>
             <LibraryView />
+          </ErrorBoundary>
+        )}
+        {settingsOpen && (
+          <ErrorBoundary>
+            <SettingsView />
           </ErrorBoundary>
         )}
         <Toasts />

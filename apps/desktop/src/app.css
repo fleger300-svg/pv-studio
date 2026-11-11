@@ -798,3 +798,17 @@ body,
 .array-components .form-field {
   grid-column: 1 / -1;
 }
+
+/* Settings: above the library (opened from the extraction dialog too). */
+.settings {
+  z-index: 40;
+}
+.settings__body {
+  max-width: 44rem;
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+.settings__status {
+  margin: 0 0 var(--space-sm);
+  font-weight: 600;
+}

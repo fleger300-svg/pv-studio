@@ -22,14 +22,14 @@ pub(crate) fn api_base() -> String {
 /// # Errors
 /// [`keys::COPILOT_NO_KEY`] when there is none; [`keys::SECRETS_UNAVAILABLE`].
 pub(crate) fn current_key() -> Result<ApiKey, CommandError> {
-    pv_secrets::resolve_from_env(&OsStore::default())?
+    pv_secrets::resolve_from_env(&OsStore::from_env())?
         .map(|(k, _)| k)
         .ok_or_else(|| CommandError::new(keys::COPILOT_NO_KEY))
 }
 
 fn status() -> Result<ApiKeyStatus, CommandError> {
     let env = std::env::var(pv_secrets::ENV_VAR).ok().map(Zeroizing::new);
-    pv_secrets::status(env.as_deref().map(String::as_str), &OsStore::default())
+    pv_secrets::status(env.as_deref().map(String::as_str), &OsStore::from_env())
 }
 
 fn network(e: impl std::fmt::Display) -> CommandError {
@@ -49,14 +49,14 @@ pub async fn set_api_key(key: String) -> Result<ApiKeyStatus, CommandError> {
     // The IPC string is wiped as soon as it is parsed.
     let raw = Zeroizing::new(key);
     let key = ApiKey::parse(&raw)?;
-    OsStore::default().save(&key)?;
+    OsStore::from_env().save(&key)?;
     status()
 }
 
 #[tauri::command]
 #[specta::specta]
 pub async fn delete_api_key() -> Result<ApiKeyStatus, CommandError> {
-    OsStore::default().delete()?;
+    OsStore::from_env().delete()?;
     status()
 }
 

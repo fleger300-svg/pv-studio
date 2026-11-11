@@ -131,6 +131,20 @@ impl OsStore {
     pub const fn with_service(service: &'static str) -> Self {
         Self { service }
     }
+
+    /// The application's entry, or the one named by `PV_SECRETS_SERVICE` (end-to-end tests:
+    /// they must never touch the user's real key). Read once per process.
+    #[must_use]
+    pub fn from_env() -> Self {
+        static SERVICE_NAME: std::sync::OnceLock<&'static str> = std::sync::OnceLock::new();
+        let service = SERVICE_NAME.get_or_init(|| {
+            std::env::var("PV_SECRETS_SERVICE")
+                .ok()
+                .filter(|s| !s.trim().is_empty())
+                .map_or(SERVICE, |s| &*Box::leak(s.into_boxed_str()))
+        });
+        Self { service }
+    }
 }
 
 #[cfg(any(windows, target_os = "macos"))]
