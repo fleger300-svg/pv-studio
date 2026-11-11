@@ -1,0 +1,572 @@
+{
+ "_about": "Synthetic K2 Base material list (same shape as the K2 export). Prices are the scaled reference prices of testdata/k2/reference_bom.json: no real catalogue price.",
+ "sheets": [
+  {
+   "name": "Total",
+   "rows": [
+    [
+     {
+      "kind": "text",
+      "value": "Art. no"
+     },
+     {
+      "kind": "text",
+      "value": "Description de l'article"
+     },
+     {
+      "kind": "text",
+      "value": "Nombre"
+     },
+     {
+      "kind": "text",
+      "value": "Poids"
+     },
+     {
+      "kind": "text",
+      "value": "Nombre d'unités de vente"
+     },
+     {
+      "kind": "text",
+      "value": "Quantité par unité de vente"
+     },
+     {
+      "kind": "text",
+      "value": "Prix catalogue"
+     },
+     {
+      "kind": "text",
+      "value": "Taux de remise"
+     },
+     {
+      "kind": "text",
+      "value": "Prix à l'unité"
+     },
+     {
+      "kind": "text",
+      "value": "Prix"
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2003024"
+     },
+     {
+      "kind": "text",
+      "value": "Single Standing SeamClamp CF:x"
+     },
+     {
+      "kind": "number",
+      "value": 10
+     },
+     {
+      "kind": "number",
+      "value": 1.45
+     },
+     {
+      "kind": "number",
+      "value": 1
+     },
+     {
+      "kind": "number",
+      "value": 50
+     },
+     {
+      "kind": "number",
+      "value": 9.29
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 9.29
+     },
+     {
+      "kind": "number",
+      "value": 92.9
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2004393"
+     },
+     {
+      "kind": "text",
+      "value": "SingleRail 36; 4.80 m"
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 73.84
+     },
+     {
+      "kind": "number",
+      "value": 1
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 57.09
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 57.09
+     },
+     {
+      "kind": "number",
+      "value": 1141.8
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2003145"
+     },
+     {
+      "kind": "text",
+      "value": "SingleRail Climber Set 36/50"
+     },
+     {
+      "kind": "number",
+      "value": 30
+     },
+     {
+      "kind": "number",
+      "value": 2.01
+     },
+     {
+      "kind": "number",
+      "value": 3
+     },
+     {
+      "kind": "number",
+      "value": 10
+     },
+     {
+      "kind": "number",
+      "value": 2.55
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 2.55
+     },
+     {
+      "kind": "number",
+      "value": 76.5
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2004148"
+     },
+     {
+      "kind": "text",
+      "value": "K2 Clamp MC 25-40 Black"
+     },
+     {
+      "kind": "number",
+      "value": 40
+     },
+     {
+      "kind": "number",
+      "value": 2.612
+     },
+     {
+      "kind": "number",
+      "value": 2
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 137.6
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2004545"
+     },
+     {
+      "kind": "text",
+      "value": "K2 Clamp EC 25-40 Black"
+     },
+     {
+      "kind": "number",
+      "value": 50
+     },
+     {
+      "kind": "number",
+      "value": 3.585
+     },
+     {
+      "kind": "number",
+      "value": 3
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 172
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2004394"
+     },
+     {
+      "kind": "text",
+      "value": "SingleRail 36 Connector Set"
+     },
+     {
+      "kind": "number",
+      "value": 4
+     },
+     {
+      "kind": "number",
+      "value": 0.8
+     },
+     {
+      "kind": "number",
+      "value": 1
+     },
+     {
+      "kind": "number",
+      "value": 10
+     },
+     {
+      "kind": "number",
+      "value": 4.35
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 4.35
+     },
+     {
+      "kind": "number",
+      "value": 17.4
+     }
+    ]
+   ]
+  },
+  {
+   "name": "Bât A Toiture Sud",
+   "rows": [
+    [
+     {
+      "kind": "text",
+      "value": "Art. no"
+     },
+     {
+      "kind": "text",
+      "value": "Description de l'article"
+     },
+     {
+      "kind": "text",
+      "value": "Nombre"
+     },
+     {
+      "kind": "text",
+      "value": "Poids"
+     },
+     {
+      "kind": "text",
+      "value": "Nombre d'unités de vente"
+     },
+     {
+      "kind": "text",
+      "value": "Quantité par unité de vente"
+     },
+     {
+      "kind": "text",
+      "value": "Prix catalogue"
+     },
+     {
+      "kind": "text",
+      "value": "Taux de remise"
+     },
+     {
+      "kind": "text",
+      "value": "Prix à l'unité"
+     },
+     {
+      "kind": "text",
+      "value": "Prix"
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2003024"
+     },
+     {
+      "kind": "text",
+      "value": "Single Standing SeamClamp CF:x"
+     },
+     {
+      "kind": "number",
+      "value": 5
+     },
+     {
+      "kind": "number",
+      "value": 0.725
+     },
+     {
+      "kind": "number",
+      "value": 1
+     },
+     {
+      "kind": "number",
+      "value": 50
+     },
+     {
+      "kind": "number",
+      "value": 9.29
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 9.29
+     },
+     {
+      "kind": "number",
+      "value": 46.45
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2004393"
+     },
+     {
+      "kind": "text",
+      "value": "SingleRail 36; 4.80 m"
+     },
+     {
+      "kind": "number",
+      "value": 10
+     },
+     {
+      "kind": "number",
+      "value": 36.92
+     },
+     {
+      "kind": "number",
+      "value": 1
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 57.09
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 57.09
+     },
+     {
+      "kind": "number",
+      "value": 570.9
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2003145"
+     },
+     {
+      "kind": "text",
+      "value": "SingleRail Climber Set 36/50"
+     },
+     {
+      "kind": "number",
+      "value": 15
+     },
+     {
+      "kind": "number",
+      "value": 1.005
+     },
+     {
+      "kind": "number",
+      "value": 2
+     },
+     {
+      "kind": "number",
+      "value": 10
+     },
+     {
+      "kind": "number",
+      "value": 2.55
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 2.55
+     },
+     {
+      "kind": "number",
+      "value": 38.25
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2004148"
+     },
+     {
+      "kind": "text",
+      "value": "K2 Clamp MC 25-40 Black"
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 1.306
+     },
+     {
+      "kind": "number",
+      "value": 1
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 68.8
+     }
+    ],
+    [
+     {
+      "kind": "text",
+      "value": "2004545"
+     },
+     {
+      "kind": "text",
+      "value": "K2 Clamp EC 25-40 Black"
+     },
+     {
+      "kind": "number",
+      "value": 25
+     },
+     {
+      "kind": "number",
+      "value": 1.792
+     },
+     {
+      "kind": "number",
+      "value": 2
+     },
+     {
+      "kind": "number",
+      "value": 20
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 0
+     },
+     {
+      "kind": "number",
+      "value": 3.44
+     },
+     {
+      "kind": "number",
+      "value": 86
+     }
+    ]
+   ]
+  },
+  {
+   "name": "Notes",
+   "rows": [
+    [
+     {
+      "kind": "text",
+      "value": "Liste synthétique : prix mis à l’échelle, aucun prix réel."
+     }
+    ]
+   ]
+  }
+ ]
+}

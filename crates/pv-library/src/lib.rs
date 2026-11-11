@@ -12,6 +12,7 @@ pub mod adoption;
 mod blobs;
 mod components;
 mod error;
+pub mod import;
 mod prices;
 pub mod schema;
 mod search;
