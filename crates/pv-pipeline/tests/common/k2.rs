@@ -81,7 +81,7 @@ pub fn roof_deviations(
     for (f, &a) in fields.iter().enumerate() {
         let zones = g.get::<ZoneSet>(a).unwrap();
         if all_zones && *zones != all {
-            failures.push(format!("field {} zones {:?}", f + 1, zones));
+            failures.push(format!("{roof} field {} zones {:?}", f + 1, zones));
         }
         let descent = g.get::<Descent>(a).unwrap();
         let descent = descent.as_ref().as_ref().expect("cross-rail field");
