@@ -365,7 +365,7 @@ fn single_rail_on_gable() -> MountingSystem {
 /// K2 D-Dome 6.10 on gravel, coefficients back-fitted from the K2 Base report of reference
 /// B (9 m): eave corner and interior as printed, the other edge zones take the eave-corner
 /// values.
-fn d_dome() -> MountingSystem {
+pub(crate) fn d_dome() -> MountingSystem {
     let k = |cp_east, cp_west| PairCoefficientsSpec {
         cp_east,
         cp_west,

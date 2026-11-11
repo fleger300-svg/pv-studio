@@ -126,6 +126,17 @@
     "roof": {
       "reentrantCorner": "Edges {a} and {b} meet at a re-entrant corner: both need a pitch (no gable wall) and the same eave height (and, with an overhang, the same pitch)."
     },
+    "component": {
+      "invalid": "{component}: invalid value for {field}.",
+      "unknown": "Component {id} is missing from the library or the project.",
+      "wrongFamily": "{component} is not {expected, select, module {a module} mountingSystem {a mounting system} mountingPart {a mounting part} other {of the expected type}}.",
+      "driverMismatch": "Article {article} cannot be counted as {driver}.",
+      "stockMismatch": "Article {article}: the system expects bars of {expected} m, the rail is {actual} m long.",
+      "invalidDate": "Invalid date: {value} (expected YYYY-MM-DD).",
+      "frameHeight": "{clamp} fits frames of {min}–{max} mm; the module frame is {height} mm.",
+      "support": "{system} cannot be mounted on {support, select, standingSeam {a standing-seam roof} rafters {rafters} other {this roof}}.",
+      "moduleSize": "{system} does not accept a module of {length} × {width} m."
+    },
     "ui": {
       "render": "This part of the screen could not be displayed (the project is not affected).",
       "retry": "Retry"

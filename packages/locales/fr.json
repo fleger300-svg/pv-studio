@@ -126,6 +126,17 @@
     "roof": {
       "reentrantCorner": "Les arêtes {a} et {b} forment un angle rentrant : elles doivent toutes deux avoir une pente (pas de pignon) et la même hauteur d’égout (et, avec un débord, la même pente)."
     },
+    "component": {
+      "invalid": "{component} : valeur invalide pour {field}.",
+      "unknown": "Le composant {id} est introuvable dans la bibliothèque ou le projet.",
+      "wrongFamily": "{component} n’est pas {expected, select, module {un module} mountingSystem {un système de montage} mountingPart {une pièce de montage} other {du type attendu}}.",
+      "driverMismatch": "L’article {article} ne peut pas être compté comme {driver}.",
+      "stockMismatch": "Article {article} : le système attend des barres de {expected} m, le rail mesure {actual} m.",
+      "invalidDate": "Date invalide : {value} (format attendu AAAA-MM-JJ).",
+      "frameHeight": "{clamp} accepte des cadres de {min} à {max} mm ; le cadre du module mesure {height} mm.",
+      "support": "{system} ne peut pas être posé sur {support, select, standingSeam {un toit à joint debout} rafters {chevrons} other {ce toit}}.",
+      "moduleSize": "{system} n’accepte pas un module de {length} × {width} m."
+    },
     "ui": {
       "render": "Cette partie de l’écran n’a pas pu s’afficher (le projet n’est pas affecté).",
       "retry": "Réessayer"

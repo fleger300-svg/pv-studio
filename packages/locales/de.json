@@ -126,6 +126,17 @@
     "roof": {
       "reentrantCorner": "Die Kanten {a} und {b} bilden eine einspringende Ecke: Beide brauchen eine Neigung (keine Giebelwand) und dieselbe Traufhöhe (bei einem Dachüberstand auch dieselbe Neigung)."
     },
+    "component": {
+      "invalid": "{component}: Ungültiger Wert für {field}.",
+      "unknown": "Die Komponente {id} fehlt in der Bibliothek oder im Projekt.",
+      "wrongFamily": "{component} ist {expected, select, module {kein Modul} mountingSystem {kein Montagesystem} mountingPart {kein Montageteil} other {nicht vom erwarteten Typ}}.",
+      "driverMismatch": "Artikel {article} kann nicht als {driver} gezählt werden.",
+      "stockMismatch": "Artikel {article}: Das System erwartet Stangen von {expected} m, die Schiene ist {actual} m lang.",
+      "invalidDate": "Ungültiges Datum: {value} (erwartet JJJJ-MM-TT).",
+      "frameHeight": "{clamp} passt für Rahmen von {min} bis {max} mm; der Modulrahmen misst {height} mm.",
+      "support": "{system} kann nicht auf {support, select, standingSeam {einem Stehfalzdach} rafters {Sparren} other {diesem Dach}} montiert werden.",
+      "moduleSize": "{system} akzeptiert kein Modul von {length} × {width} m."
+    },
     "ui": {
       "render": "Dieser Bildschirmbereich konnte nicht angezeigt werden (das Projekt ist nicht betroffen).",
       "retry": "Erneut versuchen"

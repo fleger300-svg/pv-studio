@@ -10,6 +10,7 @@
 
 pub mod article;
 pub mod command;
+pub mod component;
 pub mod fingerprint;
 pub mod geometry;
 pub mod ids;
@@ -25,9 +26,10 @@ pub mod units;
 
 pub use article::Article;
 pub use command::{ChangeSet, Command, CommandError, ErrorParam, ModulePosition, ModuleSlot};
+pub use component::{Component, ComponentSnapshot, ComponentSpec};
 pub use fingerprint::fingerprint;
 pub use geometry::{Quat, RoofFrame, Vec3};
-pub use ids::{ArrayId, BuildingId, ModuleId, ProjectId, RoofFaceId};
+pub use ids::{ArrayId, BlobId, BuildingId, ComponentId, ModuleId, ProjectId, RoofFaceId};
 pub use layout::{
     ArrayLayoutParams, BlockParams, CrossRailSpec, EdgeSetback, ExpansionJointSpec, JointAxis,
     LayoutAnchor, ObstacleKind, RoofEdgeKind, RoofObstacle, RoofOutlineSpec, SupportGridKind,

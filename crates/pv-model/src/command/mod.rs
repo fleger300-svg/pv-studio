@@ -59,6 +59,16 @@ pub mod keys {
     pub const ENTITY_INVALID: &str = "errors.entity.invalid";
     /// Roof generation (pv-roof).
     pub const ROOF_REENTRANT_CORNER: &str = "errors.roof.reentrantCorner";
+    /// Component library (pv-model `component`, pv-library).
+    pub const COMPONENT_INVALID: &str = "errors.component.invalid";
+    pub const COMPONENT_UNKNOWN: &str = "errors.component.unknown";
+    pub const COMPONENT_WRONG_FAMILY: &str = "errors.component.wrongFamily";
+    pub const COMPONENT_DRIVER_MISMATCH: &str = "errors.component.driverMismatch";
+    pub const COMPONENT_STOCK_MISMATCH: &str = "errors.component.stockMismatch";
+    pub const COMPONENT_INVALID_DATE: &str = "errors.component.invalidDate";
+    pub const COMPAT_FRAME_HEIGHT: &str = "errors.component.frameHeight";
+    pub const COMPAT_SUPPORT: &str = "errors.component.support";
+    pub const COMPAT_MODULE_SIZE: &str = "errors.component.moduleSize";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -98,6 +108,15 @@ pub mod keys {
         ENTITY_REFERENCE,
         ENTITY_INVALID,
         ROOF_REENTRANT_CORNER,
+        COMPONENT_INVALID,
+        COMPONENT_UNKNOWN,
+        COMPONENT_WRONG_FAMILY,
+        COMPONENT_DRIVER_MISMATCH,
+        COMPONENT_STOCK_MISMATCH,
+        COMPONENT_INVALID_DATE,
+        COMPAT_FRAME_HEIGHT,
+        COMPAT_SUPPORT,
+        COMPAT_MODULE_SIZE,
     ];
 }
 
