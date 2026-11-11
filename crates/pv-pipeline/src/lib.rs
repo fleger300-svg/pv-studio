@@ -11,6 +11,7 @@
 //! | Node | Instance | Reads | Typical cut-off |
 //! |---|---|---|---|
 //! | inputs ([`inputs`]) | building, face, array, project | the project | — |
+//! | [`MountingNode`](nodes::components::MountingNode) | array | array, components | component updates that do not change the system |
 //! | [`Outline`](nodes::geometry::Outline) | face | face | — |
 //! | [`Roof`](nodes::geometry::Roof) | face | face, building | most face edits |
 //! | [`ZoneGeom`](nodes::geometry::ZoneGeom) | face | outline, face, building | rarely changes |
@@ -55,10 +56,12 @@ pub fn register(graph: &mut Graph) -> Result<(), GraphError> {
     graph.register_input::<SiteIn>()?;
     graph.register_input::<FaceIn>()?;
     graph.register_input::<ArrayIn>()?;
-    graph.register_input::<MountingIn>()?;
+    graph.register_input::<ComponentsIn>()?;
+    graph.register_input::<ArrayComponentsIn>()?;
     graph.register_input::<ModulesIn>()?;
     graph.register_input::<ProjectIndexIn>()?;
     graph.register_input::<PricingIn>()?;
+    graph.register::<components::MountingNode>()?;
     graph.register::<geometry::Outline>()?;
     graph.register::<geometry::Roof>()?;
     graph.register::<geometry::ZoneGeom>()?;

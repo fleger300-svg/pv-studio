@@ -67,7 +67,7 @@ impl<F: FnMut(ComputeEvent) + Send + 'static> EventSink for F {
 enum Job {
     Apply {
         seq: u32,
-        batch: InputBatch,
+        batch: Box<InputBatch>,
         reset: bool,
     },
     Shutdown,
@@ -112,7 +112,11 @@ impl WorkerLink {
 
     /// Low-level: queues a batch and cancels the running pass.
     pub fn send_batch(&self, seq: u32, batch: InputBatch, reset: bool) {
-        self.send(Job::Apply { seq, batch, reset });
+        self.send(Job::Apply {
+            seq,
+            batch: Box::new(batch),
+            reset,
+        });
     }
 
     /// Stops the compute thread after the jobs already queued.
@@ -223,7 +227,7 @@ impl WorkerQueue {
                                 reset = true;
                             }
                             seq = s;
-                            match apply_batch(&mut graph, batch) {
+                            match apply_batch(&mut graph, *batch) {
                                 Ok(report) => removed.extend(report.forgotten_arrays),
                                 Err(e) => sink.emit(ComputeEvent::Failed {
                                     seq,

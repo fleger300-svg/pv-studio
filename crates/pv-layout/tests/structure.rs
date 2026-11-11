@@ -53,6 +53,7 @@ fn ref_a_array(f: &RoofFace, cols: u32, rows: u32) -> PanelArray {
         tilt_on_roof_deg: 0.0,
         azimuth_offset_deg: 0.0,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
+        module: None,
         mounting: None,
         layout: ArrayLayoutParams {
             boundary_uv: vec![

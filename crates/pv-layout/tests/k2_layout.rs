@@ -125,6 +125,7 @@ fn array(fx: &Fixture, face: &RoofFace, boundary: Vec<[f64; 2]>) -> PanelArray {
         tilt_on_roof_deg: 0.0,
         azimuth_offset_deg: 0.0,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
+        module: None,
         mounting: None,
         layout: ArrayLayoutParams {
             boundary_uv: boundary,

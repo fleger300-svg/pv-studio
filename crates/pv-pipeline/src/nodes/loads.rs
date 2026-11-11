@@ -5,12 +5,13 @@ use pv_model::command::keys;
 use pv_model::CommandError;
 use pv_statics::{analyze_zones, SiteInput, ZoneLoadCase, ZoneLoadResult};
 
+use super::components::MountingNode;
 use super::geometry::Roof;
 use super::zones::ZoneSet;
 use super::{array_of, building_of, kind};
 use crate::convert::{cp_source, dead_load, factors, site_input};
 use crate::error::statics_error;
-use crate::inputs::{ArrayIn, BuildingIn, MountingIn, SiteIn};
+use crate::inputs::{ArrayIn, BuildingIn, SiteIn};
 
 kind!(
     /// Site of a building as the statics engine takes it (validated).
@@ -43,7 +44,7 @@ kind!(
 impl Derived for ZoneLoads {
     fn compute(ctx: &mut Ctx<'_>, i: Instance) -> Result<ZoneLoadResult, GraphError> {
         array_of(i)?;
-        let mounting = ctx.get::<MountingIn>(i)?;
+        let mounting = ctx.get::<MountingNode>(i)?;
         let Some(m) = mounting.as_ref() else {
             return Err(CommandError::new(keys::STATICS_MOUNTING_MISSING).into());
         };

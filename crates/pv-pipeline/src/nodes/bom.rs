@@ -10,12 +10,11 @@ use pv_graph::{Ctx, Derived, GraphError, Instance};
 use pv_model::{Driver, ModuleState};
 
 use super::ballast::Ballast;
+use super::components::MountingNode;
 use super::layout::Hardware;
 use super::{array_of, kind};
 use crate::error::bom_error;
-use crate::inputs::{
-    ArrayIn, BuildingIn, FaceIn, ModulesIn, MountingIn, PricingIn, ProjectIndexIn,
-};
+use crate::inputs::{ArrayIn, BuildingIn, FaceIn, ModulesIn, PricingIn, ProjectIndexIn};
 
 fn mm(length_m: f64) -> f64 {
     (length_m * 1000.0).round() / 1000.0
@@ -35,7 +34,7 @@ impl Derived for FieldCountsNode {
         let face = ctx.get::<FaceIn>(Instance::Face(array.roof_face_id))?;
         // Tab title as K2 names it: building and roof face (« Bât 9A Toiture Sud »).
         let building = ctx.get::<BuildingIn>(Instance::Building(face.building_id))?;
-        let mounting = ctx.get::<MountingIn>(i)?;
+        let mounting = ctx.get::<MountingNode>(i)?;
         let parts = mounting
             .as_ref()
             .as_ref()

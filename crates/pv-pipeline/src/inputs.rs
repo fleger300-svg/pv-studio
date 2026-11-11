@@ -5,16 +5,17 @@
 //! | [`BuildingIn`] | building | geometry and roof kind (site stripped) |
 //! | [`SiteIn`] | building | site data for the statics |
 //! | [`FaceIn`] | face | outline, pitch, support grid |
-//! | [`ArrayIn`] | array | module, grid and layout parameters (mounting stripped) |
-//! | [`MountingIn`] | array | statics snapshot of the mounting system |
+//! | [`ArrayIn`] | array | module, grid and layout parameters (component references stripped) |
+//! | [`ArrayComponentsIn`] | array | module and mounting system references |
+//! | [`ComponentsIn`] | project | frozen library components (resolved per array by [`crate::nodes::components::MountingNode`]) |
 //! | [`ModulesIn`] | array | the array's module instances |
 //! | [`ProjectIndexIn`] | project | ids of every entity (to forget deleted ones) |
 
 use pv_graph::{serde_fingerprint, Input, Instance, Kind};
 use pv_model::fingerprint::fingerprint_bytes;
 use pv_model::{
-    ArrayId, Building, BuildingId, ModuleInstance, ModuleState, MountingSystem, PanelArray,
-    Pricing, RoofFace, RoofFaceId, SiteParams,
+    ArrayId, Building, BuildingId, ComponentId, ComponentSnapshot, ModuleInstance, ModuleState,
+    PanelArray, Pricing, RoofFace, RoofFaceId, SiteParams,
 };
 use serde::Serialize;
 
@@ -52,16 +53,23 @@ serde_input!(
     RoofFace
 );
 serde_input!(
-    /// An array without its mounting snapshot.
+    /// An array without its component references (choosing another system must not
+    /// invalidate the layout nodes).
     ArrayIn,
     "in.array",
     PanelArray
 );
 serde_input!(
-    /// Mounting snapshot of an array.
-    MountingIn,
-    "in.mounting",
-    Option<MountingSystem>
+    /// Component references of an array: `(module, mounting system)`.
+    ArrayComponentsIn,
+    "in.array_components",
+    (Option<ComponentId>, Option<ComponentId>)
+);
+serde_input!(
+    /// Frozen library components of the project.
+    ComponentsIn,
+    "in.components",
+    Vec<ComponentSnapshot>
 );
 serde_input!(
     /// Commercial conditions of the project (discounts).

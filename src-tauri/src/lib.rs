@@ -6,6 +6,7 @@ mod commands;
 mod compute;
 mod export;
 mod layout;
+mod library;
 mod roof;
 mod state;
 
@@ -46,6 +47,24 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             layout::default_array,
             layout::plan_layout,
             layout::apply_layout,
+            library::library_search,
+            library::library_component,
+            library::library_new_component,
+            library::library_duplicate,
+            library::library_save,
+            library::library_archive,
+            library::library_add_price,
+            library::library_preferred_supplier,
+            library::library_set_preferred_supplier,
+            library::library_pick_file,
+            library::library_import,
+            library::library_attach_datasheet,
+            library::library_datasheet,
+            library::array_choices,
+            library::assign_components,
+            library::component_updates,
+            library::accept_updates,
+            library::library_extract_datasheet,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,
@@ -97,6 +116,26 @@ pub fn run() {
             let state = app.state::<AppState>();
             let handle = compute::start(app.handle(), Arc::clone(&state.results))?;
             state.attach_compute(handle);
+            // The user's component library: `PV_LIBRARY_PATH` (tests), else the application
+            // data folder. Never on a network drive (SQLite locking).
+            let path = std::env::var_os("PV_LIBRARY_PATH")
+                .map(std::path::PathBuf::from)
+                .or_else(|| {
+                    app.path()
+                        .app_data_dir()
+                        .ok()
+                        .map(|d| d.join("library.sqlite"))
+                });
+            if let Some(path) = path {
+                if let Some(dir) = path.parent() {
+                    std::fs::create_dir_all(dir)?;
+                }
+                match pv_library::LibraryStore::open(&path) {
+                    Ok(library) => state.set_library(library),
+                    // The application still works with the components frozen in projects.
+                    Err(e) => eprintln!("component library unavailable ({}): {e}", path.display()),
+                }
+            }
             Ok(())
         })
         .run(tauri::generate_context!())

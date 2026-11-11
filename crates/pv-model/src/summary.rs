@@ -31,6 +31,12 @@ pub struct ArraySummary {
     pub module_size: [f64; 3],
     /// Half extents of the footprint on the roof plane along (u, v), metres.
     pub half_footprint: [f64; 2],
+    /// Label of the module component (`None`: generic module).
+    #[specta(optional)]
+    pub module_label: Option<String>,
+    /// Label of the mounting system component (`None`: none chosen).
+    #[specta(optional)]
+    pub mounting_label: Option<String>,
 }
 
 /// One wall of a building: vertical, on footprint edge `start → end` (world plan, m), from
@@ -95,6 +101,10 @@ impl ProjectSummary {
                     None => (0, 0),
                 };
                 let (hu, hv) = a.half_footprint();
+                let label = |id: Option<crate::ids::ComponentId>| {
+                    id.and_then(|id| project.component(id))
+                        .map(|s| s.component.label.clone())
+                };
                 ArraySummary {
                     array: a.clone(),
                     roof_face_index: project
@@ -106,6 +116,8 @@ impl ProjectSummary {
                     module_count: count,
                     module_size: a.local_size(),
                     half_footprint: [hu, hv],
+                    module_label: label(a.module),
+                    mounting_label: label(a.mounting),
                 }
             })
             .collect();

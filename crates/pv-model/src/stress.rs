@@ -63,6 +63,7 @@ impl Builder {
                 arrays: Vec::new(),
                 modules: Vec::new(),
                 pricing: crate::pricing::Pricing::default(),
+                components: Vec::new(),
             },
         }
     }
@@ -95,6 +96,7 @@ impl Builder {
     fn array(
         &mut self,
         mut array: PanelArray,
+        mounting: &MountingSystem,
         cells: impl IntoIterator<Item = (u32, u32, f64, f64)>,
     ) {
         array.id = ArrayId::new();
@@ -112,6 +114,9 @@ impl Builder {
             });
         }
         self.project.arrays.push(array);
+        let index = self.project.arrays.len() - 1;
+        crate::component::legacy::adopt_legacy_mounting(&mut self.project, index, mounting)
+            .expect("stress presets convert to components");
     }
 }
 
@@ -203,7 +208,8 @@ fn residential_1k() -> Project {
                 tilt_on_roof_deg: 0.0,
                 azimuth_offset_deg: 0.0,
                 grid,
-                mounting: Some(single_rail_on_gable()),
+                module: None,
+                mounting: None,
                 layout: ArrayLayoutParams {
                     rails: Some(CrossRailSpec::k2_single_rail()),
                     ..ArrayLayoutParams::default()
@@ -219,7 +225,7 @@ fn residential_1k() -> Project {
                     )
                 })
             });
-            b.array(array, cells);
+            b.array(array, &single_rail_on_gable(), cells);
         }
     }
     b.project
@@ -305,13 +311,14 @@ fn industrial_10k() -> Project {
             tilt_on_roof_deg: RACK_TILT,
             azimuth_offset_deg: offset,
             grid,
-            mounting: Some(d_dome()),
+            module: None,
+            mounting: None,
             layout: ArrayLayoutParams::default(),
         };
         let cells = (0..rows).flat_map(move |r| {
             (0..PAIRS).map(move |c| (r, c, origin_u + f64::from(c) * pair_pitch, row_v(r)))
         });
-        b.array(array, cells);
+        b.array(array, &d_dome(), cells);
     }
     // The two halves of one east-west system (ids are assigned by `Builder::array`).
     let (west, east) = (b.project.arrays[0].id, b.project.arrays[1].id);
@@ -365,7 +372,7 @@ fn single_rail_on_gable() -> MountingSystem {
 /// K2 D-Dome 6.10 on gravel, coefficients back-fitted from the K2 Base report of reference
 /// B (9 m): eave corner and interior as printed, the other edge zones take the eave-corner
 /// values.
-fn d_dome() -> MountingSystem {
+pub(crate) fn d_dome() -> MountingSystem {
     let k = |cp_east, cp_west| PairCoefficientsSpec {
         cp_east,
         cp_west,

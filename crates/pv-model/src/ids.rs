@@ -50,6 +50,14 @@ uuid_id!(
     /// Identifies a panel array.
     ArrayId
 );
+uuid_id!(
+    /// Identifies a library component across all its revisions.
+    ComponentId
+);
+uuid_id!(
+    /// Identifies a stored file (datasheet PDF) of the component library.
+    BlobId
+);
 
 /// Dense module id. Equal to the module's index in [`crate::Project::modules`], to the
 /// `module_instance.id` primary key, and to the global GPU instance index.

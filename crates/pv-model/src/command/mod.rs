@@ -6,10 +6,12 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::ids::{ArrayId, BuildingId, ModuleId, RoofFaceId};
+use crate::component::ComponentSnapshot;
+use crate::ids::{ArrayId, BuildingId, ComponentId, ModuleId, RoofFaceId};
 use crate::project::{Building, ModuleState, PanelArray, Project, RoofFace};
 
 mod batch;
+mod components;
 mod entities;
 mod modules;
 mod pricing;
@@ -59,6 +61,27 @@ pub mod keys {
     pub const ENTITY_INVALID: &str = "errors.entity.invalid";
     /// Roof generation (pv-roof).
     pub const ROOF_REENTRANT_CORNER: &str = "errors.roof.reentrantCorner";
+    /// Component library (pv-model `component`, pv-library).
+    pub const COMPONENT_INVALID: &str = "errors.component.invalid";
+    pub const COMPONENT_UNKNOWN: &str = "errors.component.unknown";
+    pub const COMPONENT_WRONG_FAMILY: &str = "errors.component.wrongFamily";
+    pub const COMPONENT_DRIVER_MISMATCH: &str = "errors.component.driverMismatch";
+    pub const COMPONENT_STOCK_MISMATCH: &str = "errors.component.stockMismatch";
+    pub const COMPONENT_INVALID_DATE: &str = "errors.component.invalidDate";
+    pub const COMPAT_FRAME_HEIGHT: &str = "errors.component.frameHeight";
+    pub const COMPAT_SUPPORT: &str = "errors.component.support";
+    pub const COMPAT_MODULE_SIZE: &str = "errors.component.moduleSize";
+    pub const COMPONENT_STALE_REVISION: &str = "errors.component.staleRevision";
+    pub const COMPONENT_EXISTS: &str = "errors.component.exists";
+    /// Copilot (pv-copilot): datasheet extraction.
+    pub const COPILOT_NO_KEY: &str = "errors.copilot.noKey";
+    pub const COPILOT_NETWORK: &str = "errors.copilot.network";
+    pub const COPILOT_HTTP: &str = "errors.copilot.http";
+    pub const COPILOT_REFUSED: &str = "errors.copilot.refused";
+    pub const COPILOT_TRUNCATED: &str = "errors.copilot.truncated";
+    pub const COPILOT_INVALID: &str = "errors.copilot.invalid";
+    pub const COPILOT_INCOMPLETE: &str = "errors.copilot.incomplete";
+    pub const COPILOT_TOO_LARGE: &str = "errors.copilot.tooLarge";
 
     /// All keys, for the locale consistency test.
     pub const ALL: &[&str] = &[
@@ -98,6 +121,25 @@ pub mod keys {
         ENTITY_REFERENCE,
         ENTITY_INVALID,
         ROOF_REENTRANT_CORNER,
+        COMPONENT_INVALID,
+        COMPONENT_UNKNOWN,
+        COMPONENT_WRONG_FAMILY,
+        COMPONENT_DRIVER_MISMATCH,
+        COMPONENT_STOCK_MISMATCH,
+        COMPONENT_INVALID_DATE,
+        COMPAT_FRAME_HEIGHT,
+        COMPAT_SUPPORT,
+        COMPAT_MODULE_SIZE,
+        COMPONENT_STALE_REVISION,
+        COMPONENT_EXISTS,
+        COPILOT_NO_KEY,
+        COPILOT_NETWORK,
+        COPILOT_HTTP,
+        COPILOT_REFUSED,
+        COPILOT_TRUNCATED,
+        COPILOT_INVALID,
+        COPILOT_INCOMPLETE,
+        COPILOT_TOO_LARGE,
     ];
 }
 
@@ -170,6 +212,21 @@ pub enum Command {
         array_id: ArrayId,
         modules: Vec<ModuleSlot>,
     },
+    /// Freezes library components into the project (identical copies already there are
+    /// skipped; a different copy with the same id is refused: use `UpdateComponents`).
+    AdoptComponents { snapshots: Vec<ComponentSnapshot> },
+    /// Removes frozen components no array or system refers to.
+    ForgetComponents { ids: Vec<ComponentId> },
+    /// Replaces frozen components (accepted update proposals); arrays using an updated
+    /// module get its dimensions.
+    UpdateComponents { snapshots: Vec<ComponentSnapshot> },
+    /// Sets the module and mounting system of an array (checked for compatibility; the
+    /// module's dimensions are copied, a newly chosen system brings its rail geometry).
+    SetArrayComponents {
+        array_id: ArrayId,
+        module: Option<ComponentId>,
+        mounting: Option<ComponentId>,
+    },
     /// Several commands applied as one, all or nothing.
     Batch { commands: Vec<Command> },
 }
@@ -182,6 +239,9 @@ pub struct ChangeSet {
     pub module_ids: Vec<ModuleId>,
     /// The project's pricing (discounts) changed.
     pub pricing: bool,
+    /// The frozen components changed (adopted, updated or forgotten).
+    #[serde(default)]
+    pub components: bool,
     /// Buildings added, changed or removed. Sorted, unique.
     pub buildings: Vec<BuildingId>,
     /// Roof faces added, changed or removed. Sorted, unique.
@@ -221,6 +281,7 @@ impl ChangeSet {
     /// Accumulates `other` (applied after `self`).
     pub fn merge(&mut self, other: ChangeSet) {
         self.pricing |= other.pricing;
+        self.components |= other.components;
         self.structure |= other.structure;
         union(&mut self.buildings, &other.buildings);
         union(&mut self.faces, &other.faces);
@@ -235,7 +296,7 @@ impl ChangeSet {
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.module_ids.is_empty() && !self.pricing && self.modules_only()
+        self.module_ids.is_empty() && !self.pricing && !self.components && self.modules_only()
     }
 }
 
@@ -304,6 +365,14 @@ impl Command {
             Command::SetArrayModules { array_id, .. } => {
                 structure::inverse_set_modules(project, *array_id)
             }
+            Command::AdoptComponents { snapshots } => components::inverse_adopt(project, snapshots),
+            Command::ForgetComponents { ids } => components::inverse_forget(project, ids),
+            Command::UpdateComponents { snapshots } => {
+                components::inverse_update(project, snapshots)
+            }
+            Command::SetArrayComponents { array_id, .. } => {
+                components::inverse_set_array(project, *array_id)
+            }
             Command::Batch { commands } => batch::inverse_batch(project, commands),
         }
     }
@@ -338,6 +407,14 @@ impl Command {
             Command::SetArrayModules { array_id, modules } => {
                 structure::apply_set_modules(project, *array_id, modules)
             }
+            Command::AdoptComponents { snapshots } => components::apply_adopt(project, snapshots),
+            Command::ForgetComponents { ids } => components::apply_forget(project, ids),
+            Command::UpdateComponents { snapshots } => components::apply_update(project, snapshots),
+            Command::SetArrayComponents {
+                array_id,
+                module,
+                mounting,
+            } => components::apply_set_array(project, *array_id, *module, *mounting),
             Command::Batch { commands } => batch::apply_batch(project, commands),
         }
     }

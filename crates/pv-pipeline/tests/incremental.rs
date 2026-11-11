@@ -4,7 +4,8 @@ mod common;
 
 use common::*;
 use pv_graph::{CancelToken, Graph, NodeStatus, Stats};
-use pv_model::{ChangeSet, ModuleState, Project};
+use pv_model::component::legacy::adopt_legacy_mounting;
+use pv_model::{ChangeSet, ModuleState, MountingSystem, Project};
 use pv_pipeline::nodes::zones::ModuleZones;
 use pv_pipeline::{sync_changes, sync_project, FieldStatics};
 use pv_statics::RoofZone;
@@ -197,12 +198,16 @@ fn a_seam_spacing_change_recomputes_hardware_and_descent() {
 
 #[test]
 fn a_mounting_change_recomputes_that_field() {
-    // The BOM counters read the mounting (parts): recomputed, unchanged, cut off.
+    // Field 1 gets a heavier variant of the system (its own component). Both fields resolve
+    // their system again (the components changed); field 0's is unchanged and cut off. The
+    // BOM counters read the mounting (parts): recomputed, unchanged, cut off.
     let mut p = ref_a_roof1();
     let mut g = graph_for(&p);
-    if let Some(m) = p.arrays[1].mounting.as_mut() {
-        m.system_mass_per_module_kg += 1.0;
-    }
+    let heavier = MountingSystem {
+        system_mass_per_module_kg: 5.3,
+        ..MountingSystem::k2_single_rail()
+    };
+    adopt_legacy_mounting(&mut p, 1, &heavier).unwrap();
     sync_project(&mut g, &p).unwrap();
     let s = pass(&mut g);
     assert_eq!(
@@ -211,6 +216,7 @@ fn a_mounting_change_recomputes_that_field() {
             ("array.ballast", 1),
             ("array.bom_counts", 1),
             ("array.descent", 1),
+            ("array.mounting", 2),
             ("array.statics", 1),
             ("array.zone_loads", 1),
         ]

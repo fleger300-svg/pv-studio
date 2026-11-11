@@ -6,6 +6,9 @@ pub mod k2;
 use pv_graph::{CancelToken, Graph, Instance};
 use pv_layout::model::{grid_spec, relayout_fixed};
 use pv_layout::{layout_east_west, Search};
+use pv_model::component::legacy::adopt_legacy_mounting;
+use pv_model::component::{presets, Currency, IsoDate, PriceEntry};
+use pv_model::ComponentSnapshot;
 use pv_model::{
     AeroZoneSpec, ArrayGrid, ArrayId, ArrayLayoutParams, BallastSpec, BlockParams, Building,
     BuildingId, ConsequenceClass, CpSpec, CrossRailSpec, MembraneKind, ModuleState, MountingSystem,
@@ -86,6 +89,38 @@ pub fn site_of(case: &str) -> (SiteParams, f64) {
     (params, s.building_height_m)
 }
 
+/// The base catalogue's K2 SingleRail system, its parts and the LONGi module, frozen without
+/// prices (`Project::components` order: by id).
+pub fn k2_components() -> Vec<ComponentSnapshot> {
+    let mut all: Vec<ComponentSnapshot> = presets::k2_single_rail_parts()
+        .into_iter()
+        .chain([presets::lr7_54hvh_490m(), presets::k2_single_rail()])
+        .map(|component| ComponentSnapshot {
+            component,
+            price: None,
+        })
+        .collect();
+    all.sort_by_key(|s| s.component.id);
+    all
+}
+
+/// Sets the list price (per piece, in currency units) of the frozen part `article_no`.
+pub fn set_list_price(p: &mut Project, article_no: &str, list_price: f64) {
+    let s = p
+        .components
+        .iter_mut()
+        .find(|s| s.component.article_no == article_no)
+        .unwrap_or_else(|| panic!("no component {article_no}"));
+    s.price = Some(PriceEntry {
+        component: s.component.id,
+        supplier: s.component.manufacturer.clone(),
+        list_price_cents: (list_price * 100.0).round() as i64,
+        currency: Currency::Chf,
+        valid_from: IsoDate::parse("2026-01-01").unwrap(),
+        valid_to: None,
+    });
+}
+
 pub fn k2_rails() -> CrossRailSpec {
     CrossRailSpec {
         per_column: 2,
@@ -162,7 +197,8 @@ pub fn ref_a_roof1() -> Project {
                 rails: Some(k2_rails()),
                 ..ArrayLayoutParams::default()
             },
-            mounting: Some(MountingSystem::k2_single_rail()),
+            module: Some(presets::LR7_54HVH_490M),
+            mounting: Some(presets::K2_SINGLE_RAIL),
         };
         let s = grid_spec(&a);
         a.grid = ArrayGrid {
@@ -191,6 +227,7 @@ pub fn ref_a_roof1() -> Project {
         arrays,
         modules,
         pricing: pv_model::Pricing::default(),
+        components: k2_components(),
     }
 }
 
@@ -305,7 +342,8 @@ pub fn ref_b_east_west() -> Project {
         azimuth_offset_deg: az,
         grid: ArrayGrid::regular(0, 0, 0.0, 0.0, 0.0, 0.0),
         layout: params.clone(),
-        mounting: Some(mounting.clone()),
+        module: None,
+        mounting: None,
     };
     let (mut west, mut east) = (mk(90.0), mk(-90.0));
     west.layout.paired_with = Some(east.id);
@@ -315,7 +353,7 @@ pub fn ref_b_east_west() -> Project {
     modules.extend(le.module_instances(east.id, modules.len() as u32));
     west.grid = lw.grid;
     east.grid = le.grid;
-    Project {
+    let mut p = Project {
         id: ProjectId::new(),
         name: "ref-b east-west".into(),
         buildings: vec![building],
@@ -323,7 +361,12 @@ pub fn ref_b_east_west() -> Project {
         arrays: vec![west, east],
         modules,
         pricing: pv_model::Pricing::default(),
+        components: Vec::new(),
+    };
+    for i in 0..2 {
+        adopt_legacy_mounting(&mut p, i, &mounting).unwrap();
     }
+    p
 }
 
 /// Graph synced on `project`, first pass done.

@@ -126,9 +126,32 @@
     "roof": {
       "reentrantCorner": "Die Kanten {a} und {b} bilden eine einspringende Ecke: Beide brauchen eine Neigung (keine Giebelwand) und dieselbe Traufhöhe (bei einem Dachüberstand auch dieselbe Neigung)."
     },
+    "component": {
+      "invalid": "{component}: Ungültiger Wert für {field}.",
+      "unknown": "Die Komponente {id} fehlt in der Bibliothek oder im Projekt.",
+      "wrongFamily": "{component} ist {expected, select, module {kein Modul} mountingSystem {kein Montagesystem} mountingPart {kein Montageteil} other {nicht vom erwarteten Typ}}.",
+      "driverMismatch": "Artikel {article} kann nicht als {driver} gezählt werden.",
+      "stockMismatch": "Artikel {article}: Das System erwartet Stangen von {expected} m, die Schiene ist {actual} m lang.",
+      "invalidDate": "Ungültiges Datum: {value} (erwartet JJJJ-MM-TT).",
+      "frameHeight": "{clamp} passt für Rahmen von {min} bis {max} mm; der Modulrahmen misst {height} mm.",
+      "support": "{system} kann nicht auf {support, select, standingSeam {einem Stehfalzdach} rafters {Sparren} other {diesem Dach}} montiert werden.",
+      "moduleSize": "{system} akzeptiert kein Modul von {length} × {width} m.",
+      "staleRevision": "{component} wurde inzwischen geändert (Revision {found}, Sie bearbeiteten Revision {expected}): Bitte neu laden.",
+      "exists": "Die Komponente {id} ist bereits in der Bibliothek."
+    },
     "ui": {
       "render": "Dieser Bildschirmbereich konnte nicht angezeigt werden (das Projekt ist nicht betroffen).",
       "retry": "Erneut versuchen"
+    },
+    "copilot": {
+      "noKey": "Die Datenblatt-Extraktion benötigt einen Anthropic-API-Schlüssel (Umgebungsvariable ANTHROPIC_API_KEY).",
+      "network": "Der Extraktionsdienst ist nicht erreichbar: {detail}",
+      "http": "Der Extraktionsdienst meldete einen Fehler ({status}): {detail}",
+      "refused": "Das Modell hat das Lesen dieses Dokuments abgelehnt ({category}).",
+      "truncated": "Die Antwort wurde abgeschnitten: Bitte erneut versuchen oder die Werte von Hand eingeben.",
+      "invalid": "Die Antwort ist nicht lesbar ({detail}).",
+      "incomplete": "Das Datenblatt enthält nicht: {fields}. Bitte die Komponente von Hand erfassen.",
+      "tooLarge": "Das PDF ist zu gross zum Senden ({size} MB, höchstens {max} MB)."
     }
   },
   "hud": {
@@ -373,7 +396,10 @@
     "relayout": "Automatisch belegen",
     "clear": "Modulfeld leeren",
     "delete": "Modulfeld löschen",
-    "add": "Modulfeld hinzufügen (automatisch belegt)"
+    "add": "Modulfeld hinzufügen (automatisch belegt)",
+    "module": "Modul",
+    "genericModule": "Generisches Modul (nur Abmessungen)",
+    "noMountingHint": "Wählen Sie ein Modul und ein Montagesystem aus der Bibliothek, um Statik und Stückliste zu erhalten."
   },
   "site": {
     "title": "Standort (Statik SIA 261)",
@@ -406,5 +432,144 @@
     "snowFactor": "Schneefaktor",
     "windFactor": "Windfaktor",
     "applyAll": "Diesen Standort auf alle Gebäude anwenden"
+  },
+  "library": {
+    "title": "Bibliothek",
+    "search": "Suchen (Hersteller, Modell, Artikelnr.)",
+    "family": "Familie",
+    "families": {
+      "all": "Alle",
+      "module": "Modul",
+      "mountingSystem": "Montagesystem",
+      "mountingPart": "Montageteil"
+    },
+    "showArchived": "Archivierte anzeigen",
+    "newModule": "Neues Modul",
+    "newPart": "Neues Teil",
+    "close": "Schliessen",
+    "results": "{count, plural, one {# Komponente} other {# Komponenten}}",
+    "empty": "Keine passende Komponente.",
+    "unverified": "nicht geprüft",
+    "archived": "archiviert",
+    "pick": "Wählen Sie eine Komponente in der Liste oder erstellen Sie eine.",
+    "duplicate": "Duplizieren",
+    "restore": "Wiederherstellen",
+    "archive": "Archivieren",
+    "history": "Verlauf",
+    "revision": "Revision {n}",
+    "authors": {
+      "user": "Benutzer",
+      "import": "Import",
+      "seed": "Grundkatalog",
+      "copilot": "Copilot"
+    },
+    "partKinds": {
+      "rail": "Schiene",
+      "splice": "Schienenverbinder",
+      "clamp": "Modulklemme",
+      "fixation": "Dachbefestigung",
+      "climber": "Kreuzverbinder",
+      "ballastBlock": "Ballaststein",
+      "other": "Andere"
+    },
+    "structures": {
+      "crossRail": "Kreuzschienen",
+      "ballasted": "Ballastiert"
+    },
+    "newTitle": "Neu: {family}",
+    "editTitle": "{label} · Revision {n}",
+    "fields": {
+      "manufacturer": "Hersteller",
+      "model": "Modell",
+      "articleNo": "Artikelnr.",
+      "label": "Bezeichnung",
+      "lengthM": "Länge",
+      "widthM": "Breite",
+      "thicknessM": "Rahmenhöhe",
+      "massKg": "Masse",
+      "electrical": "Elektrische Daten (STC)",
+      "unitMassKg": "Masse pro Stück",
+      "packQty": "Stück pro Verkaufseinheit",
+      "kind": "Art",
+      "stockLengthM": "Stangenlänge",
+      "frameMin": "Rahmenhöhe min.",
+      "frameMax": "Rahmenhöhe max.",
+      "structure": "Struktur",
+      "systemMass": "Systemmasse pro Modul",
+      "loadedArea": "Lasteinzugsfläche",
+      "verified": "Daten mit dem Datenblatt geprüft"
+    },
+    "electrical": {
+      "pmaxW": "Pmax",
+      "vocV": "Voc",
+      "iscA": "Isc",
+      "vmppV": "Vmpp",
+      "imppA": "Impp",
+      "tempCoeffPmaxPctPerK": "Temp.-Koeff. Pmax",
+      "tempCoeffVocPctPerK": "Temp.-Koeff. Voc",
+      "tempCoeffIscPctPerK": "Temp.-Koeff. Isc",
+      "maxSystemVoltageV": "Max. Systemspannung",
+      "bifaciality": "Bifazialität (leer: monofazial)"
+    },
+    "systemParts": "{count, plural, one {# Teileregel} other {# Teileregeln}} (Änderung durch Duplizieren des Systems).",
+    "note": "Änderungsnotiz",
+    "create": "Erstellen",
+    "save": "Als neue Revision speichern",
+    "invalidNumber": "Ungültige Zahl.",
+    "datasheet": {
+      "title": "Datenblatt",
+      "attach": "PDF anhängen…",
+      "show": "Anzeigen",
+      "none": "Kein Datenblatt."
+    },
+    "prices": {
+      "title": "Listenpreise",
+      "none": "Noch kein Preis.",
+      "supplier": "Lieferant",
+      "listPrice": "Listenpreis pro Stück",
+      "from": "Gültig ab",
+      "to": "Gültig bis",
+      "prefer": "Bevorzugter Lieferant",
+      "currency": "Währung",
+      "add": "Preis hinzufügen"
+    },
+    "import": {
+      "open": "Preisliste importieren…",
+      "title": "Preisliste importieren",
+      "choose": "Excel-Datei wählen…",
+      "noFile": "Keine Datei gewählt.",
+      "createMissing": "Unbekannte Artikel als ungeprüfte Teile erstellen",
+      "preview": "{count, plural, one {# Artikel wird bepreist.} other {# Artikel werden bepreist.}}",
+      "done": "{count, plural, one {# Artikel bepreist.} other {# Artikel bepreist.}}",
+      "created": "Erstellt: {list}.",
+      "unknown": "Unbekannte Artikel (nicht importiert): {list}.",
+      "conflicts": "Mit unterschiedlichen Preisen aufgeführt (nicht importiert): {list}.",
+      "difference": "Artikel {article}: {field} ist {library} in der Bibliothek, {list} in der Liste (unverändert).",
+      "fields": {
+        "packQty": "Stück pro Verkaufseinheit",
+        "label": "Bezeichnung"
+      },
+      "run": "Importieren"
+    },
+    "updates": {
+      "title": "Komponenten-Updates",
+      "available": "{count, plural, one {# Komponenten-Update ist verfügbar.} other {# Komponenten-Updates sind verfügbar.}}",
+      "show": "Prüfen",
+      "hide": "Ausblenden",
+      "revision": "Revision {from} → {to}",
+      "price": "Listenpreis {before} → {after}",
+      "accept": "{count, plural, one {# Update übernehmen} other {# Updates übernehmen}}"
+    },
+    "extract": {
+      "open": "Aus Datenblatt extrahieren (KI)…",
+      "title": "Komponente aus ihrem Datenblatt extrahieren",
+      "privacy": "Das PDF wird zum Lesen an Anthropic (Claude) gesendet. Die Werte werden als neue Komponente gespeichert und bleiben « nicht geprüft », bis Sie sie mit dem Datenblatt abgeglichen haben.",
+      "hint": "Variante (z. B. LR7-54HVH-490M), optional",
+      "run": "PDF wählen und extrahieren…",
+      "running": "Datenblatt wird gelesen…",
+      "done": "Komponente aus dem Datenblatt erstellt: Prüfen Sie jeden Wert und setzen Sie dann « Daten mit dem Datenblatt geprüft ».",
+      "warnings": "Zu prüfende Punkte",
+      "source": "durch KI extrahiert"
+    }
   }
 }

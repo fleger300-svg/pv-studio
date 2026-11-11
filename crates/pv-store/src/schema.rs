@@ -151,6 +151,21 @@ const MIGRATIONS: &[&str] = &[
     ALTER TABLE building ADD COLUMN footprint_json TEXT NOT NULL DEFAULT '[]';
     ALTER TABLE building ADD COLUMN roof_json TEXT;
     "#,
+    // v8: component library. Arrays refer to frozen components (module and mounting system)
+    // instead of carrying a hard-coded mounting snapshot. Old `mounting_json` snapshots are
+    // converted on open by `pv_model::component::legacy` (content-derived ids, same resolved
+    // system), then cleared; the undo journal of such files is cleared too (its commands
+    // carry the old snapshot format).
+    r#"
+    CREATE TABLE component_snapshot (
+        id             TEXT PRIMARY KEY,
+        revision       INTEGER NOT NULL CHECK (revision >= 1),
+        component_json TEXT NOT NULL CHECK (json_valid(component_json)),
+        price_json     TEXT CHECK (price_json IS NULL OR json_valid(price_json))
+    ) STRICT;
+    ALTER TABLE "array" ADD COLUMN module_ref TEXT;
+    ALTER TABLE "array" ADD COLUMN mounting_ref TEXT;
+    "#,
 ];
 
 /// Latest schema version known to this build.
@@ -235,6 +250,7 @@ mod tests {
                 "bom_snapshot",
                 "building",
                 "command_log",
+                "component_snapshot",
                 "module_instance",
                 "project",
                 "roof_face"

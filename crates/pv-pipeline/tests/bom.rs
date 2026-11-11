@@ -51,17 +51,20 @@ fn reference() -> Reference {
 fn priced_roof_1() -> Project {
     let r = reference();
     let mut p = ref_a_roof1();
-    for a in &mut p.arrays {
-        if let Some(m) = a.mounting.as_mut() {
-            for part in &mut m.parts {
-                part.article.list_price = r
-                    .articles
-                    .iter()
-                    .find(|x| x.article_no == part.article.article_no)
-                    .unwrap()
-                    .list_price;
-            }
-        }
+    let parts: Vec<String> = p
+        .components
+        .iter()
+        .filter(|s| !s.component.article_no.is_empty())
+        .map(|s| s.component.article_no.clone())
+        .collect();
+    for no in parts {
+        let price = r
+            .articles
+            .iter()
+            .find(|x| x.article_no == no)
+            .unwrap()
+            .list_price;
+        set_list_price(&mut p, &no, price);
     }
     p
 }
