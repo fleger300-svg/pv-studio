@@ -403,7 +403,8 @@
     "add": "Add an array (laid out automatically)",
     "module": "Module",
     "genericModule": "Generic module (dimensions only)",
-    "noMountingHint": "Choose a module and a mounting system from the library to get the statics and the bill of materials."
+    "noMountingHint": "Choose a module and a mounting system from the library to get the statics and the bill of materials.",
+    "railLength": "Rail bar length"
   },
   "site": {
     "title": "Site (statics, SIA 261)",

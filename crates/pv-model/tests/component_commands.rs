@@ -81,9 +81,14 @@ fn adopt_assign_update_forget_with_exact_undo() {
         (1.8, 1.134),
         "datasheet copied"
     );
+    let resolved = p.resolve_mounting(a).expect("resolve").expect("system");
+    assert_eq!(resolved.rail_lengths(), vec![4.8, 2.4]);
     assert_eq!(
-        p.resolve_mounting(a).expect("resolve"),
-        Some(MountingSystem::k2_single_rail())
+        MountingSystem {
+            rail_options: Vec::new(),
+            ..resolved
+        },
+        MountingSystem::k2_single_rail()
     );
 
     // A new revision of the module: the arrays using it follow its dimensions.

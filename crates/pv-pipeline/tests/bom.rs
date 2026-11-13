@@ -57,14 +57,11 @@ fn priced_roof_1() -> Project {
         .filter(|s| !s.component.article_no.is_empty())
         .map(|s| s.component.article_no.clone())
         .collect();
+    // Parts K2 did not list on this roof (the 2.40 m rail option) keep no price.
     for no in parts {
-        let price = r
-            .articles
-            .iter()
-            .find(|x| x.article_no == no)
-            .unwrap()
-            .list_price;
-        set_list_price(&mut p, &no, price);
+        if let Some(x) = r.articles.iter().find(|x| x.article_no == no) {
+            set_list_price(&mut p, &no, x.list_price);
+        }
     }
     p
 }

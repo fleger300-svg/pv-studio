@@ -194,6 +194,74 @@ pub struct MountingSystem {
     pub ballast: Option<BallastSpec>,
     /// Parts of the system and the rules giving their quantities (bill of materials).
     pub parts: Vec<PartRule>,
+    /// Other bar lengths the rails can be bought in (the field chooses one, see
+    /// [`crate::ArrayLayoutParams::rail_stock_length_m`]).
+    #[serde(default)]
+    pub rail_options: Vec<RailOption>,
+}
+
+/// A rail article sold in another bar length.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct RailOption {
+    pub stock_length_m: f64,
+    pub article: Article,
+}
+
+impl MountingSystem {
+    /// Bar lengths a field can choose: the system's own (first) then its options, without
+    /// duplicates; empty for a system without rail bars.
+    #[must_use]
+    pub fn rail_lengths(&self) -> Vec<f64> {
+        let mut out: Vec<f64> = Vec::new();
+        let own = self.parts.iter().find_map(|p| match p.driver {
+            Driver::RailBars { stock_length_m, .. } => Some(stock_length_m),
+            _ => None,
+        });
+        let Some(own) = own else {
+            return out;
+        };
+        for l in std::iter::once(own).chain(self.rail_options.iter().map(|o| o.stock_length_m)) {
+            if !out.iter().any(|x| (x - l).abs() < 1e-6) {
+                out.push(l);
+            }
+        }
+        out
+    }
+
+    /// Part rules with the rail bars and splices of `stock_length_m` (the field's choice):
+    /// the bar article becomes the option of that length. Unchanged when the length is the
+    /// system's own or not offered.
+    #[must_use]
+    pub fn parts_for_rail_length(&self, stock_length_m: Option<f64>) -> Vec<PartRule> {
+        let Some(l) = stock_length_m else {
+            return self.parts.clone();
+        };
+        let Some(option) = self
+            .rail_options
+            .iter()
+            .find(|o| (o.stock_length_m - l).abs() < 1e-6)
+        else {
+            return self.parts.clone();
+        };
+        self.parts
+            .iter()
+            .map(|p| {
+                let mut p = p.clone();
+                match &mut p.driver {
+                    Driver::RailBars { stock_length_m, .. } => {
+                        *stock_length_m = option.stock_length_m;
+                        p.article = option.article.clone();
+                    }
+                    Driver::RailJoint { stock_length_m, .. } => {
+                        *stock_length_m = option.stock_length_m;
+                    }
+                    _ => {}
+                }
+                p
+            })
+            .collect()
+    }
 }
 
 impl MountingSystem {
@@ -215,6 +283,7 @@ impl MountingSystem {
             }),
             ballast: None,
             parts: k2_single_rail_parts(),
+            rail_options: Vec::new(),
         }
     }
 }

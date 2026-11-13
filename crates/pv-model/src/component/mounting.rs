@@ -87,6 +87,9 @@ pub struct MountingSystemSpec {
     pub compatibility: SystemCompatibility,
     #[specta(optional)]
     pub approval: Option<Approval>,
+    /// The system's rail in other bar lengths (rail parts), offered to each field.
+    #[serde(default)]
+    pub rail_options: Vec<ComponentId>,
 }
 
 impl MountingSystemSpec {
@@ -114,6 +117,9 @@ impl MountingSystemSpec {
         }
         for rule in &self.parts {
             push(rule.part);
+        }
+        for &id in &self.rail_options {
+            push(id);
         }
         ids
     }

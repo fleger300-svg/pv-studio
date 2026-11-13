@@ -36,6 +36,7 @@ pub const K2_DOME_CLAMP_EC: ComponentId = seed_id(0x0109);
 pub const K2_MK2: ComponentId = seed_id(0x010a);
 pub const K2_BOLT_M8X20: ComponentId = seed_id(0x010b);
 pub const K2_MULTI_MONTI: ComponentId = seed_id(0x010c);
+pub const K2_SINGLE_RAIL_36_240: ComponentId = seed_id(0x010d);
 pub const K2_SINGLE_RAIL: ComponentId = seed_id(0x0201);
 pub const K2_D_DOME: ComponentId = seed_id(0x0202);
 
@@ -139,6 +140,17 @@ pub fn k2_single_rail_parts() -> Vec<Component> {
             },
         ),
         part(
+            K2_SINGLE_RAIL_36_240,
+            "2003458",
+            "SingleRail 36; 2.40 m",
+            1.85,
+            20,
+            PartKind::Rail {
+                stock_length_m: 2.4,
+                section: RailSectionSpec::k2_single_rail_36(),
+            },
+        ),
+        part(
             K2_CLIMBER_36_50,
             "2003145",
             "SingleRail Climber Set 36/50",
@@ -219,6 +231,7 @@ pub fn k2_single_rail() -> Component {
                 module_width: None,
             },
             approval: None,
+            rail_options: vec![K2_SINGLE_RAIL_36_240],
         })),
     )
 }
@@ -333,6 +346,7 @@ pub fn k2_d_dome() -> Component {
             ],
             compatibility: SystemCompatibility::default(),
             approval: None,
+            rail_options: Vec::new(),
         })),
     )
 }
@@ -384,7 +398,14 @@ mod tests {
         let module = lr7_54hvh_490m();
         let single =
             resolve_mounting(&k2_single_rail(), &module, snaps.as_slice()).expect("single rail");
-        assert_eq!(single, MountingSystem::k2_single_rail());
+        assert_eq!(single.rail_lengths(), vec![4.8, 2.4]);
+        assert_eq!(
+            MountingSystem {
+                rail_options: Vec::new(),
+                ..single
+            },
+            MountingSystem::k2_single_rail()
+        );
         let dome = resolve_mounting(&k2_d_dome(), &module, snaps.as_slice()).expect("d-dome");
         assert_eq!(dome.parts.len(), 7);
         assert_eq!(

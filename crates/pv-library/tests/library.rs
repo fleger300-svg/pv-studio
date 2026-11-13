@@ -64,8 +64,8 @@ fn base_catalogue_is_seeded_once_and_rebuilds_k2_single_rail() {
     let snaps = lib
         .closure(&[presets::K2_SINGLE_RAIL], &date("2026-11-11"))
         .expect("closure");
-    // 5 parts (the rail once), then the system.
-    assert_eq!(snaps.len(), 6);
+    // 5 parts (the rail once), the 2.40 m rail option, then the system.
+    assert_eq!(snaps.len(), 7);
     assert_eq!(
         snaps.last().map(|s| s.component.id),
         Some(presets::K2_SINGLE_RAIL)
@@ -77,7 +77,14 @@ fn base_catalogue_is_seeded_once_and_rebuilds_k2_single_rail() {
         .component;
     let system = &snaps.last().expect("system").component;
     let resolved = resolve_mounting(system, &module, snaps.as_slice()).expect("resolve");
-    assert_eq!(resolved, MountingSystem::k2_single_rail());
+    assert_eq!(resolved.rail_lengths(), vec![4.8, 2.4]);
+    assert_eq!(
+        MountingSystem {
+            rail_options: Vec::new(),
+            ..resolved
+        },
+        MountingSystem::k2_single_rail()
+    );
     assert!(module.verified);
 }
 
@@ -212,7 +219,7 @@ fn search_filters_on_generated_columns() {
                 ..SearchQuery::default()
             }
         ),
-        ["SingleRail 36; 4.80 m"]
+        ["SingleRail 36; 2.40 m", "SingleRail 36; 4.80 m"]
     );
     // `%` is a literal, not a wildcard.
     assert!(q(
@@ -384,7 +391,7 @@ fn new_parts_and_systems_can_be_created() {
     let snaps = lib
         .closure(&[system.id], &date("2026-11-11"))
         .expect("closure");
-    assert_eq!(snaps.len(), 7);
+    assert_eq!(snaps.len(), 8);
 }
 
 #[test]

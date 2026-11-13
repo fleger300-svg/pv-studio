@@ -421,6 +421,7 @@ pub(crate) fn d_dome() -> MountingSystem {
         }),
         // Concrete blocks are bought locally: no part in the K2 list.
         parts: Vec::new(),
+        rail_options: Vec::new(),
     }
 }
 

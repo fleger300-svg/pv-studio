@@ -71,6 +71,7 @@ export function flatRoofFixture(): { summary: ProjectSummary; data: ModuleData }
         moduleCount: 6,
         moduleSize: [1.134, 1.762, 0.03],
         halfFootprint: [0.567, 0.881],
+        railLengthsM: [],
       },
     ],
     walls: [],

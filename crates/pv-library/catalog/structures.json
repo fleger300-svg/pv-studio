@@ -326,7 +326,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -465,7 +468,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -578,7 +584,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -717,7 +726,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -830,7 +842,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -969,7 +984,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -1082,7 +1100,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -1221,7 +1242,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -1355,7 +1379,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   },
   {
@@ -1515,7 +1542,10 @@
      "moduleLength": null,
      "moduleWidth": null
     },
-    "approval": null
+    "approval": null,
+    "railOptions": [
+     "01930000-0000-7000-8000-00000000010d"
+    ]
    }
   }
  ]

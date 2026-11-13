@@ -285,6 +285,7 @@ pub fn components_from_mounting(
                 parts: rules,
                 compatibility: SystemCompatibility::default(),
                 approval: None,
+                rail_options: Vec::new(),
             })),
         ),
         None,

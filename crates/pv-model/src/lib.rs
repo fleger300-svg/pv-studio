@@ -37,8 +37,8 @@ pub use layout::{
 };
 pub use mounting::{
     AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, Driver, FixationSpec, MembraneKind,
-    MountingSystem, PairCoefficientsSpec, PartRule, RailLayerKind, RailSectionSpec, RailStatics,
-    WindZone,
+    MountingSystem, PairCoefficientsSpec, PartRule, RailLayerKind, RailOption, RailSectionSpec,
+    RailStatics, WindZone,
 };
 pub use pricing::{ManufacturerDiscount, Pricing};
 pub use project::{

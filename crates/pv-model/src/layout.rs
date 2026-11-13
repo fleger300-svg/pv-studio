@@ -232,4 +232,9 @@ pub struct ArrayLayoutParams {
     /// halves are one mounting system, the distance between arrays does not apply to them.
     #[specta(optional)]
     pub paired_with: Option<crate::ids::ArrayId>,
+    /// Bar length the rails are bought in (one of the system's lengths); `None` = the
+    /// system's own (K2: 4.80 m).
+    #[serde(default)]
+    #[specta(optional)]
+    pub rail_stock_length_m: Option<f64>,
 }

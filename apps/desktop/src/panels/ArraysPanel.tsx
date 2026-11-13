@@ -53,6 +53,7 @@ export function ArraysPanel() {
             modules={a.moduleCount}
             peakWp={summary.modulePeakPowerWp}
             mountingLabel={a.mountingLabel ?? null}
+            railLengths={a.railLengthsM}
           />
         ))}
       </ol>
@@ -69,12 +70,15 @@ function ArrayForm({
   modules,
   peakWp,
   mountingLabel,
+  railLengths,
 }: {
   index: number;
   array: PanelArray;
   modules: number;
   peakWp: number;
   mountingLabel: string | null;
+  /** Bar lengths offered by the mounting system, its own first. */
+  railLengths: number[];
 }) {
   const { t, i18n } = useTranslation();
   const fmt = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 });
@@ -166,6 +170,21 @@ function ArrayForm({
         />
       </div>
       <ArrayComponents array={a} />
+      {railLengths.length > 1 && (
+        <Select<string>
+          label={t('arrays.railLength')}
+          value={String(a.layout.railStockLengthM ?? railLengths[0])}
+          options={railLengths.map((l) => ({
+            value: String(l),
+            label: `${fmt.format(l)} m`,
+          }))}
+          onChange={(v) => {
+            const l = Number(v);
+            // The system's own length is stored as "no choice".
+            void setLayout({ railStockLengthM: l === railLengths[0] ? null : l });
+          }}
+        />
+      )}
       {mountingLabel === null && <p className="panel-hint">{t('arrays.noMountingHint')}</p>}
       <Button variant="secondary" onClick={() => void layOut(a)}>
         {t('arrays.relayout')}

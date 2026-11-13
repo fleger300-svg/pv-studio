@@ -403,7 +403,8 @@
     "add": "Modulfeld hinzufügen (automatisch belegt)",
     "module": "Modul",
     "genericModule": "Generisches Modul (nur Abmessungen)",
-    "noMountingHint": "Wählen Sie ein Modul und ein Montagesystem aus der Bibliothek, um Statik und Stückliste zu erhalten."
+    "noMountingHint": "Wählen Sie ein Modul und ein Montagesystem aus der Bibliothek, um Statik und Stückliste zu erhalten.",
+    "railLength": "Schienenlänge (Stangen)"
   },
   "site": {
     "title": "Standort (Statik SIA 261)",

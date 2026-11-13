@@ -37,6 +37,9 @@ pub struct ArraySummary {
     /// Label of the mounting system component (`None`: none chosen).
     #[specta(optional)]
     pub mounting_label: Option<String>,
+    /// Bar lengths the field can buy its rails in (the system's own first); empty without
+    /// rails.
+    pub rail_lengths_m: Vec<f64>,
 }
 
 /// One wall of a building: vertical, on footprint edge `start → end` (world plan, m), from
@@ -118,6 +121,12 @@ impl ProjectSummary {
                     half_footprint: [hu, hv],
                     module_label: label(a.module),
                     mounting_label: label(a.mounting),
+                    rail_lengths_m: project
+                        .resolve_mounting(a)
+                        .ok()
+                        .flatten()
+                        .map(|m| m.rail_lengths())
+                        .unwrap_or_default(),
                 }
             })
             .collect();

@@ -38,7 +38,8 @@ impl Derived for FieldCountsNode {
         let parts = mounting
             .as_ref()
             .as_ref()
-            .map(|m| m.parts.clone())
+            // Rails in the bar length the field chose.
+            .map(|m| m.parts_for_rail_length(array.layout.rail_stock_length_m))
             .unwrap_or_default();
         let mut counts = FieldCounts {
             face: FaceRef {

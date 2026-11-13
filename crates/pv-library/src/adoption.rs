@@ -127,7 +127,11 @@ mod tests {
         let Command::AdoptComponents { snapshots } = &commands[0] else {
             panic!("adoption first")
         };
-        assert_eq!(snapshots.len(), 7, "module, system and 5 parts");
+        assert_eq!(
+            snapshots.len(),
+            8,
+            "module, system, 5 parts and the 2.40 m rail option"
+        );
         assert_eq!(commands[1], cmd);
 
         // Nothing missing: unchanged.

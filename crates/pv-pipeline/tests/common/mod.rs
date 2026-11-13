@@ -337,6 +337,7 @@ pub fn ref_b_east_west_with_parts(parts: Vec<pv_model::PartRule>) -> Project {
         rails: None,
         ballast: Some(d_dome_ref_b_h9()),
         parts,
+        rail_options: Vec::new(),
     };
     let mk = |az: f64| PanelArray {
         id: ArrayId::new(),

@@ -317,6 +317,11 @@ export type ArrayLayoutParams_Deserialize = {
 	 *  halves are one mounting system, the distance between arrays does not apply to them.
 	 */
 	pairedWith?: ArrayId | null,
+	/**
+	 *  Bar length the rails are bought in (one of the system's lengths); `None` = the
+	 *  system's own (K2: 4.80 m).
+	 */
+	railStockLengthM?: number | null,
 };
 
 /**  Layout parameters of an array (the architecture's `params_json` / `boundary_json`). */
@@ -355,6 +360,11 @@ export type ArrayLayoutParams_Serialize = {
 	 *  halves are one mounting system, the distance between arrays does not apply to them.
 	 */
 	pairedWith?: ArrayId | null,
+	/**
+	 *  Bar length the rails are bought in (one of the system's lengths); `None` = the
+	 *  system's own (K2: 4.80 m).
+	 */
+	railStockLengthM?: number | null,
 };
 
 export type ArraySummary = ArraySummary_Serialize | ArraySummary_Deserialize;
@@ -374,6 +384,11 @@ export type ArraySummary_Deserialize = {
 	moduleLabel?: string | null,
 	/**  Label of the mounting system component (`None`: none chosen). */
 	mountingLabel?: string | null,
+	/**
+	 *  Bar lengths the field can buy its rails in (the system's own first); empty without
+	 *  rails.
+	 */
+	railLengthsM: number[],
 };
 
 export type ArraySummary_Serialize = {
@@ -391,6 +406,11 @@ export type ArraySummary_Serialize = {
 	moduleLabel?: string | null,
 	/**  Label of the mounting system component (`None`: none chosen). */
 	mountingLabel?: string | null,
+	/**
+	 *  Bar lengths the field can buy its rails in (the system's own first); empty without
+	 *  rails.
+	 */
+	railLengthsM: number[],
 };
 
 /**  Ballast data of an aerodynamic (east-west) system. */
@@ -1897,6 +1917,8 @@ export type MountingSystemSpec_Deserialize = {
 	parts: PartRuleRef[],
 	compatibility: SystemCompatibility_Deserialize,
 	approval?: Approval | null,
+	/**  The system's rail in other bar lengths (rail parts), offered to each field. */
+	railOptions?: ComponentId[],
 };
 
 /**  A mounting system. */
@@ -1909,6 +1931,8 @@ export type MountingSystemSpec_Serialize = {
 	parts: PartRuleRef[],
 	compatibility: SystemCompatibility_Serialize,
 	approval?: Approval | null,
+	/**  The system's rail in other bar lengths (rail parts), offered to each field. */
+	railOptions: ComponentId[],
 };
 
 /**  Kind of an obstacle on the roof. */

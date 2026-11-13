@@ -403,7 +403,8 @@
     "add": "Ajouter un champ (calepiné automatiquement)",
     "module": "Module",
     "genericModule": "Module générique (dimensions seules)",
-    "noMountingHint": "Choisissez un module et un système de montage dans la bibliothèque pour obtenir la statique et la nomenclature."
+    "noMountingHint": "Choisissez un module et un système de montage dans la bibliothèque pour obtenir la statique et la nomenclature.",
+    "railLength": "Longueur des barres de rail"
   },
   "site": {
     "title": "Site (statique SIA 261)",

@@ -10,7 +10,9 @@ use super::{
 use crate::article::Article;
 use crate::command::{keys, CommandError};
 use crate::ids::ComponentId;
-use crate::mounting::{Driver, FixationSpec, MountingSystem, PartRule, RailLayerKind, RailStatics};
+use crate::mounting::{
+    Driver, FixationSpec, MountingSystem, PartRule, RailLayerKind, RailOption, RailStatics,
+};
 
 /// Where resolution finds the components a system refers to, and their prices: a project's
 /// snapshots, or the library at adoption time.
@@ -244,6 +246,23 @@ fn resolve_with_module_mass<L: ComponentLookup + ?Sized>(
             })
         })
         .collect::<Result<Vec<_>, _>>()?;
+    let rail_options = spec
+        .rail_options
+        .iter()
+        .map(|&id| -> Result<RailOption, CommandError> {
+            let (c, p) = find_part(lookup, id)?;
+            c.validate()?;
+            match p.kind {
+                PartKind::Rail { stock_length_m, .. } => Ok(RailOption {
+                    stock_length_m,
+                    article: to_article(c, p, lookup.price(c.id)),
+                }),
+                _ => Err(CommandError::new(keys::COMPONENT_DRIVER_MISMATCH)
+                    .with_text("article", c.article_no.clone())
+                    .with_text("driver", "railBars")),
+            }
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
     Ok(MountingSystem {
         name: system.label.clone(),
@@ -255,6 +274,7 @@ fn resolve_with_module_mass<L: ComponentLookup + ?Sized>(
         rails,
         ballast,
         parts,
+        rail_options,
     })
 }
 
@@ -287,7 +307,14 @@ pub(crate) mod tests {
         let (system, module, parts) = k2_single_rail_catalogue();
         let snaps = snapshots(parts);
         let resolved = resolve_mounting(&system, &module, snaps.as_slice()).expect("resolve");
-        assert_eq!(resolved, MountingSystem::k2_single_rail());
+        assert_eq!(resolved.rail_lengths(), vec![4.8, 2.4]);
+        assert_eq!(
+            MountingSystem {
+                rail_options: Vec::new(),
+                ..resolved
+            },
+            MountingSystem::k2_single_rail()
+        );
     }
 
     #[test]
