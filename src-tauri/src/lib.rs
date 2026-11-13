@@ -9,6 +9,7 @@ mod layout;
 mod library;
 mod roof;
 mod settings;
+mod site;
 mod state;
 mod wiring;
 
@@ -76,6 +77,9 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::apply_command,
             commands::undo,
             commands::redo,
+            site::site_search,
+            site::site_locate,
+            site::site_fetch_weather,
             wiring::wiring_report,
             wiring::wiring_auto,
             compute::get_statics_snapshot,

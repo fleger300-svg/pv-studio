@@ -57,6 +57,18 @@ pub struct WallSummary {
     pub profile: Vec<[f64; 2]>,
 }
 
+/// Key figures of the project's weather year.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct WeatherSummary {
+    pub source: String,
+    /// Annual global horizontal irradiation [kWh/m²].
+    pub annual_ghi_kwh_m2: f64,
+    pub mean_temp_c: f64,
+    /// Measured diffuse irradiance available.
+    pub has_diffuse: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectSummary {
@@ -76,6 +88,11 @@ pub struct ProjectSummary {
     pub walls: Vec<WallSummary>,
     /// Inverters, strings and electrical settings.
     pub wiring: crate::wiring::Wiring,
+    #[specta(optional)]
+    pub location: Option<crate::weather::GeoLocation>,
+    /// The weather year, without its hourly values.
+    #[specta(optional)]
+    pub weather: Option<WeatherSummary>,
     pub can_undo: bool,
     pub can_redo: bool,
 }
@@ -146,6 +163,14 @@ impl ProjectSummary {
             arrays,
             walls: Vec::new(),
             wiring: project.wiring.clone(),
+            location: project.site.location.clone(),
+            weather: project.site.weather.as_ref().map(|w| WeatherSummary {
+                source: w.source.clone(),
+                annual_ghi_kwh_m2: w.annual_ghi_kwh_m2(),
+                mean_temp_c: w.temp_c.iter().map(|&t| f64::from(t)).sum::<f64>()
+                    / w.temp_c.len().max(1) as f64,
+                has_diffuse: !w.dhi_w_m2.is_empty(),
+            }),
             can_undo,
             can_redo,
         }

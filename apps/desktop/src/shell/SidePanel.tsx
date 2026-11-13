@@ -6,6 +6,7 @@ import { StaticsPanel } from './StaticsPanel';
 import { BomPanel } from '../bom/BomPanel';
 import type { ColorMode } from '../viewport3d/PanelMeshes';
 import { BuildingPanel } from '../panels/BuildingPanel';
+import { ProjectSitePanel } from '../panels/ProjectSitePanel';
 import { RoofPanel } from '../panels/RoofPanel';
 import { ArraysPanel } from '../panels/ArraysPanel';
 import { ConnectionPanel } from '../panels/ConnectionPanel';
@@ -22,6 +23,7 @@ export function SidePanel() {
     return (
       <aside className="app__right">
         <ErrorBoundary>
+          <ProjectSitePanel />
           <BuildingPanel />
         </ErrorBoundary>
       </aside>

@@ -301,6 +301,9 @@ pub struct Project {
     /// Inverters and strings.
     #[serde(default)]
     pub wiring: crate::wiring::Wiring,
+    /// Location and weather.
+    #[serde(default)]
+    pub site: crate::weather::ProjectSite,
 }
 
 /// Error raised when a project violates a structural invariant.
@@ -342,6 +345,7 @@ impl Project {
             pricing: Pricing::default(),
             components: Vec::new(),
             wiring: crate::wiring::Wiring::default(),
+            site: crate::weather::ProjectSite::default(),
         }
     }
 
@@ -623,6 +627,7 @@ pub(crate) mod fixtures {
             pricing: crate::pricing::Pricing::default(),
             components: Vec::new(),
             wiring: crate::wiring::Wiring::default(),
+            site: crate::weather::ProjectSite::default(),
         }
     }
 }

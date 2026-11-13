@@ -422,6 +422,12 @@ fn persist(tx: &Transaction<'_>, project: &Project, changes: &ChangeSet) -> Resu
     if changes.components {
         write_components(tx, project)?;
     }
+    if changes.site {
+        tx.execute(
+            "UPDATE project SET site_json = ?1",
+            params![serde_json::to_string(&project.site)?],
+        )?;
+    }
     if changes.wiring {
         tx.execute(
             "UPDATE project SET wiring_json = ?1",
@@ -619,12 +625,14 @@ fn insert_modules(tx: &Transaction<'_>, modules: &[ModuleInstance]) -> Result<()
 
 fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
     tx.execute(
-        "INSERT INTO project (id, name, pricing_json, wiring_json) VALUES (?1, ?2, ?3, ?4)",
+        "INSERT INTO project (id, name, pricing_json, wiring_json, site_json)
+         VALUES (?1, ?2, ?3, ?4, ?5)",
         params![
             p.id.0.to_string(),
             p.name,
             serde_json::to_string(&p.pricing)?,
-            serde_json::to_string(&p.wiring)?
+            serde_json::to_string(&p.wiring)?,
+            serde_json::to_string(&p.site)?
         ],
     )?;
     for (ord, b) in p.buildings.iter().enumerate() {
@@ -643,9 +651,16 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
 /// The project, and the old mounting snapshot of each array still to convert (files written
 /// before schema v8).
 fn load_project(conn: &Connection) -> Result<(Project, Vec<Option<MountingSystem>>), StoreError> {
-    let (id, name, pricing, wiring): (Uuid, String, Pricing, pv_model::Wiring) = conn
+    #[allow(clippy::type_complexity)]
+    let (id, name, pricing, wiring, site): (
+        Uuid,
+        String,
+        Pricing,
+        pv_model::Wiring,
+        pv_model::ProjectSite,
+    ) = conn
         .query_row(
-            "SELECT id, name, pricing_json, wiring_json FROM project LIMIT 1",
+            "SELECT id, name, pricing_json, wiring_json, site_json FROM project LIMIT 1",
             [],
             |r| {
                 Ok((
@@ -653,6 +668,7 @@ fn load_project(conn: &Connection) -> Result<(Project, Vec<Option<MountingSystem
                     r.get(1)?,
                     json_with_defaults::<Pricing>(r, 2)?,
                     json_with_defaults::<pv_model::Wiring>(r, 3)?,
+                    json_with_defaults::<pv_model::ProjectSite>(r, 4)?,
                 ))
             },
         )
@@ -799,6 +815,7 @@ fn load_project(conn: &Connection) -> Result<(Project, Vec<Option<MountingSystem
             pricing,
             components: load_components(conn)?,
             wiring,
+            site,
         },
         legacy,
     ))
@@ -958,6 +975,7 @@ mod tests {
                ALTER TABLE "array" DROP COLUMN module_ref;
                ALTER TABLE "array" DROP COLUMN mounting_ref;
                ALTER TABLE project DROP COLUMN wiring_json;
+               ALTER TABLE project DROP COLUMN site_json;
                PRAGMA user_version = 7;"#,
         )
         .expect("downgrade to v7");
@@ -1003,6 +1021,7 @@ mod tests {
                    ALTER TABLE "array" DROP COLUMN module_ref;
                    ALTER TABLE "array" DROP COLUMN mounting_ref;
                    ALTER TABLE project DROP COLUMN wiring_json;
+               ALTER TABLE project DROP COLUMN site_json;
                    PRAGMA user_version = 3;"#,
             )
             .expect("downgrade to v3");
@@ -1093,6 +1112,7 @@ mod tests {
                    ALTER TABLE "array" DROP COLUMN module_ref;
                    ALTER TABLE "array" DROP COLUMN mounting_ref;
                    ALTER TABLE project DROP COLUMN wiring_json;
+               ALTER TABLE project DROP COLUMN site_json;
                    PRAGMA user_version = 4;"#,
             )
             .expect("downgrade to v4");
@@ -1201,6 +1221,7 @@ mod tests {
                    ALTER TABLE "array" DROP COLUMN module_ref;
                    ALTER TABLE "array" DROP COLUMN mounting_ref;
                    ALTER TABLE project DROP COLUMN wiring_json;
+               ALTER TABLE project DROP COLUMN site_json;
                    PRAGMA user_version = 1;"#,
             )
             .expect("downgrade to v1");

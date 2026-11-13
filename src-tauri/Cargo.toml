@@ -40,6 +40,7 @@ pv-layout.workspace = true
 pv-store.workspace = true
 pv-library.workspace = true
 pv-electrical.workspace = true
+pv-weather.workspace = true
 pv-copilot.workspace = true
 pv-secrets.workspace = true
 zeroize = "1.9.1"

@@ -65,6 +65,7 @@ impl Builder {
                 pricing: crate::pricing::Pricing::default(),
                 components: Vec::new(),
                 wiring: crate::wiring::Wiring::default(),
+                site: crate::weather::ProjectSite::default(),
             },
         }
     }

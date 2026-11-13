@@ -155,6 +155,11 @@
     "secrets": {
       "format": "This does not look like an Anthropic API key (it starts with « sk-ant- »).",
       "unavailable": "The system credential store cannot be used: {detail}"
+    },
+    "site": {
+      "network": "Federal service unreachable ({detail}). Check the Internet connection.",
+      "noLocation": "Locate the project first (address).",
+      "noWeather": "No nearby MeteoSwiss station has enough hourly measurements."
     }
   },
   "hud": {
@@ -729,5 +734,20 @@
       "trackerCurrent": "MPPT {tracker}: current {current} A above the max. input current ({max} A), clipping.",
       "trackerPower": "MPPT {tracker}: power {power} W above the maximum ({max} W)."
     }
+  },
+  "location": {
+    "title": "Location and weather",
+    "search": "Project address (street, postcode, town)",
+    "address": "Address",
+    "coordinates": "LV95 coordinates (E / N)",
+    "altitude": "Terrain altitude",
+    "noLocation": "Search the project address to locate it.",
+    "irradiation": "Global horizontal irradiation",
+    "meanTemp": "Mean temperature",
+    "noWeather": "No weather yet: download the typical year of the nearest MeteoSwiss station.",
+    "fetchWeather": "Download weather",
+    "refreshWeather": "Update weather",
+    "loading": "Downloading…",
+    "attribution": "Data: © swisstopo (address, altitude), © MeteoSwiss (measurements)."
   }
 }

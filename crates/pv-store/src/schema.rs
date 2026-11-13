@@ -171,6 +171,11 @@ const MIGRATIONS: &[&str] = &[
     r#"
     ALTER TABLE project ADD COLUMN wiring_json TEXT NOT NULL DEFAULT '{"inverters":[],"strings":[]}';
     "#,
+    // v10: project location and typical weather year (cached: the project recomputes
+    // offline), replaced as a whole by `SetSite`.
+    r#"
+    ALTER TABLE project ADD COLUMN site_json TEXT NOT NULL DEFAULT '{}';
+    "#,
 ];
 
 /// Latest schema version known to this build.

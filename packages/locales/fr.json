@@ -155,6 +155,11 @@
     "secrets": {
       "format": "Ceci ne ressemble pas à une clé API Anthropic (elle commence par « sk-ant- »).",
       "unavailable": "Le trousseau du système est inutilisable : {detail}"
+    },
+    "site": {
+      "network": "Service fédéral injoignable ({detail}). Vérifiez la connexion Internet.",
+      "noLocation": "Localisez d’abord le projet (adresse).",
+      "noWeather": "Aucune station MeteoSwiss proche n’a assez de mesures horaires."
     }
   },
   "hud": {
@@ -729,5 +734,20 @@
       "trackerCurrent": "MPPT {tracker} : courant {current} A supérieur au courant d’entrée max. ({max} A), écrêtage.",
       "trackerPower": "MPPT {tracker} : puissance {power} W supérieure au maximum ({max} W)."
     }
+  },
+  "location": {
+    "title": "Situation et météo",
+    "search": "Adresse du projet (rue, NPA, localité)",
+    "address": "Adresse",
+    "coordinates": "Coordonnées MN95 (E / N)",
+    "altitude": "Altitude du terrain",
+    "noLocation": "Recherchez l’adresse du projet pour le localiser.",
+    "irradiation": "Irradiation globale horizontale",
+    "meanTemp": "Température moyenne",
+    "noWeather": "Pas encore de météo : téléchargez l’année type de la station MeteoSwiss la plus proche.",
+    "fetchWeather": "Télécharger la météo",
+    "refreshWeather": "Mettre à jour la météo",
+    "loading": "Téléchargement…",
+    "attribution": "Données : © swisstopo (adresse, altitude), © MeteoSwiss (mesures)."
   }
 }

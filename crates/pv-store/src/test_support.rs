@@ -136,5 +136,6 @@ pub fn fixture_project() -> Project {
         pricing: pv_model::Pricing::default(),
         components: Vec::new(),
         wiring: pv_model::Wiring::default(),
+        site: pv_model::ProjectSite::default(),
     }
 }

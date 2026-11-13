@@ -230,6 +230,7 @@ pub fn ref_a_roof1() -> Project {
         pricing: pv_model::Pricing::default(),
         components: k2_components(),
         wiring: pv_model::Wiring::default(),
+        site: pv_model::ProjectSite::default(),
     }
 }
 
@@ -371,6 +372,7 @@ pub fn ref_b_east_west_with_parts(parts: Vec<pv_model::PartRule>) -> Project {
         pricing: pv_model::Pricing::default(),
         components: Vec::new(),
         wiring: pv_model::Wiring::default(),
+        site: pv_model::ProjectSite::default(),
     };
     for i in 0..2 {
         adopt_legacy_mounting(&mut p, i, &mounting).unwrap();

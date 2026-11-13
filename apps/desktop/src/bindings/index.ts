@@ -137,6 +137,19 @@ export const commands = {
 	undo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
 	redo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("redo")),
+	/**  Swiss addresses and places matching `text` (geo.admin.ch search). */
+	siteSearch: (text: string) => typedError<Place[], CommandError>(__TAURI_INVOKE("site_search", { text })),
+	/**
+	 *  Sets the project location to `place` with its terrain altitude (swissALTI3D). Keeps the
+	 *  weather. One undo step.
+	 */
+	siteLocate: (place: Place) => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("site_locate", { place })),
+	/**
+	 *  Builds the typical weather year of the project location from the nearest MeteoSwiss
+	 *  station with enough hourly radiation and temperature data (2010 onwards), and stores it
+	 *  in the project. One undo step.
+	 */
+	siteFetchWeather: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("site_fetch_weather")),
 	/**  Checks of the open project's inverters and strings (computed on demand: fast). */
 	wiringReport: () => typedError<WiringReport_Serialize, CommandError>(__TAURI_INVOKE("wiring_report")),
 	/**  Rebuilds every unlocked string of the open project automatically. One undo step. */
@@ -763,6 +776,8 @@ export type ChangeSet_Deserialize = {
 	components?: boolean,
 	/**  The wiring (inverters, strings, electrical settings) changed. */
 	wiring?: boolean,
+	/**  The project's location or weather changed. */
+	site?: boolean,
 	/**  Buildings added, changed or removed. Sorted, unique. */
 	buildings: BuildingId[],
 	/**  Roof faces added, changed or removed. Sorted, unique. */
@@ -786,6 +801,8 @@ export type ChangeSet_Serialize = {
 	components: boolean,
 	/**  The wiring (inverters, strings, electrical settings) changed. */
 	wiring: boolean,
+	/**  The project's location or weather changed. */
+	site: boolean,
 	/**  Buildings added, changed or removed. Sorted, unique. */
 	buildings: BuildingId[],
 	/**  Roof faces added, changed or removed. Sorted, unique. */
@@ -869,6 +886,8 @@ export type Command_Deserialize =
  *  module's dimensions are copied, a newly chosen system brings its rail geometry).
  */
 { type: "SetArrayComponents"; array_id: ArrayId; module?: ComponentId | null; mounting?: ComponentId | null } | 
+/**  Replaces the project's location and weather. */
+{ type: "SetSite"; site: ProjectSite_Deserialize } | 
 /**  Replaces the inverters, strings and electrical settings of the project. */
 { type: "SetWiring"; wiring: Wiring_Deserialize } | 
 /**  Several commands applied as one, all or nothing. */
@@ -920,6 +939,8 @@ export type Command_Serialize =
  *  module's dimensions are copied, a newly chosen system brings its rail geometry).
  */
 { type: "SetArrayComponents"; array_id: ArrayId; module: ComponentId | null; mounting: ComponentId | null } | 
+/**  Replaces the project's location and weather. */
+{ type: "SetSite"; site: ProjectSite_Serialize } | 
 /**  Replaces the inverters, strings and electrical settings of the project. */
 { type: "SetWiring"; wiring: Wiring_Serialize } | 
 /**  Several commands applied as one, all or nothing. */
@@ -1450,6 +1471,20 @@ export type FrozenBom_Serialize = {
 	info: BomSnapshotInfo,
 	bom: Bom_Serialize,
 	pricing: Pricing,
+};
+
+/**  Geographic position of the project. */
+export type GeoLocation = {
+	/**  Address or place, as found (« Rue du Lac 1, 1003 Lausanne »). */
+	label: string,
+	/**  WGS84 [°]. */
+	latDeg: number,
+	lonDeg: number,
+	/**  Swiss LV95 coordinates [m]. */
+	eastM: number,
+	northM: number,
+	/**  Terrain altitude (swissALTI3D) [m a.s.l.]. */
+	altitudeM: number,
 };
 
 /**  One cell as read from the workbook. */
@@ -2204,6 +2239,13 @@ export type PickedFile = {
 	base64: string,
 };
 
+/**  A geocoded place (geo.admin.ch `SearchServer`). */
+export type Place = {
+	label: string,
+	latDeg: number,
+	lonDeg: number,
+};
+
 export type PlatformInfo = {
 	/**  `windows`, `macos`, `linux`. */
 	os: string,
@@ -2262,6 +2304,21 @@ export type Pricing = {
 /**  Identifies a project. */
 export type ProjectId = string;
 
+/**  Location and weather of a project. */
+export type ProjectSite = ProjectSite_Serialize | ProjectSite_Deserialize;
+
+/**  Location and weather of a project. */
+export type ProjectSite_Deserialize = {
+	location?: GeoLocation | null,
+	weather?: WeatherYear | null,
+};
+
+/**  Location and weather of a project. */
+export type ProjectSite_Serialize = {
+	location?: GeoLocation | null,
+	weather?: WeatherYear | null,
+};
+
 export type ProjectSummary = ProjectSummary_Serialize | ProjectSummary_Deserialize;
 
 export type ProjectSummary_Deserialize = {
@@ -2281,6 +2338,9 @@ export type ProjectSummary_Deserialize = {
 	walls: WallSummary[],
 	/**  Inverters, strings and electrical settings. */
 	wiring: Wiring_Deserialize,
+	location?: GeoLocation | null,
+	/**  The weather year, without its hourly values. */
+	weather?: WeatherSummary | null,
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -2302,6 +2362,9 @@ export type ProjectSummary_Serialize = {
 	walls: WallSummary[],
 	/**  Inverters, strings and electrical settings. */
 	wiring: Wiring_Serialize,
+	location?: GeoLocation | null,
+	/**  The weather year, without its hourly values. */
+	weather?: WeatherSummary | null,
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -2908,6 +2971,41 @@ export type WallSummary = {
 	 *  from `s = 0` to `s = length`.
 	 */
 	profile: ([number, number])[],
+};
+
+/**  Key figures of the project's weather year. */
+export type WeatherSummary = {
+	source: string,
+	/**  Annual global horizontal irradiation [kWh/m²]. */
+	annualGhiKwhM2: number,
+	meanTempC: number,
+	/**  Measured diffuse irradiance available. */
+	hasDiffuse: boolean,
+};
+
+/**
+ *  Typical meteorological year: hourly means, hour `h` = interval `[h, h + 1)` UTC from
+ *  1 January 00:00.
+ */
+export type WeatherYear = {
+	/**
+	 *  Data source, shown in reports (« MeteoSwiss Open Data, station BER Bern / Zollikofen,
+	 *  2010–2024, typical months »).
+	 */
+	source: string,
+	/**  Station or grid point [°, m a.s.l.]. */
+	latDeg: number,
+	lonDeg: number,
+	altitudeM: number,
+	/**  Global horizontal irradiance [W/m²], 8760 values. */
+	ghiWM2: number[],
+	/**
+	 *  Diffuse horizontal irradiance [W/m²], 8760 values; empty when the source has none
+	 *  (the simulation then separates it with a decomposition model).
+	 */
+	dhiWM2: number[],
+	/**  Air temperature 2 m above ground [°C], 8760 values. */
+	tempC: number[],
 };
 
 /**  Wind zone of a roof face (SN EN 1991-1-4, K2 Base nomenclature). */

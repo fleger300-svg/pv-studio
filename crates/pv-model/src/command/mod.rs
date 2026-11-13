@@ -83,6 +83,10 @@ pub mod keys {
     pub const COPILOT_INVALID: &str = "errors.copilot.invalid";
     pub const COPILOT_INCOMPLETE: &str = "errors.copilot.incomplete";
     pub const COPILOT_TOO_LARGE: &str = "errors.copilot.tooLarge";
+    /// Site data (geo.admin.ch, MeteoSwiss).
+    pub const SITE_NETWORK: &str = "errors.site.network";
+    pub const SITE_NO_LOCATION: &str = "errors.site.noLocation";
+    pub const SITE_NO_WEATHER: &str = "errors.site.noWeather";
     /// API key (pv-secrets).
     pub const SECRETS_FORMAT: &str = "errors.secrets.format";
     pub const SECRETS_UNAVAILABLE: &str = "errors.secrets.unavailable";
@@ -146,6 +150,9 @@ pub mod keys {
         COPILOT_TOO_LARGE,
         SECRETS_FORMAT,
         SECRETS_UNAVAILABLE,
+        SITE_NETWORK,
+        SITE_NO_LOCATION,
+        SITE_NO_WEATHER,
     ];
 }
 
@@ -233,6 +240,10 @@ pub enum Command {
         module: Option<ComponentId>,
         mounting: Option<ComponentId>,
     },
+    /// Replaces the project's location and weather.
+    SetSite {
+        site: Box<crate::weather::ProjectSite>,
+    },
     /// Replaces the inverters, strings and electrical settings of the project.
     SetWiring { wiring: Box<crate::wiring::Wiring> },
     /// Several commands applied as one, all or nothing.
@@ -253,6 +264,9 @@ pub struct ChangeSet {
     /// The wiring (inverters, strings, electrical settings) changed.
     #[serde(default)]
     pub wiring: bool,
+    /// The project's location or weather changed.
+    #[serde(default)]
+    pub site: bool,
     /// Buildings added, changed or removed. Sorted, unique.
     pub buildings: Vec<BuildingId>,
     /// Roof faces added, changed or removed. Sorted, unique.
@@ -294,6 +308,7 @@ impl ChangeSet {
         self.pricing |= other.pricing;
         self.components |= other.components;
         self.wiring |= other.wiring;
+        self.site |= other.site;
         self.structure |= other.structure;
         union(&mut self.buildings, &other.buildings);
         union(&mut self.faces, &other.faces);
@@ -312,6 +327,7 @@ impl ChangeSet {
             && !self.pricing
             && !self.components
             && !self.wiring
+            && !self.site
             && self.modules_only()
     }
 }
@@ -389,6 +405,9 @@ impl Command {
             Command::SetArrayComponents { array_id, .. } => {
                 components::inverse_set_array(project, *array_id)
             }
+            Command::SetSite { .. } => Command::SetSite {
+                site: Box::new(project.site.clone()),
+            },
             Command::SetWiring { .. } => Command::SetWiring {
                 wiring: Box::new(project.wiring.clone()),
             },
@@ -435,6 +454,17 @@ impl Command {
                 mounting,
             } => components::apply_set_array(project, *array_id, *module, *mounting),
             Command::SetWiring { wiring } => wiring::apply_set_wiring(project, wiring),
+            Command::SetSite { site } => {
+                site.validate()?;
+                let changed = project.site != **site;
+                if changed {
+                    project.site = (**site).clone();
+                }
+                Ok(ChangeSet {
+                    site: changed,
+                    ..ChangeSet::default()
+                })
+            }
             Command::Batch { commands } => batch::apply_batch(project, commands),
         }
     }
