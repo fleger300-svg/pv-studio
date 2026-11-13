@@ -27,6 +27,7 @@ fn field(face: &str, fixations: u32, parts: Vec<PartRule>) -> FieldCounts {
         },
         modules: 0,
         top_rails: vec![],
+        clamp_rails: vec![],
         bottom_rails: vec![],
         climbers: 0,
         fixations,

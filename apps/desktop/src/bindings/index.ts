@@ -411,6 +411,127 @@ export type BallastSpec = {
 	frictionSource: string,
 };
 
+/**  One configuration printed by the datasheet (number of modules). */
+export type BatteryConfiguration = BatteryConfiguration_Serialize | BatteryConfiguration_Deserialize;
+
+/**  One configuration printed by the datasheet (number of modules). */
+export type BatteryConfiguration_Deserialize = {
+	modules: number,
+	usableKwh?: number | null,
+	nominalKwh?: number | null,
+	voltageV?: number | null,
+	maxPowerW?: number | null,
+};
+
+/**  One configuration printed by the datasheet (number of modules). */
+export type BatteryConfiguration_Serialize = {
+	modules: number,
+	usableKwh?: number | null,
+	nominalKwh?: number | null,
+	voltageV?: number | null,
+	maxPowerW?: number | null,
+};
+
+export type BatteryCoupling = 
+/**  On the battery port of a hybrid inverter. */
+"dc" | 
+/**  With its own power conversion system. */
+"ac";
+
+/**  Battery port of a hybrid inverter. */
+export type BatteryPort = BatteryPort_Serialize | BatteryPort_Deserialize;
+
+/**  Battery port of a hybrid inverter. */
+export type BatteryPort_Deserialize = {
+	voltageMinV?: number | null,
+	voltageMaxV?: number | null,
+	maxCurrentA?: number | null,
+	maxChargePowerW?: number | null,
+	maxDischargePowerW?: number | null,
+	/**  Battery models named by the datasheet. */
+	compatible: string[],
+};
+
+/**  Battery port of a hybrid inverter. */
+export type BatteryPort_Serialize = {
+	voltageMinV?: number | null,
+	voltageMaxV?: number | null,
+	maxCurrentA?: number | null,
+	maxChargePowerW?: number | null,
+	maxDischargePowerW?: number | null,
+	/**  Battery models named by the datasheet. */
+	compatible: string[],
+};
+
+/**  How the datasheet gives the battery power. */
+export type BatteryPowerRule = 
+/**  Power per module (Huawei LUNA S1). */
+{ kind: "perModule"; charge_w: number; discharge_w: number } | 
+/**  Current limit: power = current × configuration voltage (BYD, Fronius, Dyness). */
+{ kind: "currentLimited"; max_current_a: number } | 
+/**  C-rate on the configuration's energy (C&I cabinets). */
+{ kind: "cRate"; max_c: number } | 
+/**  Fixed power of the system (AC cabinets). */
+{ kind: "fixed"; charge_w: number; discharge_w: number } | 
+/**  Given per configuration (see `configurations`). */
+{ kind: "perConfiguration" } | 
+/**  Limited by the inverter only. */
+{ kind: "inverterLimited" };
+
+export type BatterySpec = BatterySpec_Serialize | BatterySpec_Deserialize;
+
+export type BatterySpec_Deserialize = {
+	/**  « LFP », « NMC »… */
+	chemistry: string,
+	coupling: BatteryCoupling,
+	moduleModel?: string | null,
+	moduleUsableKwh?: number | null,
+	moduleNominalKwh?: number | null,
+	minModules: number,
+	maxModulesPerStack: number,
+	maxStacks?: number | null,
+	power: BatteryPowerRule,
+	configurations: BatteryConfiguration_Deserialize[],
+	voltageMinV?: number | null,
+	voltageMaxV?: number | null,
+	depthOfDischargePct?: number | null,
+	/**  Round-trip efficiency, with its basis in `notes` (DC-DC or AC-AC with auxiliaries). */
+	roundTripEfficiencyPct?: number | null,
+	cycles?: number | null,
+	warrantyYears?: number | null,
+	/**  « indoor », « outdoor », « both ». */
+	location?: string | null,
+	massKgPerModule?: number | null,
+	compatibleInverters: string[],
+	details?: EquipmentDetails_Deserialize,
+};
+
+export type BatterySpec_Serialize = {
+	/**  « LFP », « NMC »… */
+	chemistry: string,
+	coupling: BatteryCoupling,
+	moduleModel?: string | null,
+	moduleUsableKwh?: number | null,
+	moduleNominalKwh?: number | null,
+	minModules: number,
+	maxModulesPerStack: number,
+	maxStacks?: number | null,
+	power: BatteryPowerRule,
+	configurations: BatteryConfiguration_Serialize[],
+	voltageMinV?: number | null,
+	voltageMaxV?: number | null,
+	depthOfDischargePct?: number | null,
+	/**  Round-trip efficiency, with its basis in `notes` (DC-DC or AC-AC with auxiliaries). */
+	roundTripEfficiencyPct?: number | null,
+	cycles?: number | null,
+	warrantyYears?: number | null,
+	/**  « indoor », « outdoor », « both ». */
+	location?: string | null,
+	massKgPerModule?: number | null,
+	compatibleInverters: string[],
+	details: EquipmentDetails_Serialize,
+};
+
 /**  Identifies a stored file (datasheet PDF) of the component library. */
 export type BlobId = string;
 
@@ -793,7 +914,7 @@ export type ComponentDetail_Serialize = {
 };
 
 /**  Family of a component (the `ComponentSpec` tag, for search filters and error messages). */
-export type ComponentFamily = "module" | "mountingSystem" | "mountingPart";
+export type ComponentFamily = "module" | "mountingSystem" | "mountingPart" | "inverter" | "optimizer" | "battery" | "equipment";
 
 /**  Identifies a library component across all its revisions. */
 export type ComponentId = string;
@@ -824,26 +945,42 @@ export type ComponentSource =
 /**  Extracted from a datasheet by the copilot; never `verified` until reviewed. */
 "aiExtracted";
 
-/**  Family-specific data of a component (closed set; electrical families come later). */
+/**  Family-specific data of a component (closed set). */
 export type ComponentSpec = ComponentSpec_Serialize | ComponentSpec_Deserialize;
 
-/**  Family-specific data of a component (closed set; electrical families come later). */
+/**  Family-specific data of a component (closed set). */
 export type ComponentSpec_Deserialize = {
 	family: "module",
 } & ModuleSpec_Deserialize | {
 	family: "mountingSystem",
 } & MountingSystemSpec_Deserialize | {
 	family: "mountingPart",
-} & PartSpec_Deserialize;
+} & PartSpec_Deserialize | {
+	family: "inverter",
+} & InverterSpec_Deserialize | {
+	family: "optimizer",
+} & OptimizerSpec_Deserialize | {
+	family: "battery",
+} & BatterySpec_Deserialize | {
+	family: "equipment",
+} & EquipmentSpec_Deserialize;
 
-/**  Family-specific data of a component (closed set; electrical families come later). */
+/**  Family-specific data of a component (closed set). */
 export type ComponentSpec_Serialize = {
 	family: "module",
 } & ModuleSpec_Serialize | {
 	family: "mountingSystem",
 } & MountingSystemSpec_Serialize | {
 	family: "mountingPart",
-} & PartSpec_Serialize;
+} & PartSpec_Serialize | {
+	family: "inverter",
+} & InverterSpec_Serialize | {
+	family: "optimizer",
+} & OptimizerSpec_Serialize | {
+	family: "battery",
+} & BatterySpec_Serialize | {
+	family: "equipment",
+} & EquipmentSpec_Serialize;
 
 /**  One row of a search result (no spec: lists stay light). */
 export type ComponentSummary = ComponentSummary_Serialize | ComponentSummary_Deserialize;
@@ -958,16 +1095,17 @@ export type CpSpec =
 { kind: "explicit"; reference: string; entries: CpEntrySpec[] };
 
 /**
- *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
- *  mounting system's data.
+ *  Geometry rules of a rail mounting system (top rails on bottom rails, or a single layer),
+ *  from the mounting system's data.
  */
 export type CrossRailSpec = CrossRailSpec_Serialize | CrossRailSpec_Deserialize;
 
 /**
- *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
- *  mounting system's data.
+ *  Geometry rules of a rail mounting system (top rails on bottom rails, or a single layer),
+ *  from the mounting system's data.
  */
 export type CrossRailSpec_Deserialize = {
+	layers?: RailLayers,
 	perColumn: number,
 	topInsetM: number,
 	topOverhangM: number,
@@ -982,10 +1120,11 @@ export type CrossRailSpec_Deserialize = {
 };
 
 /**
- *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
- *  mounting system's data.
+ *  Geometry rules of a rail mounting system (top rails on bottom rails, or a single layer),
+ *  from the mounting system's data.
  */
 export type CrossRailSpec_Serialize = {
+	layers: RailLayers,
 	perColumn: number,
 	topInsetM: number,
 	topOverhangM: number,
@@ -1028,9 +1167,12 @@ export type Driver =
 { kind: "fixation" } | 
 /**  One per crossing of a top and a bottom rail. */
 { kind: "climber" } | 
-/**  Two per top rail (end clamps). */
+/**
+ *  Two per module-carrying rail (end clamps): top rails, or the rails of a one-layer
+ *  system.
+ */
 { kind: "topRailEnd" } | 
-/**  Modules − 1 per top rail (middle clamps). */
+/**  Modules − 1 per module-carrying rail (middle clamps). */
 { kind: "topRailInnerJoint" } | 
 /**  One per active module. */
 { kind: "module" } | 
@@ -1074,6 +1216,55 @@ export type EdgeRoof_Serialize = {
 export type EdgeSetback = {
 	kind: RoofEdgeKind,
 	distanceM: number,
+};
+
+/**  Datasheet facts shared by every electrical component (not used by the engines). */
+export type EquipmentDetails = EquipmentDetails_Serialize | EquipmentDetails_Deserialize;
+
+/**  Datasheet facts shared by every electrical component (not used by the engines). */
+export type EquipmentDetails_Deserialize = {
+	series?: string | null,
+	ipRating?: string | null,
+	massKg?: number | null,
+	/**  Width × height × depth [mm]. */
+	dimensionsMm?: [number, number, number] | null,
+	operatingTempMinC?: number | null,
+	operatingTempMaxC?: number | null,
+	communication?: string[],
+	datasheetRef?: string | null,
+	notes?: string[],
+};
+
+/**  Datasheet facts shared by every electrical component (not used by the engines). */
+export type EquipmentDetails_Serialize = {
+	series?: string | null,
+	ipRating?: string | null,
+	massKg?: number | null,
+	/**  Width × height × depth [mm]. */
+	dimensionsMm?: [number, number, number] | null,
+	operatingTempMinC?: number | null,
+	operatingTempMaxC?: number | null,
+	communication: string[],
+	datasheetRef?: string | null,
+	notes: string[],
+};
+
+export type EquipmentKind = "energyManager" | "backupBox" | "dcBox" | "evCharger" | "cable" | "connector" | "cableTray" | "communication" | "safetyLine" | "carport" | "other";
+
+export type EquipmentSpec = EquipmentSpec_Serialize | EquipmentSpec_Deserialize;
+
+export type EquipmentSpec_Deserialize = {
+	kind: EquipmentKind,
+	properties: Property[],
+	compatibleWith: string[],
+	details?: EquipmentDetails_Deserialize,
+};
+
+export type EquipmentSpec_Serialize = {
+	kind: EquipmentKind,
+	properties: Property[],
+	compatibleWith: string[],
+	details: EquipmentDetails_Serialize,
 };
 
 /**  A parameter of a translated error message. */
@@ -1270,6 +1461,125 @@ export type ImportSheet = {
 	rows: ImportCell[][],
 };
 
+/**  AC side. */
+export type InverterAc = InverterAc_Serialize | InverterAc_Deserialize;
+
+/**  AC side. */
+export type InverterAc_Deserialize = {
+	phases: number,
+	nominalPowerW: number,
+	maxApparentPowerVa?: number | null,
+	maxActivePowerW?: number | null,
+	nominalVoltageV?: number | null,
+	maxCurrentA?: number | null,
+};
+
+/**  AC side. */
+export type InverterAc_Serialize = {
+	phases: number,
+	nominalPowerW: number,
+	maxApparentPowerVa?: number | null,
+	maxActivePowerW?: number | null,
+	nominalVoltageV?: number | null,
+	maxCurrentA?: number | null,
+};
+
+/**  DC side. */
+export type InverterDc = InverterDc_Serialize | InverterDc_Deserialize;
+
+/**  DC side. */
+export type InverterDc_Deserialize = {
+	/**  Absolute maximum input voltage [V]. */
+	maxVoltageV: number,
+	startVoltageV?: number | null,
+	minVoltageV?: number | null,
+	nominalVoltageV?: number | null,
+	/**  MPP window [V] (fixed operating voltage for optimizer-based inverters). */
+	mpptMinV: number,
+	mpptMaxV: number,
+	/**  MPP window at full power, when printed. */
+	fullPowerMpptMinV?: number | null,
+	fullPowerMpptMaxV?: number | null,
+	/**  Maximum DC (PV) power; its meaning differs by manufacturer (see `max_power_basis`). */
+	maxPowerW?: number | null,
+	maxPowerBasis?: string | null,
+	maxCurrentTotalA?: number | null,
+	maxShortCircuitCurrentTotalA?: number | null,
+	/**  One per MPPT (asymmetric trackers are common). */
+	trackers: Tracker_Deserialize[],
+};
+
+/**  DC side. */
+export type InverterDc_Serialize = {
+	/**  Absolute maximum input voltage [V]. */
+	maxVoltageV: number,
+	startVoltageV?: number | null,
+	minVoltageV?: number | null,
+	nominalVoltageV?: number | null,
+	/**  MPP window [V] (fixed operating voltage for optimizer-based inverters). */
+	mpptMinV: number,
+	mpptMaxV: number,
+	/**  MPP window at full power, when printed. */
+	fullPowerMpptMinV?: number | null,
+	fullPowerMpptMaxV?: number | null,
+	/**  Maximum DC (PV) power; its meaning differs by manufacturer (see `max_power_basis`). */
+	maxPowerW?: number | null,
+	maxPowerBasis?: string | null,
+	maxCurrentTotalA?: number | null,
+	maxShortCircuitCurrentTotalA?: number | null,
+	/**  One per MPPT (asymmetric trackers are common). */
+	trackers: Tracker_Serialize[],
+};
+
+export type InverterKind = 
+/**  String inverter (PV only). */
+"string" | 
+/**  Hybrid: PV and a battery port. */
+"hybrid" | "micro" | 
+/**
+ *  Fixed-voltage inverter driven by module optimizers (SolarEdge): string rules come from
+ *  the optimizer.
+ */
+"optimizerBased";
+
+export type InverterSpec = InverterSpec_Serialize | InverterSpec_Deserialize;
+
+export type InverterSpec_Deserialize = {
+	kind: InverterKind,
+	ac: InverterAc_Deserialize,
+	dc: InverterDc_Deserialize,
+	battery?: BatteryPort_Deserialize | null,
+	/**  Backup / emergency power, as described by the datasheet. */
+	backup?: string | null,
+	optimizerRequired: boolean,
+	compatibleOptimizers: string[],
+	maxEfficiencyPct?: number | null,
+	euroEfficiencyPct?: number | null,
+	/**  Arc-fault detection: « yes », « no », « optional ». */
+	afci?: string | null,
+	spdDc?: string | null,
+	spdAc?: string | null,
+	details?: EquipmentDetails_Deserialize,
+};
+
+export type InverterSpec_Serialize = {
+	kind: InverterKind,
+	ac: InverterAc_Serialize,
+	dc: InverterDc_Serialize,
+	battery?: BatteryPort_Serialize | null,
+	/**  Backup / emergency power, as described by the datasheet. */
+	backup?: string | null,
+	optimizerRequired: boolean,
+	compatibleOptimizers: string[],
+	maxEfficiencyPct?: number | null,
+	euroEfficiencyPct?: number | null,
+	/**  Arc-fault detection: « yes », « no », « optional ». */
+	afci?: string | null,
+	spdDc?: string | null,
+	spdAc?: string | null,
+	details: EquipmentDetails_Serialize,
+};
+
 /**  Calendar date, serialised as `YYYY-MM-DD` (so string order is date order). */
 export type IsoDate = string;
 
@@ -1341,6 +1651,82 @@ export type ModelChanged = {
 	canRedo: boolean,
 };
 
+/**
+ *  Datasheet data beyond what layout, statics and stringing need. Every value as printed;
+ *  `None` when the datasheet does not give it.
+ */
+export type ModuleDetails = ModuleDetails_Serialize | ModuleDetails_Deserialize;
+
+/**
+ *  Datasheet data beyond what layout, statics and stringing need. Every value as printed;
+ *  `None` when the datasheet does not give it.
+ */
+export type ModuleDetails_Deserialize = {
+	kind?: ModuleKind,
+	/**  Product series (e.g. « Hi-MO X10 »). */
+	series?: string | null,
+	cellType?: string | null,
+	cellCount?: number | null,
+	/**  `Some(false)`: monofacial; `None`: unknown. */
+	bifacial?: boolean | null,
+	/**  Efficiency at STC, as printed [%]. */
+	efficiencyPct?: number | null,
+	maxSeriesFuseA?: number | null,
+	/**  Nominal operating cell temperature (NOCT or NMOT) [°C]. */
+	nominalOperatingTempC?: number | null,
+	operatingTempMinC?: number | null,
+	operatingTempMaxC?: number | null,
+	/**  Test loads, front (snow) and back (wind suction) [Pa]. */
+	testLoadFrontPa?: number | null,
+	testLoadBackPa?: number | null,
+	/**  VKF/AEAI hail class (e.g. « HW4 »). */
+	hailClass?: string | null,
+	fireClass?: string | null,
+	warrantyProductYears?: number | null,
+	warrantyPowerYears?: number | null,
+	degradationFirstYearPct?: number | null,
+	degradationAnnualPct?: number | null,
+	/**  Datasheet file the values come from, and its revision when printed. */
+	datasheetRef?: string | null,
+	/**  Points to check (printed anomalies, ambiguities). */
+	notes?: string[],
+};
+
+/**
+ *  Datasheet data beyond what layout, statics and stringing need. Every value as printed;
+ *  `None` when the datasheet does not give it.
+ */
+export type ModuleDetails_Serialize = {
+	kind: ModuleKind,
+	/**  Product series (e.g. « Hi-MO X10 »). */
+	series?: string | null,
+	cellType?: string | null,
+	cellCount?: number | null,
+	/**  `Some(false)`: monofacial; `None`: unknown. */
+	bifacial?: boolean | null,
+	/**  Efficiency at STC, as printed [%]. */
+	efficiencyPct?: number | null,
+	maxSeriesFuseA?: number | null,
+	/**  Nominal operating cell temperature (NOCT or NMOT) [°C]. */
+	nominalOperatingTempC?: number | null,
+	operatingTempMinC?: number | null,
+	operatingTempMaxC?: number | null,
+	/**  Test loads, front (snow) and back (wind suction) [Pa]. */
+	testLoadFrontPa?: number | null,
+	testLoadBackPa?: number | null,
+	/**  VKF/AEAI hail class (e.g. « HW4 »). */
+	hailClass?: string | null,
+	fireClass?: string | null,
+	warrantyProductYears?: number | null,
+	warrantyPowerYears?: number | null,
+	degradationFirstYearPct?: number | null,
+	degradationAnnualPct?: number | null,
+	/**  Datasheet file the values come from, and its revision when printed. */
+	datasheetRef?: string | null,
+	/**  Points to check (printed anomalies, ambiguities). */
+	notes: string[],
+};
+
 /**  Electrical datasheet values at STC. */
 export type ModuleElectrical = ModuleElectrical_Serialize | ModuleElectrical_Deserialize;
 
@@ -1384,6 +1770,13 @@ export type ModuleElectrical_Serialize = {
  */
 export type ModuleId = number;
 
+/**  How a module is mounted. */
+export type ModuleKind = 
+/**  Framed module on a mounting system. */
+"framed" | 
+/**  Building-integrated (replaces the roof covering: solar slates, tiles, Solrif frames). */
+"integratedRoof";
+
 /**  Exact position of one module, used by [`Command::SetModulePositions`]. */
 export type ModulePosition = {
 	id: ModuleId,
@@ -1421,6 +1814,8 @@ export type ModuleSpec_Deserialize = {
 	 *  bill of materials; required for stringing).
 	 */
 	electrical?: ModuleElectrical_Deserialize | null,
+	/**  Further datasheet data (simulation, warranties, approvals); all optional. */
+	details?: ModuleDetails_Deserialize,
 };
 
 /**  A PV module. */
@@ -1437,6 +1832,8 @@ export type ModuleSpec_Serialize = {
 	 *  bill of materials; required for stringing).
 	 */
 	electrical?: ModuleElectrical_Serialize | null,
+	/**  Further datasheet data (simulation, warranties, approvals); all optional. */
+	details: ModuleDetails_Serialize,
 };
 
 export type ModuleState = "active" | "removed";
@@ -1512,6 +1909,63 @@ export type MountingSystemSpec_Serialize = {
 export type ObstacleKind = "chimney" | "skylight" | "vent" | "dormer" | 
 /**  Area kept free on purpose (access path, maintenance zone…). */
 "keepOut";
+
+export type OptimizerSpec = OptimizerSpec_Serialize | OptimizerSpec_Deserialize;
+
+export type OptimizerSpec_Deserialize = {
+	modulesPerOptimizer?: number | null,
+	ratedInputPowerW: number,
+	maxInputVoltageV: number,
+	mpptMinV?: number | null,
+	mpptMaxV?: number | null,
+	maxInputShortCircuitCurrentA?: number | null,
+	maxOutputCurrentA?: number | null,
+	maxOutputVoltageV?: number | null,
+	maxEfficiencyPct?: number | null,
+	weightedEfficiencyPct?: number | null,
+	compatibleInverters: string[],
+	stringRules: OptimizerStringRule_Deserialize[],
+	details?: EquipmentDetails_Deserialize,
+};
+
+export type OptimizerSpec_Serialize = {
+	modulesPerOptimizer?: number | null,
+	ratedInputPowerW: number,
+	maxInputVoltageV: number,
+	mpptMinV?: number | null,
+	mpptMaxV?: number | null,
+	maxInputShortCircuitCurrentA?: number | null,
+	maxOutputCurrentA?: number | null,
+	maxOutputVoltageV?: number | null,
+	maxEfficiencyPct?: number | null,
+	weightedEfficiencyPct?: number | null,
+	compatibleInverters: string[],
+	stringRules: OptimizerStringRule_Serialize[],
+	details: EquipmentDetails_Serialize,
+};
+
+/**  String length rule of an optimizer with a given inverter family. */
+export type OptimizerStringRule = OptimizerStringRule_Serialize | OptimizerStringRule_Deserialize;
+
+/**  String length rule of an optimizer with a given inverter family. */
+export type OptimizerStringRule_Deserialize = {
+	/**  Inverter model or family pattern (e.g. « SE*K », « SUN2000-*KTL-M1 »). */
+	inverter: string,
+	minOptimizers?: number | null,
+	maxOptimizers?: number | null,
+	maxPowerPerStringW?: number | null,
+	note?: string | null,
+};
+
+/**  String length rule of an optimizer with a given inverter family. */
+export type OptimizerStringRule_Serialize = {
+	/**  Inverter model or family pattern (e.g. « SE*K », « SUN2000-*KTL-M1 »). */
+	inverter: string,
+	minOptimizers?: number | null,
+	maxOptimizers?: number | null,
+	maxPowerPerStringW?: number | null,
+	note?: string | null,
+};
 
 export type Orientation = 
 /**  Long side along the module's slope direction. */
@@ -1751,11 +2205,34 @@ export type ProjectSummary_Serialize = {
 	canRedo: boolean,
 };
 
+export type Property = {
+	name: string,
+	value: PropertyValue,
+};
+
+/**  A printed characteristic: a number with its unit, or a text. */
+export type PropertyValue = { kind: "number"; value: number; unit: string } | { kind: "text"; value: string };
+
 /**
  *  Layer of a cross-rail system: rails of different layers are never cut from the same bar
  *  (K2 Base cuts top and bottom rails separately).
  */
 export type RailLayerKind = "top" | "bottom";
+
+/**  Rail layers of a rail system. */
+export type RailLayers = 
+/**
+ *  Top rails along `v` carry the modules and rest on bottom rails along `u`, fixed to
+ *  the roof (K2 « croisé », 2 couches).
+ */
+"two" | 
+/**
+ *  Rails along `u`, fixed to the roof, carry the modules directly (K2 1 couche, modules
+ *  in portrait): `per_column` is then the number of rails per module row, `top_inset_m`
+ *  their distance from the module edges along `v` and `top_overhang_m` their overhang
+ *  beyond the outer modules along `u`.
+ */
+"one";
 
 /**  Cross-section and material of a rail. */
 export type RailSectionSpec = {
@@ -2184,6 +2661,27 @@ export type SystemStatics_Serialize = {
 
 /**  SIA 261 terrain category (tab. 4). */
 export type TerrainCategory = "II" | "IIa" | "III" | "IV";
+
+/**  One MPP tracker. */
+export type Tracker = Tracker_Serialize | Tracker_Deserialize;
+
+/**  One MPP tracker. */
+export type Tracker_Deserialize = {
+	/**  String inputs on this tracker. */
+	inputs: number,
+	maxCurrentA?: number | null,
+	maxShortCircuitCurrentA?: number | null,
+	maxPowerW?: number | null,
+};
+
+/**  One MPP tracker. */
+export type Tracker_Serialize = {
+	/**  String inputs on this tracker. */
+	inputs: number,
+	maxCurrentA?: number | null,
+	maxShortCircuitCurrentA?: number | null,
+	maxPowerW?: number | null,
+};
 
 /**  A newer library version of a frozen component. */
 export type UpdateProposal = UpdateProposal_Serialize | UpdateProposal_Deserialize;

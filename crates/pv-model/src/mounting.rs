@@ -239,9 +239,10 @@ pub enum Driver {
     Fixation,
     /// One per crossing of a top and a bottom rail.
     Climber,
-    /// Two per top rail (end clamps).
+    /// Two per module-carrying rail (end clamps): top rails, or the rails of a one-layer
+    /// system.
     TopRailEnd,
-    /// Modules − 1 per top rail (middle clamps).
+    /// Modules − 1 per module-carrying rail (middle clamps).
     TopRailInnerJoint,
     /// One per active module.
     Module,

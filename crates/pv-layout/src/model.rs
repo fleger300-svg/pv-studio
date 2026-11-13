@@ -276,6 +276,7 @@ pub fn rail_params(array: &PanelArray) -> Option<(CrossRailParams, f64, Option<f
     array.layout.rails.map(|r| {
         (
             CrossRailParams {
+                layers: r.layers,
                 per_column: r.per_column,
                 top_inset_m: r.top_inset_m,
                 top_overhang_m: r.top_overhang_m,
@@ -300,11 +301,13 @@ pub struct ArrayHardware {
 }
 
 /// Mounting hardware of an array from its stored modules; `None` when its mounting system
-/// has no rail rules.
+/// has no rail rules. `fixation_every`: on a rafter grid, fixations on every n-th rafter
+/// (from the statics); ignored on standing seams (one clamp per seam).
 pub fn hardware(
     face: &RoofFace,
     array: &PanelArray,
     modules: &[ModuleInstance],
+    fixation_every: u32,
 ) -> Result<Option<ArrayHardware>, LayoutError> {
     let Some((params, edge, cantilever)) = rail_params(array) else {
         return Ok(None);
@@ -320,7 +323,13 @@ pub fn hardware(
         })
         .collect();
     let rails = cross_rails(&cells, &grid_spec(array), &structure, &params);
-    let fixations = support_lines(face).map(|lines| fixations(&rails, &lines, edge, cantilever));
+    let fixations = support_lines(face).map(|lines| {
+        let every = match lines.kind {
+            SupportKind::Rafters => fixation_every,
+            SupportKind::StandingSeam => 1,
+        };
+        fixations(&rails, &lines, edge, cantilever, every)
+    });
     Ok(Some(ArrayHardware {
         structure,
         module_ids,

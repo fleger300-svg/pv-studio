@@ -355,16 +355,16 @@ fn roof_1_clamps_over_seam_phases() {
         };
         let plain: usize = layouts
             .iter()
-            .map(|l| fixations(l, &lines, 0.03, None).count())
+            .map(|l| fixations(l, &lines, 0.03, None, 1).count())
             .sum();
         let extended: usize = layouts
             .iter()
-            .map(|l| fixations(l, &lines, 0.03, Some(0.485)).count())
+            .map(|l| fixations(l, &lines, 0.03, Some(0.485), 1).count())
             .sum();
         let ext_lens: Vec<f64> = layouts
             .iter()
             .flat_map(|l| {
-                let fx = fixations(l, &lines, 0.03, Some(0.485));
+                let fx = fixations(l, &lines, 0.03, Some(0.485), 1);
                 l.bottom
                     .iter()
                     .zip(fx.bottom.clone())
@@ -409,6 +409,7 @@ fn roof_1_clamps_over_seam_phases() {
             },
             0.03,
             None,
+            1,
         );
         assert!(fx0.positions.iter().all(|p| p.len() >= 2));
     }
@@ -437,6 +438,7 @@ fn k2_clamp_totals_follow_from_cut_lists() {
     let rail = |len: f64| RailLayout {
         top: vec![],
         top_modules: vec![],
+        bottom_modules: vec![],
         bottom: vec![pv_layout::Rail {
             block: 0,
             layer: pv_layout::RailLayer::Bottom,
@@ -451,7 +453,13 @@ fn k2_clamp_totals_follow_from_cut_lists() {
     for (base, normal, aligned) in [(3.060, 5, 6), (1.250, 2, 2)] {
         let mut seen = std::collections::BTreeSet::new();
         for step in 0..600 {
-            let fx1 = fixations(&rail(base), &seams(f64::from(step) * 0.001), 0.03, max_cl);
+            let fx1 = fixations(
+                &rail(base),
+                &seams(f64::from(step) * 0.001),
+                0.03,
+                max_cl,
+                1,
+            );
             let lengthened = fx1.bottom[0].length() > base + 1e-9;
             let n = fx1.count();
             if lengthened {

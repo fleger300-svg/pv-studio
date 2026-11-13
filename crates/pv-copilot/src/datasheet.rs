@@ -315,6 +315,7 @@ pub fn to_component(
                 thickness_m: t.unwrap_or_default(),
                 mass_kg: mass.unwrap_or_default(),
                 electrical,
+                details: Box::default(),
             })
         }
         "mountingPart" => {

@@ -115,6 +115,7 @@ fn reference_bom() -> (Bom, Reference) {
                 },
                 // Two top rails per module column.
                 modules: top_rails.iter().map(|t| t.modules).sum::<u32>() / 2,
+                clamp_rails: top_rails.iter().map(|t| t.modules).collect(),
                 top_rails,
                 bottom_rails: [expand(&r.bottom_long), expand(&r.bottom_short)].concat(),
                 climbers: r.climbers,

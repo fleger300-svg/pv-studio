@@ -70,6 +70,73 @@ pub struct ModuleSpec {
     /// bill of materials; required for stringing).
     #[specta(optional)]
     pub electrical: Option<ModuleElectrical>,
+    /// Further datasheet data (simulation, warranties, approvals); all optional.
+    #[serde(default)]
+    pub details: Box<ModuleDetails>,
+}
+
+/// How a module is mounted.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum ModuleKind {
+    /// Framed module on a mounting system.
+    #[default]
+    Framed,
+    /// Building-integrated (replaces the roof covering: solar slates, tiles, Solrif frames).
+    IntegratedRoof,
+}
+
+/// Datasheet data beyond what layout, statics and stringing need. Every value as printed;
+/// `None` when the datasheet does not give it.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase", default)]
+pub struct ModuleDetails {
+    pub kind: ModuleKind,
+    /// Product series (e.g. « Hi-MO X10 »).
+    #[specta(optional)]
+    pub series: Option<String>,
+    #[specta(optional)]
+    pub cell_type: Option<String>,
+    #[specta(optional)]
+    pub cell_count: Option<u32>,
+    /// `Some(false)`: monofacial; `None`: unknown.
+    #[specta(optional)]
+    pub bifacial: Option<bool>,
+    /// Efficiency at STC, as printed [%].
+    #[specta(optional)]
+    pub efficiency_pct: Option<f64>,
+    #[specta(optional)]
+    pub max_series_fuse_a: Option<f64>,
+    /// Nominal operating cell temperature (NOCT or NMOT) [°C].
+    #[specta(optional)]
+    pub nominal_operating_temp_c: Option<f64>,
+    #[specta(optional)]
+    pub operating_temp_min_c: Option<f64>,
+    #[specta(optional)]
+    pub operating_temp_max_c: Option<f64>,
+    /// Test loads, front (snow) and back (wind suction) [Pa].
+    #[specta(optional)]
+    pub test_load_front_pa: Option<f64>,
+    #[specta(optional)]
+    pub test_load_back_pa: Option<f64>,
+    /// VKF/AEAI hail class (e.g. « HW4 »).
+    #[specta(optional)]
+    pub hail_class: Option<String>,
+    #[specta(optional)]
+    pub fire_class: Option<String>,
+    #[specta(optional)]
+    pub warranty_product_years: Option<f64>,
+    #[specta(optional)]
+    pub warranty_power_years: Option<f64>,
+    #[specta(optional)]
+    pub degradation_first_year_pct: Option<f64>,
+    #[specta(optional)]
+    pub degradation_annual_pct: Option<f64>,
+    /// Datasheet file the values come from, and its revision when printed.
+    #[specta(optional)]
+    pub datasheet_ref: Option<String>,
+    /// Points to check (printed anomalies, ambiguities).
+    pub notes: Vec<String>,
 }
 
 impl ModuleSpec {

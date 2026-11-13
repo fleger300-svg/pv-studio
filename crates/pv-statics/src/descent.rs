@@ -2,7 +2,10 @@
 //!
 //! The model is the two-layer cross-rail system (K2 SingleRail with climbers): modules sit on
 //! top rails, top rails sit on bottom rails, bottom rails are fixed to the roof. A single-layer
-//! system is the same chain with only the bottom layer.
+//! system is the same chain with only the bottom layer: no top-rail check, the rails carry
+//! q = p·w directly (w = module dimension across the rail / rails per module, κ = 1) and are
+//! checked as simple spans between fixations (conservative for rails continuous over several
+//! hooks).
 //!
 //! - Top rail: line load q = p·w (w = tributary width of the rail), continuous beam over the
 //!   bottom rails: M = q·L²/10, δ = q·L⁴/(185·E·I).
@@ -149,6 +152,10 @@ pub struct CrossRailSystem {
     pub actual_fixation_spacing_m: Option<f64>,
     #[serde(default)]
     pub fixation: Option<FixationResistance>,
+    /// One-layer system: the bottom rails carry the modules (`top_rail` and
+    /// `bottom_rail_spacing_m` are then ignored).
+    #[serde(default)]
+    pub single_layer: bool,
 }
 
 /// Design surface loads of one zone, ⊥ / ∥ to the roof [kN/m²] (from [`crate::combos`]).
@@ -219,7 +226,8 @@ pub struct FixationCheck {
 /// Load descent result of one zone.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct DescentResult {
-    pub top_rail: RailCheck,
+    /// `None` for a one-layer system.
+    pub top_rail: Option<RailCheck>,
     pub bottom_rail: RailCheck,
     /// Fixation spacing on the bottom rails, chosen from the support grid [m].
     pub fixation_spacing: Traced,
@@ -315,20 +323,26 @@ pub fn descend(
         0.05,
         5.0,
     )?;
-    let kappa = SUPPORT_REACTION_FACTOR;
-    let s_top = system.bottom_rail_spacing_m;
+    // One layer: the rails carry their own tributary width, without a top-rail reaction.
+    let (kappa, s_top) = if system.single_layer {
+        (1.0, system.top_rail_tributary_width_m)
+    } else {
+        (SUPPORT_REACTION_FACTOR, system.bottom_rail_spacing_m)
+    };
 
     // Top rail: continuous over the bottom rails; its maximum span is the maximum spacing of
     // the bottom rails.
-    let top_rail = rail_check(
-        &system.top_rail,
-        BeamScheme::Continuous,
-        system.top_rail_tributary_width_m,
-        s_top,
-        loads,
-        true,
-        None,
-    );
+    let top_rail = (!system.single_layer).then(|| {
+        rail_check(
+            &system.top_rail,
+            BeamScheme::Continuous,
+            system.top_rail_tributary_width_m,
+            s_top,
+            loads,
+            true,
+            None,
+        )
+    });
 
     // Bottom rail fixation spacing.
     let bottom_width = kappa * s_top;
@@ -389,7 +403,11 @@ pub fn descend(
         .input("s_fix", s_fix, Unit::Metre)
         .assume(
             "statics.assumption.descent.reaction_factor",
-            "κ = 1.05: reaction of the continuous top rail, calibrated on K2 Base",
+            if system.single_layer {
+                "κ = 1: one-layer system, s_top = tributary width of the rail"
+            } else {
+                "κ = 1.05: reaction of the continuous top rail, calibrated on K2 Base"
+            },
         );
     let fixation_forces = FixationForces {
         uls_pressure_perp: loads.uls_pressure_perp * area,
@@ -448,6 +466,7 @@ mod tests {
             support_grid: SupportGrid::Rafters { spacing_m: 0.4 },
             actual_fixation_spacing_m: None,
             fixation: None,
+            single_layer: false,
         };
         let loads = ZoneSurfaceLoads {
             uls_pressure_perp: 1.0,
@@ -464,5 +483,39 @@ mod tests {
         assert!((s / 0.4 - (s / 0.4).round()).abs() < 1e-9);
         assert!(s <= r.bottom_rail.max_span.value + 1e-9);
         assert!(s + 0.4 > r.bottom_rail.max_span.value);
+    }
+
+    #[test]
+    fn one_layer_skips_the_top_rail() {
+        let loads = ZoneSurfaceLoads {
+            uls_pressure_perp: 1.0,
+            uls_pressure_par: 0.2,
+            uls_uplift_perp: -0.8,
+            uls_uplift_par: 0.03,
+            sls_pressure_perp: 0.7,
+            sls_pressure_par: 0.15,
+            sls_uplift_perp: -0.5,
+            sls_uplift_par: 0.03,
+        };
+        let system = CrossRailSystem {
+            top_rail: RailSection::k2_single_rail_36(),
+            bottom_rail: RailSection::k2_single_rail_36(),
+            top_rail_tributary_width_m: 0.9,
+            bottom_rail_spacing_m: 1.0,
+            support_grid: SupportGrid::Rafters { spacing_m: 0.6 },
+            actual_fixation_spacing_m: Some(1.2),
+            fixation: Some(FixationResistance {
+                name: "hook".into(),
+                uplift_kn: 2.17,
+                pressure_kn: 2.67,
+                parallel_kn: 2.40,
+            }),
+            single_layer: true,
+        };
+        let r = descend(&system, &loads).unwrap();
+        assert!(r.top_rail.is_none());
+        // F = p · w · s_fix, without κ.
+        let f = r.fixation_forces.uls_pressure_perp;
+        assert!((f - 1.0 * 0.9 * 1.2).abs() < 1e-9, "{f}");
     }
 }

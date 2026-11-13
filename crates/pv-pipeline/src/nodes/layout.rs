@@ -23,7 +23,14 @@ impl Derived for Hardware {
         let array = ctx.get::<ArrayIn>(i)?;
         let face = ctx.get::<FaceIn>(Instance::Face(array.roof_face_id))?;
         let modules = ctx.get::<ModulesIn>(i)?;
-        hardware(&face, &array, &modules).map_err(|e| layout_error(&e).into())
+        // Only rafter grids depend on the statics (dynamic dependency).
+        let every = match face.support_grid.map(|g| g.kind) {
+            Some(pv_model::SupportGridKind::Rafters) if array.layout.rails.is_some() => {
+                *ctx.get::<super::descent::FixationEvery>(i)?
+            }
+            _ => 1,
+        };
+        hardware(&face, &array, &modules, every).map_err(|e| layout_error(&e).into())
     }
 }
 

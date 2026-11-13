@@ -92,6 +92,7 @@ fn singlerail(f: &RoofFace) -> PanelArray {
             obstacle_clearance_m: 0.3,
             min_distance_to_other_arrays_m: 0.5,
             rails: Some(CrossRailSpec {
+                layers: pv_model::RailLayers::Two,
                 per_column: 2,
                 top_inset_m: 0.4,
                 top_overhang_m: 0.05,
@@ -295,7 +296,7 @@ fn command_validation_rejects_each_rule() {
 fn hardware_from_stored_parameters() {
     let p = mixed();
     let (f, sr, pt) = (&p.roof_faces[0], &p.arrays[0], &p.arrays[1]);
-    let hw = hardware(f, sr, &p.modules)
+    let hw = hardware(f, sr, &p.modules, 1)
         .unwrap()
         .expect("SingleRail has rail rules");
     let fx = hw.fixations.as_ref().expect("face has standing seams");
@@ -310,7 +311,7 @@ fn hardware_from_stored_parameters() {
         }
     }
     // No rail rules → no hardware for the other system.
-    assert!(hardware(f, pt, &p.modules).unwrap().is_none());
+    assert!(hardware(f, pt, &p.modules, 1).unwrap().is_none());
 }
 
 #[test]

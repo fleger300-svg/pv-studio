@@ -57,9 +57,13 @@ impl Derived for FieldStatics {
         if let Some(zd) = descent.as_ref() {
             for d in zd {
                 let r = &d.result;
+                let top = r.top_rail.as_ref().map_or(0.0, |t| {
+                    t.bending_utilisation
+                        .value
+                        .max(t.deflection_utilisation.value)
+                });
                 let mut u = [
-                    r.top_rail.bending_utilisation.value,
-                    r.top_rail.deflection_utilisation.value,
+                    top,
                     r.bottom_rail.bending_utilisation.value,
                     r.bottom_rail.deflection_utilisation.value,
                 ]

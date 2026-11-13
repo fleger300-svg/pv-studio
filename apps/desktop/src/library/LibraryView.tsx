@@ -19,6 +19,7 @@ import { NumInput, TextInput } from './inputs';
 import { ImportDialog } from './ImportDialog';
 import { ExtractDialog } from './ExtractDialog';
 import { base64ToBytes } from './priceList';
+import { SpecSummary } from './SpecSummary';
 
 type Family = ComponentFamily | 'all';
 
@@ -94,7 +95,18 @@ export function LibraryView() {
         <Select<Family>
           label={t('library.family')}
           value={family}
-          options={(['all', 'module', 'mountingSystem', 'mountingPart'] as const).map((f) => ({
+          options={(
+            [
+              'all',
+              'module',
+              'inverter',
+              'optimizer',
+              'battery',
+              'mountingSystem',
+              'mountingPart',
+              'equipment',
+            ] as const
+          ).map((f) => ({
             value: f,
             label: t(`library.families.${f}`),
           }))}
@@ -621,6 +633,7 @@ function ComponentEditor({
           <p className="panel-hint">{t('library.systemParts', { count: spec.parts.length })}</p>
         </>
       )}
+      <SpecSummary spec={spec} />
       <label className="form-check">
         <input
           type="checkbox"

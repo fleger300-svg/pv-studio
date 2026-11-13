@@ -1143,6 +1143,7 @@ mod tests {
         a.layout.anchor = LayoutAnchor::LowerRight;
         a.layout.min_distance_to_other_arrays_m = 0.3;
         a.layout.rails = Some(pv_model::CrossRailSpec {
+            layers: pv_model::RailLayers::Two,
             per_column: 2,
             top_inset_m: 0.4,
             top_overhang_m: 0.05,

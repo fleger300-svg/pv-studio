@@ -32,8 +32,8 @@ pub use geometry::{Quat, RoofFrame, Vec3};
 pub use ids::{ArrayId, BlobId, BuildingId, ComponentId, ModuleId, ProjectId, RoofFaceId};
 pub use layout::{
     ArrayLayoutParams, BlockParams, CrossRailSpec, EdgeSetback, ExpansionJointSpec, JointAxis,
-    LayoutAnchor, ObstacleKind, RoofEdgeKind, RoofObstacle, RoofOutlineSpec, SupportGridKind,
-    SupportGridSpec,
+    LayoutAnchor, ObstacleKind, RailLayers, RoofEdgeKind, RoofObstacle, RoofOutlineSpec,
+    SupportGridKind, SupportGridSpec,
 };
 pub use mounting::{
     AeroZoneSpec, BallastSpec, CpEntrySpec, CpSpec, Driver, FixationSpec, MembraneKind,

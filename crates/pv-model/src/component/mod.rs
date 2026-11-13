@@ -10,6 +10,7 @@
 //! breaking change of its shape, and the library migrates stored specs accordingly.
 
 pub mod compat;
+pub mod electrical;
 pub mod legacy;
 pub mod module;
 pub mod mounting;
@@ -25,7 +26,12 @@ use crate::command::{keys, CommandError};
 use crate::ids::{BlobId, ComponentId};
 
 pub use compat::check_array_components;
-pub use module::{ModuleElectrical, ModuleSpec};
+pub use electrical::{
+    BatteryConfiguration, BatteryCoupling, BatteryPort, BatteryPowerRule, BatterySpec,
+    EquipmentDetails, EquipmentKind, EquipmentSpec, InverterAc, InverterDc, InverterKind,
+    InverterSpec, OptimizerSpec, OptimizerStringRule, Property, PropertyValue, Tracker,
+};
+pub use module::{ModuleDetails, ModuleElectrical, ModuleKind, ModuleSpec};
 pub use mounting::{
     Approval, MountingStructure, MountingSystemSpec, PartRuleRef, SystemCompatibility,
     SystemStatics,
@@ -68,6 +74,10 @@ pub enum ComponentFamily {
     Module,
     MountingSystem,
     MountingPart,
+    Inverter,
+    Optimizer,
+    Battery,
+    Equipment,
 }
 
 impl ComponentFamily {
@@ -78,17 +88,25 @@ impl ComponentFamily {
             Self::Module => "module",
             Self::MountingSystem => "mountingSystem",
             Self::MountingPart => "mountingPart",
+            Self::Inverter => "inverter",
+            Self::Optimizer => "optimizer",
+            Self::Battery => "battery",
+            Self::Equipment => "equipment",
         }
     }
 }
 
-/// Family-specific data of a component (closed set; electrical families come later).
+/// Family-specific data of a component (closed set).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase", tag = "family")]
 pub enum ComponentSpec {
     Module(ModuleSpec),
     MountingSystem(Box<MountingSystemSpec>),
     MountingPart(PartSpec),
+    Inverter(Box<InverterSpec>),
+    Optimizer(Box<OptimizerSpec>),
+    Battery(Box<BatterySpec>),
+    Equipment(Box<EquipmentSpec>),
 }
 
 impl ComponentSpec {
@@ -98,6 +116,10 @@ impl ComponentSpec {
             Self::Module(_) => ComponentFamily::Module,
             Self::MountingSystem(_) => ComponentFamily::MountingSystem,
             Self::MountingPart(_) => ComponentFamily::MountingPart,
+            Self::Inverter(_) => ComponentFamily::Inverter,
+            Self::Optimizer(_) => ComponentFamily::Optimizer,
+            Self::Battery(_) => ComponentFamily::Battery,
+            Self::Equipment(_) => ComponentFamily::Equipment,
         }
     }
 }
@@ -157,6 +179,10 @@ impl Component {
                 ComponentSpec::Module(m) => m.invalid_field(),
                 ComponentSpec::MountingSystem(s) => s.invalid_field(),
                 ComponentSpec::MountingPart(p) => p.invalid_field(),
+                ComponentSpec::Inverter(i) => i.invalid_field(),
+                ComponentSpec::Optimizer(o) => o.invalid_field(),
+                ComponentSpec::Battery(b) => b.invalid_field(),
+                ComponentSpec::Equipment(e) => e.invalid_field(),
             }
         };
         field.map_or(Ok(()), |f| {

@@ -8,9 +8,9 @@
 use uuid::Uuid;
 
 use super::{
-    Component, ComponentSource, ComponentSpec, Descriptions, LengthRange, ModuleElectrical,
-    ModuleSpec, MountingStructure, MountingSystemSpec, PartKind, PartRuleRef, PartSpec,
-    SystemCompatibility, SystemStatics,
+    Component, ComponentSource, ComponentSpec, Descriptions, LengthRange, ModuleDetails,
+    ModuleElectrical, ModuleSpec, MountingStructure, MountingSystemSpec, PartKind, PartRuleRef,
+    PartSpec, SystemCompatibility, SystemStatics,
 };
 use crate::ids::ComponentId;
 use crate::layout::{ArrayLayoutParams, CrossRailSpec, SupportGridKind};
@@ -91,6 +91,14 @@ pub fn lr7_54hvh_490m() -> Component {
                 temp_coeff_isc_pct_per_k: 0.05,
                 max_system_voltage_v: 1500.0,
                 bifaciality: None,
+            }),
+            details: Box::new(ModuleDetails {
+                series: Some("Hi-MO X10".into()),
+                bifacial: Some(false),
+                nominal_operating_temp_c: Some(45.0),
+                max_series_fuse_a: Some(25.0),
+                warranty_product_years: Some(15.0),
+                ..ModuleDetails::default()
             }),
         }),
     )

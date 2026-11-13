@@ -123,6 +123,7 @@ pub fn set_list_price(p: &mut Project, article_no: &str, list_price: f64) {
 
 pub fn k2_rails() -> CrossRailSpec {
     CrossRailSpec {
+        layers: pv_model::RailLayers::Two,
         per_column: 2,
         top_inset_m: 0.40,
         top_overhang_m: 0.05,

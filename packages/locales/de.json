@@ -445,7 +445,11 @@
       "all": "Alle",
       "module": "Modul",
       "mountingSystem": "Montagesystem",
-      "mountingPart": "Montageteil"
+      "mountingPart": "Montageteil",
+      "inverter": "Wechselrichter",
+      "optimizer": "Optimierer",
+      "battery": "Batterie",
+      "equipment": "Zubehör"
     },
     "showArchived": "Archivierte anzeigen",
     "newModule": "Neues Modul",
@@ -575,6 +579,65 @@
       "warnings": "Zu prüfende Punkte",
       "source": "durch KI extrahiert",
       "configure": "API-Schlüssel einrichten…"
+    },
+    "spec": {
+      "series": "Serie",
+      "kind": "Typ",
+      "efficiency": "Wirkungsgrad",
+      "noct": "NOCT",
+      "warranty": "Produkt- / Leistungsgarantie (Jahre)",
+      "hail": "Hagelklasse",
+      "inverterKind": "Wechselrichtertyp",
+      "acPower": "AC-Leistung",
+      "dcMax": "Max. DC-Spannung",
+      "mppt": "MPPT-Bereich",
+      "trackers": "Tracker",
+      "battery": "Batterieanschluss",
+      "yes": "Ja",
+      "no": "Nein",
+      "ratedInput": "Eingangsleistung",
+      "maxInputVoltage": "Max. Eingangsspannung",
+      "maxInputIsc": "Max. Eingangs-Isc",
+      "stringRules": "String-Regeln",
+      "chemistry": "Chemie · Kopplung",
+      "moduleCapacity": "Kapazität pro Modul",
+      "modules": "Module pro Stapel",
+      "power": "Leistungsregel",
+      "location": "Aufstellort",
+      "equipmentKind": "Zubehörtyp",
+      "datasheet": "Datenblatt: {ref}",
+      "notes": "{count, plural, one {# Punkt zu prüfen} other {# Punkte zu prüfen}}",
+      "moduleKinds": {
+        "framed": "Gerahmt",
+        "integratedRoof": "Indach"
+      },
+      "inverterKinds": {
+        "string": "String",
+        "hybrid": "Hybrid",
+        "micro": "Mikrowechselrichter",
+        "optimizerBased": "Mit Optimierern"
+      },
+      "powerRules": {
+        "perModule": "Pro Modul",
+        "currentLimited": "Strombegrenzt",
+        "cRate": "C-Rate",
+        "fixed": "Fest",
+        "perConfiguration": "Je nach Konfiguration",
+        "inverterLimited": "Durch Wechselrichter begrenzt"
+      },
+      "equipmentKinds": {
+        "energyManager": "Energiemanager",
+        "backupBox": "Backup-Box",
+        "dcBox": "DC-Box",
+        "evCharger": "Ladestation",
+        "cable": "Kabel",
+        "connector": "Stecker",
+        "cableTray": "Kabelkanal",
+        "communication": "Kommunikation",
+        "safetyLine": "Sicherungsseil",
+        "carport": "Carport",
+        "other": "Andere"
+      }
     }
   },
   "settings": {

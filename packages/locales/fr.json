@@ -445,7 +445,11 @@
       "all": "Toutes",
       "module": "Module",
       "mountingSystem": "Système de montage",
-      "mountingPart": "Pièce de montage"
+      "mountingPart": "Pièce de montage",
+      "inverter": "Onduleur",
+      "optimizer": "Optimiseur",
+      "battery": "Batterie",
+      "equipment": "Équipement"
     },
     "showArchived": "Afficher les archivés",
     "newModule": "Nouveau module",
@@ -575,6 +579,65 @@
       "warnings": "Points à vérifier",
       "source": "extrait par IA",
       "configure": "Configurer la clé API…"
+    },
+    "spec": {
+      "series": "Série",
+      "kind": "Type",
+      "efficiency": "Rendement",
+      "noct": "NOCT",
+      "warranty": "Garantie produit / puissance (ans)",
+      "hail": "Classe de grêle",
+      "inverterKind": "Type d’onduleur",
+      "acPower": "Puissance AC",
+      "dcMax": "Tension DC max.",
+      "mppt": "Plage MPPT",
+      "trackers": "Trackers",
+      "battery": "Port batterie",
+      "yes": "Oui",
+      "no": "Non",
+      "ratedInput": "Puissance d’entrée",
+      "maxInputVoltage": "Tension d’entrée max.",
+      "maxInputIsc": "Isc d’entrée max.",
+      "stringRules": "Règles de string",
+      "chemistry": "Chimie · couplage",
+      "moduleCapacity": "Capacité par module",
+      "modules": "Modules par pile",
+      "power": "Règle de puissance",
+      "location": "Emplacement",
+      "equipmentKind": "Type d’équipement",
+      "datasheet": "Fiche technique : {ref}",
+      "notes": "{count, plural, one {# point à vérifier} other {# points à vérifier}}",
+      "moduleKinds": {
+        "framed": "Cadré",
+        "integratedRoof": "Intégré en toiture"
+      },
+      "inverterKinds": {
+        "string": "String",
+        "hybrid": "Hybride",
+        "micro": "Micro-onduleur",
+        "optimizerBased": "Avec optimiseurs"
+      },
+      "powerRules": {
+        "perModule": "Par module",
+        "currentLimited": "Limitée par le courant",
+        "cRate": "Taux C",
+        "fixed": "Fixe",
+        "perConfiguration": "Selon la configuration",
+        "inverterLimited": "Limitée par l’onduleur"
+      },
+      "equipmentKinds": {
+        "energyManager": "Gestionnaire d’énergie",
+        "backupBox": "Boîtier de secours",
+        "dcBox": "Coffret DC",
+        "evCharger": "Borne de recharge",
+        "cable": "Câble",
+        "connector": "Connecteur",
+        "cableTray": "Chemin de câbles",
+        "communication": "Communication",
+        "safetyLine": "Ligne de vie",
+        "carport": "Carport",
+        "other": "Autre"
+      }
     }
   },
   "settings": {

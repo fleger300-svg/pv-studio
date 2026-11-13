@@ -119,11 +119,28 @@ pub struct SupportGridSpec {
     pub spacing_m: f64,
 }
 
-/// Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
-/// mounting system's data.
+/// Rail layers of a rail system.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum RailLayers {
+    /// Top rails along `v` carry the modules and rest on bottom rails along `u`, fixed to
+    /// the roof (K2 « croisé », 2 couches).
+    #[default]
+    Two,
+    /// Rails along `u`, fixed to the roof, carry the modules directly (K2 1 couche, modules
+    /// in portrait): `per_column` is then the number of rails per module row, `top_inset_m`
+    /// their distance from the module edges along `v` and `top_overhang_m` their overhang
+    /// beyond the outer modules along `u`.
+    One,
+}
+
+/// Geometry rules of a rail mounting system (top rails on bottom rails, or a single layer),
+/// from the mounting system's data.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct CrossRailSpec {
+    #[serde(default)]
+    pub layers: RailLayers,
     pub per_column: u32,
     pub top_inset_m: f64,
     pub top_overhang_m: f64,
@@ -144,6 +161,7 @@ impl CrossRailSpec {
     #[must_use]
     pub const fn k2_single_rail() -> Self {
         Self {
+            layers: RailLayers::Two,
             per_column: 2,
             top_inset_m: 0.40,
             top_overhang_m: 0.05,

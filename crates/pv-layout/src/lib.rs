@@ -40,7 +40,8 @@ pub use mixing::{layout_face, FieldLayout, FieldPlan};
 pub use model::{layout_array, layout_east_west, relayout_fixed, ArrayLayout};
 pub use plan::{default_array, plan_layout};
 pub use rails::{
-    cross_rails, fixations, CrossRailParams, Fixations, Rail, RailLayer, RailLayout, TopSupports,
+    cross_rails, every_nth, fixations, CrossRailParams, Fixations, Rail, RailLayer, RailLayout,
+    TopSupports,
 };
 pub use roof::{EdgeKind, Obstacle, ObstacleKind, RoofOutline};
 pub use setbacks::{BuildableArea, Rejection, SetbackRules};
