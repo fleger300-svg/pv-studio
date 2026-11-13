@@ -27,6 +27,9 @@ pub struct FieldCounts {
     /// Active modules.
     pub modules: u32,
     pub top_rails: Vec<TopRail>,
+    /// Modules carried by each module-carrying rail: the top rails of a two-layer system,
+    /// the rails of a one-layer system. End and middle clamps are counted on them.
+    pub clamp_rails: Vec<u32>,
     /// Bottom rail pieces [m].
     pub bottom_rails: Vec<f64>,
     /// Crossings of top and bottom rails.

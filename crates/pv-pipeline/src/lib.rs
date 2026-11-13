@@ -16,11 +16,12 @@
 //! | [`Roof`](nodes::geometry::Roof) | face | face, building | most face edits |
 //! | [`ZoneGeom`](nodes::geometry::ZoneGeom) | face | outline, face, building | rarely changes |
 //! | [`Site`](nodes::loads::Site) | building | site, building | — |
-//! | [`Hardware`](nodes::layout::Hardware) | array | array, face, modules | — |
+//! | [`Hardware`](nodes::layout::Hardware) | array | array, face, modules (+ fixation spacing on rafters) | — |
 //! | [`StructureNode`](nodes::layout::StructureNode) | array | array, modules | — |
 //! | [`ModuleZones`](nodes::zones::ModuleZones) | array | array, outline, zone geometry, modules | module moved inside its zone |
 //! | [`ZoneSet`](nodes::zones::ZoneSet) | array | module zones | set of zones unchanged |
 //! | [`ZoneLoads`](nodes::loads::ZoneLoads) | array | mounting, array, roof, site, zone set | — |
+//! | [`FixationEvery`](nodes::descent::FixationEvery) | array | mounting, array, face, loads | spacing unchanged |
 //! | [`Descent`](nodes::descent::Descent) | array | mounting, array, face, loads (+ hardware on rafters) | — |
 //! | [`Ballast`](nodes::ballast::Ballast) | array | both halves of an east-west pair | — |
 //! | [`FieldStatics`](nodes::summary::FieldStatics) | array (watched) | zone set, descent, ballast, hardware | decisions unchanged |
@@ -71,6 +72,7 @@ pub fn register(graph: &mut Graph) -> Result<(), GraphError> {
     graph.register::<zones::ModuleZones>()?;
     graph.register::<zones::ZoneSet>()?;
     graph.register::<loads::ZoneLoads>()?;
+    graph.register::<descent::FixationEvery>()?;
     graph.register::<descent::Descent>()?;
     graph.register::<ballast::Ballast>()?;
     graph.register::<summary::FieldStatics>()?;

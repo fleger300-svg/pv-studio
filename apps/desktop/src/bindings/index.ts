@@ -1095,16 +1095,17 @@ export type CpSpec =
 { kind: "explicit"; reference: string; entries: CpEntrySpec[] };
 
 /**
- *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
- *  mounting system's data.
+ *  Geometry rules of a rail mounting system (top rails on bottom rails, or a single layer),
+ *  from the mounting system's data.
  */
 export type CrossRailSpec = CrossRailSpec_Serialize | CrossRailSpec_Deserialize;
 
 /**
- *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
- *  mounting system's data.
+ *  Geometry rules of a rail mounting system (top rails on bottom rails, or a single layer),
+ *  from the mounting system's data.
  */
 export type CrossRailSpec_Deserialize = {
+	layers?: RailLayers,
 	perColumn: number,
 	topInsetM: number,
 	topOverhangM: number,
@@ -1119,10 +1120,11 @@ export type CrossRailSpec_Deserialize = {
 };
 
 /**
- *  Geometry rules of a cross-rail mounting system (top rails on bottom rails), from the
- *  mounting system's data.
+ *  Geometry rules of a rail mounting system (top rails on bottom rails, or a single layer),
+ *  from the mounting system's data.
  */
 export type CrossRailSpec_Serialize = {
+	layers: RailLayers,
 	perColumn: number,
 	topInsetM: number,
 	topOverhangM: number,
@@ -1165,9 +1167,12 @@ export type Driver =
 { kind: "fixation" } | 
 /**  One per crossing of a top and a bottom rail. */
 { kind: "climber" } | 
-/**  Two per top rail (end clamps). */
+/**
+ *  Two per module-carrying rail (end clamps): top rails, or the rails of a one-layer
+ *  system.
+ */
 { kind: "topRailEnd" } | 
-/**  Modules − 1 per top rail (middle clamps). */
+/**  Modules − 1 per module-carrying rail (middle clamps). */
 { kind: "topRailInnerJoint" } | 
 /**  One per active module. */
 { kind: "module" } | 
@@ -2213,6 +2218,21 @@ export type PropertyValue = { kind: "number"; value: number; unit: string } | { 
  *  (K2 Base cuts top and bottom rails separately).
  */
 export type RailLayerKind = "top" | "bottom";
+
+/**  Rail layers of a rail system. */
+export type RailLayers = 
+/**
+ *  Top rails along `v` carry the modules and rest on bottom rails along `u`, fixed to
+ *  the roof (K2 « croisé », 2 couches).
+ */
+"two" | 
+/**
+ *  Rails along `u`, fixed to the roof, carry the modules directly (K2 1 couche, modules
+ *  in portrait): `per_column` is then the number of rails per module row, `top_inset_m`
+ *  their distance from the module edges along `v` and `top_overhang_m` their overhang
+ *  beyond the outer modules along `u`.
+ */
+"one";
 
 /**  Cross-section and material of a rail. */
 export type RailSectionSpec = {

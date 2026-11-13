@@ -22,7 +22,10 @@ impl LibraryStore {
             }
         }
         // Datasheet catalogue: unverified until the user reviews each entry.
-        for component in crate::catalog::components()? {
+        // Systems last: they refer to parts that must exist first.
+        let mut catalogue = crate::catalog::components()?;
+        catalogue.sort_by_key(|c| matches!(c.spec, pv_model::ComponentSpec::MountingSystem(_)));
+        for component in catalogue {
             if self.get(component.id)?.is_none() {
                 self.create(component, ChangeAuthor::Import, "datasheet catalogue")?;
                 added += 1;

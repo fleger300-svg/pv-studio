@@ -47,6 +47,7 @@ impl Derived for FieldCountsNode {
             },
             modules: 0,
             top_rails: Vec::new(),
+            clamp_rails: Vec::new(),
             bottom_rails: Vec::new(),
             climbers: 0,
             fixations: 0,
@@ -81,6 +82,12 @@ impl Derived for FieldCountsNode {
                         modules: n,
                     })
                     .collect();
+                // One-layer systems carry the modules on the bottom rails.
+                counts.clamp_rails = if hw.rails.bottom_modules.is_empty() {
+                    hw.rails.top_modules.clone()
+                } else {
+                    hw.rails.bottom_modules.clone()
+                };
                 // Bottom rails as fixed: possibly lengthened to reach a support line.
                 let bottom = hw
                     .fixations

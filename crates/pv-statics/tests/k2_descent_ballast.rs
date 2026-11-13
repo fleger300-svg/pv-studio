@@ -271,6 +271,7 @@ fn load_descent_matches_k2() {
             support_grid: case.system.support_grid,
             actual_fixation_spacing_m: case.system.actual_fixation_spacing_m,
             fixation: case.system.fixation.clone(),
+            single_layer: false,
         };
         for (zl, ex) in result.zones.iter().zip(&case.zones) {
             let tag = format!("{} {:?}", case.id, ex.zone);
@@ -320,17 +321,17 @@ fn load_descent_matches_k2() {
             }
             c.close(
                 &format!("{tag} top rail η_M"),
-                d.top_rail.bending_utilisation.value,
+                d.top_rail.as_ref().unwrap().bending_utilisation.value,
                 ex.top_bending,
             );
             c.close(
                 &format!("{tag} top rail η_δ"),
-                d.top_rail.deflection_utilisation.value,
+                d.top_rail.as_ref().unwrap().deflection_utilisation.value,
                 ex.top_deflection,
             );
             c.close(
                 &format!("{tag} top rail L_max [m]"),
-                d.top_rail.max_span.value,
+                d.top_rail.as_ref().unwrap().max_span.value,
                 ex.top_max_span_m,
             );
             c.close(

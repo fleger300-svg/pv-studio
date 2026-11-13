@@ -1,0 +1,1522 @@
+{
+ "_about": "K2 SingleRail on tile hooks (1 and 2 layers): article data and design resistances as printed in K2 Base reports, quantity rules checked on 112 roof zones. Unverified until reviewed. No prices.",
+ "components": [
+  {
+   "id": "a9bca76b-2d35-8d8c-b524-dcf8bca05b07",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "M8x20 T-Bolt 20/12",
+   "articleNo": "1002387",
+   "label": "K2 Systems M8x20 T-Bolt 20/12",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.01,
+    "packQty": 100,
+    "kind": {
+     "kind": "other"
+    }
+   }
+  },
+  {
+   "id": "4e274cf5-515c-8c0b-928a-55bb7687aa66",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "Self-locking nut M8",
+   "articleNo": "2002744",
+   "label": "K2 Systems Self-locking nut M8",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.008,
+    "packQty": 100,
+    "kind": {
+     "kind": "other"
+    }
+   }
+  },
+  {
+   "id": "d76457ad-7a0f-86be-9159-7a3de3a618d8",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleHook 2 Set",
+   "articleNo": "2003175",
+   "label": "K2 Systems SingleHook 2 Set",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.99,
+    "packQty": 15,
+    "kind": {
+     "kind": "fixation",
+     "capacity": {
+      "upliftKn": 1.22,
+      "pressureKn": 4.22,
+      "parallelKn": 1.46
+     }
+    }
+   }
+  },
+  {
+   "id": "461b3178-b803-8669-9927-ba7a371c7da2",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleHook 3S",
+   "articleNo": "2003215",
+   "label": "K2 Systems SingleHook 3S",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.53,
+    "packQty": 30,
+    "kind": {
+     "kind": "fixation",
+     "capacity": {
+      "upliftKn": 2.17,
+      "pressureKn": 2.67,
+      "parallelKn": 2.4
+     }
+    }
+   }
+  },
+  {
+   "id": "fc758343-148a-87c1-bc19-c11ffd5a9874",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleHook 3S long",
+   "articleNo": "2004222",
+   "label": "K2 Systems SingleHook 3S long",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.698,
+    "packQty": 30,
+    "kind": {
+     "kind": "fixation",
+     "capacity": {
+      "upliftKn": 1.71,
+      "pressureKn": 1.74,
+      "parallelKn": 1.47
+     }
+    }
+   }
+  },
+  {
+   "id": "3e1e1e80-acdc-8dbf-9b5a-38eb17d58d02",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleHook Alpin Set",
+   "articleNo": "2003155",
+   "label": "K2 Systems SingleHook Alpin Set",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.738,
+    "packQty": 25,
+    "kind": {
+     "kind": "fixation",
+     "capacity": {
+      "upliftKn": 2.36,
+      "pressureKn": 1.85,
+      "parallelKn": 1.73
+     }
+    }
+   }
+  },
+  {
+   "id": "c2d19f5a-fcad-80cf-8e7f-4d59f37175bc",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleHook FLA H35/144 75x4",
+   "articleNo": "2004416",
+   "label": "K2 Systems SingleHook FLA H35/144 75x4",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.5677,
+    "packQty": 25,
+    "kind": {
+     "kind": "fixation",
+     "capacity": {
+      "upliftKn": 1.76,
+      "pressureKn": 1.49,
+      "parallelKn": 1.54
+     }
+    }
+   }
+  },
+  {
+   "id": "116982d4-c73d-8208-9444-4f7dbe78e37c",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleHook FLA sheet metal red",
+   "articleNo": "2004282",
+   "label": "K2 Systems SingleHook FLA sheet metal red",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.042,
+    "packQty": 50,
+    "kind": {
+     "kind": "other"
+    }
+   }
+  },
+  {
+   "id": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 RailConnector Set",
+   "articleNo": "2001976",
+   "label": "K2 Systems SingleRail 36 RailConnector Set",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.376,
+    "packQty": 10,
+    "kind": {
+     "kind": "splice"
+    }
+   }
+  },
+  {
+   "id": "52a0d961-9554-8465-a83f-8159e8a23de3",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "Wood screw 8x80",
+   "articleNo": "2004111",
+   "label": "K2 Systems Wood screw 8x80",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingPart",
+    "unitMassKg": 0.023,
+    "packQty": 50,
+    "kind": {
+     "kind": "other"
+    }
+   }
+  },
+  {
+   "id": "017a6e78-ba06-864d-97b2-df1dff20e05a",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook 2 Set 1 layer",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook 2 Set 1 layer",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "d76457ad-7a0f-86be-9159-7a3de3a618d8"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": null,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "one",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 2.8,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "d76457ad-7a0f-86be-9159-7a3de3a618d8",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "941b9be2-203a-8eba-ae08-77b419750411",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook 2 Set 2 layers",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook 2 Set 2 layers",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "d76457ad-7a0f-86be-9159-7a3de3a618d8"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": 17.6,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "two",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 4.3,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "d76457ad-7a0f-86be-9159-7a3de3a618d8",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "top",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "top",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000103",
+      "driver": {
+       "kind": "climber"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "9455634d-5699-8ac2-bb54-f33da0f75330",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook 3S 1 layer",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook 3S 1 layer",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "461b3178-b803-8669-9927-ba7a371c7da2"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": null,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "one",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 2.8,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "461b3178-b803-8669-9927-ba7a371c7da2",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "4cc2e96e-1e52-84c4-b08f-5a75da8c2eca",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook 3S 2 layers",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook 3S 2 layers",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "461b3178-b803-8669-9927-ba7a371c7da2"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": 17.6,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "two",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 4.3,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "461b3178-b803-8669-9927-ba7a371c7da2",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "top",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "top",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000103",
+      "driver": {
+       "kind": "climber"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "c45d44b1-7668-8419-8214-dfcf29c38cec",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook 3S long 1 layer",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook 3S long 1 layer",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "fc758343-148a-87c1-bc19-c11ffd5a9874"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": null,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "one",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 2.8,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "fc758343-148a-87c1-bc19-c11ffd5a9874",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "3876cfd5-58e0-8927-88cc-e1204b22ae5b",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook 3S long 2 layers",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook 3S long 2 layers",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "fc758343-148a-87c1-bc19-c11ffd5a9874"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": 17.6,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "two",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 4.3,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "fc758343-148a-87c1-bc19-c11ffd5a9874",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "top",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "top",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000103",
+      "driver": {
+       "kind": "climber"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "efb99a32-3637-810b-9d91-e66010fecf75",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook Alpin Set 1 layer",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook Alpin Set 1 layer",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "3e1e1e80-acdc-8dbf-9b5a-38eb17d58d02"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": null,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "one",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 2.8,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "3e1e1e80-acdc-8dbf-9b5a-38eb17d58d02",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "3d7c5e39-a56f-8794-b52a-24cfcf981624",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook Alpin Set 2 layers",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook Alpin Set 2 layers",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "3e1e1e80-acdc-8dbf-9b5a-38eb17d58d02"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": 17.6,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "two",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 4.3,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "3e1e1e80-acdc-8dbf-9b5a-38eb17d58d02",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "top",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "top",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000103",
+      "driver": {
+       "kind": "climber"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "17bf329a-62a0-8edf-8b26-1f5a26b0e8ee",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook FLA H35/144 75x4 1 layer",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook FLA H35/144 75x4 1 layer",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "c2d19f5a-fcad-80cf-8e7f-4d59f37175bc"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": null,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "one",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 2.8,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "c2d19f5a-fcad-80cf-8e7f-4d59f37175bc",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "116982d4-c73d-8208-9444-4f7dbe78e37c",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "a9bca76b-2d35-8d8c-b524-dcf8bca05b07",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "4e274cf5-515c-8c0b-928a-55bb7687aa66",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  },
+  {
+   "id": "f6d066ff-a2f5-8e86-8560-37054c6d3c84",
+   "revision": 1,
+   "manufacturer": "K2 Systems",
+   "model": "SingleRail 36 SingleHook FLA H35/144 75x4 2 layers",
+   "articleNo": "",
+   "label": "K2 Systems SingleRail 36 SingleHook FLA H35/144 75x4 2 layers",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "mountingSystem",
+    "structure": {
+     "kind": "crossRail",
+     "top_rail": "01930000-0000-7000-8000-000000000102",
+     "bottom_rail": "01930000-0000-7000-8000-000000000102",
+     "checked_fixation": "c2d19f5a-fcad-80cf-8e7f-4d59f37175bc"
+    },
+    "defaults": {
+     "boundaryUv": [],
+     "moduleGapUM": 0.02,
+     "moduleGapVM": 0.02,
+     "block": null,
+     "edgeSetbackM": 0,
+     "edgeSetbacks": [],
+     "obstacleClearanceM": 0.3,
+     "rowPitchM": null,
+     "anchor": "lowerLeft",
+     "expansionJoints": [],
+     "maxBlockLengthUM": 17.6,
+     "maxBlockLengthVM": 17.6,
+     "minDistanceToOtherArraysM": 0,
+     "rails": {
+      "layers": "two",
+      "perColumn": 2,
+      "topInsetM": 0.4,
+      "topOverhangM": 0.05,
+      "bottomSpacingM": 1,
+      "minSupportOverhangM": 0.06,
+      "spacingStepM": 0.01,
+      "bottomInsetM": 0.275,
+      "fixationEdgeM": 0.05,
+      "maxCantileverM": null
+     },
+     "pairedWith": null
+    },
+    "statics": {
+     "systemMassPerModuleKg": 4.3,
+     "loadedAreaM2": 10,
+     "psi0Snow": null,
+     "cp": {
+      "kind": "standard"
+     }
+    },
+    "parts": [
+     {
+      "part": "c2d19f5a-fcad-80cf-8e7f-4d59f37175bc",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "52a0d961-9554-8465-a83f-8159e8a23de3",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "116982d4-c73d-8208-9444-4f7dbe78e37c",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 2
+     },
+     {
+      "part": "a9bca76b-2d35-8d8c-b524-dcf8bca05b07",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "4e274cf5-515c-8c0b-928a-55bb7687aa66",
+      "driver": {
+       "kind": "fixation"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "top",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "top",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000102",
+      "driver": {
+       "kind": "railBars",
+       "layer": "bottom",
+       "stock_length_m": 4.8,
+       "kerf_m": 0.01
+      },
+      "per": 1
+     },
+     {
+      "part": "deb4d094-e8c3-82d1-9544-cb4e76fb9788",
+      "driver": {
+       "kind": "railJoint",
+       "layer": "bottom",
+       "stock_length_m": 4.8
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000103",
+      "driver": {
+       "kind": "climber"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000104",
+      "driver": {
+       "kind": "topRailInnerJoint"
+      },
+      "per": 1
+     },
+     {
+      "part": "01930000-0000-7000-8000-000000000105",
+      "driver": {
+       "kind": "topRailEnd"
+      },
+      "per": 1
+     }
+    ],
+    "compatibility": {
+     "supports": [
+      "rafters"
+     ],
+     "moduleLength": null,
+     "moduleWidth": null
+    },
+    "approval": null
+   }
+  }
+ ]
+}

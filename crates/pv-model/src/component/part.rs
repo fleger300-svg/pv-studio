@@ -102,8 +102,9 @@ impl PartSpec {
     #[must_use]
     pub fn accepts(&self, driver: &Driver) -> bool {
         match driver {
-            Driver::Fixation => matches!(self.kind, PartKind::Fixation { .. }),
-            Driver::Climber => matches!(self.kind, PartKind::Climber),
+            // Accessories counted per fixation or crossing (wood screws, nuts, flashings).
+            Driver::Fixation => matches!(self.kind, PartKind::Fixation { .. } | PartKind::Other),
+            Driver::Climber => matches!(self.kind, PartKind::Climber | PartKind::Other),
             Driver::TopRailEnd | Driver::TopRailInnerJoint => {
                 matches!(self.kind, PartKind::Clamp { .. })
             }

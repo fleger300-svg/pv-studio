@@ -20,6 +20,7 @@ const FILES: &[(&str, &str)] = &[
     ("optimizers", include_str!("../catalog/optimizers.json")),
     ("batteries", include_str!("../catalog/batteries.json")),
     ("equipment", include_str!("../catalog/equipment.json")),
+    ("structures", include_str!("../catalog/structures.json")),
 ];
 
 /// Every catalogue component.
@@ -95,5 +96,40 @@ mod tests {
                 c.label
             );
         }
+    }
+
+    #[test]
+    fn k2_hook_systems_resolve_with_their_parts() {
+        use pv_model::component::{resolve_mounting, ComponentSnapshot};
+        use pv_model::RailLayers;
+        let snaps: Vec<ComponentSnapshot> = presets::all()
+            .into_iter()
+            .chain(components().expect("parse"))
+            .map(|component| ComponentSnapshot {
+                component,
+                price: None,
+            })
+            .collect();
+        let module = presets::lr7_54hvh_490m();
+        let mut layers = BTreeSet::new();
+        let mut n = 0;
+        for s in snaps.iter().map(|s| &s.component) {
+            let ComponentSpec::MountingSystem(spec) = &s.spec else {
+                continue;
+            };
+            let m = resolve_mounting(s, &module, snaps.as_slice())
+                .unwrap_or_else(|e| panic!("{}: {e:?}", s.label));
+            if s.model.starts_with("SingleRail 36 SingleHook") {
+                n += 1;
+                let rails = m.rails.as_ref().expect("rail system");
+                assert!(rails.fixation.is_some(), "{}: hooks are checked", s.label);
+                layers.insert(format!("{:?}", spec.defaults.rails.expect("rails").layers));
+                // Two wood screws per hook.
+                assert!(m.parts.iter().any(|p| p.per == 2));
+            }
+        }
+        assert_eq!(n, 10);
+        assert_eq!(layers.len(), 2, "{layers:?}");
+        let _ = RailLayers::One;
     }
 }

@@ -20,6 +20,7 @@
 use std::collections::BTreeMap;
 
 use pv_geo::Vec2;
+use pv_model::RailLayers;
 use serde::{Deserialize, Serialize};
 
 use crate::blocks::Structure;
@@ -29,6 +30,10 @@ use crate::supports::{grid_positions, supports_under_centred_rail, SupportLines}
 /// Geometry rules of the cross-rail system.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct CrossRailParams {
+    /// Two layers (top rails on bottom rails) or one (rails along `u` carrying the modules,
+    /// see [`pv_model::RailLayers::One`] for how the other fields are read then).
+    #[serde(default)]
+    pub layers: RailLayers,
     /// Top rails per module column.
     pub per_column: u32,
     /// Distance from the module edge (along `u`) to the outer top rails [m].
@@ -52,6 +57,7 @@ impl CrossRailParams {
     #[must_use]
     pub fn k2_single_rail() -> Self {
         Self {
+            layers: RailLayers::Two,
             per_column: 2,
             top_inset_m: 0.40,
             top_overhang_m: 0.05,
@@ -104,6 +110,10 @@ pub struct RailLayout {
     /// its column. Middle clamps = modules − 1, end clamps = 2 per rail.
     pub top_modules: Vec<u32>,
     pub bottom: Vec<Rail>,
+    /// Modules carried by each bottom rail (aligned with `bottom`) in a one-layer system,
+    /// where the bottom rails are the module-carrying rails; empty in a two-layer system.
+    #[serde(default)]
+    pub bottom_modules: Vec<u32>,
     pub supports: Vec<TopSupports>,
     /// Crossings of top and bottom rails.
     pub climbers: Vec<Vec2>,
@@ -126,9 +136,14 @@ pub fn cross_rails(
         top: Vec::new(),
         top_modules: Vec::new(),
         bottom: Vec::new(),
+        bottom_modules: Vec::new(),
         supports: Vec::new(),
         climbers: Vec::new(),
     };
+    if p.layers == RailLayers::One {
+        one_layer(cells, hu, hv, structure, p, &mut out);
+        return out;
+    }
 
     for block in &structure.blocks {
         // Columns of the block: col → (u centre, sorted (row, v centre)).
@@ -258,6 +273,78 @@ pub fn cross_rails(
     out
 }
 
+/// One-layer rails: per run of horizontally adjacent modules of a block row, `per_column`
+/// rails along `u`, `top_inset_m` inside the module edges along `v`, overhanging the
+/// outer modules by `top_overhang_m`. They are the rails fixed to the roof (`bottom`).
+fn one_layer(
+    cells: &[Cell],
+    hu: f64,
+    hv: f64,
+    structure: &Structure,
+    p: &CrossRailParams,
+    out: &mut RailLayout,
+) {
+    for block in &structure.blocks {
+        // Rows of the block: row → (v centre, sorted (col, u centre)).
+        let mut rows: BTreeMap<u32, (f64, Vec<(u32, f64)>)> = BTreeMap::new();
+        for &i in &block.cells {
+            let c = &cells[i];
+            let e = rows.entry(c.row).or_insert((c.centre.v, Vec::new()));
+            e.1.push((c.col, c.centre.u));
+        }
+        for (v, cols) in rows.values_mut() {
+            cols.sort_by_key(|c| c.0);
+            let mut runs: Vec<Vec<(u32, f64)>> = Vec::new();
+            for &c in cols.iter() {
+                match runs.last_mut() {
+                    Some(run) if run.last().is_some_and(|l| l.0 + 1 == c.0) => run.push(c),
+                    _ => runs.push(vec![c]),
+                }
+            }
+            let k = p.per_column.max(1);
+            for run in runs {
+                let lo = run[0].1 - hu - p.top_overhang_m;
+                let hi = run[run.len() - 1].1 + hu + p.top_overhang_m;
+                for r in 0..k {
+                    let rv = if k == 1 {
+                        *v
+                    } else {
+                        let low = *v - hv + p.top_inset_m;
+                        let high = *v + hv - p.top_inset_m;
+                        low + (high - low) * f64::from(r) / f64::from(k - 1)
+                    };
+                    out.bottom.push(Rail {
+                        block: block.id,
+                        layer: RailLayer::Bottom,
+                        start: Vec2::new(lo, rv),
+                        end: Vec2::new(hi, rv),
+                    });
+                    out.bottom_modules
+                        .push(u32::try_from(run.len()).unwrap_or(u32::MAX));
+                }
+            }
+        }
+    }
+}
+
+/// Keeps every `every`-th fixation position (ascending), always keeping the first and the
+/// last one: gaps never exceed `every` grid spacings and the rail-end cantilevers do not
+/// change.
+#[must_use]
+pub fn every_nth(positions: Vec<f64>, every: u32) -> Vec<f64> {
+    let n = every.max(1) as usize;
+    if n == 1 || positions.len() <= 2 {
+        return positions;
+    }
+    let last = positions.len() - 1;
+    positions
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| i % n == 0 || *i == last)
+        .map(|(_, &x)| x)
+        .collect()
+}
+
 /// Fixations of the bottom rails on the roof's support lines.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Fixations {
@@ -280,12 +367,16 @@ impl Fixations {
 /// fixation is lengthened to the next support line + `min_edge_m`, adding one fixation.
 /// This bounds the lengthening to `spacing − max_cantilever + min_edge` (0.145 m for K2's
 /// 0.485 m on 0.6 m seams), which brackets every lengthened rail of project A.
+///
+/// `every`: fixations on every n-th support line only (rafters: the statics decide n), see
+/// [`every_nth`]; 1 on standing seams.
 #[must_use]
 pub fn fixations(
     rails: &RailLayout,
     lines: &SupportLines,
     min_edge_m: f64,
     max_cantilever_m: Option<f64>,
+    every: u32,
 ) -> Fixations {
     let mut bottom = rails.bottom.clone();
     let mut positions = Vec::with_capacity(bottom.len());
@@ -328,11 +419,14 @@ pub fn fixations(
         }
         rail.start = Vec2::new(lo, v);
         rail.end = Vec2::new(hi, v);
-        positions.push(grid_positions(
-            lo + min_edge_m,
-            hi - min_edge_m,
-            lines.origin_m,
-            lines.spacing_m,
+        positions.push(every_nth(
+            grid_positions(
+                lo + min_edge_m,
+                hi - min_edge_m,
+                lines.origin_m,
+                lines.spacing_m,
+            ),
+            every,
         ));
     }
     Fixations { bottom, positions }

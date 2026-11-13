@@ -110,10 +110,14 @@ pub fn roof_deviations(
             for (name, v, exp) in [
                 (
                     "top η_M",
-                    r.top_rail.bending_utilisation.value,
+                    r.top_rail.as_ref().unwrap().bending_utilisation.value,
                     ex.top_bending,
                 ),
-                ("top L_max", r.top_rail.max_span.value, ex.top_max_span_m),
+                (
+                    "top L_max",
+                    r.top_rail.as_ref().unwrap().max_span.value,
+                    ex.top_max_span_m,
+                ),
                 (
                     "bottom η_M",
                     r.bottom_rail.bending_utilisation.value,
