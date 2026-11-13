@@ -21,6 +21,7 @@ specta.workspace = true
 pv-library.workspace = true
 pv-electrical.workspace = true
 pv-solar.workspace = true
+pv-cad.workspace = true
 pv-store.workspace = true
 pv-roof.workspace = true
 serde_json.workspace = true

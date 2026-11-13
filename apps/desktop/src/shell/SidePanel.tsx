@@ -1,5 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Panel, Select, Stat } from '@pv/ui';
+import { Button, Panel, Select, Stat } from '@pv/ui';
+import { api, unwrap } from '../ipc';
+import { useToastStore } from '../store/toast';
+import { toCommandError } from '../commands/runCommand';
 import { useProjectStore } from '../store/project';
 import { useViewStore } from '../store/view';
 import { StaticsPanel } from './StaticsPanel';
@@ -81,6 +84,21 @@ function LayoutPanels() {
             ]}
             onChange={setColorMode}
           />
+          <Button
+            variant="secondary"
+            onClick={() => {
+              unwrap(api.exportDxf(null))
+                .then((path) => {
+                  if (path)
+                    useToastStore.getState().push({ key: 'display.dxfSaved', params: { path } });
+                })
+                .catch((e: unknown) => {
+                  useToastStore.getState().push(toCommandError(e));
+                });
+            }}
+          >
+            {t('display.exportDxf')}
+          </Button>
         </Panel>
         <StaticsPanel />
         <BomPanel />

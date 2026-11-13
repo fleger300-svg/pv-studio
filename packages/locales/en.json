@@ -59,7 +59,9 @@
     "colorModes": {
       "default": "Default",
       "string": "By string"
-    }
+    },
+    "exportDxf": "Export the plan (DXF)",
+    "dxfSaved": "Plan saved: {path}"
   },
   "viewport": {
     "label": "3D viewport",
@@ -803,5 +805,27 @@
     "placeholder": "Your question or request (Enter to send)",
     "send": "Send",
     "privacy": "Each question is sent to Anthropic with the project’s computed values (geometry, results), never prices. Every change can be undone."
+  },
+  "report": {
+    "open": "Report",
+    "print": "Print / PDF",
+    "close": "Close",
+    "date": "Prepared on {date} with PV Studio",
+    "site": "Site",
+    "fields": "PV fields",
+    "face": "Face",
+    "module": "Module",
+    "mounting": "Mounting system",
+    "statics": "Statics (SIA 261 / 260)",
+    "ok": "Compliant",
+    "notOk": "Not compliant",
+    "ballast": "{count, plural, one {# ballast block} other {# ballast blocks}}",
+    "staticsNote": "Detailed calculation note per zone in the application (formulas, standards, assumptions).",
+    "bom": "Bill of materials",
+    "article": "Article",
+    "label": "Description",
+    "quantity": "Quantity",
+    "mass": "Mass",
+    "wiring": "Inverters and string plan"
   }
 }

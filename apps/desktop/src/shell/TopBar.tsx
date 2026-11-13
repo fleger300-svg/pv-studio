@@ -7,6 +7,7 @@ import { isLanguage, setLanguage } from '../i18n';
 import { useUiStore } from '../store/ui';
 import { useStaticsStore } from '../store/statics';
 import { useAssistantStore } from '../assistant/AssistantPanel';
+import { useReportStore } from '../report/ReportView';
 
 interface TopBarProps {
   projectName: string | null;
@@ -22,6 +23,7 @@ export function TopBar({ projectName }: TopBarProps) {
   const setLibraryOpen = useLibraryStore((s) => s.setOpen);
   const settingsOpen = useSettingsStore((s) => s.open);
   const setSettingsOpen = useSettingsStore((s) => s.setOpen);
+  const setReportOpen = useReportStore((s) => s.setOpen);
   const assistantOpen = useAssistantStore((s) => s.open);
   const setAssistantOpen = useAssistantStore((s) => s.setOpen);
 
@@ -36,6 +38,15 @@ export function TopBar({ projectName }: TopBarProps) {
         </span>
       )}
       <div className="topbar__controls">
+        <Button
+          variant="secondary"
+          disabled={projectName === null}
+          onClick={() => {
+            setReportOpen(true);
+          }}
+        >
+          {t('report.open')}
+        </Button>
         <Button
           variant={assistantOpen ? 'primary' : 'secondary'}
           aria-pressed={assistantOpen}

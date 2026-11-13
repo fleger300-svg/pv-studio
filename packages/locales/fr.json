@@ -59,7 +59,9 @@
     "colorModes": {
       "default": "Par défaut",
       "string": "Par string"
-    }
+    },
+    "exportDxf": "Exporter le plan (DXF)",
+    "dxfSaved": "Plan enregistré : {path}"
   },
   "viewport": {
     "label": "Vue 3D",
@@ -803,5 +805,27 @@
     "placeholder": "Votre question ou votre demande (Entrée pour envoyer)",
     "send": "Envoyer",
     "privacy": "Chaque question est envoyée à Anthropic avec les valeurs calculées du projet (géométrie, résultats), jamais les prix. Chaque modification est annulable."
+  },
+  "report": {
+    "open": "Rapport",
+    "print": "Imprimer / PDF",
+    "close": "Fermer",
+    "date": "Établi le {date} avec PV Studio",
+    "site": "Situation",
+    "fields": "Champs photovoltaïques",
+    "face": "Pan",
+    "module": "Module",
+    "mounting": "Système de montage",
+    "statics": "Statique (SIA 261 / 260)",
+    "ok": "Conforme",
+    "notOk": "Non conforme",
+    "ballast": "{count, plural, one {# bloc de lest} other {# blocs de lest}}",
+    "staticsNote": "Note de calcul détaillée par zone dans l’application (formules, normes, hypothèses).",
+    "bom": "Liste de matériel",
+    "article": "Article",
+    "label": "Désignation",
+    "quantity": "Quantité",
+    "mass": "Masse",
+    "wiring": "Onduleurs et plan de strings"
   }
 }

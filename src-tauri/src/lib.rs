@@ -74,6 +74,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             settings::set_api_key,
             settings::delete_api_key,
             settings::test_api_key,
+            export::export_dxf,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

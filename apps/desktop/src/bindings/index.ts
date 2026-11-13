@@ -127,6 +127,11 @@ export const commands = {
 	deleteApiKey: () => typedError<ApiKeyStatus_Serialize, CommandError>(__TAURI_INVOKE("delete_api_key")),
 	/**  Checks the key in use against the API (lists models: free). */
 	testApiKey: () => typedError<KeyCheck, CommandError>(__TAURI_INVOKE("test_api_key")),
+	/**
+	 *  Exports the plan of the open project as DXF (English layers). Without `path`, asks where
+	 *  (native dialog); `None` when the user cancels.
+	 */
+	exportDxf: (path: string | null) => typedError<string | null, CommandError>(__TAURI_INVOKE("export_dxf", { path })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */

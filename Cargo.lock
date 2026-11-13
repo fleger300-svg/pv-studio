@@ -2518,6 +2518,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-cad"
+version = "0.1.0"
+dependencies = [
+ "pv-layout",
+ "pv-model",
+]
+
+[[package]]
 name = "pv-copilot"
 version = "0.1.0"
 dependencies = [
@@ -2598,6 +2606,7 @@ name = "pv-pipeline"
 version = "0.1.0"
 dependencies = [
  "pv-bom",
+ "pv-cad",
  "pv-electrical",
  "pv-geo",
  "pv-graph",
@@ -2680,8 +2689,10 @@ version = "0.1.0"
 dependencies = [
  "base64 0.21.7",
  "pv-bom",
+ "pv-cad",
  "pv-copilot",
  "pv-electrical",
+ "pv-graph",
  "pv-layout",
  "pv-library",
  "pv-model",

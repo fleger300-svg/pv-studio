@@ -59,7 +59,9 @@
     "colorModes": {
       "default": "Standard",
       "string": "Nach String"
-    }
+    },
+    "exportDxf": "Plan exportieren (DXF)",
+    "dxfSaved": "Plan gespeichert: {path}"
   },
   "viewport": {
     "label": "3D-Ansicht",
@@ -803,5 +805,27 @@
     "placeholder": "Ihre Frage oder Anfrage (Enter zum Senden)",
     "send": "Senden",
     "privacy": "Jede Frage wird mit den berechneten Projektwerten (Geometrie, Ergebnisse) an Anthropic gesendet, nie mit Preisen. Jede Änderung ist rückgängig zu machen."
+  },
+  "report": {
+    "open": "Bericht",
+    "print": "Drucken / PDF",
+    "close": "Schliessen",
+    "date": "Erstellt am {date} mit PV Studio",
+    "site": "Standort",
+    "fields": "PV-Felder",
+    "face": "Dachfläche",
+    "module": "Modul",
+    "mounting": "Montagesystem",
+    "statics": "Statik (SIA 261 / 260)",
+    "ok": "Konform",
+    "notOk": "Nicht konform",
+    "ballast": "{count, plural, one {# Ballaststein} other {# Ballaststeine}}",
+    "staticsNote": "Ausführlicher Rechennachweis je Zone in der Anwendung (Formeln, Normen, Annahmen).",
+    "bom": "Materialliste",
+    "article": "Artikel",
+    "label": "Bezeichnung",
+    "quantity": "Menge",
+    "mass": "Masse",
+    "wiring": "Wechselrichter und Stringplan"
   }
 }

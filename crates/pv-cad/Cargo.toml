@@ -1,0 +1,15 @@
+[package]
+name = "pv-cad"
+description = "PV Studio drawings: plan view of buildings, roof faces, modules, strings, rails and fixations as DXF (AutoCAD R12 ASCII, English layer names)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-model.workspace = true
+pv-layout.workspace = true
+
+[lints]
+workspace = true
