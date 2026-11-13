@@ -490,7 +490,7 @@ fn relayout(before: &Project, after: &Project) -> Result<Vec<Command>, CommandEr
 }
 
 /// Applies `cmd` on a copy, then the relayouts it calls for: one batch.
-fn with_relayout(project: &Project, cmd: Command) -> Result<Command, CommandError> {
+pub(crate) fn with_relayout(project: &Project, cmd: Command) -> Result<Command, CommandError> {
     let mut preview = project.clone();
     cmd.apply(&mut preview)?;
     let mut commands = vec![cmd];

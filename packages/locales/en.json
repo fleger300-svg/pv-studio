@@ -790,5 +790,18 @@
       "10": "N",
       "11": "D"
     }
+  },
+  "assistant": {
+    "title": "Assistant",
+    "cost": "Session cost: {cost} USD",
+    "new": "New conversation",
+    "close": "Close the assistant",
+    "intro": "Ask a technical question about the project (ballast, wind zones, strings, yield…) or request an action: “Create a 26 × 10 m gable building with 19° pitch, then lay out the south face in landscape.”",
+    "actions": "Actions: {list}",
+    "thinking": "The assistant is working…",
+    "noKey": "Enter your Anthropic API key in the settings to use the assistant.",
+    "placeholder": "Your question or request (Enter to send)",
+    "send": "Send",
+    "privacy": "Each question is sent to Anthropic with the project’s computed values (geometry, results), never prices. Every change can be undone."
   }
 }

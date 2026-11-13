@@ -790,5 +790,18 @@
       "10": "N",
       "11": "D"
     }
+  },
+  "assistant": {
+    "title": "Assistent",
+    "cost": "Kosten der Sitzung: {cost} USD",
+    "new": "Neue Unterhaltung",
+    "close": "Assistent schliessen",
+    "intro": "Stellen Sie eine technische Frage zum Projekt (Ballast, Windzonen, Strings, Ertrag…) oder verlangen Sie eine Aktion: «Erstelle ein Gebäude 26 × 10 m mit Satteldach 19° und belege die Südseite quer.»",
+    "actions": "Aktionen: {list}",
+    "thinking": "Der Assistent arbeitet…",
+    "noKey": "Geben Sie Ihren Anthropic-API-Schlüssel in den Einstellungen ein, um den Assistenten zu nutzen.",
+    "placeholder": "Ihre Frage oder Anfrage (Enter zum Senden)",
+    "send": "Senden",
+    "privacy": "Jede Frage wird mit den berechneten Projektwerten (Geometrie, Ergebnisse) an Anthropic gesendet, nie mit Preisen. Jede Änderung ist rückgängig zu machen."
   }
 }

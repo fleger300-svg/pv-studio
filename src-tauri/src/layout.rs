@@ -18,14 +18,23 @@ pub async fn default_array(
     state: State<'_, AppState>,
     face_id: RoofFaceId,
 ) -> Result<PanelArray, CommandError> {
-    state.with(|store| {
-        let face = store
-            .project()
+    state.with(|store| default_array_for(&state, store.project(), face_id))
+}
+
+/// See [`default_array`].
+pub(crate) fn default_array_for(
+    state: &AppState,
+    project: &pv_model::Project,
+    face_id: RoofFaceId,
+) -> Result<PanelArray, CommandError> {
+    {
+        let store_project = project;
+        let face = store_project
             .roof_face(face_id)
             .ok_or_else(|| CommandError::new(keys::ENTITY_UNKNOWN).with_text("kind", "roofFace"))?;
         let mut array = pv_layout::default_array(face);
         // The module as frozen in the project, else as the library holds it now.
-        let module = match store.project().component(presets::LR7_54HVH_490M) {
+        let module = match store_project.component(presets::LR7_54HVH_490M) {
             Some(s) => Some(s.component.clone()),
             None => state
                 .with_library(|lib| {
@@ -44,13 +53,13 @@ pub async fn default_array(
             array.mounting = Some(presets::K2_SINGLE_RAIL);
         }
         Ok(array)
-    })
+    }
 }
 
 /// The layout batch of `array`, preceded by the adoption of the library components it refers
 /// to that the project lacks (the planner validates the array against the project, so they
 /// are frozen on a copy first). One batch: one undo step.
-fn layout_command(
+pub(crate) fn layout_command(
     state: &AppState,
     project: &pv_model::Project,
     array: &PanelArray,

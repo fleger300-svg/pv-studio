@@ -11,6 +11,7 @@
 //! - Values are taken as printed (mm, kg, %/K); `null` when not printed — never guessed.
 //!   Uncertainties come back as warnings, shown to the user who reviews the data.
 
+pub mod assistant;
 pub mod datasheet;
 
 pub use datasheet::{

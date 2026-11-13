@@ -1,3 +1,4 @@
+import { AssistantPanel } from './assistant/AssistantPanel';
 import { useTranslation } from 'react-i18next';
 import { TopBar } from './shell/TopBar';
 import { WorkflowSteps } from './shell/WorkflowSteps';
@@ -79,6 +80,7 @@ export function App() {
           </ErrorBoundary>
         )}
         <Toasts />
+        <AssistantPanel />
       </main>
       <SidePanel />
     </div>

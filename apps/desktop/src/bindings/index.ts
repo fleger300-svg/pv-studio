@@ -137,6 +137,10 @@ export const commands = {
 	undo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
 	redo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("redo")),
+	/**  Asks the assistant. Runs tools until it answers (at most `MAX_TOOL_ROUNDS` rounds). */
+	assistantAsk: (question: string, language: string) => typedError<AssistantReply, CommandError>(__TAURI_INVOKE("assistant_ask", { question, language })),
+	/**  Starts a new conversation. */
+	assistantReset: () => typedError<null, CommandError>(__TAURI_INVOKE("assistant_reset")),
 	/**  Simulates the AC yield of the open project. */
 	simulateYield: () => typedError<YieldReport, CommandError>(__TAURI_INVOKE("simulate_yield")),
 	/**  Swiss addresses and places matching `text` (geo.admin.ch search). */
@@ -430,6 +434,17 @@ export type ArraySummary_Serialize = {
 	 *  rails.
 	 */
 	railLengthsM: number[],
+};
+
+/**  One answer of the assistant. */
+export type AssistantReply = {
+	text: string,
+	/**  Tools run for this answer, in order (`create_building`, …). */
+	actions: string[],
+	/**  Whether the project was changed (the interface reloads it). */
+	changed: boolean,
+	usage: Usage,
+	costUsd: number,
 };
 
 /**  Ballast data of an aerodynamic (east-west) system. */
@@ -2989,6 +3004,14 @@ export type UpdateProposal_Serialize = {
 	priceAfter?: PriceEntry_Serialize | null,
 	/**  The snapshot that accepting the proposal freezes. */
 	proposed: ComponentSnapshot_Serialize,
+};
+
+/**  Token usage of one response. */
+export type Usage = {
+	inputTokens: number,
+	outputTokens: number,
+	cacheReadTokens: number,
+	cacheWriteTokens: number,
 };
 
 /**

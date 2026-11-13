@@ -6,6 +6,7 @@ import { SUPPORTED_LANGUAGES, type Language } from '@pv/locales';
 import { isLanguage, setLanguage } from '../i18n';
 import { useUiStore } from '../store/ui';
 import { useStaticsStore } from '../store/statics';
+import { useAssistantStore } from '../assistant/AssistantPanel';
 
 interface TopBarProps {
   projectName: string | null;
@@ -21,6 +22,8 @@ export function TopBar({ projectName }: TopBarProps) {
   const setLibraryOpen = useLibraryStore((s) => s.setOpen);
   const settingsOpen = useSettingsStore((s) => s.open);
   const setSettingsOpen = useSettingsStore((s) => s.setOpen);
+  const assistantOpen = useAssistantStore((s) => s.open);
+  const setAssistantOpen = useAssistantStore((s) => s.setOpen);
 
   return (
     <header className="topbar">
@@ -33,6 +36,15 @@ export function TopBar({ projectName }: TopBarProps) {
         </span>
       )}
       <div className="topbar__controls">
+        <Button
+          variant={assistantOpen ? 'primary' : 'secondary'}
+          aria-pressed={assistantOpen}
+          onClick={() => {
+            setAssistantOpen(!assistantOpen);
+          }}
+        >
+          {t('assistant.title')}
+        </Button>
         <Button
           variant={libraryOpen ? 'primary' : 'secondary'}
           aria-pressed={libraryOpen}

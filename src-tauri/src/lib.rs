@@ -1,6 +1,7 @@
 //! PV Studio desktop shell. Only this crate depends on Tauri; business logic lives in
 //! `crates/pv-model`, `crates/pv-store` and `crates/pv-pipeline` (statics compute thread).
 
+mod assistant;
 mod bench;
 mod commands;
 mod compute;
@@ -78,6 +79,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::apply_command,
             commands::undo,
             commands::redo,
+            assistant::assistant_ask,
+            assistant::assistant_reset,
             production::simulate_yield,
             site::site_search,
             site::site_locate,
