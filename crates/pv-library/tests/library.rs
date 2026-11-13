@@ -20,6 +20,7 @@ fn module(label: &str, pmax: f64) -> Component {
     let mut c = presets::lr7_54hvh_490m();
     c.id = ComponentId::new();
     c.label = label.into();
+    c.manufacturer = "Test Solar".into();
     c.model = label.into();
     if let ComponentSpec::Module(ModuleSpec {
         electrical: Some(e),
@@ -46,7 +47,7 @@ fn price(component: ComponentId, supplier: &str, cents: i64, from: &str) -> Pric
 fn base_catalogue_is_seeded_once_and_rebuilds_k2_single_rail() {
     let dir = tempfile::tempdir().expect("dir");
     let path = dir.path().join("library.sqlite");
-    let n = presets::all().len();
+    let n = presets::all().len() + pv_library::catalog::components().expect("catalogue").len();
     {
         let lib = LibraryStore::open(&path).expect("open");
         let all = lib.search(&SearchQuery::default()).expect("search");
@@ -163,9 +164,10 @@ fn search_filters_on_generated_columns() {
     };
     let modules = SearchQuery {
         family: Some(ComponentFamily::Module),
+        manufacturer: Some("Test Solar".into()),
         ..SearchQuery::default()
     };
-    assert_eq!(q(&lib, modules.clone()).len(), 4);
+    assert_eq!(q(&lib, modules.clone()).len(), 3);
     assert_eq!(
         q(
             &lib,
@@ -175,7 +177,7 @@ fn search_filters_on_generated_columns() {
                 ..modules.clone()
             }
         ),
-        ["Beta 450", "LONGi LR7-54HVH-490M"]
+        ["Beta 450"]
     );
     assert_eq!(
         q(
@@ -225,7 +227,7 @@ fn search_filters_on_generated_columns() {
     lib.set_archived(id, true).expect("archive");
     assert_eq!(
         q(&lib, modules.clone()).len(),
-        3,
+        2,
         "archived components are hidden"
     );
     assert_eq!(
@@ -237,7 +239,7 @@ fn search_filters_on_generated_columns() {
             }
         )
         .len(),
-        4
+        3
     );
     assert!(lib.get(id).expect("get").expect("still readable").archived);
 }

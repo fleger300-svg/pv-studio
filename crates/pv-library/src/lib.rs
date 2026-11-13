@@ -10,6 +10,7 @@
 
 pub mod adoption;
 mod blobs;
+pub mod catalog;
 mod components;
 mod error;
 pub mod import;

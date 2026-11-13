@@ -87,7 +87,18 @@ fn a_recorded_answer_becomes_an_unverified_module_equal_to_the_catalogue_one() {
     assert!(!c.verified, "AI data is never verified");
     assert_eq!(warnings.len(), 1);
     // Same data as the base catalogue's module, entered by hand from the datasheet.
-    assert_eq!(c.spec, presets::lr7_54hvh_490m().spec);
+    // Same dimensions, mass and electrical values as the base catalogue (details such as NOCT or
+    // warranty are not part of the extraction schema yet).
+    let (ComponentSpec::Module(got), ComponentSpec::Module(want)) =
+        (&c.spec, &presets::lr7_54hvh_490m().spec)
+    else {
+        panic!("modules")
+    };
+    assert_eq!(
+        (got.length_m, got.width_m, got.thickness_m, got.mass_kg),
+        (want.length_m, want.width_m, want.thickness_m, want.mass_kg)
+    );
+    assert_eq!(got.electrical, want.electrical);
 }
 
 #[test]

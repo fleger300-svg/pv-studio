@@ -1341,6 +1341,82 @@ export type ModelChanged = {
 	canRedo: boolean,
 };
 
+/**
+ *  Datasheet data beyond what layout, statics and stringing need. Every value as printed;
+ *  `None` when the datasheet does not give it.
+ */
+export type ModuleDetails = ModuleDetails_Serialize | ModuleDetails_Deserialize;
+
+/**
+ *  Datasheet data beyond what layout, statics and stringing need. Every value as printed;
+ *  `None` when the datasheet does not give it.
+ */
+export type ModuleDetails_Deserialize = {
+	kind?: ModuleKind,
+	/**  Product series (e.g. « Hi-MO X10 »). */
+	series?: string | null,
+	cellType?: string | null,
+	cellCount?: number | null,
+	/**  `Some(false)`: monofacial; `None`: unknown. */
+	bifacial?: boolean | null,
+	/**  Efficiency at STC, as printed [%]. */
+	efficiencyPct?: number | null,
+	maxSeriesFuseA?: number | null,
+	/**  Nominal operating cell temperature (NOCT or NMOT) [°C]. */
+	nominalOperatingTempC?: number | null,
+	operatingTempMinC?: number | null,
+	operatingTempMaxC?: number | null,
+	/**  Test loads, front (snow) and back (wind suction) [Pa]. */
+	testLoadFrontPa?: number | null,
+	testLoadBackPa?: number | null,
+	/**  VKF/AEAI hail class (e.g. « HW4 »). */
+	hailClass?: string | null,
+	fireClass?: string | null,
+	warrantyProductYears?: number | null,
+	warrantyPowerYears?: number | null,
+	degradationFirstYearPct?: number | null,
+	degradationAnnualPct?: number | null,
+	/**  Datasheet file the values come from, and its revision when printed. */
+	datasheetRef?: string | null,
+	/**  Points to check (printed anomalies, ambiguities). */
+	notes?: string[],
+};
+
+/**
+ *  Datasheet data beyond what layout, statics and stringing need. Every value as printed;
+ *  `None` when the datasheet does not give it.
+ */
+export type ModuleDetails_Serialize = {
+	kind: ModuleKind,
+	/**  Product series (e.g. « Hi-MO X10 »). */
+	series?: string | null,
+	cellType?: string | null,
+	cellCount?: number | null,
+	/**  `Some(false)`: monofacial; `None`: unknown. */
+	bifacial?: boolean | null,
+	/**  Efficiency at STC, as printed [%]. */
+	efficiencyPct?: number | null,
+	maxSeriesFuseA?: number | null,
+	/**  Nominal operating cell temperature (NOCT or NMOT) [°C]. */
+	nominalOperatingTempC?: number | null,
+	operatingTempMinC?: number | null,
+	operatingTempMaxC?: number | null,
+	/**  Test loads, front (snow) and back (wind suction) [Pa]. */
+	testLoadFrontPa?: number | null,
+	testLoadBackPa?: number | null,
+	/**  VKF/AEAI hail class (e.g. « HW4 »). */
+	hailClass?: string | null,
+	fireClass?: string | null,
+	warrantyProductYears?: number | null,
+	warrantyPowerYears?: number | null,
+	degradationFirstYearPct?: number | null,
+	degradationAnnualPct?: number | null,
+	/**  Datasheet file the values come from, and its revision when printed. */
+	datasheetRef?: string | null,
+	/**  Points to check (printed anomalies, ambiguities). */
+	notes: string[],
+};
+
 /**  Electrical datasheet values at STC. */
 export type ModuleElectrical = ModuleElectrical_Serialize | ModuleElectrical_Deserialize;
 
@@ -1384,6 +1460,13 @@ export type ModuleElectrical_Serialize = {
  */
 export type ModuleId = number;
 
+/**  How a module is mounted. */
+export type ModuleKind = 
+/**  Framed module on a mounting system. */
+"framed" | 
+/**  Building-integrated (replaces the roof covering: solar slates, tiles, Solrif frames). */
+"integratedRoof";
+
 /**  Exact position of one module, used by [`Command::SetModulePositions`]. */
 export type ModulePosition = {
 	id: ModuleId,
@@ -1421,6 +1504,8 @@ export type ModuleSpec_Deserialize = {
 	 *  bill of materials; required for stringing).
 	 */
 	electrical?: ModuleElectrical_Deserialize | null,
+	/**  Further datasheet data (simulation, warranties, approvals); all optional. */
+	details?: ModuleDetails_Deserialize,
 };
 
 /**  A PV module. */
@@ -1437,6 +1522,8 @@ export type ModuleSpec_Serialize = {
 	 *  bill of materials; required for stringing).
 	 */
 	electrical?: ModuleElectrical_Serialize | null,
+	/**  Further datasheet data (simulation, warranties, approvals); all optional. */
+	details: ModuleDetails_Serialize,
 };
 
 export type ModuleState = "active" | "removed";

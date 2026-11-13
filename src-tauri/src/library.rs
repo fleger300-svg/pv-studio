@@ -134,6 +134,7 @@ pub async fn library_new_component(family: ComponentFamily) -> Result<Component,
             thickness_m: 0.030,
             mass_kg: 21.0,
             electrical: None,
+            details: Box::default(),
         }),
         ComponentFamily::MountingPart => ComponentSpec::MountingPart(PartSpec {
             unit_mass_kg: 0.0,

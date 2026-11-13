@@ -25,7 +25,7 @@ use crate::command::{keys, CommandError};
 use crate::ids::{BlobId, ComponentId};
 
 pub use compat::check_array_components;
-pub use module::{ModuleElectrical, ModuleSpec};
+pub use module::{ModuleDetails, ModuleElectrical, ModuleKind, ModuleSpec};
 pub use mounting::{
     Approval, MountingStructure, MountingSystemSpec, PartRuleRef, SystemCompatibility,
     SystemStatics,

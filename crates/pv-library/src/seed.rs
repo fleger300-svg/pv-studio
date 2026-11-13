@@ -21,6 +21,13 @@ impl LibraryStore {
                 added += 1;
             }
         }
+        // Datasheet catalogue: unverified until the user reviews each entry.
+        for component in crate::catalog::components()? {
+            if self.get(component.id)?.is_none() {
+                self.create(component, ChangeAuthor::Import, "datasheet catalogue")?;
+                added += 1;
+            }
+        }
         Ok(added)
     }
 }

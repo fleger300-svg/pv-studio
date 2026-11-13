@@ -304,6 +304,7 @@ pub fn components_from_mounting(
                 thickness_m: MODULE_THICKNESS_M,
                 mass_kg: m.module_mass_kg,
                 electrical: None,
+                details: Box::default(),
             }),
         ),
         None,
