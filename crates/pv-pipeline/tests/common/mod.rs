@@ -279,6 +279,11 @@ pub fn d_dome_ref_b_h9() -> BallastSpec {
 
 /// Reference B (9 m): a flat roof with parapets and one D-Dome east-west system.
 pub fn ref_b_east_west() -> Project {
+    ref_b_east_west_with_parts(Vec::new())
+}
+
+/// [`ref_b_east_west`] with bill-of-materials rules on its mounting system.
+pub fn ref_b_east_west_with_parts(parts: Vec<pv_model::PartRule>) -> Project {
     let (site, height) = site_of("ref-b-h9");
     let building = Building {
         id: BuildingId::new(),
@@ -331,7 +336,7 @@ pub fn ref_b_east_west() -> Project {
         cp: CpSpec::Standard,
         rails: None,
         ballast: Some(d_dome_ref_b_h9()),
-        parts: Vec::new(),
+        parts,
     };
     let mk = |az: f64| PanelArray {
         id: ArrayId::new(),

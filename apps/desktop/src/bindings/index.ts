@@ -1179,6 +1179,12 @@ export type Driver =
 /**  One per ballast block. */
 { kind: "ballastBlock" } | 
 /**
+ *  Per continuous east-west run of `n` module pairs (one row of an east-west system,
+ *  e.g. K2 D-Dome): `max(0, base + per_pair·n)` (Peak: 2 + 2n, end clamps: 8 + 0n,
+ *  middle clamps: −4 + 4n).
+ */
+{ kind: "pairRun"; base: number; per_pair: number } | 
+/**
  *  One per splice of the rails of `layer` longer than a bar of `stock_length_m`
  *  (rail connectors).
  */

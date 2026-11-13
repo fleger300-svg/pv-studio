@@ -204,7 +204,7 @@ pub fn components_from_mounting(
                     max_m: 1.0,
                 },
             },
-            Driver::Module => PartKind::Other,
+            Driver::Module | Driver::PairRun { .. } => PartKind::Other,
             Driver::BallastBlock => PartKind::BallastBlock,
             Driver::RailJoint { .. } => PartKind::Splice,
             Driver::RailBars {

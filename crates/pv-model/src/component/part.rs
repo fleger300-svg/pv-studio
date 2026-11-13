@@ -108,11 +108,14 @@ impl PartSpec {
             Driver::TopRailEnd | Driver::TopRailInnerJoint => {
                 matches!(self.kind, PartKind::Clamp { .. })
             }
-            Driver::BallastBlock => matches!(self.kind, PartKind::BallastBlock),
+            // Ballast blocks and what is counted per block (concrete screws).
+            Driver::BallastBlock => matches!(self.kind, PartKind::BallastBlock | PartKind::Other),
             Driver::RailJoint { .. } => matches!(self.kind, PartKind::Splice),
             Driver::RailBars { .. } => matches!(self.kind, PartKind::Rail { .. }),
             // Per-module accessories (cable clips, earthing…): any non-structural part.
-            Driver::Module => matches!(self.kind, PartKind::Other | PartKind::Clamp { .. }),
+            Driver::Module | Driver::PairRun { .. } => {
+                matches!(self.kind, PartKind::Other | PartKind::Clamp { .. })
+            }
         }
     }
 }

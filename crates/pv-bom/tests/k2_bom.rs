@@ -121,6 +121,7 @@ fn reference_bom() -> (Bom, Reference) {
                 climbers: r.climbers,
                 fixations: r.clamps,
                 ballast_blocks: 0,
+                pair_runs: vec![],
                 parts: parts.clone(),
             }
         })

@@ -248,6 +248,10 @@ pub enum Driver {
     Module,
     /// One per ballast block.
     BallastBlock,
+    /// Per continuous east-west run of `n` module pairs (one row of an east-west system,
+    /// e.g. K2 D-Dome): `max(0, base + per_pair·n)` (Peak: 2 + 2n, end clamps: 8 + 0n,
+    /// middle clamps: −4 + 4n).
+    PairRun { base: i32, per_pair: u32 },
     /// One per splice of the rails of `layer` longer than a bar of `stock_length_m`
     /// (rail connectors).
     RailJoint {

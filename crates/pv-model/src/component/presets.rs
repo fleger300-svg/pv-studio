@@ -29,6 +29,13 @@ pub const K2_SINGLE_RAIL_36: ComponentId = seed_id(0x0102);
 pub const K2_CLIMBER_36_50: ComponentId = seed_id(0x0103);
 pub const K2_CLAMP_MC_25_40: ComponentId = seed_id(0x0104);
 pub const K2_CLAMP_EC_25_40: ComponentId = seed_id(0x0105);
+pub const K2_DOME_PEAK: ComponentId = seed_id(0x0106);
+pub const K2_DOME_SD: ComponentId = seed_id(0x0107);
+pub const K2_DOME_CLAMP_MC: ComponentId = seed_id(0x0108);
+pub const K2_DOME_CLAMP_EC: ComponentId = seed_id(0x0109);
+pub const K2_MK2: ComponentId = seed_id(0x010a);
+pub const K2_BOLT_M8X20: ComponentId = seed_id(0x010b);
+pub const K2_MULTI_MONTI: ComponentId = seed_id(0x010c);
 pub const K2_SINGLE_RAIL: ComponentId = seed_id(0x0201);
 pub const K2_D_DOME: ComponentId = seed_id(0x0202);
 
@@ -218,8 +225,81 @@ pub fn k2_single_rail() -> Component {
 
 /// K2 D-Dome 6.10 east-west ballasted system on gravel (coefficients of the stress preset,
 /// back-fitted from a K2 Base report). Concrete blocks are bought locally: no part.
+/// Parts of the K2 D-Dome 6.10 on concrete blocks, as in the K2 Base material lists (unit
+/// masses = list mass / quantity).
+#[must_use]
+pub fn k2_d_dome_parts() -> Vec<Component> {
+    let clamps = LengthRange {
+        min_m: 0.030,
+        max_m: 0.050,
+    };
+    vec![
+        part(
+            K2_DOME_PEAK,
+            "2004125",
+            "Dome 6.10 Peak",
+            0.3,
+            30,
+            PartKind::Other,
+        ),
+        part(
+            K2_DOME_SD,
+            "2003243",
+            "Dome 6.10 SD",
+            0.085,
+            30,
+            PartKind::Other,
+        ),
+        part(
+            K2_DOME_CLAMP_MC,
+            "2002609",
+            "DomeClamp Black MC Set 30-50",
+            0.058,
+            20,
+            PartKind::Clamp {
+                frame_height: clamps,
+            },
+        ),
+        part(
+            K2_DOME_CLAMP_EC,
+            "2004564",
+            "DomeClamp EC Black Set 30-50",
+            0.072,
+            20,
+            PartKind::Clamp {
+                frame_height: clamps,
+            },
+        ),
+        part(K2_MK2, "1001643", "MK2", 0.0175, 250, PartKind::Other),
+        part(
+            K2_BOLT_M8X20,
+            "2001729",
+            "Socket Head Bolt serrated M8x20",
+            0.0126,
+            200,
+            PartKind::Other,
+        ),
+        part(
+            K2_MULTI_MONTI,
+            "2002570",
+            "Multi-Monti concrete screw 7.5x40",
+            0.0122,
+            100,
+            PartKind::Other,
+        ),
+    ]
+}
+
 #[must_use]
 pub fn k2_d_dome() -> Component {
+    // Per continuous east-west run of n pairs (K2 Base lists, 23 zones): Peak = SD = 2(n+1),
+    // EC = 8, MC = 4(n−1) (MC + EC = 2 × Peak), MK2 = M8x20 = 2 × Peak (no Porter on the
+    // concrete-block variant), one concrete screw per block.
+    let run = |part, base, per_pair| PartRuleRef {
+        part,
+        driver: Driver::PairRun { base, per_pair },
+        per: 1,
+    };
     let reference = crate::stress::d_dome();
     component(
         K2_D_DOME,
@@ -238,7 +318,19 @@ pub fn k2_d_dome() -> Component {
                 psi0_snow: reference.psi0_snow,
                 cp: reference.cp,
             },
-            parts: Vec::new(),
+            parts: vec![
+                run(K2_DOME_PEAK, 2, 2),
+                run(K2_DOME_SD, 2, 2),
+                run(K2_DOME_CLAMP_MC, -4, 4),
+                run(K2_DOME_CLAMP_EC, 8, 0),
+                run(K2_MK2, 4, 4),
+                run(K2_BOLT_M8X20, 4, 4),
+                PartRuleRef {
+                    part: K2_MULTI_MONTI,
+                    driver: Driver::BallastBlock,
+                    per: 1,
+                },
+            ],
             compatibility: SystemCompatibility::default(),
             approval: None,
         })),
@@ -251,6 +343,7 @@ pub fn all() -> Vec<Component> {
     let mut all = vec![lr7_54hvh_490m()];
     all.extend(k2_single_rail_parts());
     all.push(k2_single_rail());
+    all.extend(k2_d_dome_parts());
     all.push(k2_d_dome());
     all
 }
@@ -293,8 +386,12 @@ mod tests {
             resolve_mounting(&k2_single_rail(), &module, snaps.as_slice()).expect("single rail");
         assert_eq!(single, MountingSystem::k2_single_rail());
         let dome = resolve_mounting(&k2_d_dome(), &module, snaps.as_slice()).expect("d-dome");
+        assert_eq!(dome.parts.len(), 7);
         assert_eq!(
-            dome,
+            MountingSystem {
+                parts: Vec::new(),
+                ..dome
+            },
             MountingSystem {
                 module_mass_kg: 21.6,
                 ..crate::stress::d_dome()

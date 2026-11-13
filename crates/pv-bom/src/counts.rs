@@ -37,5 +37,7 @@ pub struct FieldCounts {
     /// Roof fixations.
     pub fixations: u32,
     pub ballast_blocks: u32,
+    /// Module pairs of each continuous east-west run (east-west systems).
+    pub pair_runs: Vec<u32>,
     pub parts: Vec<PartRule>,
 }

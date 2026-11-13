@@ -11,7 +11,7 @@ use pv_model::{Driver, ModuleState};
 
 use super::ballast::Ballast;
 use super::components::MountingNode;
-use super::layout::Hardware;
+use super::layout::{Hardware, StructureNode};
 use super::{array_of, kind};
 use crate::error::bom_error;
 use crate::inputs::{ArrayIn, BuildingIn, FaceIn, ModulesIn, PricingIn, ProjectIndexIn};
@@ -52,6 +52,7 @@ impl Derived for FieldCountsNode {
             climbers: 0,
             fixations: 0,
             ballast_blocks: 0,
+            pair_runs: Vec::new(),
             parts,
         };
         // Read only what the rules count (dynamic dependencies): a field without parts does
@@ -70,6 +71,7 @@ impl Derived for FieldCountsNode {
         });
         let modules = uses(|d| matches!(d, Driver::Module));
         let blocks = uses(|d| matches!(d, Driver::BallastBlock));
+        let runs = uses(|d| matches!(d, Driver::PairRun { .. }));
         if rails {
             if let Some(hw) = ctx.get::<Hardware>(i)?.as_ref() {
                 counts.top_rails = hw
@@ -107,6 +109,9 @@ impl Derived for FieldCountsNode {
                 u32::try_from(ms.iter().filter(|m| m.state == ModuleState::Active).count())
                     .unwrap_or(u32::MAX);
         }
+        if runs {
+            counts.pair_runs = pair_runs(ctx, i, &array)?;
+        }
         if blocks {
             counts.ballast_blocks = ctx
                 .get::<Ballast>(i)?
@@ -116,6 +121,57 @@ impl Derived for FieldCountsNode {
         }
         Ok(counts)
     }
+}
+
+/// Pairs of each continuous east-west run of a paired field, counted on the half with the
+/// smaller id (like the ballast; the other half counts none): cells of either half in the
+/// same row and adjacent columns, split where the mounting block of the field changes
+/// (expansion joint).
+fn pair_runs(
+    ctx: &mut Ctx<'_>,
+    i: Instance,
+    array: &pv_model::PanelArray,
+) -> Result<Vec<u32>, GraphError> {
+    use std::collections::{BTreeMap, HashMap};
+    let Some(partner) = array.layout.paired_with else {
+        return Ok(Vec::new());
+    };
+    if partner < array.id {
+        return Ok(Vec::new());
+    }
+    let own = ctx.get::<ModulesIn>(i)?;
+    let other = ctx.get::<ModulesIn>(Instance::Array(partner))?;
+    let field = ctx.get::<StructureNode>(i)?;
+    let block_of: HashMap<pv_model::ModuleId, usize> = field
+        .module_ids
+        .iter()
+        .zip(&field.structure.block_of)
+        .map(|(id, &b)| (*id, b))
+        .collect();
+    // (row, col) → block (None for a cell only the other half has).
+    let mut cells: BTreeMap<(u32, u32), Option<usize>> = BTreeMap::new();
+    for m in own.iter().filter(|m| m.state == ModuleState::Active) {
+        cells.insert((m.row, m.col), block_of.get(&m.id).copied());
+    }
+    for m in other.iter().filter(|m| m.state == ModuleState::Active) {
+        cells.entry((m.row, m.col)).or_insert(None);
+    }
+    let mut runs: Vec<u32> = Vec::new();
+    let mut prev: Option<((u32, u32), Option<usize>)> = None;
+    for (&(row, col), &block) in &cells {
+        let continues = prev.is_some_and(|((r, c), b)| {
+            r == row && c + 1 == col && (b.is_none() || block.is_none() || b == block)
+        });
+        match runs.last_mut() {
+            Some(n) if continues => *n += 1,
+            _ => runs.push(1),
+        }
+        prev = Some((
+            (row, col),
+            block.or(prev.and_then(|p| p.1).filter(|_| continues)),
+        ));
+    }
+    Ok(runs)
 }
 
 kind!(

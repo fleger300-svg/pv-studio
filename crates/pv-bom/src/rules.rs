@@ -20,6 +20,13 @@ pub fn counted(rule: &PartRule, c: &FieldCounts) -> Option<u64> {
             .sum(),
         Driver::Module => c.modules.into(),
         Driver::BallastBlock => c.ballast_blocks.into(),
+        Driver::PairRun { base, per_pair } => c
+            .pair_runs
+            .iter()
+            .map(|&n| {
+                u64::try_from(i64::from(base) + i64::from(per_pair) * i64::from(n)).unwrap_or(0)
+            })
+            .sum(),
         Driver::RailJoint {
             layer,
             stock_length_m,

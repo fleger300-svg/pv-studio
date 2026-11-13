@@ -32,6 +32,7 @@ fn field(face: &str, fixations: u32, parts: Vec<PartRule>) -> FieldCounts {
         climbers: 0,
         fixations,
         ballast_blocks: 0,
+        pair_runs: vec![],
         parts,
     }
 }

@@ -102,6 +102,7 @@ fn driver_name(driver: &Driver) -> &'static str {
         Driver::TopRailInnerJoint => "topRailInnerJoint",
         Driver::Module => "module",
         Driver::BallastBlock => "ballastBlock",
+        Driver::PairRun { .. } => "pairRun",
         Driver::RailJoint { .. } => "railJoint",
         Driver::RailBars { .. } => "railBars",
     }
