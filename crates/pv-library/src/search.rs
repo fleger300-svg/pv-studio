@@ -63,6 +63,10 @@ fn family_of(tag: &str) -> Option<ComponentFamily> {
         "module" => ComponentFamily::Module,
         "mountingSystem" => ComponentFamily::MountingSystem,
         "mountingPart" => ComponentFamily::MountingPart,
+        "inverter" => ComponentFamily::Inverter,
+        "optimizer" => ComponentFamily::Optimizer,
+        "battery" => ComponentFamily::Battery,
+        "equipment" => ComponentFamily::Equipment,
         _ => return None,
     })
 }

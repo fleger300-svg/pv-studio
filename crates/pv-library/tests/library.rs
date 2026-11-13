@@ -50,7 +50,12 @@ fn base_catalogue_is_seeded_once_and_rebuilds_k2_single_rail() {
     let n = presets::all().len() + pv_library::catalog::components().expect("catalogue").len();
     {
         let lib = LibraryStore::open(&path).expect("open");
-        let all = lib.search(&SearchQuery::default()).expect("search");
+        let all = lib
+            .search(&SearchQuery {
+                limit: Some(10_000),
+                ..SearchQuery::default()
+            })
+            .expect("search");
         assert_eq!(all.len(), n);
     }
     let mut lib = LibraryStore::open(&path).expect("reopen");

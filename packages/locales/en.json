@@ -445,7 +445,11 @@
       "all": "All",
       "module": "Module",
       "mountingSystem": "Mounting system",
-      "mountingPart": "Mounting part"
+      "mountingPart": "Mounting part",
+      "inverter": "Inverter",
+      "optimizer": "Optimizer",
+      "battery": "Battery",
+      "equipment": "Equipment"
     },
     "showArchived": "Show archived",
     "newModule": "New module",
@@ -575,6 +579,65 @@
       "warnings": "Points to check",
       "source": "extracted by AI",
       "configure": "Configure the API key…"
+    },
+    "spec": {
+      "series": "Series",
+      "kind": "Type",
+      "efficiency": "Efficiency",
+      "noct": "NOCT",
+      "warranty": "Product / power warranty (years)",
+      "hail": "Hail class",
+      "inverterKind": "Inverter type",
+      "acPower": "AC power",
+      "dcMax": "Max. DC voltage",
+      "mppt": "MPPT range",
+      "trackers": "Trackers",
+      "battery": "Battery port",
+      "yes": "Yes",
+      "no": "No",
+      "ratedInput": "Rated input power",
+      "maxInputVoltage": "Max. input voltage",
+      "maxInputIsc": "Max. input Isc",
+      "stringRules": "String rules",
+      "chemistry": "Chemistry · coupling",
+      "moduleCapacity": "Capacity per module",
+      "modules": "Modules per stack",
+      "power": "Power rule",
+      "location": "Location",
+      "equipmentKind": "Equipment type",
+      "datasheet": "Datasheet: {ref}",
+      "notes": "{count, plural, one {# point to check} other {# points to check}}",
+      "moduleKinds": {
+        "framed": "Framed",
+        "integratedRoof": "Roof-integrated"
+      },
+      "inverterKinds": {
+        "string": "String",
+        "hybrid": "Hybrid",
+        "micro": "Microinverter",
+        "optimizerBased": "With optimizers"
+      },
+      "powerRules": {
+        "perModule": "Per module",
+        "currentLimited": "Current-limited",
+        "cRate": "C-rate",
+        "fixed": "Fixed",
+        "perConfiguration": "By configuration",
+        "inverterLimited": "Inverter-limited"
+      },
+      "equipmentKinds": {
+        "energyManager": "Energy manager",
+        "backupBox": "Backup box",
+        "dcBox": "DC box",
+        "evCharger": "EV charger",
+        "cable": "Cable",
+        "connector": "Connector",
+        "cableTray": "Cable tray",
+        "communication": "Communication",
+        "safetyLine": "Safety line",
+        "carport": "Carport",
+        "other": "Other"
+      }
     }
   },
   "settings": {

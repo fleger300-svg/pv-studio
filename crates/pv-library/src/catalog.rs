@@ -14,7 +14,13 @@ struct CatalogFile {
 }
 
 /// The catalogue files, in seeding order (parts before the systems that use them).
-const FILES: &[(&str, &str)] = &[("modules", include_str!("../catalog/modules.json"))];
+const FILES: &[(&str, &str)] = &[
+    ("modules", include_str!("../catalog/modules.json")),
+    ("inverters", include_str!("../catalog/inverters.json")),
+    ("optimizers", include_str!("../catalog/optimizers.json")),
+    ("batteries", include_str!("../catalog/batteries.json")),
+    ("equipment", include_str!("../catalog/equipment.json")),
+];
 
 /// Every catalogue component.
 ///
@@ -42,7 +48,13 @@ mod tests {
     #[test]
     fn the_catalogue_is_valid_unique_and_unverified() {
         let all = components().expect("parse");
-        assert!(all.len() >= 90, "{} components", all.len());
+        assert!(all.len() >= 250, "{} components", all.len());
+        for family in ["module", "inverter", "optimizer", "battery", "equipment"] {
+            assert!(
+                all.iter().any(|c| c.spec.family().as_str() == family),
+                "no {family} in the catalogue"
+            );
+        }
         let mut ids = BTreeSet::new();
         let mut names = BTreeSet::new();
         let preset_ids: BTreeSet<_> = presets::all().iter().map(|c| c.id).collect();

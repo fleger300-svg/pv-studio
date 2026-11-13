@@ -1,0 +1,2640 @@
+{
+ "_about": "Electrical equipment datasheet values (public manufacturer data, read by AI from the datasheets: every entry is unverified until reviewed). No prices.",
+ "components": [
+  {
+   "id": "126a6b68-9fdd-8fdf-b723-547db355977c",
+   "revision": 1,
+   "manufacturer": "Heiniger",
+   "model": "FG16M16-flex Cca san-hal",
+   "articleNo": "",
+   "label": "Heiniger FG16M16-flex Cca san-hal",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "cable",
+    "properties": [
+     {
+      "name": "type",
+      "value": {
+       "kind": "text",
+       "value": "FG16M16 0.6/1 kV, single core, halogen-free"
+      }
+     },
+     {
+      "name": "use",
+      "value": {
+       "kind": "text",
+       "value": "AC / power cable (indoor, dry or damp; NOT UV-resistant)"
+      }
+     },
+     {
+      "name": "rated_voltage",
+      "value": {
+       "kind": "text",
+       "value": "600/1000 V"
+      }
+     },
+     {
+      "name": "test_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 4000,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "conductor",
+      "value": {
+       "kind": "text",
+       "value": "bare Cu class 5 (VDE 0295)"
+      }
+     },
+     {
+      "name": "insulation",
+      "value": {
+       "kind": "text",
+       "value": "EPR"
+      }
+     },
+     {
+      "name": "sheath",
+      "value": {
+       "kind": "text",
+       "value": "thermoplastic M16, grey"
+      }
+     },
+     {
+      "name": "temp",
+      "value": {
+       "kind": "text",
+       "value": "fixed -15 to 90 °C, mobile -5 to 90 °C"
+      }
+     },
+     {
+      "name": "bending_radius",
+      "value": {
+       "kind": "text",
+       "value": "4 x cable diameter"
+      }
+     },
+     {
+      "name": "cpr_class",
+      "value": {
+       "kind": "text",
+       "value": "Cca-s1,d1,a1"
+      }
+     },
+     {
+      "name": "variants",
+      "value": {
+       "kind": "text",
+       "value": "{\"section_mm2\":4,\"outer_diameter_mm\":null,\"r_ohm_per_km\":4.95,\"mass_kg_per_100m\":null}; {\"section_mm2\":6,\"outer_diameter_mm\":7.7,\"r_ohm_per_km\":3.3,\"mass_kg_per_100m\":10}; {\"section_mm2\":10,\"outer_diameter_mm\":10.9,\"r_ohm_per_km\":1.91,\"mass_kg_per_100m\":17.5}; {\"section_mm2\":16,\"outer_diameter_mm\":11.4,\"r_ohm_per_km\":1.21,\"mass_kg_per_100m\":24.5}; {\"section_mm2\":25,\"outer_diameter_mm\":13.2,\"r_ohm_per_km\":0.78,\"mass_kg_per_100m\":34}; {\"section_mm2\":35,\"outer_diameter_mm\":14.6,\"r_ohm_per_km\":0.554,\"mass_kg_per_100m\":44}; {\"section_mm2\":50,\"outer_diameter_mm\":16.4,\"r_ohm_per_km\":0.386,\"mass_kg_per_100m\":59}; {\"section_mm2\":70,\"outer_diameter_mm\":18.3,\"r_ohm_per_km\":0.272,\"mass_kg_per_100m\":79.5}; {\"section_mm2\":95,\"outer_diameter_mm\":20.4,\"r_ohm_per_km\":0.206,\"mass_kg_per_100m\":99.5}; {\"section_mm2\":120,\"outer_diameter_mm\":22.4,\"r_ohm_per_km\":0.161,\"mass_kg_per_100m\":134}; {\"section_mm2\":150,\"outer_diameter_mm\":24.8,\"r_ohm_per_km\":0.129,\"mass_kg_per_100m\":163.5}; {\"section_mm2\":185,\"outer_diameter_mm\":27,\"r_ohm_per_km\":0.106,\"mass_kg_per_100m\":195.5}; {\"section_mm2\":240,\"outer_diameter_mm\":30.2,\"r_ohm_per_km\":0.0801,\"mass_kg_per_100m\":249.5}; {\"section_mm2\":300,\"outer_diameter_mm\":33,\"r_ohm_per_km\":0.0641,\"mass_kg_per_100m\":304}"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "communication": [],
+     "datasheetRef": "Fiche Technique - HEINEGER  FG16M16-flex Cca san-hal (2).pdf",
+     "notes": [
+      "Article list (p.2) starts at 6 mm2; 4 mm2 only in the construction table (no diameter/weight).",
+      "Colour variants per section: L black, N blue/white (>= 25 mm2), PE green-yellow; Heiniger article numbers on p.2.",
+      "Doc. D06061703 rev. H, 22.07.2025."
+     ]
+    }
+   }
+  },
+  {
+   "id": "4adbb004-8eed-8722-87d7-dfe26a294e63",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "EMMA-A01",
+   "articleNo": "",
+   "label": "Huawei EMMA-A01",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "energyManager",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "Smart energy controller (metering, comms, PV+ESS management)"
+      }
+     },
+     {
+      "name": "supported_devices",
+      "value": {
+       "kind": "text",
+       "value": "PV inverters; Huawei Smart String ESS"
+      }
+     },
+     {
+      "name": "internal_ct_max_a",
+      "value": {
+       "kind": "number",
+       "value": 63,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "external_ct",
+      "value": {
+       "kind": "text",
+       "value": "N x 50 A/50 mA (integer N >= 2), CT supplied by user, for > 63 A"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "DIN 35 mm rail in AC distribution box (SPD required in the box)"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "communication": [],
+     "datasheetRef": "MA_ML_Huawei_EMMA_A02_kurz.pdf",
+     "notes": [
+      "A01: only PV and ESS features; do not connect chargers, heat pumps or other smart loads."
+     ]
+    }
+   }
+  },
+  {
+   "id": "a736e40c-a7a0-8cf0-981a-2c30c18632ad",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "EMMA-A02",
+   "articleNo": "",
+   "label": "Huawei EMMA-A02",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "energyManager",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "Smart energy controller: metering, comms, PV + ESS + EV charger + heat pump + smart loads"
+      }
+     },
+     {
+      "name": "supported_devices",
+      "value": {
+       "kind": "text",
+       "value": "up to 3 cascaded SUN2000 inverters (2 batteries each for L1/M1/LC0, 4 for MB0); up to 2 Huawei SCharger; 1 SG-Ready heat pump (+1 via Shelly); up to 20 Shelly devices"
+      }
+     },
+     {
+      "name": "internal_ct_max_a",
+      "value": {
+       "kind": "number",
+       "value": 63,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "external_ct",
+      "value": {
+       "kind": "text",
+       "value": "N x 50 A/50 mA (integer N >= 2); external CT secondary 50 mA, purchased separately"
+      }
+     },
+     {
+      "name": "digital_inputs",
+      "value": {
+       "kind": "number",
+       "value": 2,
+       "unit": ""
+      }
+     },
+     {
+      "name": "replaces",
+      "value": {
+       "kind": "text",
+       "value": "Smart Dongle + Smart Meter not needed"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "DIN 35 mm rail"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "massKg": 0.5,
+     "communication": [],
+     "datasheetRef": "Anleitung EMMA_17.07.24.pdf",
+     "notes": [
+      "Huawei CH training deck (17.07.2024); technical-data table on p.5 is an image (21-page PDF, not readable with the tool) - only the 0.5 kg weight and CT notes are in the text.",
+      "Quick guide (EMMA huawei/MA_ML_Huawei_EMMA_A02_kurz.pdf p.1-2): DIN rail, power DO / signal DO for SG-Ready heat pump.",
+      "If 4 DI are needed, the extra 2 come from the inverters."
+     ]
+    }
+   }
+  },
+  {
+   "id": "3a804a42-fee6-8cba-a557-d95913e44064",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "SCharger-22KT-S0",
+   "articleNo": "",
+   "label": "Huawei SCharger-22KT-S0",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "evCharger",
+    "properties": [
+     {
+      "name": "phases",
+      "value": {
+       "kind": "number",
+       "value": 3,
+       "unit": ""
+      }
+     },
+     {
+      "name": "power_kw_min",
+      "value": {
+       "kind": "number",
+       "value": 1.4,
+       "unit": ""
+      }
+     },
+     {
+      "name": "power_kw_max",
+      "value": {
+       "kind": "number",
+       "value": 22,
+       "unit": ""
+      }
+     },
+     {
+      "name": "nominal_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 400,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "current_a",
+      "value": {
+       "kind": "text",
+       "value": "6-32 A (3-phase or 1-phase)"
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Type 2 socket"
+      }
+     },
+     {
+      "name": "rcd",
+      "value": {
+       "kind": "text",
+       "value": "Type A 30 mA + DC 6 mA integrated"
+      }
+     },
+     {
+      "name": "ik",
+      "value": {
+       "kind": "text",
+       "value": "IK10"
+      }
+     },
+     {
+      "name": "modes",
+      "value": {
+       "kind": "text",
+       "value": "Normal; Scheduled; PV Power Preferred"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -35,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 45,
+       "unit": "c"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP54",
+     "massKg": 3.1,
+     "dimensionsMm": [
+      180,
+      335,
+      145
+     ],
+     "operatingTempMinC": -35,
+     "operatingTempMaxC": 45,
+     "communication": [
+      "Wi-Fi",
+      "Ethernet",
+      "Modbus TCP",
+      "Bluetooth",
+      "RFID"
+     ],
+     "datasheetRef": "Huawei AC EV charger.pdf",
+     "notes": [
+      "Automatic 1-phase / 3-phase switching in PV Power Preferred mode; min 1.4 kW (1-phase) / 4.2 kW (3-phase).",
+      "Network types TN, TT.",
+      "Up to 40 °C at 32 A, 50 °C at 16 A."
+     ]
+    }
+   }
+  },
+  {
+   "id": "c4068aa2-c0d8-80cc-8a1c-2da699d97461",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "SCharger-7KS-S0",
+   "articleNo": "",
+   "label": "Huawei SCharger-7KS-S0",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "evCharger",
+    "properties": [
+     {
+      "name": "phases",
+      "value": {
+       "kind": "number",
+       "value": 1,
+       "unit": ""
+      }
+     },
+     {
+      "name": "power_kw_min",
+      "value": {
+       "kind": "number",
+       "value": 1.4,
+       "unit": ""
+      }
+     },
+     {
+      "name": "power_kw_max",
+      "value": {
+       "kind": "number",
+       "value": 7.4,
+       "unit": ""
+      }
+     },
+     {
+      "name": "nominal_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 230,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "current_a",
+      "value": {
+       "kind": "text",
+       "value": "6-32 A (1-phase)"
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Type 2 socket"
+      }
+     },
+     {
+      "name": "rcd",
+      "value": {
+       "kind": "text",
+       "value": "Type A 30 mA + DC 6 mA integrated"
+      }
+     },
+     {
+      "name": "ik",
+      "value": {
+       "kind": "text",
+       "value": "IK10"
+      }
+     },
+     {
+      "name": "modes",
+      "value": {
+       "kind": "text",
+       "value": "Normal; Scheduled; PV Power Preferred"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -35,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 45,
+       "unit": "c"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP54",
+     "massKg": 3,
+     "dimensionsMm": [
+      180,
+      335,
+      145
+     ],
+     "operatingTempMinC": -35,
+     "operatingTempMaxC": 45,
+     "communication": [
+      "Wi-Fi",
+      "Ethernet",
+      "Modbus TCP",
+      "Bluetooth",
+      "RFID"
+     ],
+     "datasheetRef": "Huawei AC EV charger.pdf",
+     "notes": [
+      "Network types TN, TT, IT."
+     ]
+    }
+   }
+  },
+  {
+   "id": "64145918-5014-8a5e-88a7-b85f4181f487",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "SmartGuard-63A-T0",
+   "articleNo": "",
+   "label": "Huawei SmartGuard-63A-T0",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "backupBox",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "On/off-grid switchover and load distribution for three-phase systems (whole-home backup)"
+      }
+     },
+     {
+      "name": "rated_current_a",
+      "value": {
+       "kind": "number",
+       "value": 63,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "phases",
+      "value": {
+       "kind": "number",
+       "value": 3,
+       "unit": ""
+      }
+     },
+     {
+      "name": "switchover_time",
+      "value": {
+       "kind": "text",
+       "value": "min. 20 ms (MAP0 datasheet: <= 20 ms)"
+      }
+     },
+     {
+      "name": "features",
+      "value": {
+       "kind": "text",
+       "value": "integrated EMMA functions (no dongle or meter); direct measurement up to 63 A; bypass mode if SmartGuard fails"
+      }
+     }
+    ],
+    "compatibleWith": [
+     "up to 3 x SUN2000-MAP0 (2 batteries each)",
+     "or 1 x SUN2000 M1",
+     "or 1 x SUN2000 MB0"
+    ],
+    "details": {
+     "communication": [],
+     "datasheetRef": "Anleitung EMMA_17.07.24.pdf",
+     "notes": [
+      "family \"backup_box\" added (not in the brief list): grid-forming switch boxes condition hybrid backup designs."
+     ]
+    }
+   }
+  },
+  {
+   "id": "23253e6d-52eb-8664-a2e0-40e5aca685dd",
+   "revision": 1,
+   "manufacturer": "KBE",
+   "model": "KBE Solar DB+",
+   "articleNo": "",
+   "label": "KBE KBE Solar DB+",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "cable",
+    "properties": [
+     {
+      "name": "type",
+      "value": {
+       "kind": "text",
+       "value": "H1Z2Z2-K / 62930 IEC 131 / PV 1500-K"
+      }
+     },
+     {
+      "name": "use",
+      "value": {
+       "kind": "text",
+       "value": "DC string cable"
+      }
+     },
+     {
+      "name": "rated_voltage",
+      "value": {
+       "kind": "text",
+       "value": "1.5/1.5 kV DC, 1.0/1.0 kV AC"
+      }
+     },
+     {
+      "name": "max_voltage",
+      "value": {
+       "kind": "text",
+       "value": "1.8 kV DC"
+      }
+     },
+     {
+      "name": "conductor",
+      "value": {
+       "kind": "text",
+       "value": "tinned Cu class 5"
+      }
+     },
+     {
+      "name": "temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -40,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 90,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "conductor_max_temp_c",
+      "value": {
+       "kind": "number",
+       "value": 120,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "bending_radius",
+      "value": {
+       "kind": "text",
+       "value": ">= 4 x outer diameter"
+      }
+     },
+     {
+      "name": "cpr_class",
+      "value": {
+       "kind": "text",
+       "value": "Dca"
+      }
+     },
+     {
+      "name": "current_capacity",
+      "value": {
+       "kind": "text",
+       "value": "per EN 50618 table A-3 (not tabulated on the sheet)"
+      }
+     },
+     {
+      "name": "colors",
+      "value": {
+       "kind": "text",
+       "value": "black; red; blue"
+      }
+     },
+     {
+      "name": "variants",
+      "value": {
+       "kind": "text",
+       "value": "{\"section_mm2\":4,\"conductor\":\"56 x 0.310\",\"r_max_mohm_per_m\":5.09,\"outer_diameter_mm\":5.4,\"mass_kg_per_km\":55,\"article_no\":{\"black\":\"730400015060QUSW\",\"red\":\"730400015060QURT\",\"blue\":\"730400015060QUBL\"},\"packaging\":\"500/1000 m (ring 100 m: 8204...)\"}; {\"section_mm2\":6,\"conductor\":\"80 x 0.310\",\"r_max_mohm_per_m\":3.39,\"outer_diameter_mm\":6,\"mass_kg_per_km\":75,\"article_no\":{\"black\":\"730600015060QUSW\",\"red\":\"730600015060QURT\",\"blue\":\"730600015060QUBL\"},\"packaging\":\"500/1000 m (ring 100 m: 8206...)\"}; {\"section_mm2\":10,\"conductor\":\"80 x 0.410\",\"r_max_mohm_per_m\":1.95,\"outer_diameter_mm\":7.1,\"mass_kg_per_km\":115,\"article_no\":{\"black\":\"731000015060QUSW\",\"red\":\"731000015060QURT\",\"blue\":\"731000015060QUBL\"},\"packaging\":\"500 m (ring 100 m: 8210...)\"}"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 90,
+     "communication": [],
+     "datasheetRef": "Fiche Technique - KBE Solar DB+ (2).pdf",
+     "notes": [
+      "Insulation/jacket min. thickness 0.53 / 0.58 mm for all sections.",
+      "Direct burial suitable."
+     ]
+    }
+   }
+  },
+  {
+   "id": "ec1f4a98-0687-8e44-ab98-49f59318723c",
+   "revision": 1,
+   "manufacturer": "MAVISUN (Rexel catalogue page)",
+   "model": "Câble photovoltaïque H1Z2Z2-K 1500V",
+   "articleNo": "",
+   "label": "MAVISUN (Rexel catalogue page) Câble photovoltaïque H1Z2Z2-K 1500V",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "cable",
+    "properties": [
+     {
+      "name": "type",
+      "value": {
+       "kind": "text",
+       "value": "H1Z2Z2-K (EN 50618)"
+      }
+     },
+     {
+      "name": "use",
+      "value": {
+       "kind": "text",
+       "value": "DC string cable"
+      }
+     },
+     {
+      "name": "rated_voltage",
+      "value": {
+       "kind": "text",
+       "value": "1500 V"
+      }
+     },
+     {
+      "name": "conductor",
+      "value": {
+       "kind": "text",
+       "value": "tinned Cu class 5"
+      }
+     },
+     {
+      "name": "temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -40,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 90,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "bending_radius",
+      "value": {
+       "kind": "text",
+       "value": "approx. 3 x diameter"
+      }
+     },
+     {
+      "name": "cpr_class",
+      "value": {
+       "kind": "text",
+       "value": "Eca"
+      }
+     },
+     {
+      "name": "sections_mm2_range",
+      "value": {
+       "kind": "text",
+       "value": "4; 25"
+      }
+     },
+     {
+      "name": "colors",
+      "value": {
+       "kind": "text",
+       "value": "black; red"
+      }
+     },
+     {
+      "name": "variants",
+      "value": {
+       "kind": "text",
+       "value": "{\"ref\":\"FILPVH1X6NT500\"}; {\"ref\":\"FILPVH1X6RT500\"}; {\"ref\":\"FILPVH1X10NT5\"}; {\"ref\":\"FILPVH1X10RTGL\"}"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 90,
+     "communication": [],
+     "datasheetRef": "FILPVH1X10RTGL_FICHE_1.pdf",
+     "notes": [
+      "The four MAVISUN files are the same generic Rexel catalogue page (p.94); the reference (section 6 or 10 mm2, NT/RT presumably black/red) is only in the file name - not printed, so no per-variant data."
+     ]
+    }
+   }
+  },
+  {
+   "id": "bb96dcb6-5eec-86c0-875b-bf3257e42a30",
+   "revision": 1,
+   "manufacturer": "myenergi",
+   "model": "zappi V2 (ZAPPI-207xx 7 kW 1-ph / ZAPPI-222xx 22 kW 3-ph)",
+   "articleNo": "",
+   "label": "myenergi zappi V2 (ZAPPI-207xx 7 kW 1-ph / ZAPPI-222xx 22 kW 3-ph)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "evCharger",
+    "properties": [
+     {
+      "name": "phases",
+      "value": {
+       "kind": "text",
+       "value": "1 or 3"
+      }
+     },
+     {
+      "name": "power_kw_options",
+      "value": {
+       "kind": "text",
+       "value": "7; 22"
+      }
+     },
+     {
+      "name": "current_a",
+      "value": {
+       "kind": "text",
+       "value": "6-32 A"
+      }
+     },
+     {
+      "name": "nominal_voltage_v",
+      "value": {
+       "kind": "text",
+       "value": "230 (1~) / 400 (3~) +-10 %"
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Type 2 tethered 6.5 m or socket"
+      }
+     },
+     {
+      "name": "rcd",
+      "value": {
+       "kind": "text",
+       "value": "Type A 30 mA + 6 mA DC"
+      }
+     },
+     {
+      "name": "modes",
+      "value": {
+       "kind": "text",
+       "value": "ECO; ECO+; FAST"
+      }
+     },
+     {
+      "name": "grid_ct",
+      "value": {
+       "kind": "text",
+       "value": "65 A max primary, 16 mm cable"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -25,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 40,
+       "unit": "c"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP65",
+     "dimensionsMm": [
+      282,
+      439,
+      122
+     ],
+     "operatingTempMinC": -25,
+     "operatingTempMaxC": 40,
+     "communication": [],
+     "datasheetRef": "zappi V2 Gebrauchanweisung Englisch_ (1).pdf",
+     "notes": [
+      "Manual; variants ZAPPI-207UW/TW/UB/TB and ZAPPI-222UW/TW/UB/TB (U = untethered, T = tethered, W/B = colour).",
+      "PV-surplus charging via its own grid CT, independent of the inverter."
+     ]
+    }
+   }
+  },
+  {
+   "id": "2cc0c315-ae68-8482-97de-4cc9bc274d49",
+   "revision": 1,
+   "manufacturer": "OBO Bettermann",
+   "model": "RKSM 620 FS (RKS-Magic 60)",
+   "articleNo": "6047638",
+   "label": "OBO Bettermann RKSM 620 FS (RKS-Magic 60)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "cableTray",
+    "properties": [
+     {
+      "name": "material",
+      "value": {
+       "kind": "text",
+       "value": "steel, sendzimir galvanised (DIN EN 10346)"
+      }
+     },
+     {
+      "name": "length_mm",
+      "value": {
+       "kind": "number",
+       "value": 3050,
+       "unit": "mm"
+      }
+     },
+     {
+      "name": "usable_length_mm",
+      "value": {
+       "kind": "number",
+       "value": 3000,
+       "unit": "mm"
+      }
+     },
+     {
+      "name": "sheet_thickness_mm",
+      "value": {
+       "kind": "number",
+       "value": 0.75,
+       "unit": "mm"
+      }
+     },
+     {
+      "name": "usable_section_mm2",
+      "value": {
+       "kind": "number",
+       "value": 11800,
+       "unit": "mm2"
+      }
+     },
+     {
+      "name": "mass_kg_per_100",
+      "value": {
+       "kind": "number",
+       "value": 181.508,
+       "unit": ""
+      }
+     },
+     {
+      "name": "load_kn_per_m",
+      "value": {
+       "kind": "text",
+       "value": "{\"1.0 m\":1.2,\"1.5 m\":1,\"2.0 m\":0.55,\"2.5 m\":0.4}"
+      }
+     },
+     {
+      "name": "support_spacing_m",
+      "value": {
+       "kind": "text",
+       "value": "1; 2.5"
+      }
+     },
+     {
+      "name": "load_test",
+      "value": {
+       "kind": "text",
+       "value": "Type II (IEC 61537)"
+      }
+     },
+     {
+      "name": "gwp_kgco2e_per_m",
+      "value": {
+       "kind": "number",
+       "value": 4.4813,
+       "unit": "m"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "communication": [],
+     "datasheetRef": "Fiche Technique - Canal de câble intérieur (1).pdf",
+     "notes": [
+      "Weight unit printed \"kg/100 pc\".",
+      "family \"cable_tray\" added."
+     ]
+    }
+   }
+  },
+  {
+   "id": "accc6743-d8de-8000-a5a6-6ded6b8ec096",
+   "revision": 1,
+   "manufacturer": "Solar Manager",
+   "model": "Solar Manager Gateway",
+   "articleNo": "",
+   "label": "Solar Manager Solar Manager Gateway",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "energyManager",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "EMS gateway (PV, battery, EV charger, heat pump, smart plugs), manufacturer-independent"
+      }
+     },
+     {
+      "name": "interfaces",
+      "value": {
+       "kind": "text",
+       "value": "LAN; WLAN (Shelly); Modbus RTU (industrial DIN-rail gateway variant)"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "consumer gateway or DIN-rail industrial hardware"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "communication": [],
+     "datasheetRef": "240418_SolarManager - Formation Solarmarkt_handout.pdf",
+     "notes": [
+      "Training handout (FR), no technical datasheet: no electrical or dimensional data. Compatibility lists referenced to the vendor wiki."
+     ]
+    }
+   }
+  },
+  {
+   "id": "87276c20-3381-8178-b06b-02a6d512ce6f",
+   "revision": 1,
+   "manufacturer": "Solar-Log",
+   "model": "Solar-Log Base 100",
+   "articleNo": "256326",
+   "label": "Solar-Log Solar-Log Base 100",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "energyManager",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "Datalogger / feed-in management / Smart Energy / direct marketing"
+      }
+     },
+     {
+      "name": "max_plant_size_kwp",
+      "value": {
+       "kind": "number",
+       "value": 100,
+       "unit": ""
+      }
+     },
+     {
+      "name": "extension",
+      "value": {
+       "kind": "text",
+       "value": "extension licence 100 -> 250 kWp (256329)"
+      }
+     },
+     {
+      "name": "interfaces",
+      "value": {
+       "kind": "text",
+       "value": "2 x RS485 or 1 x RS422; 2 x Ethernet 100 Mbit/s; 2 x USB 2.0; 1 x S0 in; HBUS module connector (MOD I/O for digital I/O, PM+)"
+      }
+     },
+     {
+      "name": "supply",
+      "value": {
+       "kind": "text",
+       "value": "24 V DC (+-5 %), 12 V DC possible, 1 A max., typ. 2 W"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "DIN rail TH35 (3 TE), or wall clips"
+      }
+     },
+     {
+      "name": "max_bus_cable_m",
+      "value": {
+       "kind": "number",
+       "value": 1000,
+       "unit": "m"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "massKg": 0.112,
+     "dimensionsMm": [
+      53.6,
+      89.7,
+      60.3
+     ],
+     "communication": [],
+     "datasheetRef": "DB_FR_SolarLog_Base.pdf",
+     "notes": [
+      "Training handout 240418_Solar-Log Base Schulung_Handout_FR.pdf covers the same product (not re-extracted)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "b56c6a29-7f80-8239-9ab0-246df43cb34b",
+   "revision": 1,
+   "manufacturer": "Solar-Log",
+   "model": "Solar-Log Base 15",
+   "articleNo": "256325",
+   "label": "Solar-Log Solar-Log Base 15",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "energyManager",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "Datalogger / feed-in management / Smart Energy / direct marketing"
+      }
+     },
+     {
+      "name": "max_plant_size_kwp",
+      "value": {
+       "kind": "number",
+       "value": 15,
+       "unit": ""
+      }
+     },
+     {
+      "name": "extension",
+      "value": {
+       "kind": "text",
+       "value": "extension licence 15 -> 30 kWp (256328)"
+      }
+     },
+     {
+      "name": "interfaces",
+      "value": {
+       "kind": "text",
+       "value": "2 x RS485 or 1 x RS422; 2 x Ethernet 100 Mbit/s; 2 x USB 2.0; 1 x S0 in; HBUS module connector (MOD I/O for digital I/O, PM+)"
+      }
+     },
+     {
+      "name": "supply",
+      "value": {
+       "kind": "text",
+       "value": "24 V DC (+-5 %), 12 V DC possible, 1 A max., typ. 2 W"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "DIN rail TH35 (3 TE), or wall clips"
+      }
+     },
+     {
+      "name": "max_bus_cable_m",
+      "value": {
+       "kind": "number",
+       "value": 1000,
+       "unit": "m"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "massKg": 0.112,
+     "dimensionsMm": [
+      53.6,
+      89.7,
+      60.3
+     ],
+     "communication": [],
+     "datasheetRef": "DB_FR_SolarLog_Base.pdf",
+     "notes": [
+      "Training handout 240418_Solar-Log Base Schulung_Handout_FR.pdf covers the same product (not re-extracted)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "ff0b1c47-e0fc-8052-b989-22dfcae924f1",
+   "revision": 1,
+   "manufacturer": "Solar-Log",
+   "model": "Solar-Log Base 2000",
+   "articleNo": "256327",
+   "label": "Solar-Log Solar-Log Base 2000",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "energyManager",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "Datalogger / feed-in management / Smart Energy / direct marketing"
+      }
+     },
+     {
+      "name": "max_plant_size_kwp",
+      "value": {
+       "kind": "number",
+       "value": 2000,
+       "unit": ""
+      }
+     },
+     {
+      "name": "interfaces",
+      "value": {
+       "kind": "text",
+       "value": "2 x RS485 or 1 x RS422; 2 x Ethernet 100 Mbit/s; 2 x USB 2.0; 1 x S0 in; HBUS module connector (MOD I/O for digital I/O, PM+)"
+      }
+     },
+     {
+      "name": "supply",
+      "value": {
+       "kind": "text",
+       "value": "24 V DC (+-5 %), 12 V DC possible, 1 A max., typ. 2 W"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "DIN rail TH35 (3 TE), or wall clips"
+      }
+     },
+     {
+      "name": "max_bus_cable_m",
+      "value": {
+       "kind": "number",
+       "value": 1000,
+       "unit": "m"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "massKg": 0.112,
+     "dimensionsMm": [
+      53.6,
+      89.7,
+      60.3
+     ],
+     "communication": [],
+     "datasheetRef": "DB_FR_SolarLog_Base.pdf",
+     "notes": [
+      "Training handout 240418_Solar-Log Base Schulung_Handout_FR.pdf covers the same product (not re-extracted)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "51031c09-be9c-8a4d-b768-9813740bd456",
+   "revision": 1,
+   "manufacturer": "SolarEdge",
+   "model": "SolarEdge EV Charger (SE-EVK22...)",
+   "articleNo": "",
+   "label": "SolarEdge SolarEdge EV Charger (SE-EVK22...)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "evCharger",
+    "properties": [
+     {
+      "name": "phases",
+      "value": {
+       "kind": "number",
+       "value": 3,
+       "unit": ""
+      }
+     },
+     {
+      "name": "power_kw_options",
+      "value": {
+       "kind": "text",
+       "value": "4.6; 7.4; 11; 22"
+      }
+     },
+     {
+      "name": "current_a",
+      "value": {
+       "kind": "text",
+       "value": "10/13/16/20/25/32 A single or three phase (configurable)"
+      }
+     },
+     {
+      "name": "nominal_voltage_v",
+      "value": {
+       "kind": "text",
+       "value": "3 x 230/400"
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Type 2 (cable 6 m or socket)"
+      }
+     },
+     {
+      "name": "rdc_dd",
+      "value": {
+       "kind": "text",
+       "value": ">= 6 mA DC (IEC 62955)"
+      }
+     },
+     {
+      "name": "ik",
+      "value": {
+       "kind": "text",
+       "value": "IK10"
+      }
+     },
+     {
+      "name": "mid",
+      "value": {
+       "kind": "text",
+       "value": "optional, class B"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -25,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 50,
+       "unit": "c"
+      }
+     }
+    ],
+    "compatibleWith": [
+     "all SetApp residential inverters up to SE15K (except single-phase Compact)"
+    ],
+    "details": {
+     "ipRating": "IP54",
+     "operatingTempMinC": -25,
+     "operatingTempMaxC": 50,
+     "communication": [
+      "Ethernet (LSA+ / RJ45)",
+      "Wi-Fi",
+      "RFID",
+      "OCPP"
+     ],
+     "datasheetRef": "SolarEdge EV charger.pdf",
+     "notes": [
+      "Operating max 50 °C at 16 A, 40 °C at 32 A."
+     ]
+    }
+   }
+  },
+  {
+   "id": "cf79ebb9-76f2-8d3b-b33d-a20f1a781199",
+   "revision": 1,
+   "manufacturer": "Stäubli",
+   "model": "MC4-Evo 2",
+   "articleNo": "",
+   "label": "Stäubli MC4-Evo 2",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "connector",
+    "properties": [
+     {
+      "name": "system",
+      "value": {
+       "kind": "text",
+       "value": "Ø 4 mm, MULTILAM, crimp"
+      }
+     },
+     {
+      "name": "rated_voltage",
+      "value": {
+       "kind": "text",
+       "value": "1500 V DC (IEC, UL)"
+      }
+     },
+     {
+      "name": "temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -40,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 85,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "upper_limit_temp_c",
+      "value": {
+       "kind": "number",
+       "value": 115,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "contact_resistance",
+      "value": {
+       "kind": "text",
+       "value": "< 0.2 mOhm"
+      }
+     },
+     {
+      "name": "rated_current_iec",
+      "value": {
+       "kind": "text",
+       "value": "{\"section_mm2\":2.5,\"current_a\":39}; {\"section_mm2\":4,\"current_a\":45}; {\"section_mm2\":6,\"current_a\":53}; {\"section_mm2\":10,\"current_a\":69}"
+      }
+     },
+     {
+      "name": "article_no_examples",
+      "value": {
+       "kind": "text",
+       "value": "32.0316P0001 PV-KBT4-EVO2A/6I (female); 32.0317P0001 PV-KST4-EVO2A/6I (male)"
+      }
+     },
+     {
+      "name": "cable_od_ranges_mm",
+      "value": {
+       "kind": "text",
+       "value": "4.7-6.4 (I); 5.9-7.3 (X); 6.4-8.4 (II)"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP65/IP68 (1 m, 168 h) connected; IP2X unmated",
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [],
+     "datasheetRef": "Fiche Technique - Stäubli MC4 EVO II (2).pdf",
+     "notes": [
+      "Do not disconnect under load.",
+      "family \"connector\" added."
+     ]
+    }
+   }
+  },
+  {
+   "id": "dcd5ed8f-1edf-84da-8c6e-e11109940319",
+   "revision": 1,
+   "manufacturer": "Sungrow",
+   "model": "EB80S",
+   "articleNo": "",
+   "label": "Sungrow EB80S",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "backupBox",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "EnergyBridge: backup switch + circuit breaker + energy metering, single phase"
+      }
+     },
+     {
+      "name": "rated_current_a",
+      "value": {
+       "kind": "number",
+       "value": 80,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "rated_voltage_v",
+      "value": {
+       "kind": "text",
+       "value": "230 / 240 V"
+      }
+     },
+     {
+      "name": "grid_type",
+      "value": {
+       "kind": "text",
+       "value": "L-N"
+      }
+     },
+     {
+      "name": "breaker_poles",
+      "value": {
+       "kind": "text",
+       "value": "4P"
+      }
+     },
+     {
+      "name": "switchover_time",
+      "value": {
+       "kind": "text",
+       "value": "<= 10 ms"
+      }
+     },
+     {
+      "name": "trip_curve",
+      "value": {
+       "kind": "text",
+       "value": "C"
+      }
+     },
+     {
+      "name": "short_circuit_current_ka",
+      "value": {
+       "kind": "number",
+       "value": 6,
+       "unit": ""
+      }
+     },
+     {
+      "name": "insulation_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 500,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "impulse_withstand_kv",
+      "value": {
+       "kind": "number",
+       "value": 4,
+       "unit": ""
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -25,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 60,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "derating",
+      "value": {
+       "kind": "text",
+       "value": "80 A up to 30 °C, 78/76/74/72/70/68 A at 35/40/45/50/55/60 °C"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "35 mm DIN rail"
+      }
+     },
+     {
+      "name": "external_ct",
+      "value": {
+       "kind": "text",
+       "value": "optional split-core 100 A, 333 mV, 6 m (ZTY6.176.532)"
+      }
+     }
+    ],
+    "compatibleWith": [
+     "SH5.0-6.0RS",
+     "SH8.0-10.0RS",
+     "SH5.0-25T"
+    ],
+    "details": {
+     "ipRating": "IP20",
+     "massKg": 0.48,
+     "dimensionsMm": [
+      72,
+      105,
+      79
+     ],
+     "operatingTempMinC": -25,
+     "operatingTempMaxC": 60,
+     "communication": [
+      "RS485 x1",
+      "DI x1",
+      "DO x1",
+      "RJ45 (<= 100 m)"
+     ],
+     "datasheetRef": "817a8895-fd07-493f-9997-3928a593a519.pdf",
+     "notes": [
+      "Text layer split into label and value blocks; mapping by order.",
+      "Weight printed 480 g."
+     ]
+    }
+   }
+  },
+  {
+   "id": "b9f5123f-7296-8acd-91e4-ffd66f79df17",
+   "revision": 1,
+   "manufacturer": "Sungrow",
+   "model": "EB80T",
+   "articleNo": "",
+   "label": "Sungrow EB80T",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "backupBox",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "EnergyBridge: backup switch + circuit breaker + energy metering, three phase"
+      }
+     },
+     {
+      "name": "rated_current_a",
+      "value": {
+       "kind": "number",
+       "value": 80,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "rated_voltage_v",
+      "value": {
+       "kind": "text",
+       "value": "400 / 415 V"
+      }
+     },
+     {
+      "name": "grid_type",
+      "value": {
+       "kind": "text",
+       "value": "L1/L2/L3-N"
+      }
+     },
+     {
+      "name": "breaker_poles",
+      "value": {
+       "kind": "text",
+       "value": "6P"
+      }
+     },
+     {
+      "name": "switchover_time",
+      "value": {
+       "kind": "text",
+       "value": "<= 10 ms"
+      }
+     },
+     {
+      "name": "trip_curve",
+      "value": {
+       "kind": "text",
+       "value": "C"
+      }
+     },
+     {
+      "name": "short_circuit_current_ka",
+      "value": {
+       "kind": "number",
+       "value": 6,
+       "unit": ""
+      }
+     },
+     {
+      "name": "insulation_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 500,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "impulse_withstand_kv",
+      "value": {
+       "kind": "number",
+       "value": 4,
+       "unit": ""
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -25,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 60,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "derating",
+      "value": {
+       "kind": "text",
+       "value": "same as EB80S"
+      }
+     },
+     {
+      "name": "mounting",
+      "value": {
+       "kind": "text",
+       "value": "35 mm DIN rail"
+      }
+     }
+    ],
+    "compatibleWith": [
+     "SH5.0-6.0RS",
+     "SH8.0-10.0RS",
+     "SH5.0-25T"
+    ],
+    "details": {
+     "ipRating": "IP20",
+     "massKg": 0.78,
+     "dimensionsMm": [
+      108,
+      105,
+      79
+     ],
+     "operatingTempMinC": -25,
+     "operatingTempMaxC": 60,
+     "communication": [
+      "RS485 x1",
+      "DI x1",
+      "DO x1",
+      "RJ45 (<= 100 m)"
+     ],
+     "datasheetRef": "817a8895-fd07-493f-9997-3928a593a519.pdf",
+     "notes": [
+      "Weight printed 780 g."
+     ]
+    }
+   }
+  },
+  {
+   "id": "f1eb2a09-ba6d-88e9-a2b2-858a55f338b9",
+   "revision": 1,
+   "manufacturer": "TARU",
+   "model": "GAK 1INFHx12 12MPPT 12ÜS MC4",
+   "articleNo": "94043",
+   "label": "TARU GAK 1INFHx12 12MPPT 12ÜS MC4",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "dcBox",
+    "properties": [
+     {
+      "name": "mppt_count",
+      "value": {
+       "kind": "number",
+       "value": 12,
+       "unit": ""
+      }
+     },
+     {
+      "name": "inputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 1,
+       "unit": ""
+      }
+     },
+     {
+      "name": "outputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 1,
+       "unit": ""
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "MC4 originals"
+      }
+     },
+     {
+      "name": "fuses",
+      "value": {
+       "kind": "text",
+       "value": "with fuse (per input)"
+      }
+     },
+     {
+      "name": "switch",
+      "value": {
+       "kind": "text",
+       "value": "without switch"
+      }
+     },
+     {
+      "name": "rated_dc_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 1000,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "current_per_input_a",
+      "value": {
+       "kind": "number",
+       "value": 22,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "current_total_a",
+      "value": {
+       "kind": "number",
+       "value": 264,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "spd",
+      "value": {
+       "kind": "text",
+       "value": "Type I + II 1000 V with remote signal"
+      }
+     },
+     {
+      "name": "enclosure",
+      "value": {
+       "kind": "text",
+       "value": "plastic, wall mounting"
+      }
+     },
+     {
+      "name": "standard",
+      "value": {
+       "kind": "text",
+       "value": "DIN EN 61439-2, Class II"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP44",
+     "massKg": 10,
+     "dimensionsMm": [
+      540,
+      360,
+      171
+     ],
+     "communication": [],
+     "datasheetRef": "GAK 1INFHx12 12MPP 12ÜS MC4.pdf",
+     "notes": [
+      "Text layer scrambled; read on the original PDF.",
+      "Weight printed 10000 g."
+     ]
+    }
+   }
+  },
+  {
+   "id": "00251713-9d5d-8a67-a85a-068156161117",
+   "revision": 1,
+   "manufacturer": "Teltonika",
+   "model": "RUT901",
+   "articleNo": "",
+   "label": "Teltonika RUT901",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "communication",
+    "properties": [
+     {
+      "name": "function",
+      "value": {
+       "kind": "text",
+       "value": "Industrial 4G (Cat 4) router, dual SIM, Wi-Fi, 4 x Ethernet"
+      }
+     },
+     {
+      "name": "supply",
+      "value": {
+       "kind": "text",
+       "value": "9-30 VDC (4-pin)"
+      }
+     },
+     {
+      "name": "interfaces",
+      "value": {
+       "kind": "text",
+       "value": "4 x RJ45 10/100; Wi-Fi 802.11b/g/n; 2 x SIM; 1 DI / 1 DO; Modbus, MQTT, SNMP, VPN"
+      }
+     },
+     {
+      "name": "operating_temp",
+      "value": {
+       "kind": "text",
+       "value": "-40 °C to -75 °C (as printed)"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "massKg": 0.297,
+     "dimensionsMm": [
+      110,
+      50,
+      100
+     ],
+     "communication": [],
+     "datasheetRef": "Fiche Technique - TELTONIKA RUT901.pdf",
+     "notes": [
+      "Operating temperature printed \"-40 °C to -75 °C\" (obvious typo for +75 °C) - kept as printed.",
+      "family \"communication\" added (not in brief list)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "7f54dc4c-d0fa-8874-b997-24ed7ccd556a",
+   "revision": 1,
+   "manufacturer": "Tesla",
+   "model": "Wall Connector 32 A three phase",
+   "articleNo": "",
+   "label": "Tesla Wall Connector 32 A three phase",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "evCharger",
+    "properties": [
+     {
+      "name": "phases",
+      "value": {
+       "kind": "number",
+       "value": 3,
+       "unit": ""
+      }
+     },
+     {
+      "name": "power_kw_max",
+      "value": {
+       "kind": "number",
+       "value": 22,
+       "unit": ""
+      }
+     },
+     {
+      "name": "current_a",
+      "value": {
+       "kind": "text",
+       "value": "max. 32 A (breaker setting 6-32 A)"
+      }
+     },
+     {
+      "name": "nominal_voltage_v",
+      "value": {
+       "kind": "text",
+       "value": "230 (1~) / 400 (3~)"
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "tethered cable 2.6 m (7.4 m option)"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -30,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 50,
+       "unit": "c"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP55",
+     "massKg": 9,
+     "dimensionsMm": [
+      160,
+      380,
+      140
+     ],
+     "operatingTempMinC": -30,
+     "operatingTempMaxC": 50,
+     "communication": [],
+     "datasheetRef": "190925_Tesla32aWallConnectorInstallationManual.pdf",
+     "notes": [
+      "Installation manual, not a datasheet; weight includes bracket.",
+      "Supports 230 V 3-phase without neutral (IT grids)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "b45ea4fd-84d0-858e-baef-924de8634b82",
+   "revision": 1,
+   "manufacturer": "Weidmüller",
+   "model": "PVC DC 2I 1O 4MPP SPD1R EVO 11",
+   "articleNo": "8000109091",
+   "label": "Weidmüller PVC DC 2I 1O 4MPP SPD1R EVO 11",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "dcBox",
+    "properties": [
+     {
+      "name": "gtin",
+      "value": {
+       "kind": "text",
+       "value": "4099986665316"
+      }
+     },
+     {
+      "name": "mppt_count",
+      "value": {
+       "kind": "number",
+       "value": 4,
+       "unit": ""
+      }
+     },
+     {
+      "name": "inputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 2,
+       "unit": ""
+      }
+     },
+     {
+      "name": "outputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 1,
+       "unit": ""
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Stäubli MC4-Evo 2 (2.5-10 mm2)"
+      }
+     },
+     {
+      "name": "fuses",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "switch",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "rated_dc_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 1100,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "current_per_mppt_a",
+      "value": {
+       "kind": "number",
+       "value": 30,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "current_per_string_a",
+      "value": {
+       "kind": "number",
+       "value": 30,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "rated_short_term_current_a",
+      "value": {
+       "kind": "number",
+       "value": 37.5,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "spd",
+      "value": {
+       "kind": "text",
+       "value": "Type I/II, Ucpv 1100 V DC, In 20 kA, Imax 40 kA, Iimp 6.25 kA, Up <= 3.8 kV, Iscpv 11 kA"
+      }
+     },
+     {
+      "name": "enclosure",
+      "value": {
+       "kind": "text",
+       "value": "polycarbonate, 4 screws / mounting feet"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -40,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 50,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "standard",
+      "value": {
+       "kind": "text",
+       "value": "IEC/EN 61439-2"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP65",
+     "massKg": 4.539,
+     "dimensionsMm": [
+      400,
+      336,
+      132
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 50,
+     "communication": [],
+     "datasheetRef": "GAK PVC DC 2INx4 4MPPT SPD1R EVO 1.1kV.pdf",
+     "notes": [
+      "2 inputs connected in parallel per MPP; 5-year guarantee."
+     ]
+    }
+   }
+  },
+  {
+   "id": "4b2486cb-8c39-8209-9416-0355fb5a34fc",
+   "revision": 1,
+   "manufacturer": "Weidmüller",
+   "model": "PVC DC 2IN SPD1R EVO",
+   "articleNo": "2862050000",
+   "label": "Weidmüller PVC DC 2IN SPD1R EVO",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "dcBox",
+    "properties": [
+     {
+      "name": "mppt_count",
+      "value": {
+       "kind": "number",
+       "value": 1,
+       "unit": ""
+      }
+     },
+     {
+      "name": "inputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 2,
+       "unit": ""
+      }
+     },
+     {
+      "name": "outputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 1,
+       "unit": ""
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Stäubli MC4-Evo"
+      }
+     },
+     {
+      "name": "fuses",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "switch",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "rated_dc_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 1100,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "current_per_input_a",
+      "value": {
+       "kind": "number",
+       "value": 15,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "current_note",
+      "value": {
+       "kind": "text",
+       "value": "15 A at 35 °C ambient; 1.25 x Inc for 10 h short-circuit at output"
+      }
+     },
+     {
+      "name": "spd",
+      "value": {
+       "kind": "text",
+       "value": "Type I + II 1000 V with auxiliary contact (2x VPU PV I+II 0 1000, 1x VPU PV I+II 0M 1000)"
+      }
+     },
+     {
+      "name": "enclosure",
+      "value": {
+       "kind": "text",
+       "value": "GFRP, polycarbonate cover, direct wall mount"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -20,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 40,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "standard",
+      "value": {
+       "kind": "text",
+       "value": "IEC/EN 61439-2"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP65",
+     "dimensionsMm": [
+      180,
+      270,
+      171
+     ],
+     "operatingTempMinC": -20,
+     "operatingTempMaxC": 40,
+     "communication": [],
+     "datasheetRef": "GAK PVC DC 2IN SPD1R EVO 1.1kV.pdf",
+     "notes": [
+      "Inputs printed \"1x2\", outputs \"1x1\".",
+      "Protected outdoor location (> 1 km from sea)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "0f193a97-d3f5-8aa6-ad7f-dc10959970c8",
+   "revision": 1,
+   "manufacturer": "Weidmüller",
+   "model": "PVN DC 2IN/1OUTX2 2MPPT SPD1R EVO 1.1KV",
+   "articleNo": "2866360000",
+   "label": "Weidmüller PVN DC 2IN/1OUTX2 2MPPT SPD1R EVO 1.1KV",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "dcBox",
+    "properties": [
+     {
+      "name": "gtin",
+      "value": {
+       "kind": "text",
+       "value": "4064675604044"
+      }
+     },
+     {
+      "name": "mppt_count",
+      "value": {
+       "kind": "number",
+       "value": 2,
+       "unit": ""
+      }
+     },
+     {
+      "name": "inputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 2,
+       "unit": ""
+      }
+     },
+     {
+      "name": "outputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 1,
+       "unit": ""
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Stäubli MC4-Evo 2 (4-6 mm2)"
+      }
+     },
+     {
+      "name": "fuses",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "switch",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "rated_dc_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 1000,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "current_per_mppt_a",
+      "value": {
+       "kind": "number",
+       "value": 30,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "current_per_string_a",
+      "value": {
+       "kind": "number",
+       "value": 30,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "spd",
+      "value": {
+       "kind": "text",
+       "value": "Type I/II, Ucpv 1100 V DC, In 20 kA, Iimp 6.25 kA, Up <= 3.8 kV"
+      }
+     },
+     {
+      "name": "enclosure",
+      "value": {
+       "kind": "text",
+       "value": "GFRP / polycarbonate, wall mounting"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -25,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 50,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "standard",
+      "value": {
+       "kind": "text",
+       "value": "IEC 61439-2"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP65",
+     "massKg": 2.1,
+     "dimensionsMm": [
+      200,
+      240,
+      132
+     ],
+     "operatingTempMinC": -25,
+     "operatingTempMaxC": 50,
+     "communication": [],
+     "datasheetRef": "GAK PVN DC 2IN1OUTX2 2MPPT SPD1R EVO.pdf",
+     "notes": [
+      "Rated DC voltage 1,000 V DC although the name says 1.1 kV and the SPD Ucpv is 1,100 V."
+     ]
+    }
+   }
+  },
+  {
+   "id": "0a1b8fc0-e7ac-8774-b6be-cfa86ad3435a",
+   "revision": 1,
+   "manufacturer": "Weidmüller",
+   "model": "PVN DC 3IN/3OUTx3 3MPPT SPD1R EVO",
+   "articleNo": "2882770000",
+   "label": "Weidmüller PVN DC 3IN/3OUTx3 3MPPT SPD1R EVO",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "equipment",
+    "kind": "dcBox",
+    "properties": [
+     {
+      "name": "mppt_count",
+      "value": {
+       "kind": "number",
+       "value": 3,
+       "unit": ""
+      }
+     },
+     {
+      "name": "inputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 3,
+       "unit": ""
+      }
+     },
+     {
+      "name": "outputs_per_mppt",
+      "value": {
+       "kind": "number",
+       "value": 3,
+       "unit": ""
+      }
+     },
+     {
+      "name": "connector",
+      "value": {
+       "kind": "text",
+       "value": "Stäubli MC4-Evo"
+      }
+     },
+     {
+      "name": "fuses",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "switch",
+      "value": {
+       "kind": "text",
+       "value": "none"
+      }
+     },
+     {
+      "name": "rated_dc_voltage_v",
+      "value": {
+       "kind": "number",
+       "value": 1100,
+       "unit": "v"
+      }
+     },
+     {
+      "name": "current_per_input_a",
+      "value": {
+       "kind": "number",
+       "value": 15,
+       "unit": "a"
+      }
+     },
+     {
+      "name": "current_note",
+      "value": {
+       "kind": "text",
+       "value": "15 A at 35 °C ambient"
+      }
+     },
+     {
+      "name": "spd",
+      "value": {
+       "kind": "text",
+       "value": "Type I + II 1000 V with auxiliary contact"
+      }
+     },
+     {
+      "name": "enclosure",
+      "value": {
+       "kind": "text",
+       "value": "GFRP, polycarbonate cover"
+      }
+     },
+     {
+      "name": "operating_temp_min_c",
+      "value": {
+       "kind": "number",
+       "value": -20,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "operating_temp_max_c",
+      "value": {
+       "kind": "number",
+       "value": 40,
+       "unit": "c"
+      }
+     },
+     {
+      "name": "standard",
+      "value": {
+       "kind": "text",
+       "value": "IEC/EN 61439-2"
+      }
+     }
+    ],
+    "compatibleWith": [],
+    "details": {
+     "ipRating": "IP65",
+     "dimensionsMm": [
+      300,
+      560,
+      210
+     ],
+     "operatingTempMinC": -20,
+     "operatingTempMaxC": 40,
+     "communication": [],
+     "datasheetRef": "GAK PVC DC 3IN3OUTx3 3MPPT SPD1R EVO 1.1kV.pdf",
+     "notes": [
+      "Inputs and outputs both printed \"3x3\": pass-through (3 in / 3 out per MPPT, SPD only), no paralleling."
+     ]
+    }
+   }
+  }
+ ]
+}

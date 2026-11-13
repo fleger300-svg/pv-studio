@@ -1,0 +1,977 @@
+{
+ "_about": "Battery datasheet values (public manufacturer data, read by AI from the datasheets: every entry is unverified until reviewed). No prices.",
+ "components": [
+  {
+   "id": "46beafa2-535b-82ae-9e2f-863aa7b67805",
+   "revision": 1,
+   "manufacturer": "BYD",
+   "model": "Battery-Box Premium HVM (HVM 8.3 … 22.1)",
+   "articleNo": "",
+   "label": "BYD Battery-Box Premium HVM (HVM 8.3 … 22.1)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "HVM",
+    "moduleUsableKwh": 2.76,
+    "minModules": 3,
+    "maxModulesPerStack": 8,
+    "maxStacks": 3,
+    "power": {
+     "kind": "currentLimited",
+     "max_current_a": 50
+    },
+    "configurations": [
+     {
+      "modules": 3,
+      "usableKwh": 8.28,
+      "voltageV": 153.6
+     },
+     {
+      "modules": 4,
+      "usableKwh": 11.04,
+      "voltageV": 204.8
+     },
+     {
+      "modules": 5,
+      "usableKwh": 13.8,
+      "voltageV": 256
+     },
+     {
+      "modules": 6,
+      "usableKwh": 16.56,
+      "voltageV": 307.2
+     },
+     {
+      "modules": 7,
+      "usableKwh": 19.32,
+      "voltageV": 358.4
+     },
+     {
+      "modules": 8,
+      "usableKwh": 22.08,
+      "voltageV": 409.6
+     }
+    ],
+    "depthOfDischargePct": 100,
+    "roundTripEfficiencyPct": 96,
+    "warrantyYears": 10,
+    "massKgPerModule": 38,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "operatingTempMinC": -10,
+     "operatingTempMaxC": 50,
+     "communication": [
+      "CAN",
+      "RS485"
+     ],
+     "datasheetRef": "B-BOX PREMIUM battery HVM 5 to 21 kWh.pdf",
+     "notes": [
+      "Page 1 : « direct parallel connection of up to 3 identical Battery-Box Premium HVM allows a maximum capacity of 66.2 kWh ».",
+      "Le titre du fichier dit « 5 to 21 kWh » mais la fiche couvre 8.3–22.1 kWh (HVM) et 5.1–12.8 kWh (HVS).",
+      "Puissance non imprimée ; courant de sortie max 50 A (pic 75 A, 3 s) pour toutes les configurations. Derating entre -10 °C et +5 °C.",
+      "≥96%",
+      "condition d'essai de l'énergie utile [1]",
+      "Conditions apply. Refer to BYD Battery-Box Premium Limited Warranty Letter.",
+      "Refer to BYD Battery-Box Premium HVS / HVM Compatible Inverter List (liste non jointe).",
+      "Certifiée VDE 2510-50 / IEC 62619 ; aucune exigence d'implantation sur la fiche."
+     ]
+    }
+   }
+  },
+  {
+   "id": "4ddd33ba-552f-8690-9843-af0c38a7d5b8",
+   "revision": 1,
+   "manufacturer": "BYD",
+   "model": "Battery-Box Premium HVS (HVS 5.1 / 7.7 / 10.2 / 12.8)",
+   "articleNo": "",
+   "label": "BYD Battery-Box Premium HVS (HVS 5.1 / 7.7 / 10.2 / 12.8)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "HVS",
+    "moduleUsableKwh": 2.56,
+    "minModules": 2,
+    "maxModulesPerStack": 5,
+    "maxStacks": 3,
+    "power": {
+     "kind": "currentLimited",
+     "max_current_a": 25
+    },
+    "configurations": [
+     {
+      "modules": 2,
+      "usableKwh": 5.12,
+      "voltageV": 204.8
+     },
+     {
+      "modules": 3,
+      "usableKwh": 7.68,
+      "voltageV": 307.2
+     },
+     {
+      "modules": 4,
+      "usableKwh": 10.24,
+      "voltageV": 409.6
+     },
+     {
+      "modules": 5,
+      "usableKwh": 12.8,
+      "voltageV": 512
+     }
+    ],
+    "depthOfDischargePct": 100,
+    "roundTripEfficiencyPct": 96,
+    "warrantyYears": 10,
+    "massKgPerModule": 38,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "operatingTempMinC": -10,
+     "operatingTempMaxC": 50,
+     "communication": [
+      "CAN",
+      "RS485"
+     ],
+     "datasheetRef": "B-BOX PREMIUM battery HVM 5 to 21 kWh.pdf",
+     "notes": [
+      "Fiche commune HVS/HVM (V3.1EN) ; les modules HVS et HVM ne se mélangent pas (deux familles distinctes).",
+      "Page 1 : « direct parallel connection of up to 3 identical Battery-Box Premium HVS allows a maximum capacity of 38.4 kWh » ; plage commerciale « 5.1 - 66.2 kWh » pour HVS+HVM.",
+      "Énergie utile : DC, 100 % DoD, 0.2C à +25 °C ; « System usable energy may vary with different inverter brands ».",
+      "Puissance non imprimée ; courant de sortie max 25 A (pic 50 A, 3 s) quel que soit le nombre de modules, donc puissance ≈ I × U selon la tension de la pile. Derating entre -10 °C et +5 °C.",
+      "≥96%",
+      "100 % DoD = condition d'essai de l'énergie utile [1], pas une limite déclarée",
+      "Conditions apply. Refer to BYD Battery-Box Premium Limited Warranty Letter.",
+      "Refer to BYD Battery-Box Premium HVS / HVM Compatible Inverter List (liste non jointe). Onduleurs batterie HV mono et triphasés.",
+      "Certifiée VDE 2510-50 / IEC 62619 ; aucune exigence d'implantation ou de distance sur la fiche."
+     ]
+    }
+   }
+  },
+  {
+   "id": "b87e5171-986f-8fae-999c-924dc358ed92",
+   "revision": 1,
+   "manufacturer": "BYD",
+   "model": "Battery-Box Premium LVS (LVS 4.0 … 24.0)",
+   "articleNo": "",
+   "label": "BYD Battery-Box Premium LVS (LVS 4.0 … 24.0)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "LVS",
+    "moduleUsableKwh": 4,
+    "minModules": 1,
+    "maxModulesPerStack": 6,
+    "maxStacks": 16,
+    "power": {
+     "kind": "inverterLimited"
+    },
+    "configurations": [
+     {
+      "modules": 1,
+      "usableKwh": 4
+     },
+     {
+      "modules": 2,
+      "usableKwh": 8
+     },
+     {
+      "modules": 3,
+      "usableKwh": 12
+     },
+     {
+      "modules": 4,
+      "usableKwh": 16
+     },
+     {
+      "modules": 5,
+      "usableKwh": 20
+     },
+     {
+      "modules": 6,
+      "usableKwh": 24
+     }
+    ],
+    "voltageMinV": 40,
+    "voltageMaxV": 57.6,
+    "depthOfDischargePct": 100,
+    "roundTripEfficiencyPct": 95,
+    "warrantyYears": 10,
+    "massKgPerModule": 45,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "operatingTempMinC": -10,
+     "operatingTempMaxC": 50,
+     "communication": [
+      "CAN",
+      "RS485"
+     ],
+     "datasheetRef": "B-BOX PREMIUM battery LVS 4 to 24 kWh.pdf",
+     "notes": [
+      "Mise en parallèle : max 64 modules (256 kWh), soit 16 × LVS 16.0 ; tours parallèles seulement avec 1 à 4 modules par tour ; LVS 20.0 et 24.0 uniquement en tour unique [3].",
+      "max_stacks = 16 d'après « Connect up to 16 Battery-Box LVS 16.0 in parallel » (p. 1).",
+      "Courant continu max selon le nombre de modules : 65 / 130 / 195 / 250 / 250 / 250 A (1…6 modules) ; pic 90 / 180 / 270 / 360 / 360 / 360 A, 5 s. Tension fixe 51.2 V nominale (40–57.6 V). Derating de charge entre -10 °C et +5 °C.",
+      "≥95%",
+      "condition d'essai de l'énergie utile [1]",
+      "Conditions apply. Refer to BYD Battery-Box Premium Limited Warranty Letter.",
+      "Refer to BYD Battery-Box Premium LVS Minimum Configuration List (non jointe). Batterie basse tension 48 V pour onduleur externe.",
+      "Certifiée VDE 2510-50 / IEC 62619 ; aucune exigence d'implantation sur la fiche."
+     ]
+    }
+   }
+  },
+  {
+   "id": "74f3b258-3ca1-8fe4-8a5d-4b5246335c20",
+   "revision": 1,
+   "manufacturer": "Dyness",
+   "model": "STACK100 (STACK100-3S … 15S)",
+   "articleNo": "",
+   "label": "Dyness STACK100 (STACK100-3S … 15S)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "S51100",
+    "moduleUsableKwh": 4.864,
+    "moduleNominalKwh": 5.12,
+    "minModules": 3,
+    "maxModulesPerStack": 15,
+    "maxStacks": 12,
+    "power": {
+     "kind": "currentLimited",
+     "max_current_a": 100
+    },
+    "configurations": [
+     {
+      "modules": 3,
+      "nominalKwh": 15.36
+     },
+     {
+      "modules": 4,
+      "nominalKwh": 20.49
+     },
+     {
+      "modules": 5,
+      "nominalKwh": 25.6
+     },
+     {
+      "modules": 6,
+      "nominalKwh": 30.72
+     },
+     {
+      "modules": 7,
+      "nominalKwh": 35.84
+     },
+     {
+      "modules": 8,
+      "nominalKwh": 40.96
+     },
+     {
+      "modules": 9,
+      "nominalKwh": 46.08
+     },
+     {
+      "modules": 10,
+      "nominalKwh": 51.2
+     },
+     {
+      "modules": 11,
+      "nominalKwh": 56.32
+     },
+     {
+      "modules": 12,
+      "nominalKwh": 61.44
+     },
+     {
+      "modules": 13,
+      "nominalKwh": 66.56
+     },
+     {
+      "modules": 14,
+      "nominalKwh": 71.68
+     },
+     {
+      "modules": 15,
+      "nominalKwh": 76.8
+     }
+    ],
+    "voltageMinV": 134.4,
+    "voltageMaxV": 864,
+    "depthOfDischargePct": 95,
+    "cycles": 8000,
+    "warrantyYears": 10,
+    "location": "indoor",
+    "massKgPerModule": 47,
+    "compatibleInverters": [
+     "Kostal",
+     "Ingeteam",
+     "Solis",
+     "GoodWe",
+     "Growatt",
+     "Solplanet",
+     "SAJ",
+     "Deye",
+     "Hoymiles",
+     "Solinteg"
+    ],
+    "details": {
+     "ipRating": "IP20",
+     "operatingTempMinC": -20,
+     "operatingTempMaxC": 55,
+     "communication": [
+      "CAN",
+      "RS485",
+      "WLAN + APP"
+     ],
+     "datasheetRef": "Dyness STACK100 Datasheet -de(DACH)-20260520_Elektron.pdf ; Dyness STACK100 User Manuel-en(EU)-18.08.2026.pdf",
+     "notes": [
+      "Fiche DACH = images (texte vide dans le corpus), lue sur l'original.",
+      "Énergies système du manuel (table 2-1) arrondies : 15.4 / 20.5 / … / 76.8 kWh ; les valeurs de la configurations[] viennent de la « Battery Capacity Description » (p. 40).",
+      "Parallèle : max 12 clusters ; écart de tension < 20 V, SOC 100 %, écart d'âge < 3 ans entre clusters (manuel p. 44).",
+      "Fiche « 5,12 kWh / Modul, 76,8 kWh / System, Parallel bis zu 921 kWh » — énergies nominales ; utile 4.864 kWh/module (95 % DoD).",
+      "Plus de 12 modules : deux colonnes recommandées (base + câbles d'extension).",
+      "Classé C&I par le dossier source, mais la plage 15–77 kWh couvre aussi le grand résidentiel / petit tertiaire.",
+      "Fiche DACH : « Empfohlene Lade- und Entladeleistung 2,56 kW », « Max. Lade- und Entladeleistung 5,12 kW » (valeurs par module, = 0.5C / 1C de 5.12 kWh). Courant : 50 A recommandé (0.5C), 100 A max (1C), pic 125 A 2 min, identique pour 3 à 15 modules en série ; la puissance de la pile croît donc avec la tension (134.4–864 V).",
+      "Liste de marques « usw. » (fiche DACH) ; le manuel ajoute Sunways, Sinexcel, ATESS, Megarevo, Sineng. Câble RS485 pour Kostal, CAN pour les autres (manuel p. 43).",
+      "Extincteur aérosol intégré dans chaque module (« Integrierter Aerosol-Feuerlöscher », déclenchement 5 s). Manuel : local équipé d'un système de protection incendie ou d'extincteurs ; en cas de feu, seulement extincteur à poudre (p. 7) — contradiction avec « Recommended: foam extinguisher » (p. 21). Installation intérieure, loin des matériaux inflammables/explosifs."
+     ]
+    }
+   }
+  },
+  {
+   "id": "34455864-02e3-8876-94a8-993bc0e4db88",
+   "revision": 1,
+   "manufacturer": "Fronius",
+   "model": "Reserva (6.3 / 9.5 / 12.6 / 15.8)",
+   "articleNo": "",
+   "label": "Fronius Reserva (6.3 / 9.5 / 12.6 / 15.8)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "Reserva Module",
+    "moduleUsableKwh": 3.15,
+    "minModules": 2,
+    "maxModulesPerStack": 5,
+    "maxStacks": 4,
+    "power": {
+     "kind": "currentLimited",
+     "max_current_a": 32
+    },
+    "configurations": [
+     {
+      "modules": 2,
+      "usableKwh": 6.31,
+      "voltageV": 204.8
+     },
+     {
+      "modules": 3,
+      "usableKwh": 9.47,
+      "voltageV": 307.2
+     },
+     {
+      "modules": 4,
+      "usableKwh": 12.63,
+      "voltageV": 409.6
+     },
+     {
+      "modules": 5,
+      "usableKwh": 15.79,
+      "voltageV": 512
+     }
+    ],
+    "warrantyYears": 10,
+    "location": "indoor + protected outdoor",
+    "massKgPerModule": 33.5,
+    "compatibleInverters": [
+     "Fronius hybrid inverter (GEN24 Plus)"
+    ],
+    "details": {
+     "ipRating": "IP65",
+     "operatingTempMinC": -20,
+     "operatingTempMaxC": 55,
+     "communication": [
+      "RS485"
+     ],
+     "datasheetRef": "DB_EN_Fronius_Reserva_V02.pdf",
+     "notes": [
+      "Parallel operation : up to 4 batteries ; capacité système max non imprimée (system_usable_capacity_kwh_range[1] = null).",
+      "Page 4 : couplage DC (« DC-coupled high-voltage battery »), 2 à 5 modules ; le Fronius Energy Cost Assistant charge depuis le réseau quand le tarif est bas (cas tarifs dynamiques).",
+      "Courant de sortie max 32 A ; « The charging and discharging current is limited by the inverter » : la puissance réelle est min(onduleur hybride, 32 A × U batterie). Limitation possible selon la température.",
+      "« Fronius hybrid inverter » sauf Fronius Symo Hybrid (note 2) ; p. 4 cite le Fronius GEN24 Plus.",
+      "Aucune exigence incendie sur la fiche."
+     ]
+    }
+   }
+  },
+  {
+   "id": "f05802b5-fe3d-876d-a2d9-87460b600b65",
+   "revision": 1,
+   "manufacturer": "Fronius",
+   "model": "Reserva Pro (12.0 … 32.0)",
+   "articleNo": "",
+   "label": "Fronius Reserva Pro (12.0 … 32.0)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "Reserva Pro - Modulo",
+    "moduleUsableKwh": 3.98,
+    "minModules": 3,
+    "maxModulesPerStack": 8,
+    "maxStacks": 4,
+    "power": {
+     "kind": "currentLimited",
+     "max_current_a": 50
+    },
+    "configurations": [
+     {
+      "modules": 3,
+      "usableKwh": 11.9,
+      "voltageV": 212.52
+     },
+     {
+      "modules": 4,
+      "usableKwh": 15.9,
+      "voltageV": 283.36
+     },
+     {
+      "modules": 5,
+      "usableKwh": 19.9,
+      "voltageV": 354.2
+     },
+     {
+      "modules": 6,
+      "usableKwh": 23.9,
+      "voltageV": 425.04
+     },
+     {
+      "modules": 7,
+      "usableKwh": 27.9,
+      "voltageV": 495.88
+     },
+     {
+      "modules": 8,
+      "usableKwh": 31.9,
+      "voltageV": 566.72
+     }
+    ],
+    "warrantyYears": 10,
+    "location": "indoor + protected outdoor",
+    "massKgPerModule": 36,
+    "compatibleInverters": [
+     "Fronius Primo GEN24 Plus",
+     "Fronius Symo GEN24 Plus",
+     "Fronius Verto Plus"
+    ],
+    "details": {
+     "ipRating": "IP65",
+     "operatingTempMinC": -20,
+     "operatingTempMaxC": 50,
+     "communication": [
+      "Modbus (RS485)",
+      "CAN"
+     ],
+     "datasheetRef": "SE__Datasheet_Fronius_Reserva_PRO_2026_IT_IT-Italian.pdf",
+     "notes": [
+      "Fiche en italien (IT_V01, janvier 2026) ; décimales à la virgule converties en point.",
+      "Funzionamento in parallelo : fino a 4 torri batteria ; capacité système max non imprimée.",
+      "Garantie liée à un état de santé (80 % SOH) : utile pour modéliser la dégradation dans la VAN.",
+      "Corrente di uscita massima 50 A, « limitata dall'inverter » ; puissance = min(onduleur, 50 A × U). Limitation possible selon la température.",
+      "10 anni (80% SOH)",
+      "Aucune exigence incendie sur la fiche."
+     ]
+    }
+   }
+  },
+  {
+   "id": "7ded1acb-58a3-8fe9-be91-87439e49a3cd",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "LUNA2000-107-1S11",
+   "articleNo": "",
+   "label": "Huawei LUNA2000-107-1S11",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "ac",
+    "moduleModel": "LUNA2000-54-1E1 (pack)",
+    "moduleNominalKwh": 53.8,
+    "minModules": 2,
+    "maxModulesPerStack": 2,
+    "power": {
+     "kind": "fixed",
+     "charge_w": 108000,
+     "discharge_w": 108000
+    },
+    "configurations": [],
+    "voltageMinV": 324,
+    "voltageMaxV": 432,
+    "depthOfDischargePct": 100,
+    "roundTripEfficiencyPct": 86,
+    "location": "outdoor",
+    "massKgPerModule": 410,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "massKg": 2000,
+     "dimensionsMm": [
+      1150,
+      2100,
+      1800
+     ],
+     "operatingTempMinC": -30,
+     "operatingTempMaxC": 55,
+     "communication": [
+      "Ethernet",
+      "Optical fiber",
+      "Modbus TCP"
+     ],
+     "datasheetRef": "DB_EN_Huawei_LUNA2000_107-2S11.pdf ; OperationsManual-EN.pdf",
+     "notes": [
+      "Le nom de fichier dit « 107-2S11 » mais la fiche décrit LUNA2000-107-1S11.",
+      "Configuration 120S1P, cellules 280 Ah, 2 packs.",
+      "Dégagements lus sur la figure 5-1/5-2 du manuel (p. 81) : côté gauche ≥ 750 mm, côté droit ≥ 100 mm, dessus ≥ 400 mm, devant ≥ 2500 mm, ouverture de porte 130°.",
+      "« Maximum cycle efficiency » 86.0 % aux conditions nominales (25 °C, 1 C, 400 Vac, on-grid) — rendement système AC-AC incluant auxiliaires",
+      "Depth of charge and discharge 0~100%",
+      "Fire suppression mode : Pack-level oxygen barrier, Directional gas exhaust, Top explosion vent, Aerosol. Manuel : extérieur seulement ; aucun combustible à < 3 m ; ≥ 12 m des habitations, > 30.5 m des écoles/hôpitaux sinon murs coupe-feu ; ≥ 3.048 m des limites de parcelle/bâtiments (réductible à 1 m avec mur coupe-feu 1 h ou paroi 2 h) ; évent à > 4.6 m des prises d'air/fenêtres/portes ; référence NFPA 855 ; 2 extincteurs à gaz près de chaque unité."
+     ]
+    }
+   }
+  },
+  {
+   "id": "572ce86a-c3cd-8651-8302-23eaecc58a4b",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "LUNA2000-161-2S11",
+   "articleNo": "",
+   "label": "Huawei LUNA2000-161-2S11",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "ac",
+    "moduleModel": "LUNA2000-54-1E1 (pack)",
+    "moduleNominalKwh": 53.8,
+    "minModules": 3,
+    "maxModulesPerStack": 3,
+    "power": {
+     "kind": "fixed",
+     "charge_w": 108000,
+     "discharge_w": 108000
+    },
+    "configurations": [],
+    "voltageMinV": 486,
+    "voltageMaxV": 648,
+    "depthOfDischargePct": 100,
+    "roundTripEfficiencyPct": 88,
+    "location": "outdoor",
+    "massKgPerModule": 410,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "massKg": 2400,
+     "dimensionsMm": [
+      1150,
+      2100,
+      1800
+     ],
+     "operatingTempMinC": -30,
+     "operatingTempMaxC": 55,
+     "communication": [
+      "Ethernet",
+      "Optical fiber",
+      "Modbus TCP"
+     ],
+     "datasheetRef": "Datasheet-EN (32).pdf ; OperationsManual-EN.pdf",
+     "notes": [
+      "Configuration 180S1P, 3 packs ; fiche tronquée (THDu absent).",
+      "Maximum cycle efficiency, 25 °C, 0.67 CP, 400 Vac",
+      "Pack-level oxygen barrier, Directional gas exhaust, Top explosion vent, Aerosol ; mêmes règles de site que LUNA2000-107-1S11 (manuel commun)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "ad427cdc-3fe6-82ef-b7ee-5bf910364601",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "LUNA2000-215-2S10",
+   "articleNo": "",
+   "label": "Huawei LUNA2000-215-2S10",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "ac",
+    "moduleModel": "LUNA2000-54-2E1 (pack)",
+    "moduleNominalKwh": 53.8,
+    "minModules": 4,
+    "maxModulesPerStack": 4,
+    "power": {
+     "kind": "fixed",
+     "charge_w": 108000,
+     "discharge_w": 108000
+    },
+    "configurations": [],
+    "voltageMinV": 648,
+    "voltageMaxV": 864,
+    "depthOfDischargePct": 100,
+    "roundTripEfficiencyPct": 91.3,
+    "location": "outdoor",
+    "massKgPerModule": 410,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "massKg": 2800,
+     "dimensionsMm": [
+      1150,
+      2100,
+      1800
+     ],
+     "operatingTempMinC": -30,
+     "operatingTempMaxC": 55,
+     "communication": [
+      "Ethernet",
+      "Optical fiber",
+      "Modbus TCP"
+     ],
+     "datasheetRef": "LUNA2000-215-2S12-datasheet.pdf ; OperationsManual-EN.pdf ; MountingInstructions-EN (3).pdf",
+     "notes": [
+      "Le fichier s'appelle « 215-2S12 » mais la fiche décrit LUNA2000-215-2S10 ; le guide de montage couvre LUNA2000-(215-2S10, 215-2S12). « This product datasheet is used only for the bidding of early projects ».",
+      "Modèles fabriqués jusqu'à décembre 2024 : pas de commutation on/off-grid ni de limitation de puissance par phase (manuel p. 31).",
+      "Configuration 240S1P, 4 packs.",
+      "Rated AC current 164.1 A sur cette fiche (155.9 A sur les autres).",
+      "Maximum cycle efficiency, 25 °C, 0.5 CP, 400 Vac",
+      "Directional gas exhaust, Top explosion vent, Aerosol (pas d'« oxygen barrier » sur cette fiche) ; règles de site du manuel commun."
+     ]
+    }
+   }
+  },
+  {
+   "id": "69f941cf-a269-85fa-bd2a-b6cfddc03952",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "LUNA2000-7/14/21-S1",
+   "articleNo": "",
+   "label": "Huawei LUNA2000-7/14/21-S1",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "LUNA2000-7-E1",
+    "moduleUsableKwh": 6.9,
+    "minModules": 1,
+    "maxModulesPerStack": 3,
+    "maxStacks": 4,
+    "power": {
+     "kind": "perConfiguration"
+    },
+    "configurations": [
+     {
+      "modules": 1,
+      "usableKwh": 6.9,
+      "maxPowerW": 3500
+     },
+     {
+      "modules": 2,
+      "usableKwh": 13.8,
+      "maxPowerW": 7000
+     },
+     {
+      "modules": 3,
+      "usableKwh": 20.7,
+      "maxPowerW": 10500
+     }
+    ],
+    "depthOfDischargePct": 100,
+    "location": "both",
+    "massKgPerModule": 68,
+    "compatibleInverters": [
+     "SUN2000-12/15/17/20/25K-MB0",
+     "SUN2000-3/4/5/6/8/10KTL-M1",
+     "SUN2000-8/10K-LC0",
+     "SUN2000-2/3/3.68/4/4.6/5/6KTL-L1"
+    ],
+    "details": {
+     "ipRating": "IP66",
+     "operatingTempMinC": -20,
+     "operatingTempMaxC": 55,
+     "communication": [
+      "RS485",
+      "FE",
+      "CAN"
+     ],
+     "datasheetRef": "LUNA2000-battery-7-14-21S1 (13.8 kWh).pdf",
+     "notes": [
+      "Masses du système « Floor stand toolkit included » ; masse module ± 3 %.",
+      "Énergie utile mesurée à 100 % DoD, 0.2C, 25 °C, début de vie.",
+      "Modules de puissance et modules batterie commandés séparément (note 10) : la nomenclature PV Studio doit sortir 1 × LUNA2000-10KW-C1 + n × LUNA2000-7-E1 par groupe.",
+      "Garantie non imprimée sur la fiche.",
+      "Max. charging & discharging power par groupe = 3.5 kW par module : 3.5 / 7 / 10.5 kW pour 1 / 2 / 3 modules. Derating en température et au-delà de 2000 m.",
+      "Seuls les SUN2000-12/15/17/20/25K-MB0 acceptent 4 systèmes en parallèle (note 8) ; calendrier de compatibilité LC0 / L1 à confirmer avec Huawei (note 9).",
+      "« 5-layer Safety Protection » (cell, electrical, structural, active, emergency) ; aucune distance imprimée."
+     ]
+    }
+   }
+  },
+  {
+   "id": "13cc6cb0-b964-8b63-b678-fd1d322e6804",
+   "revision": 1,
+   "manufacturer": "Sungrow",
+   "model": "PowerStack ST255CS-2H",
+   "articleNo": "",
+   "label": "Sungrow PowerStack ST255CS-2H",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "ac",
+    "moduleNominalKwh": 257,
+    "minModules": 1,
+    "maxModulesPerStack": 1,
+    "maxStacks": 25,
+    "power": {
+     "kind": "fixed",
+     "charge_w": 125000,
+     "discharge_w": 125000
+    },
+    "configurations": [],
+    "voltageMinV": 691.2,
+    "voltageMaxV": 934.4,
+    "depthOfDischargePct": 100,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "massKg": 3200,
+     "dimensionsMm": [
+      1150,
+      2450,
+      1610
+     ],
+     "operatingTempMinC": -30,
+     "operatingTempMaxC": 50,
+     "communication": [
+      "Ethernet",
+      "Modbus TCP"
+     ],
+     "datasheetRef": "DB_FR_Sungrow_Powerstack_ST255CS_2H.pdf",
+     "notes": [
+      "Capacité « nominale » 257 kWh ; capacité utile non imprimée.",
+      "Plage de tension AC 340–440 V, 50/60 Hz, cos φ 1,0 capacitif ~ 1,0 inductif, déséquilibre de charge 100 % hors réseau.",
+      "> 100 kWh par compartiment coupe-feu ⇒ HL III selon AEAI 2005-15 : implantation extérieure ou bâtiment annexe RF1.",
+      "Profondeur de charge et de décharge 0 % ~ 100 %",
+      "PCS intégré ; s'ajoute à n'importe quelle installation PV côté AC.",
+      "Détecteur de gaz combustible, détecteur de fumée, détecteur de chaleur, sirène d'alarme, équipement d'extinction à aérosol chaud ; « conception de prévention des incendies à trois niveaux » ; alerte précoce d'emballement thermique par IA."
+     ]
+    }
+   }
+  },
+  {
+   "id": "6a33dbde-5a0f-848f-9ba9-90b60f4f83bd",
+   "revision": 1,
+   "manufacturer": "Sungrow",
+   "model": "SBH100/150/200/250/300/350/400",
+   "articleNo": "",
+   "label": "Sungrow SBH100/150/200/250/300/350/400",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "SBH module (LiFePO4 prismatic cell)",
+    "moduleUsableKwh": 5,
+    "minModules": 2,
+    "maxModulesPerStack": 8,
+    "power": {
+     "kind": "currentLimited",
+     "max_current_a": 50
+    },
+    "configurations": [
+     {
+      "modules": 2,
+      "usableKwh": 10,
+      "voltageV": 140.8
+     },
+     {
+      "modules": 3,
+      "usableKwh": 15,
+      "voltageV": 211.2
+     },
+     {
+      "modules": 4,
+      "usableKwh": 20,
+      "voltageV": 281.6
+     },
+     {
+      "modules": 5,
+      "usableKwh": 25,
+      "voltageV": 352
+     },
+     {
+      "modules": 6,
+      "usableKwh": 30,
+      "voltageV": 422.4
+     },
+     {
+      "modules": 7,
+      "usableKwh": 35,
+      "voltageV": 492.8
+     },
+     {
+      "modules": 8,
+      "usableKwh": 40,
+      "voltageV": 563.2
+     }
+    ],
+    "depthOfDischargePct": 100,
+    "warrantyYears": 10,
+    "location": "both",
+    "massKgPerModule": 45,
+    "compatibleInverters": [],
+    "details": {
+     "ipRating": "IP55",
+     "operatingTempMinC": -20,
+     "operatingTempMaxC": 50,
+     "communication": [
+      "CAN"
+     ],
+     "datasheetRef": "Sungrow (33).pdf",
+     "notes": [
+      "Version 3.1, 2023. Énergie utile à 25 °C, 100 % DoD, 0.2C.",
+      "Aucune mention de mise en parallèle de piles : max_stacks = null, système max = 40 kWh (« 10–40 kWh capacity range », p. 1).",
+      "Dimensions imprimées en W*H*D : 675 * hauteur * 350 mm.",
+      "Rated DC power par configuration : 7.04 / 10.56 / 14.08 / 17.60 / 21.12 / 24.64 / 28.16 kW pour 2…8 modules (= 50 A × U nominale).",
+      "Max. 100 % DOD (settable)",
+      "Refer to battery warranty letter for conditional application",
+      "Non imprimé sur la fiche.",
+      "Protections BMS (sur/sous-tension, surintensité, température) + disjoncteur DC ; aucune exigence d'implantation imprimée."
+     ]
+    }
+   }
+  },
+  {
+   "id": "cf27fa22-1f90-8e86-bd80-1be6be48d4a5",
+   "revision": 1,
+   "manufacturer": "Sunwoda",
+   "model": "OASIS A180 (CIESS-107 / 125 / 143 / 161 / 179)",
+   "articleNo": "",
+   "label": "Sunwoda OASIS A180 (CIESS-107 / 125 / 143 / 161 / 179)",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "battery",
+    "chemistry": "LFP",
+    "coupling": "dc",
+    "moduleModel": "PACK LFP200S (3.2 V 280 Ah)",
+    "moduleNominalKwh": 17.92,
+    "minModules": 6,
+    "maxModulesPerStack": 10,
+    "maxStacks": 6,
+    "power": {
+     "kind": "inverterLimited"
+    },
+    "configurations": [
+     {
+      "modules": 6,
+      "nominalKwh": 107.52,
+      "voltageV": 384
+     },
+     {
+      "modules": 7,
+      "nominalKwh": 125.44,
+      "voltageV": 448
+     },
+     {
+      "modules": 8,
+      "nominalKwh": 143.36,
+      "voltageV": 512
+     },
+     {
+      "modules": 9,
+      "nominalKwh": 161.28,
+      "voltageV": 576
+     },
+     {
+      "modules": 10,
+      "nominalKwh": 179.2,
+      "voltageV": 640
+     }
+    ],
+    "depthOfDischargePct": 100,
+    "cycles": 9000,
+    "location": "outdoor",
+    "compatibleInverters": [
+     "Deye SUN-29.9/30/35/40/50K-SG01HP3-EU-BM",
+     "Solis S6-EH3P(29.9-50)K-H",
+     "SMA Sunny Island X 30/50",
+     "SOLINTEG MHT-25K/30K/36K/40K/50K-100",
+     "Megarevo MPS030/MPS050/MPS0100/MPS0150/MPS0250/MPS0500"
+    ],
+    "details": {
+     "ipRating": "IP55",
+     "massKg": 1800,
+     "dimensionsMm": [
+      1150,
+      2200,
+      1375
+     ],
+     "operatingTempMinC": -25,
+     "operatingTempMaxC": 55,
+     "communication": [
+      "CAN",
+      "RS485",
+      "Internet",
+      "WiFi"
+     ],
+     "datasheetRef": "DB_DE_Sunwoda_Oasis_A180.pdf",
+     "notes": [
+      "Colonnes du tableau extraites dans le désordre (179 avant 161) ; réordonnées par nombre de packs (6→10) d'après les valeurs cohérentes (17.92 kWh × packs).",
+      "Dimensions imprimées B*T*H : 1150*1375*2200 mm.",
+      "Applications citées : PV + stockage, peak shaving et autoconsommation, backup, micro-réseau, régulation de fréquence.",
+      "Max. Ladung und Entladung 1C pour toutes les variantes ; puissance choisie par l'onduleur (0.2C~1C).",
+      "Hinweise zur Garantie entnehmen Sie bitte den Garantiebedingungen.",
+      "Rauchsensor, Wasser-Tauchsensor, Aerosol-Brandbekämpfung, Anschluss zur Wasser-Brandbekämpfung ; protection « Cluster-Ebene + Systemebene + aktive Explosionsdruckentlastung + Sicherheitsisolation durch Partitionierung »."
+     ]
+    }
+   }
+  }
+ ]
+}

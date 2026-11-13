@@ -1,0 +1,777 @@
+{
+ "_about": "Optimizer datasheet values (public manufacturer data, read by AI from the datasheets: every entry is unverified until reviewed). No prices.",
+ "components": [
+  {
+   "id": "c9f5fa11-3874-8a53-85b5-b134f3bb6e38",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "MERC-1100W-P",
+   "articleNo": "",
+   "label": "Huawei MERC-1100W-P",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "ratedInputPowerW": 1100,
+    "maxInputVoltageV": 125,
+    "mpptMinV": 12.5,
+    "mpptMaxV": 105,
+    "maxInputShortCircuitCurrentA": 20,
+    "maxOutputCurrentA": 22,
+    "maxOutputVoltageV": 80,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 99,
+    "compatibleInverters": [
+     "SUN2000-8/10/12/15/17/20KTL-M2",
+     "SUN2000-30/36/40KTL-M3",
+     "SUN2000-12/15/17/20/25KTL-M5",
+     "SUN2000-50KTL-M3"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SUN2000-12~25K-MB0",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 20000
+     },
+     {
+      "inverter": "SUN2000-12~25KTL-M5",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 20000
+     },
+     {
+      "inverter": "SUN2000-30~40KTL-M3",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 20000
+     },
+     {
+      "inverter": "SUN2000-50KTL-M3",
+      "minOptimizers": 8,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 20000
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 1,
+     "dimensionsMm": [
+      149,
+      104,
+      48.8
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [],
+     "datasheetRef": "MERC1100-1300.pdf",
+     "notes": [
+      "Version 03-202403. Optimiseur C&I.",
+      "modules_per_optimizer null : la fiche dit \"chaque module doit être équipé d’un MERC\" (note 7) mais la puissance 1100/1300 W et la tension d’entrée 125 V suggèrent 2 modules en série ; le guide Huawei CH 2025 indique \"1-1 et 2-1\" pour le MERC-1100/1300 — à confirmer.",
+      "Liste des onduleurs compatibles (M2/M3/M5) et tableau de conception (MB0/M5/M3) ne concordent pas exactement (MB0 dans le tableau, M2 dans la liste) : tel qu’imprimé.",
+      "Écart de capacité entre chaînes d’un même onduleur ≤ 2 kW recommandé. Arrêt possible 70–85 °C."
+     ]
+    }
+   }
+  },
+  {
+   "id": "e4c5ae04-678b-81c5-aa1f-cade1eb63bd4",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "MERC-1300W-P",
+   "articleNo": "",
+   "label": "Huawei MERC-1300W-P",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "ratedInputPowerW": 1300,
+    "maxInputVoltageV": 125,
+    "mpptMinV": 12.5,
+    "mpptMaxV": 105,
+    "maxInputShortCircuitCurrentA": 20,
+    "maxOutputCurrentA": 22,
+    "maxOutputVoltageV": 80,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 99,
+    "compatibleInverters": [
+     "SUN2000-8/10/12/15/17/20KTL-M2",
+     "SUN2000-30/36/40KTL-M3",
+     "SUN2000-12/15/17/20/25KTL-M5",
+     "SUN2000-50KTL-M3"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SUN2000-12~25K-MB0",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 20000
+     },
+     {
+      "inverter": "SUN2000-12~25KTL-M5",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 20000
+     },
+     {
+      "inverter": "SUN2000-30~40KTL-M3",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 20000
+     },
+     {
+      "inverter": "SUN2000-50KTL-M3",
+      "minOptimizers": 8,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 20000
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 1,
+     "dimensionsMm": [
+      149,
+      104,
+      48.8
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [],
+     "datasheetRef": "MERC1100-1300.pdf",
+     "notes": [
+      "Version 03-202403. Optimiseur C&I.",
+      "modules_per_optimizer null : la fiche dit \"chaque module doit être équipé d’un MERC\" (note 7) mais la puissance 1100/1300 W et la tension d’entrée 125 V suggèrent 2 modules en série ; le guide Huawei CH 2025 indique \"1-1 et 2-1\" pour le MERC-1100/1300 — à confirmer.",
+      "Liste des onduleurs compatibles (M2/M3/M5) et tableau de conception (MB0/M5/M3) ne concordent pas exactement (MB0 dans le tableau, M2 dans la liste) : tel qu’imprimé.",
+      "Écart de capacité entre chaînes d’un même onduleur ≤ 2 kW recommandé. Arrêt possible 70–85 °C."
+     ]
+    }
+   }
+  },
+  {
+   "id": "e530260d-fb3d-8ede-994f-c44de16c2ca2",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "MERC-600W-PA0",
+   "articleNo": "",
+   "label": "Huawei MERC-600W-PA0",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 600,
+    "maxInputVoltageV": 80,
+    "mpptMinV": 10,
+    "mpptMaxV": 80,
+    "maxInputShortCircuitCurrentA": 16,
+    "maxOutputCurrentA": 16,
+    "maxOutputVoltageV": 80,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 99,
+    "compatibleInverters": [
+     "SUN2000-2/3/3.68/4/4.6/5/6KTL-L1",
+     "SUN2000-3/3.68/4/4.6/5/6K-LB0",
+     "SUN5000-3/6K-LB0",
+     "SUN2000-8/10K-LC0",
+     "SUN2000-3/4/5/6/8/10KTL-M1",
+     "SUN2000-10KTL-BEM1",
+     "SUN2000-5/6/8/10/12K-MAP0",
+     "SUN5000-8/12K-MAP0",
+     "SUN2000-10K-MAP0-BE",
+     "SUN2000-12/15/17/20/25K-MB0",
+     "SUN5000-17/25K-MB0"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SUN2000-2–6KTL-L1 / SUN2000-8K/10K-LC0",
+      "minOptimizers": 4,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 6000
+     },
+     {
+      "inverter": "SUN2000-3–6KTL-LB0 / SUN5000-3K/6K-LB0",
+      "minOptimizers": 4,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 6000
+     },
+     {
+      "inverter": "SUN2000-3–10KTL-M1 / SUN2000-10KTL-BEM1",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 10000
+     },
+     {
+      "inverter": "SUN2000-5-12K-MAP0 / SUN5000-8K/12K-MAP0",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 12000
+     },
+     {
+      "inverter": "SUN2000-12-25K-MB0 / SUN5000-17/25K-MB0",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 12000
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 0.65,
+     "dimensionsMm": [
+      73.8,
+      145,
+      27.2
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [
+      "MBUS"
+     ],
+     "datasheetRef": "PAO 600W. pdf",
+     "notes": [
+      "Fichier original \"PAO 600W. pdf\" (extension mal formée, absent du corpus texte) : lu directement, version 02-202504.",
+      "Sortie en veille 1 V par optimiseur (contrairement aux SUN2000-P : 0 V). Incendie NEC 2020.",
+      "Isc 16 A : seul optimiseur Huawei du corpus compatible avec les modules à Isc > 15 A (BISOL BDO, Jinko 48HL4M-DV).",
+      "Ne pas mélanger avec SUN2000-450W-P2/600W-P ni MERC-1100/1300W-P sous le même contrôleur."
+     ]
+    }
+   }
+  },
+  {
+   "id": "0df93a7a-841e-87f5-94bc-a1ff72c65a2a",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "SUN2000-450W-P",
+   "articleNo": "",
+   "label": "Huawei SUN2000-450W-P",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 450,
+    "maxInputVoltageV": 80,
+    "compatibleInverters": [
+     "SUN2000-2/3/3.68/4/4.6/5/6KTL-L1",
+     "SUN2000-3/4/5/6/8/10KTL-M1",
+     "SUN2000-12/15/17/20KTL-M2"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SUN2000-2-6KTL-L1",
+      "minOptimizers": 4,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 5000
+     },
+     {
+      "inverter": "SUN2000-3-10KTL-M1",
+      "minOptimizers": 6,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 10000
+     },
+     {
+      "inverter": "SUN2000-12-20KTL-M2",
+      "minOptimizers": 6,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 10000
+     }
+    ],
+    "details": {
+     "communication": [],
+     "datasheetRef": "SUN2000-450W-P Power Optimizer Application Note for HUAWEI Residential & Commercial Inverter.pdf",
+     "notes": [
+      "Ancienne génération : seule une note d’application est disponible (pas de fiche technique) ; tension 80 V et 450 W tirées de la présentation Huawei CH 2022 (\"450W, 80V\"), Isc ≤ 14.5 A indiqué pour la P2.",
+      "Règles : M2 (2 entrées/MPPT) — chaînes d’un même MPPT de même longueur, même modèle, même azimut/inclinaison ; optimisation partielle interdite si 2 chaînes sur le MPPT.",
+      "Optimisation partielle : perte de la chaîne longue, de la coupure rapide HT et de la localisation d’arc."
+     ]
+    }
+   }
+  },
+  {
+   "id": "d70f399b-ff76-881b-82ba-135c325b448b",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "SUN2000-450W-P2",
+   "articleNo": "",
+   "label": "Huawei SUN2000-450W-P2",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 450,
+    "maxInputVoltageV": 80,
+    "mpptMinV": 10,
+    "mpptMaxV": 80,
+    "maxInputShortCircuitCurrentA": 14.5,
+    "maxOutputCurrentA": 15,
+    "maxOutputVoltageV": 80,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 99,
+    "compatibleInverters": [
+     "SUN2000-12K/15K/17K/20K/25K-MB0",
+     "SUN2000-8K/10K-LC0",
+     "SUN2000-2/3/3.68/4/4.6/5/6KTL-L1",
+     "SUN2000-3/4/5/6/8/10KTL-M1",
+     "SUN2000-12/15/17/20/25KTL-M5",
+     "SUN2000-30/36/40-M3"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SUN2000-2~6KTL-L1",
+      "minOptimizers": 4,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 6000
+     },
+     {
+      "inverter": "SUN2000-8K/10K-LC0",
+      "minOptimizers": 4,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 6000
+     },
+     {
+      "inverter": "SUN2000-3~10KTL-M1",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 10000
+     },
+     {
+      "inverter": "SUN2000-12~25KTL-M5",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 12000
+     },
+     {
+      "inverter": "SUN2000-12K/15K/17K/20K/25K-MB0",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 12000
+     },
+     {
+      "inverter": "SUN2000-30K/36K/40K-M3",
+      "minOptimizers": 6,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 12000
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 0.6,
+     "dimensionsMm": [
+      75,
+      140,
+      28
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [
+      "MBUS"
+     ],
+     "datasheetRef": "SMART PV OPTIMIZER SUN2000P-600W-P.pdf",
+     "notes": [
+      "Fiche 03-202402 commune 450W-P2/600W-P : seule la puissance assignée diffère.",
+      "Pmax STC du module ≤ puissance assignée ; tolérance module jusqu’à +5 % admise.",
+      "En panne : bypass. Impédance de sortie en veille 1 kΩ ±10 %. Arrêt possible entre 70 et 85 °C (sur-température).",
+      "Ne pas mélanger avec MERC-600W-PA0 / MERC-1100/1300W-P sous le même Smart Energy/PV Controller.",
+      "Guide Huawei CH 2025 : Impp module > 14.5 A toléré \"moyennant une perte de courant\" ; optimisation partielle possible (1 chaîne par MPPT si 2 entrées/MPPT) ; chaîne longue jusqu’à 50 modules / 1900 V ÷ Voc(Tmin) en optimisation complète (doc 2022).",
+      "Sécurité IEC62109-1 classe II ; incendie VDE-AR-E 2100-712:2018-12."
+     ]
+    }
+   }
+  },
+  {
+   "id": "7539d596-c873-8d90-b4bf-09807183d429",
+   "revision": 1,
+   "manufacturer": "Huawei",
+   "model": "SUN2000-600W-P",
+   "articleNo": "",
+   "label": "Huawei SUN2000-600W-P",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 600,
+    "maxInputVoltageV": 80,
+    "mpptMinV": 10,
+    "mpptMaxV": 80,
+    "maxInputShortCircuitCurrentA": 14.5,
+    "maxOutputCurrentA": 15,
+    "maxOutputVoltageV": 80,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 99,
+    "compatibleInverters": [
+     "SUN2000-12K/15K/17K/20K/25K-MB0",
+     "SUN2000-8K/10K-LC0",
+     "SUN2000-2/3/3.68/4/4.6/5/6KTL-L1",
+     "SUN2000-3/4/5/6/8/10KTL-M1",
+     "SUN2000-12/15/17/20/25KTL-M5",
+     "SUN2000-30/36/40-M3"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SUN2000-2~6KTL-L1",
+      "minOptimizers": 4,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 6000
+     },
+     {
+      "inverter": "SUN2000-8K/10K-LC0",
+      "minOptimizers": 4,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 6000
+     },
+     {
+      "inverter": "SUN2000-3~10KTL-M1",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 10000
+     },
+     {
+      "inverter": "SUN2000-12~25KTL-M5",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 12000
+     },
+     {
+      "inverter": "SUN2000-12K/15K/17K/20K/25K-MB0",
+      "minOptimizers": 6,
+      "maxOptimizers": 35,
+      "maxPowerPerStringW": 12000
+     },
+     {
+      "inverter": "SUN2000-30K/36K/40K-M3",
+      "minOptimizers": 6,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 12000
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 0.6,
+     "dimensionsMm": [
+      75,
+      140,
+      28
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [
+      "MBUS"
+     ],
+     "datasheetRef": "SMART PV OPTIMIZER SUN2000P-600W-P.pdf",
+     "notes": [
+      "Mêmes caractéristiques que SUN2000-450W-P2 sauf puissance assignée 600 W (fiche 03-202402)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "0d32db45-138a-8431-aa43-4f0739f165b8",
+   "revision": 1,
+   "manufacturer": "SolarEdge",
+   "model": "S440",
+   "articleNo": "",
+   "label": "SolarEdge S440",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 440,
+    "maxInputVoltageV": 60,
+    "mpptMinV": 8,
+    "mpptMaxV": 60,
+    "maxInputShortCircuitCurrentA": 14.5,
+    "maxOutputCurrentA": 15,
+    "maxOutputVoltageV": 60,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 98.6,
+    "compatibleInverters": [
+     "SolarEdge Home Wave Inverter Single Phase",
+     "SolarEdge Home Short String Inverter Three Phase",
+     "SolarEdge Three Phase 230/400V",
+     "SolarEdge Three Phase 277/480V"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SolarEdge Home Wave Inverter Single Phase",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 5700,
+      "note": "6800 W pour onduleurs ≥ 8000 W AC avec ≥ 2 chaînes"
+     },
+     {
+      "inverter": "SolarEdge Home Short String Inverter Three Phase",
+      "minOptimizers": 9,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 5625,
+      "note": "voir note (8) : jusqu’à la puissance DC max de l’onduleur si P AC ≤ puissance continue par chaîne"
+     },
+     {
+      "inverter": "Three Phase 230/400V Grid",
+      "minOptimizers": 16,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 11250
+     },
+     {
+      "inverter": "Three Phase 277/480V Grid",
+      "minOptimizers": 18,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 12750
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 0.72,
+     "dimensionsMm": [
+      129,
+      155,
+      30
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [],
+     "datasheetRef": "POWER OPTIMIZER S500B.pdf",
+     "notes": [
+      "Installations après le 1er avril 2024 : 490 W et Isc max 15 A (note 2 de la fiche ; aussi dérogation SolarEdge RFW-002247B pour l’Europe).",
+      "Dimensions \"W x L x H\" = 129 x 155 x 30 mm (largeur, longueur, hauteur) ; mappées width/height/depth.",
+      "Ne pas mélanger séries S et P dans une même chaîne en installation neuve."
+     ]
+    }
+   }
+  },
+  {
+   "id": "ab59075d-07e5-8ebf-bc0b-8110614eb6c2",
+   "revision": 1,
+   "manufacturer": "SolarEdge",
+   "model": "S500",
+   "articleNo": "",
+   "label": "SolarEdge S500",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 500,
+    "maxInputVoltageV": 60,
+    "mpptMinV": 8,
+    "mpptMaxV": 60,
+    "maxInputShortCircuitCurrentA": 15,
+    "maxOutputCurrentA": 15,
+    "maxOutputVoltageV": 60,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 98.6,
+    "compatibleInverters": [
+     "SolarEdge Home Wave Inverter Single Phase",
+     "SolarEdge Home Short String Inverter Three Phase",
+     "SolarEdge Three Phase 230/400V",
+     "SolarEdge Three Phase 277/480V"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SolarEdge Home Wave Inverter Single Phase",
+      "minOptimizers": 8,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 5700,
+      "note": "6800 W pour onduleurs ≥ 8000 W AC avec ≥ 2 chaînes"
+     },
+     {
+      "inverter": "SolarEdge Home Short String Inverter Three Phase",
+      "minOptimizers": 9,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 5625,
+      "note": "voir note (8) : jusqu’à la puissance DC max de l’onduleur si P AC ≤ puissance continue par chaîne"
+     },
+     {
+      "inverter": "Three Phase 230/400V Grid",
+      "minOptimizers": 16,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 11250
+     },
+     {
+      "inverter": "Three Phase 277/480V Grid",
+      "minOptimizers": 18,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 12750
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 0.72,
+     "dimensionsMm": [
+      129,
+      155,
+      30
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [],
+     "datasheetRef": "POWER OPTIMIZER S500B.pdf",
+     "notes": [
+      "Installations après le 1er avril 2024 : 550 W (note 3).",
+      "Valeurs de colonne vérifiées sur l’image du tableau (cellules fusionnées)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "f811ade0-edbb-8825-93bf-861682fa89b7",
+   "revision": 1,
+   "manufacturer": "SolarEdge",
+   "model": "S500B",
+   "articleNo": "",
+   "label": "SolarEdge S500B",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 500,
+    "maxInputVoltageV": 125,
+    "mpptMinV": 12.5,
+    "mpptMaxV": 105,
+    "maxInputShortCircuitCurrentA": 15,
+    "maxOutputCurrentA": 15,
+    "maxOutputVoltageV": 80,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 98.6,
+    "compatibleInverters": [
+     "SolarEdge Home Wave Inverter Single Phase",
+     "SolarEdge Home Short String Inverter Three Phase",
+     "SolarEdge Three Phase 230/400V",
+     "SolarEdge Three Phase 277/480V"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SolarEdge Home Wave Inverter Single Phase",
+      "minOptimizers": 6,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 5700,
+      "note": "6800 W pour onduleurs ≥ 8000 W AC avec ≥ 2 chaînes"
+     },
+     {
+      "inverter": "SolarEdge Home Short String Inverter Three Phase",
+      "minOptimizers": 8,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 5625,
+      "note": "voir note (8) : jusqu’à la puissance DC max de l’onduleur si P AC ≤ puissance continue par chaîne"
+     },
+     {
+      "inverter": "Three Phase 230/400V Grid",
+      "minOptimizers": 14,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 11250
+     },
+     {
+      "inverter": "Three Phase 277/480V Grid",
+      "minOptimizers": 14,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 12750
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 0.79,
+     "dimensionsMm": [
+      129,
+      165,
+      45
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [],
+     "datasheetRef": "POWER OPTIMIZER S500B.pdf",
+     "notes": [
+      "Installations après le 1er avril 2024 : 550 W (note 3).",
+      "Deux versions : S500B-1GM4MRM (équerre plate, dessin 155 x 30 mm) et S500B-1GM4MBM (équerre coudée, 165 x 45 mm) ; le tableau donne 129 x 165 x 45 / 790 g.",
+      "Déclassement au-delà de +75 °C ambiant (vs +85 °C pour S440/S500).",
+      "Tension d’entrée 125 V : permet des modules à forte tension (p.ex. 144 cellules Trina, Voc ~53 V à froid > 60 V)."
+     ]
+    }
+   }
+  },
+  {
+   "id": "179773d2-7a04-8d97-b10f-b7b9d51486e1",
+   "revision": 1,
+   "manufacturer": "SolarEdge",
+   "model": "S650B",
+   "articleNo": "",
+   "label": "SolarEdge S650B",
+   "descriptions": {},
+   "source": "import",
+   "verified": false,
+   "spec": {
+    "family": "optimizer",
+    "modulesPerOptimizer": 1,
+    "ratedInputPowerW": 650,
+    "maxInputVoltageV": 85,
+    "mpptMinV": 12.5,
+    "mpptMaxV": 85,
+    "maxInputShortCircuitCurrentA": 15,
+    "maxOutputCurrentA": 15,
+    "maxOutputVoltageV": 80,
+    "maxEfficiencyPct": 99.5,
+    "weightedEfficiencyPct": 98.6,
+    "compatibleInverters": [
+     "SolarEdge Home Wave Inverter Single Phase",
+     "SolarEdge Home Short String Inverter Three Phase",
+     "SolarEdge Three Phase 230/400V",
+     "SolarEdge Three Phase 277/480V"
+    ],
+    "stringRules": [
+     {
+      "inverter": "SolarEdge Home Wave Inverter Single Phase",
+      "minOptimizers": 6,
+      "maxOptimizers": 25,
+      "maxPowerPerStringW": 5700,
+      "note": "6800 W pour onduleurs ≥ 8000 W AC avec ≥ 2 chaînes"
+     },
+     {
+      "inverter": "SolarEdge Home Short String Inverter Three Phase",
+      "minOptimizers": 8,
+      "maxOptimizers": 20,
+      "maxPowerPerStringW": 5625,
+      "note": "voir note (8) : jusqu’à la puissance DC max de l’onduleur si P AC ≤ puissance continue par chaîne"
+     },
+     {
+      "inverter": "Three Phase 230/400V Grid",
+      "minOptimizers": 14,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 11250
+     },
+     {
+      "inverter": "Three Phase 277/480V Grid",
+      "minOptimizers": 14,
+      "maxOptimizers": 50,
+      "maxPowerPerStringW": 12750
+     }
+    ],
+    "details": {
+     "ipRating": "IP68",
+     "massKg": 0.79,
+     "dimensionsMm": [
+      129,
+      165,
+      45
+     ],
+     "operatingTempMinC": -40,
+     "operatingTempMaxC": 85,
+     "communication": [],
+     "datasheetRef": "POWER OPTIMIZER S500B.pdf",
+     "notes": [
+      "Équerre coudée."
+     ]
+    }
+   }
+  }
+ ]
+}
