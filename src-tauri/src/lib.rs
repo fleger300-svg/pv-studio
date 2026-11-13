@@ -7,6 +7,7 @@ mod compute;
 mod export;
 mod layout;
 mod library;
+mod production;
 mod roof;
 mod settings;
 mod site;
@@ -77,6 +78,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::apply_command,
             commands::undo,
             commands::redo,
+            production::simulate_yield,
             site::site_search,
             site::site_locate,
             site::site_fetch_weather,

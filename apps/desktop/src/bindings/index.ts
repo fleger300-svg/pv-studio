@@ -137,6 +137,8 @@ export const commands = {
 	undo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
 	redo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("redo")),
+	/**  Simulates the AC yield of the open project. */
+	simulateYield: () => typedError<YieldReport, CommandError>(__TAURI_INVOKE("simulate_yield")),
 	/**  Swiss addresses and places matching `text` (geo.admin.ch search). */
 	siteSearch: (text: string) => typedError<Place[], CommandError>(__TAURI_INVOKE("site_search", { text })),
 	/**
@@ -1275,6 +1277,20 @@ export type EdgeRoof_Serialize = {
 export type EdgeSetback = {
 	kind: RoofEdgeKind,
 	distanceM: number,
+};
+
+/**  Energy balance [kWh], each loss booked after the previous ones. */
+export type EnergyBalance = {
+	/**  STC efficiency × plane-of-array irradiation. */
+	nominalKwh: number,
+	iamKwh: number,
+	soilingKwh: number,
+	lowLightKwh: number,
+	temperatureKwh: number,
+	mismatchKwh: number,
+	dcCableKwh: number,
+	inverterKwh: number,
+	clippingKwh: number,
 };
 
 /**  Datasheet facts shared by every electrical component (not used by the engines). */
@@ -2748,6 +2764,25 @@ export type ServiceLifeModel =
 /**  How serious a finding is. */
 export type Severity = "info" | "warning" | "error";
 
+/**  Assumptions of the simulation (shown with the results). */
+export type SimulationAssumptions = {
+	albedo: number,
+	/**  ASHRAE incidence angle modifier coefficient b₀. */
+	iamB0: number,
+	/**  Incidence modifier applied to sky and ground diffuse. */
+	iamDiffuse: number,
+	soilingLoss: number,
+	mismatchLoss: number,
+	dcCableLoss: number,
+	/**  Heat loss factor of modules on a pitched roof / of free-standing rows [W/(m²·K)]. */
+	uRoof: number,
+	uFree: number,
+	/**  Low-light coefficient: relative efficiency `1 + a·ln(G/1000)`. */
+	lowLightA: number,
+	/**  Efficiency of the generic inverter (modules in no string). */
+	defaultInverterEfficiency: number,
+};
+
 /**  Site data of a building. */
 export type SiteParams = {
 	/**  Terrain altitude above sea level [m]. */
@@ -3069,6 +3104,23 @@ export type Wiring_Serialize = {
 	inverters: InverterUnit[],
 	strings: PvString_Serialize[],
 	settings: WiringSettings,
+};
+
+/**  Results of the simulation. */
+export type YieldReport = {
+	weatherSource: string,
+	peakPowerKwp: number,
+	/**  Global horizontal irradiation [kWh/m²]. */
+	ghiKwhM2: number,
+	/**  Plane-of-array irradiation, weighted by peak power [kWh/m²]. */
+	poaKwhM2: number,
+	acEnergyKwh: number,
+	/**  [kWh/kWp]. */
+	specificYield: number,
+	performanceRatio: number,
+	monthlyAcKwh: number[],
+	balance: EnergyBalance,
+	assumptions: SimulationAssumptions,
 };
 
 /**  Decision of one zone of a cross-rail field. */

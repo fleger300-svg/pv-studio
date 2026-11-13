@@ -1,0 +1,16 @@
+[package]
+name = "pv-solar"
+description = "PV Studio yield simulation: solar position, decomposition, transposition, IAM, cell temperature, module and inverter models, loss balance"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-model.workspace = true
+serde.workspace = true
+specta.workspace = true
+
+[lints]
+workspace = true

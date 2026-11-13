@@ -24,6 +24,7 @@ pv-copilot = { path = "crates/pv-copilot" }
 pv-secrets = { path = "crates/pv-secrets" }
 pv-electrical = { path = "crates/pv-electrical" }
 pv-weather = { path = "crates/pv-weather" }
+pv-solar = { path = "crates/pv-solar" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "float_roundtrip"] }
 thiserror = "2.0.21"

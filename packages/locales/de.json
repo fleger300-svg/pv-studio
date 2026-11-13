@@ -160,6 +160,10 @@
       "network": "Bundesdienst nicht erreichbar ({detail}). Prüfen Sie die Internetverbindung.",
       "noLocation": "Lokalisieren Sie zuerst das Projekt (Adresse).",
       "noWeather": "Keine nahe MeteoSwiss-Station hat genug Stundenmessungen."
+    },
+    "yield": {
+      "noWeather": "Keine Wetterdaten: Projekt lokalisieren und Wetterdaten herunterladen (Schritt Gebäude).",
+      "noModules": "Kein Modul mit elektrischen Daten zu simulieren."
     }
   },
   "hud": {
@@ -749,5 +753,42 @@
     "refreshWeather": "Wetterdaten aktualisieren",
     "loading": "Wird heruntergeladen…",
     "attribution": "Daten: © swisstopo (Adresse, Höhe), © MeteoSwiss (Messungen)."
+  },
+  "production": {
+    "title": "Ertrag",
+    "run": "Ertrag simulieren",
+    "rerun": "Erneut simulieren",
+    "running": "Simulation…",
+    "energy": "Jährliche AC-Energie",
+    "specific": "Spezifischer Ertrag",
+    "pr": "Performance Ratio (PR)",
+    "poa": "Einstrahlung auf Modulebene",
+    "monthly": "Monatlicher Ertrag",
+    "balance": {
+      "nominal": "Nennenergie (STC × Einstrahlung)",
+      "iamKwh": "Reflexion (IAM)",
+      "soilingKwh": "Verschmutzung",
+      "lowLightKwh": "Schwachlicht",
+      "temperatureKwh": "Temperatur",
+      "mismatchKwh": "Mismatch",
+      "dcCableKwh": "DC-Kabel",
+      "inverterKwh": "Wechselrichter-Umwandlung",
+      "clippingKwh": "Wechselrichter-Abregelung"
+    },
+    "note": "Wetter: {source}. Ohne Nah- und Fernverschattung (folgt).",
+    "months": {
+      "0": "J",
+      "1": "F",
+      "2": "M",
+      "3": "A",
+      "4": "M",
+      "5": "J",
+      "6": "J",
+      "7": "A",
+      "8": "S",
+      "9": "O",
+      "10": "N",
+      "11": "D"
+    }
   }
 }

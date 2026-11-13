@@ -160,6 +160,10 @@
       "network": "Service fédéral injoignable ({detail}). Vérifiez la connexion Internet.",
       "noLocation": "Localisez d’abord le projet (adresse).",
       "noWeather": "Aucune station MeteoSwiss proche n’a assez de mesures horaires."
+    },
+    "yield": {
+      "noWeather": "Pas de météo : localisez le projet et téléchargez la météo (étape Bâtiment).",
+      "noModules": "Aucun module avec données électriques à simuler."
     }
   },
   "hud": {
@@ -749,5 +753,42 @@
     "refreshWeather": "Mettre à jour la météo",
     "loading": "Téléchargement…",
     "attribution": "Données : © swisstopo (adresse, altitude), © MeteoSwiss (mesures)."
+  },
+  "production": {
+    "title": "Production",
+    "run": "Simuler la production",
+    "rerun": "Simuler à nouveau",
+    "running": "Simulation…",
+    "energy": "Énergie AC annuelle",
+    "specific": "Rendement spécifique",
+    "pr": "Indice de performance (PR)",
+    "poa": "Irradiation sur le plan",
+    "monthly": "Production mensuelle",
+    "balance": {
+      "nominal": "Énergie nominale (STC × irradiation)",
+      "iamKwh": "Réflexion (IAM)",
+      "soilingKwh": "Salissure",
+      "lowLightKwh": "Faible éclairement",
+      "temperatureKwh": "Température",
+      "mismatchKwh": "Mismatch",
+      "dcCableKwh": "Câbles DC",
+      "inverterKwh": "Conversion onduleur",
+      "clippingKwh": "Écrêtage onduleur"
+    },
+    "note": "Météo : {source}. Sans ombrage proche ni lointain (à venir).",
+    "months": {
+      "0": "J",
+      "1": "F",
+      "2": "M",
+      "3": "A",
+      "4": "M",
+      "5": "J",
+      "6": "J",
+      "7": "A",
+      "8": "S",
+      "9": "O",
+      "10": "N",
+      "11": "D"
+    }
   }
 }

@@ -87,6 +87,9 @@ pub mod keys {
     pub const SITE_NETWORK: &str = "errors.site.network";
     pub const SITE_NO_LOCATION: &str = "errors.site.noLocation";
     pub const SITE_NO_WEATHER: &str = "errors.site.noWeather";
+    /// Yield simulation (pv-solar).
+    pub const YIELD_NO_WEATHER: &str = "errors.yield.noWeather";
+    pub const YIELD_NO_MODULES: &str = "errors.yield.noModules";
     /// API key (pv-secrets).
     pub const SECRETS_FORMAT: &str = "errors.secrets.format";
     pub const SECRETS_UNAVAILABLE: &str = "errors.secrets.unavailable";
@@ -153,6 +156,8 @@ pub mod keys {
         SITE_NETWORK,
         SITE_NO_LOCATION,
         SITE_NO_WEATHER,
+        YIELD_NO_WEATHER,
+        YIELD_NO_MODULES,
     ];
 }
 

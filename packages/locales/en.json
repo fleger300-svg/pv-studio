@@ -160,6 +160,10 @@
       "network": "Federal service unreachable ({detail}). Check the Internet connection.",
       "noLocation": "Locate the project first (address).",
       "noWeather": "No nearby MeteoSwiss station has enough hourly measurements."
+    },
+    "yield": {
+      "noWeather": "No weather: locate the project and download the weather (Building step).",
+      "noModules": "No module with electrical data to simulate."
     }
   },
   "hud": {
@@ -749,5 +753,42 @@
     "refreshWeather": "Update weather",
     "loading": "Downloading…",
     "attribution": "Data: © swisstopo (address, altitude), © MeteoSwiss (measurements)."
+  },
+  "production": {
+    "title": "Production",
+    "run": "Simulate the yield",
+    "rerun": "Simulate again",
+    "running": "Simulating…",
+    "energy": "Annual AC energy",
+    "specific": "Specific yield",
+    "pr": "Performance ratio (PR)",
+    "poa": "Plane-of-array irradiation",
+    "monthly": "Monthly production",
+    "balance": {
+      "nominal": "Nominal energy (STC × irradiation)",
+      "iamKwh": "Reflection (IAM)",
+      "soilingKwh": "Soiling",
+      "lowLightKwh": "Low irradiance",
+      "temperatureKwh": "Temperature",
+      "mismatchKwh": "Mismatch",
+      "dcCableKwh": "DC cables",
+      "inverterKwh": "Inverter conversion",
+      "clippingKwh": "Inverter clipping"
+    },
+    "note": "Weather: {source}. Without near or far shading (coming).",
+    "months": {
+      "0": "J",
+      "1": "F",
+      "2": "M",
+      "3": "A",
+      "4": "M",
+      "5": "J",
+      "6": "J",
+      "7": "A",
+      "8": "S",
+      "9": "O",
+      "10": "N",
+      "11": "D"
+    }
   }
 }

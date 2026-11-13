@@ -10,6 +10,7 @@ import { ProjectSitePanel } from '../panels/ProjectSitePanel';
 import { RoofPanel } from '../panels/RoofPanel';
 import { ArraysPanel } from '../panels/ArraysPanel';
 import { ConnectionPanel } from '../panels/ConnectionPanel';
+import { ProductionPanel } from '../panels/ProductionPanel';
 import { useWorkflowStore } from '../store/workflow';
 import { ErrorBoundary } from './ErrorBoundary';
 
@@ -43,6 +44,7 @@ export function SidePanel() {
       <aside className="app__right">
         <ErrorBoundary>
           <ConnectionPanel />
+          <ProductionPanel />
         </ErrorBoundary>
       </aside>
     );
