@@ -20,8 +20,7 @@
     "building": "Gebäude",
     "roof": "Dach",
     "layout": "Belegung",
-    "connection": "Anschluss",
-    "unavailable": "In diesem Prototyp nicht verfügbar"
+    "connection": "Anschluss"
   },
   "project": {
     "title": "Lasttest-Projekte",
@@ -670,6 +669,65 @@
       "storeUnavailable": "Der Schlüsselbund des Systems ist auf diesem Computer nicht verfügbar: Der Schlüssel kann nicht gespeichert werden.",
       "privacy": "Der Schlüssel wird vom Betriebssystem verwahrt (Windows-Anmeldeinformationsverwaltung, macOS-Schlüsselbund) und nie wieder angezeigt. Der Test ist kostenlos; jedes gelesene Datenblatt wird von Anthropic verrechnet.",
       "help": "Erstellen Sie einen Schlüssel in der Anthropic-Konsole (console.anthropic.com) unter API keys."
+    }
+  },
+  "connection": {
+    "title": "Verschaltung",
+    "dcPower": "DC-Leistung",
+    "acPower": "AC-Leistung",
+    "assigned": "Verschaltete Module",
+    "status": "Status",
+    "severity": {
+      "ok": "Konform",
+      "info": "Information",
+      "warning": "Zu prüfen",
+      "error": "Nicht konform"
+    },
+    "auto": "Automatische Verschaltung",
+    "clearStrings": "Strings löschen",
+    "noInverter": "Fügen Sie einen Wechselrichter aus der Bibliothek hinzu und starten Sie die automatische Verschaltung.",
+    "ratio": "DC/AC-Verhältnis",
+    "tracker": "MPPT",
+    "strings": "String",
+    "vocPlan": "Voc × kT",
+    "vocCold": "Voc kalt",
+    "isc": "Isc",
+    "emptyTracker": "Kein String",
+    "stringModules": "{count, plural, one {# Modul} other {# Module}}",
+    "locked": "Gesperrt",
+    "unlocked": "Frei",
+    "lockHint": "Ein gesperrter String wird von der automatischen Verschaltung nie geändert.",
+    "removeInverter": "Wechselrichter entfernen",
+    "addInverter": "Wechselrichter hinzufügen",
+    "searchInverter": "Wechselrichter suchen (Hersteller, Modell…)",
+    "add": "Hinzufügen",
+    "settings": "Auslegungsannahmen",
+    "minTemp": "Min. Zelltemperatur",
+    "maxTemp": "Max. Zelltemperatur",
+    "ratioMin": "Min. DC/AC-Verhältnis",
+    "ratioMax": "Max. DC/AC-Verhältnis",
+    "vocFactor": "Faktor kT des Stringplans"
+  },
+  "wiring": {
+    "issues": {
+      "dcAcRatio": "DC/AC-Verhältnis {ratio} % ausserhalb des Bereichs {min}–{max} %.",
+      "dcPower": "DC-Leistung {power} W über dem Maximum des Wechselrichters ({max} W).",
+      "inverterIsc": "Gesamter Kurzschlussstrom {current} A über dem Maximum des Wechselrichters ({max} A).",
+      "unassigned": "{count, plural, one {# Modul ist} other {# Module sind}} keinem String zugeordnet.",
+      "inverterMissing": "Der Wechselrichter {name} ist nicht mehr im Projekt.",
+      "missingModules": "{count, plural, one {# Modul des Strings existiert nicht mehr} other {# Module des Strings existieren nicht mehr}} (Belegung geändert).",
+      "mixedModules": "Der String mischt verschiedene Module.",
+      "mixedOrientation": "Der String mischt verschiedene Ausrichtungen.",
+      "noModuleData": "Modul ohne elektrische Daten: String nicht geprüft.",
+      "trackerInputs": "MPPT {tracker}: {strings} Strings für {inputs} Eingänge.",
+      "unequalStrings": "MPPT {tracker}: Strings unterschiedlicher Länge.",
+      "trackerOrientation": "MPPT {tracker}: Strings mit unterschiedlicher Ausrichtung.",
+      "maxVoltage": "MPPT {tracker}: Leerlaufspannung {voltage} V bei {temp} °C, über dem Maximum des Wechselrichters ({max} V).",
+      "belowMpp": "MPPT {tracker}: MPP-Spannung {voltage} V bei {temp} °C, unter dem MPP-Bereich ({min} V).",
+      "aboveMpp": "MPPT {tracker}: MPP-Spannung {voltage} V bei {temp} °C, über dem MPP-Bereich ({max} V).",
+      "trackerIsc": "MPPT {tracker}: Kurzschlussstrom {current} A über dem Maximum ({max} A).",
+      "trackerCurrent": "MPPT {tracker}: Strom {current} A über dem max. Eingangsstrom ({max} A), Abregelung.",
+      "trackerPower": "MPPT {tracker}: Leistung {power} W über dem Maximum ({max} W)."
     }
   }
 }

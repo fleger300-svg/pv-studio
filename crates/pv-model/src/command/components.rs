@@ -88,6 +88,7 @@ pub(super) fn apply_forget(
             .arrays
             .iter()
             .any(|a| a.module == Some(id) || a.mounting == Some(id))
+            || project.wiring.inverters.iter().any(|i| i.component == id)
             || project.components.iter().any(|s| {
                 !ids.contains(&s.component.id)
                     && matches!(&s.component.spec, ComponentSpec::MountingSystem(m) if m.part_ids().contains(&id))

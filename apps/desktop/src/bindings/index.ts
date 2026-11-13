@@ -137,6 +137,10 @@ export const commands = {
 	undo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("undo")),
 	/**  Redoes the last undone command. */
 	redo: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("redo")),
+	/**  Checks of the open project's inverters and strings (computed on demand: fast). */
+	wiringReport: () => typedError<WiringReport_Serialize, CommandError>(__TAURI_INVOKE("wiring_report")),
+	/**  Rebuilds every unlocked string of the open project automatically. One undo step. */
+	wiringAuto: () => typedError<ApplyResult_Serialize, CommandError>(__TAURI_INVOKE("wiring_auto")),
 	/**  Latest statics results of the open project (no computation: read from the cache). */
 	getStaticsSnapshot: () => typedError<StaticsSnapshot_Serialize, CommandError>(__TAURI_INVOKE("get_statics_snapshot")),
 	/**
@@ -757,6 +761,8 @@ export type ChangeSet_Deserialize = {
 	pricing: boolean,
 	/**  The frozen components changed (adopted, updated or forgotten). */
 	components?: boolean,
+	/**  The wiring (inverters, strings, electrical settings) changed. */
+	wiring?: boolean,
 	/**  Buildings added, changed or removed. Sorted, unique. */
 	buildings: BuildingId[],
 	/**  Roof faces added, changed or removed. Sorted, unique. */
@@ -778,6 +784,8 @@ export type ChangeSet_Serialize = {
 	pricing: boolean,
 	/**  The frozen components changed (adopted, updated or forgotten). */
 	components: boolean,
+	/**  The wiring (inverters, strings, electrical settings) changed. */
+	wiring: boolean,
 	/**  Buildings added, changed or removed. Sorted, unique. */
 	buildings: BuildingId[],
 	/**  Roof faces added, changed or removed. Sorted, unique. */
@@ -861,6 +869,8 @@ export type Command_Deserialize =
  *  module's dimensions are copied, a newly chosen system brings its rail geometry).
  */
 { type: "SetArrayComponents"; array_id: ArrayId; module?: ComponentId | null; mounting?: ComponentId | null } | 
+/**  Replaces the inverters, strings and electrical settings of the project. */
+{ type: "SetWiring"; wiring: Wiring_Deserialize } | 
 /**  Several commands applied as one, all or nothing. */
 { type: "Batch"; commands: Command_Deserialize[] };
 
@@ -910,6 +920,8 @@ export type Command_Serialize =
  *  module's dimensions are copied, a newly chosen system brings its rail geometry).
  */
 { type: "SetArrayComponents"; array_id: ArrayId; module: ComponentId | null; mounting: ComponentId | null } | 
+/**  Replaces the inverters, strings and electrical settings of the project. */
+{ type: "SetWiring"; wiring: Wiring_Serialize } | 
 /**  Several commands applied as one, all or nothing. */
 { type: "Batch"; commands: Command_Serialize[] };
 
@@ -1557,6 +1569,9 @@ export type InverterDc_Serialize = {
 	trackers: Tracker_Serialize[],
 };
 
+/**  Identifies an inverter of a project. */
+export type InverterId = string;
+
 export type InverterKind = 
 /**  String inverter (PV only). */
 "string" | 
@@ -1567,6 +1582,35 @@ export type InverterKind =
  *  the optimizer.
  */
 "optimizerBased";
+
+/**  One inverter. */
+export type InverterReport = InverterReport_Serialize | InverterReport_Deserialize;
+
+/**  One inverter. */
+export type InverterReport_Deserialize = {
+	id: InverterId,
+	name: string,
+	model: string,
+	acPowerW: number,
+	dcPowerWp: number,
+	/**  DC Wp / AC W. */
+	dcAcRatio: number,
+	trackers: TrackerReport_Deserialize[],
+	issues: Issue[],
+};
+
+/**  One inverter. */
+export type InverterReport_Serialize = {
+	id: InverterId,
+	name: string,
+	model: string,
+	acPowerW: number,
+	dcPowerWp: number,
+	/**  DC Wp / AC W. */
+	dcAcRatio: number,
+	trackers: TrackerReport_Serialize[],
+	issues: Issue[],
+};
 
 export type InverterSpec = InverterSpec_Serialize | InverterSpec_Deserialize;
 
@@ -1606,8 +1650,24 @@ export type InverterSpec_Serialize = {
 	details: EquipmentDetails_Serialize,
 };
 
+/**  One inverter of the project. */
+export type InverterUnit = {
+	id: InverterId,
+	/**  Shown on plans and reports (« WR1 », « Onduleur garage »). */
+	name: string,
+	/**  Frozen inverter component. */
+	component: ComponentId,
+};
+
 /**  Calendar date, serialised as `YYYY-MM-DD` (so string order is date order). */
 export type IsoDate = string;
+
+/**  A finding: i18n key (`wiring.issues.<name>`) and its parameters. */
+export type Issue = {
+	severity: Severity,
+	key: string,
+	params: { [key in string]: ErrorParam },
+};
 
 /**  Direction of an expansion joint line. */
 export type JointAxis = 
@@ -1808,6 +1868,13 @@ export type ModulePosition = {
 	id: ModuleId,
 	u: number,
 	v: number,
+};
+
+/**  Position of a module in its array's grid. */
+export type ModuleRef = {
+	array: ArrayId,
+	row: number,
+	col: number,
 };
 
 /**
@@ -2212,6 +2279,8 @@ export type ProjectSummary_Deserialize = {
 	arrays: ArraySummary_Deserialize[],
 	/**  Walls of every building (filled by the application with `pv_roof::walls`). */
 	walls: WallSummary[],
+	/**  Inverters, strings and electrical settings. */
+	wiring: Wiring_Deserialize,
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -2231,6 +2300,8 @@ export type ProjectSummary_Serialize = {
 	arrays: ArraySummary_Serialize[],
 	/**  Walls of every building (filled by the application with `pv_roof::walls`). */
 	walls: WallSummary[],
+	/**  Inverters, strings and electrical settings. */
+	wiring: Wiring_Serialize,
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -2242,6 +2313,33 @@ export type Property = {
 
 /**  A printed characteristic: a number with its unit, or a text. */
 export type PropertyValue = { kind: "number"; value: number; unit: string } | { kind: "text"; value: string };
+
+/**  A series string of modules on one tracker (MPPT) of an inverter. */
+export type PvString = PvString_Serialize | PvString_Deserialize;
+
+/**  A series string of modules on one tracker (MPPT) of an inverter. */
+export type PvString_Deserialize = {
+	id: StringId,
+	inverter: InverterId,
+	/**  Index of the tracker in the inverter's `dc.trackers`. */
+	tracker: number,
+	/**  Modules in wiring order (first = plus pole). */
+	modules: ModuleRef[],
+	/**  Locked strings are never changed by the automatic stringing. */
+	locked?: boolean,
+};
+
+/**  A series string of modules on one tracker (MPPT) of an inverter. */
+export type PvString_Serialize = {
+	id: StringId,
+	inverter: InverterId,
+	/**  Index of the tracker in the inverter's `dc.trackers`. */
+	tracker: number,
+	/**  Modules in wiring order (first = plus pole). */
+	modules: ModuleRef[],
+	/**  Locked strings are never changed by the automatic stringing. */
+	locked: boolean,
+};
 
 /**
  *  Layer of a cross-rail system: rails of different layers are never cut from the same bar
@@ -2584,6 +2682,9 @@ export type ServiceLifeModel =
 /**  Factors fixed by the engineer. */
 { kind: "explicit"; snow: number; wind: number };
 
+/**  How serious a finding is. */
+export type Severity = "info" | "warning" | "error";
+
 /**  Site data of a building. */
 export type SiteParams = {
 	/**  Terrain altitude above sea level [m]. */
@@ -2627,6 +2728,27 @@ export type StressPreset =
 "Residential1k" | 
 /**  One 160 m × 140 m flat roof with 10° east-west racks, ~10,000 modules. */
 "Industrial10k";
+
+/**  Identifies a PV string of a project. */
+export type StringId = string;
+
+/**  One string of the report. */
+export type StringReport = {
+	id: StringId,
+	modules: number,
+	/**  Module ids in wiring order (for the 3D colouring); missing positions are skipped. */
+	moduleIds: ModuleId[],
+	powerWp: number,
+	/**  `n × Voc_STC` and `n × Voc_STC × kT` (string plan table). */
+	vocStcV: number,
+	vocPlanV: number,
+	vocColdV: number,
+	vmppHotV: number,
+	vmppColdV: number,
+	iscA: number,
+	imppA: number,
+	issues: Issue[],
+};
 
 /**  Kind of support grid under the roof covering. */
 export type SupportGridKind = 
@@ -2694,6 +2816,33 @@ export type TerrainCategory = "II" | "IIa" | "III" | "IV";
 
 /**  One MPP tracker. */
 export type Tracker = Tracker_Serialize | Tracker_Deserialize;
+
+/**  One tracker (MPPT) of an inverter. */
+export type TrackerReport = TrackerReport_Serialize | TrackerReport_Deserialize;
+
+/**  One tracker (MPPT) of an inverter. */
+export type TrackerReport_Deserialize = {
+	index: number,
+	strings: StringReport[],
+	powerWp: number,
+	iscA: number,
+	imppA: number,
+	/**  Accepted string lengths for the module of its strings. */
+	limits?: [number, number] | null,
+	issues: Issue[],
+};
+
+/**  One tracker (MPPT) of an inverter. */
+export type TrackerReport_Serialize = {
+	index: number,
+	strings: StringReport[],
+	powerWp: number,
+	iscA: number,
+	imppA: number,
+	/**  Accepted string lengths for the module of its strings. */
+	limits?: [number, number] | null,
+	issues: Issue[],
+};
 
 /**  One MPP tracker. */
 export type Tracker_Deserialize = {
@@ -2763,6 +2912,66 @@ export type WallSummary = {
 
 /**  Wind zone of a roof face (SN EN 1991-1-4, K2 Base nomenclature). */
 export type WindZone = "interior" | "ridge" | "verge" | "eave" | "eaveCorner";
+
+/**  Inverters, strings and settings of a project. */
+export type Wiring = Wiring_Serialize | Wiring_Deserialize;
+
+/**  The project's DC design. */
+export type WiringReport = WiringReport_Serialize | WiringReport_Deserialize;
+
+/**  The project's DC design. */
+export type WiringReport_Deserialize = {
+	inverters: InverterReport_Deserialize[],
+	dcPowerWp: number,
+	acPowerW: number,
+	activeModules: number,
+	unassignedModules: number,
+	/**  Worst severity over everything (`None`: no finding). */
+	worst?: Severity | null,
+	issues: Issue[],
+};
+
+/**  The project's DC design. */
+export type WiringReport_Serialize = {
+	inverters: InverterReport_Serialize[],
+	dcPowerWp: number,
+	acPowerW: number,
+	activeModules: number,
+	unassignedModules: number,
+	/**  Worst severity over everything (`None`: no finding). */
+	worst?: Severity | null,
+	issues: Issue[],
+};
+
+/**  Design settings of the electrical checks. */
+export type WiringSettings = {
+	/**
+	 *  Lowest cell temperature (open-circuit voltage check) [°C]; −10 °C is the usual Swiss
+	 *  value of PV*SOL.
+	 */
+	minCellTempC: number,
+	/**  Highest cell temperature (lower MPP voltage check) [°C]. */
+	maxCellTempC: number,
+	/**  Acceptable DC/AC power ratio of an inverter (installed Wp / AC W). */
+	dcAcMin: number,
+	dcAcMax: number,
+	/**  Voltage factor of the string plan table (`Voc × kT`, 1.15 on the reference plan). */
+	vocFactor: number,
+};
+
+/**  Inverters, strings and settings of a project. */
+export type Wiring_Deserialize = {
+	inverters: InverterUnit[],
+	strings: PvString_Deserialize[],
+	settings?: WiringSettings,
+};
+
+/**  Inverters, strings and settings of a project. */
+export type Wiring_Serialize = {
+	inverters: InverterUnit[],
+	strings: PvString_Serialize[],
+	settings: WiringSettings,
+};
 
 /**  Decision of one zone of a cross-rail field. */
 export type ZoneDecision = {

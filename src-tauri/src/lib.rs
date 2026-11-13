@@ -10,6 +10,7 @@ mod library;
 mod roof;
 mod settings;
 mod state;
+mod wiring;
 
 use std::sync::Arc;
 
@@ -75,6 +76,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::apply_command,
             commands::undo,
             commands::redo,
+            wiring::wiring_report,
+            wiring::wiring_auto,
             compute::get_statics_snapshot,
             compute::get_bom,
             compute::freeze_bom,

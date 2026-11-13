@@ -298,6 +298,9 @@ pub struct Project {
     /// that refer to them), with the price adopted.
     #[serde(default)]
     pub components: Vec<ComponentSnapshot>,
+    /// Inverters and strings.
+    #[serde(default)]
+    pub wiring: crate::wiring::Wiring,
 }
 
 /// Error raised when a project violates a structural invariant.
@@ -338,6 +341,7 @@ impl Project {
             modules: Vec::new(),
             pricing: Pricing::default(),
             components: Vec::new(),
+            wiring: crate::wiring::Wiring::default(),
         }
     }
 
@@ -618,6 +622,7 @@ pub(crate) mod fixtures {
             modules,
             pricing: crate::pricing::Pricing::default(),
             components: Vec::new(),
+            wiring: crate::wiring::Wiring::default(),
         }
     }
 }

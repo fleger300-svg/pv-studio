@@ -55,6 +55,14 @@ uuid_id!(
     ComponentId
 );
 uuid_id!(
+    /// Identifies an inverter of a project.
+    InverterId
+);
+uuid_id!(
+    /// Identifies a PV string of a project.
+    StringId
+);
+uuid_id!(
     /// Identifies a stored file (datasheet PDF) of the component library.
     BlobId
 );

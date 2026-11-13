@@ -76,6 +76,17 @@ export function flatRoofFixture(): { summary: ProjectSummary; data: ModuleData }
     ],
     walls: [],
     canUndo: false,
+    wiring: {
+      inverters: [],
+      strings: [],
+      settings: {
+        minCellTempC: -10,
+        maxCellTempC: 70,
+        dcAcMin: 0.9,
+        dcAcMax: 1.3,
+        vocFactor: 1.15,
+      },
+    },
     canRedo: false,
   };
   const count = 6;

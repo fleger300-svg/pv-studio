@@ -20,8 +20,7 @@
     "building": "Building",
     "roof": "Roof",
     "layout": "Layout",
-    "connection": "Connection",
-    "unavailable": "Not available in this prototype"
+    "connection": "Connection"
   },
   "project": {
     "title": "Stress projects",
@@ -670,6 +669,65 @@
       "storeUnavailable": "The system credential store is not available on this computer: the key cannot be saved.",
       "privacy": "The key is kept by the operating system (Windows Credential Manager, macOS Keychain) and never shown again. Testing it costs nothing; each datasheet read is billed by Anthropic.",
       "help": "Create a key in the Anthropic Console (console.anthropic.com), under API keys."
+    }
+  },
+  "connection": {
+    "title": "Connection",
+    "dcPower": "DC power",
+    "acPower": "AC power",
+    "assigned": "Connected modules",
+    "status": "Status",
+    "severity": {
+      "ok": "Compliant",
+      "info": "Information",
+      "warning": "To check",
+      "error": "Not compliant"
+    },
+    "auto": "Automatic stringing",
+    "clearStrings": "Clear strings",
+    "noInverter": "Add an inverter from the library, then run the automatic stringing.",
+    "ratio": "DC/AC ratio",
+    "tracker": "MPPT",
+    "strings": "String",
+    "vocPlan": "Voc × kT",
+    "vocCold": "Voc cold",
+    "isc": "Isc",
+    "emptyTracker": "No string",
+    "stringModules": "{count, plural, one {# module} other {# modules}}",
+    "locked": "Locked",
+    "unlocked": "Free",
+    "lockHint": "A locked string is never changed by the automatic stringing.",
+    "removeInverter": "Remove inverter",
+    "addInverter": "Add an inverter",
+    "searchInverter": "Search an inverter (manufacturer, model…)",
+    "add": "Add",
+    "settings": "Design assumptions",
+    "minTemp": "Min. cell temperature",
+    "maxTemp": "Max. cell temperature",
+    "ratioMin": "Min. DC/AC ratio",
+    "ratioMax": "Max. DC/AC ratio",
+    "vocFactor": "String plan factor kT"
+  },
+  "wiring": {
+    "issues": {
+      "dcAcRatio": "DC/AC ratio {ratio} % outside the range {min}–{max} %.",
+      "dcPower": "DC power {power} W above the inverter maximum ({max} W).",
+      "inverterIsc": "Total short-circuit current {current} A above the inverter maximum ({max} A).",
+      "unassigned": "{count, plural, one {# module is} other {# modules are}} in no string.",
+      "inverterMissing": "Inverter {name} is no longer in the project.",
+      "missingModules": "{count, plural, one {# module of the string no longer exists} other {# modules of the string no longer exist}} (layout changed).",
+      "mixedModules": "The string mixes different modules.",
+      "mixedOrientation": "The string mixes different orientations.",
+      "noModuleData": "Module without electrical data: string not checked.",
+      "trackerInputs": "MPPT {tracker}: {strings} strings for {inputs} inputs.",
+      "unequalStrings": "MPPT {tracker}: strings of different lengths.",
+      "trackerOrientation": "MPPT {tracker}: strings with different orientations.",
+      "maxVoltage": "MPPT {tracker}: open-circuit voltage {voltage} V at {temp} °C, above the inverter maximum ({max} V).",
+      "belowMpp": "MPPT {tracker}: MPP voltage {voltage} V at {temp} °C, below the MPP range ({min} V).",
+      "aboveMpp": "MPPT {tracker}: MPP voltage {voltage} V at {temp} °C, above the MPP range ({max} V).",
+      "trackerIsc": "MPPT {tracker}: short-circuit current {current} A above the maximum ({max} A).",
+      "trackerCurrent": "MPPT {tracker}: current {current} A above the max. input current ({max} A), clipping.",
+      "trackerPower": "MPPT {tracker}: power {power} W above the maximum ({max} W)."
     }
   }
 }

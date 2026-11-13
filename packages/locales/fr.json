@@ -20,8 +20,7 @@
     "building": "Bâtiment",
     "roof": "Toiture",
     "layout": "Calepinage",
-    "connection": "Raccordement",
-    "unavailable": "Non disponible dans ce prototype"
+    "connection": "Raccordement"
   },
   "project": {
     "title": "Projets de test de charge",
@@ -670,6 +669,65 @@
       "storeUnavailable": "Le trousseau du système n’est pas disponible sur cet ordinateur : la clé ne peut pas être enregistrée.",
       "privacy": "La clé est conservée par le système d’exploitation (Gestionnaire d’identification Windows, Trousseau macOS) et n’est plus jamais affichée. La tester ne coûte rien ; chaque fiche lue est facturée par Anthropic.",
       "help": "Créez une clé dans la console Anthropic (console.anthropic.com), rubrique API keys."
+    }
+  },
+  "connection": {
+    "title": "Raccordement",
+    "dcPower": "Puissance DC",
+    "acPower": "Puissance AC",
+    "assigned": "Modules raccordés",
+    "status": "État",
+    "severity": {
+      "ok": "Conforme",
+      "info": "Information",
+      "warning": "À vérifier",
+      "error": "Non conforme"
+    },
+    "auto": "Répartition automatique",
+    "clearStrings": "Effacer les strings",
+    "noInverter": "Ajoutez un onduleur depuis la bibliothèque, puis lancez la répartition automatique.",
+    "ratio": "Ratio DC/AC",
+    "tracker": "MPPT",
+    "strings": "String",
+    "vocPlan": "Voc × kT",
+    "vocCold": "Voc à froid",
+    "isc": "Isc",
+    "emptyTracker": "Aucun string",
+    "stringModules": "{count, plural, one {# module} other {# modules}}",
+    "locked": "Verrouillé",
+    "unlocked": "Libre",
+    "lockHint": "Un string verrouillé n’est jamais modifié par la répartition automatique.",
+    "removeInverter": "Retirer l’onduleur",
+    "addInverter": "Ajouter un onduleur",
+    "searchInverter": "Rechercher un onduleur (fabricant, modèle…)",
+    "add": "Ajouter",
+    "settings": "Hypothèses de dimensionnement",
+    "minTemp": "Température de cellule min.",
+    "maxTemp": "Température de cellule max.",
+    "ratioMin": "Ratio DC/AC min.",
+    "ratioMax": "Ratio DC/AC max.",
+    "vocFactor": "Facteur kT du plan de string"
+  },
+  "wiring": {
+    "issues": {
+      "dcAcRatio": "Ratio DC/AC de {ratio} % hors de la plage {min}–{max} %.",
+      "dcPower": "Puissance DC {power} W supérieure au maximum de l’onduleur ({max} W).",
+      "inverterIsc": "Courant de court-circuit total {current} A supérieur au maximum de l’onduleur ({max} A).",
+      "unassigned": "{count, plural, one {# module n’est raccordé} other {# modules ne sont raccordés}} à aucun string.",
+      "inverterMissing": "L’onduleur {name} n’est plus dans le projet.",
+      "missingModules": "{count, plural, one {# module du string n’existe plus} other {# modules du string n’existent plus}} (calepinage modifié).",
+      "mixedModules": "Le string mélange des modules différents.",
+      "mixedOrientation": "Le string mélange des orientations différentes.",
+      "noModuleData": "Module sans données électriques : string non contrôlé.",
+      "trackerInputs": "MPPT {tracker} : {strings} strings pour {inputs} entrées.",
+      "unequalStrings": "MPPT {tracker} : strings de longueurs différentes.",
+      "trackerOrientation": "MPPT {tracker} : strings d’orientations différentes.",
+      "maxVoltage": "MPPT {tracker} : tension à vide {voltage} V à {temp} °C, supérieure au maximum de l’onduleur ({max} V).",
+      "belowMpp": "MPPT {tracker} : tension MPP {voltage} V à {temp} °C, sous la plage MPP ({min} V).",
+      "aboveMpp": "MPPT {tracker} : tension MPP {voltage} V à {temp} °C, au-dessus de la plage MPP ({max} V).",
+      "trackerIsc": "MPPT {tracker} : courant de court-circuit {current} A supérieur au maximum ({max} A).",
+      "trackerCurrent": "MPPT {tracker} : courant {current} A supérieur au courant d’entrée max. ({max} A), écrêtage.",
+      "trackerPower": "MPPT {tracker} : puissance {power} W supérieure au maximum ({max} W)."
     }
   }
 }

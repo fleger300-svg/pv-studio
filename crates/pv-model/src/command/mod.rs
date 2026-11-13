@@ -16,6 +16,7 @@ mod entities;
 mod modules;
 mod pricing;
 mod structure;
+mod wiring;
 
 /// i18n keys of every error the back-end can return. The front-end translates them; never
 /// show raw keys. A test checks that each key exists in `packages/locales/en.json`.
@@ -232,6 +233,8 @@ pub enum Command {
         module: Option<ComponentId>,
         mounting: Option<ComponentId>,
     },
+    /// Replaces the inverters, strings and electrical settings of the project.
+    SetWiring { wiring: Box<crate::wiring::Wiring> },
     /// Several commands applied as one, all or nothing.
     Batch { commands: Vec<Command> },
 }
@@ -247,6 +250,9 @@ pub struct ChangeSet {
     /// The frozen components changed (adopted, updated or forgotten).
     #[serde(default)]
     pub components: bool,
+    /// The wiring (inverters, strings, electrical settings) changed.
+    #[serde(default)]
+    pub wiring: bool,
     /// Buildings added, changed or removed. Sorted, unique.
     pub buildings: Vec<BuildingId>,
     /// Roof faces added, changed or removed. Sorted, unique.
@@ -287,6 +293,7 @@ impl ChangeSet {
     pub fn merge(&mut self, other: ChangeSet) {
         self.pricing |= other.pricing;
         self.components |= other.components;
+        self.wiring |= other.wiring;
         self.structure |= other.structure;
         union(&mut self.buildings, &other.buildings);
         union(&mut self.faces, &other.faces);
@@ -301,7 +308,11 @@ impl ChangeSet {
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.module_ids.is_empty() && !self.pricing && !self.components && self.modules_only()
+        self.module_ids.is_empty()
+            && !self.pricing
+            && !self.components
+            && !self.wiring
+            && self.modules_only()
     }
 }
 
@@ -378,6 +389,9 @@ impl Command {
             Command::SetArrayComponents { array_id, .. } => {
                 components::inverse_set_array(project, *array_id)
             }
+            Command::SetWiring { .. } => Command::SetWiring {
+                wiring: Box::new(project.wiring.clone()),
+            },
             Command::Batch { commands } => batch::inverse_batch(project, commands),
         }
     }
@@ -420,6 +434,7 @@ impl Command {
                 module,
                 mounting,
             } => components::apply_set_array(project, *array_id, *module, *mounting),
+            Command::SetWiring { wiring } => wiring::apply_set_wiring(project, wiring),
             Command::Batch { commands } => batch::apply_batch(project, commands),
         }
     }

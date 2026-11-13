@@ -422,6 +422,12 @@ fn persist(tx: &Transaction<'_>, project: &Project, changes: &ChangeSet) -> Resu
     if changes.components {
         write_components(tx, project)?;
     }
+    if changes.wiring {
+        tx.execute(
+            "UPDATE project SET wiring_json = ?1",
+            params![serde_json::to_string(&project.wiring)?],
+        )?;
+    }
     if !changes.modules_only() {
         persist_entities(tx, project, changes)?;
     }
@@ -613,11 +619,12 @@ fn insert_modules(tx: &Transaction<'_>, modules: &[ModuleInstance]) -> Result<()
 
 fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
     tx.execute(
-        "INSERT INTO project (id, name, pricing_json) VALUES (?1, ?2, ?3)",
+        "INSERT INTO project (id, name, pricing_json, wiring_json) VALUES (?1, ?2, ?3, ?4)",
         params![
             p.id.0.to_string(),
             p.name,
-            serde_json::to_string(&p.pricing)?
+            serde_json::to_string(&p.pricing)?,
+            serde_json::to_string(&p.wiring)?
         ],
     )?;
     for (ord, b) in p.buildings.iter().enumerate() {
@@ -636,15 +643,16 @@ fn insert_project(tx: &Transaction<'_>, p: &Project) -> Result<(), StoreError> {
 /// The project, and the old mounting snapshot of each array still to convert (files written
 /// before schema v8).
 fn load_project(conn: &Connection) -> Result<(Project, Vec<Option<MountingSystem>>), StoreError> {
-    let (id, name, pricing): (Uuid, String, Pricing) = conn
+    let (id, name, pricing, wiring): (Uuid, String, Pricing, pv_model::Wiring) = conn
         .query_row(
-            "SELECT id, name, pricing_json FROM project LIMIT 1",
+            "SELECT id, name, pricing_json, wiring_json FROM project LIMIT 1",
             [],
             |r| {
                 Ok((
                     uuid_col(r, 0)?,
                     r.get(1)?,
                     json_with_defaults::<Pricing>(r, 2)?,
+                    json_with_defaults::<pv_model::Wiring>(r, 3)?,
                 ))
             },
         )
@@ -790,6 +798,7 @@ fn load_project(conn: &Connection) -> Result<(Project, Vec<Option<MountingSystem
             modules,
             pricing,
             components: load_components(conn)?,
+            wiring,
         },
         legacy,
     ))
@@ -948,6 +957,7 @@ mod tests {
             r#"DROP TABLE component_snapshot;
                ALTER TABLE "array" DROP COLUMN module_ref;
                ALTER TABLE "array" DROP COLUMN mounting_ref;
+               ALTER TABLE project DROP COLUMN wiring_json;
                PRAGMA user_version = 7;"#,
         )
         .expect("downgrade to v7");
@@ -992,6 +1002,7 @@ mod tests {
                    DROP TABLE component_snapshot;
                    ALTER TABLE "array" DROP COLUMN module_ref;
                    ALTER TABLE "array" DROP COLUMN mounting_ref;
+                   ALTER TABLE project DROP COLUMN wiring_json;
                    PRAGMA user_version = 3;"#,
             )
             .expect("downgrade to v3");
@@ -1081,6 +1092,7 @@ mod tests {
                    DROP TABLE component_snapshot;
                    ALTER TABLE "array" DROP COLUMN module_ref;
                    ALTER TABLE "array" DROP COLUMN mounting_ref;
+                   ALTER TABLE project DROP COLUMN wiring_json;
                    PRAGMA user_version = 4;"#,
             )
             .expect("downgrade to v4");
@@ -1188,6 +1200,7 @@ mod tests {
                    DROP TABLE component_snapshot;
                    ALTER TABLE "array" DROP COLUMN module_ref;
                    ALTER TABLE "array" DROP COLUMN mounting_ref;
+                   ALTER TABLE project DROP COLUMN wiring_json;
                    PRAGMA user_version = 1;"#,
             )
             .expect("downgrade to v1");

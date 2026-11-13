@@ -74,6 +74,8 @@ pub struct ProjectSummary {
     pub arrays: Vec<ArraySummary>,
     /// Walls of every building (filled by the application with `pv_roof::walls`).
     pub walls: Vec<WallSummary>,
+    /// Inverters, strings and electrical settings.
+    pub wiring: crate::wiring::Wiring,
     pub can_undo: bool,
     pub can_redo: bool,
 }
@@ -143,6 +145,7 @@ impl ProjectSummary {
             roof_faces,
             arrays,
             walls: Vec::new(),
+            wiring: project.wiring.clone(),
             can_undo,
             can_redo,
         }

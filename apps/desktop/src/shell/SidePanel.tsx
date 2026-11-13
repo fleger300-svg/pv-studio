@@ -8,6 +8,7 @@ import type { ColorMode } from '../viewport3d/PanelMeshes';
 import { BuildingPanel } from '../panels/BuildingPanel';
 import { RoofPanel } from '../panels/RoofPanel';
 import { ArraysPanel } from '../panels/ArraysPanel';
+import { ConnectionPanel } from '../panels/ConnectionPanel';
 import { useWorkflowStore } from '../store/workflow';
 import { ErrorBoundary } from './ErrorBoundary';
 
@@ -31,6 +32,15 @@ export function SidePanel() {
       <aside className="app__right">
         <ErrorBoundary>
           <RoofPanel />
+        </ErrorBoundary>
+      </aside>
+    );
+  }
+  if (step === 'connection') {
+    return (
+      <aside className="app__right">
+        <ErrorBoundary>
+          <ConnectionPanel />
         </ErrorBoundary>
       </aside>
     );

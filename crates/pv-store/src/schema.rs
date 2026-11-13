@@ -166,6 +166,11 @@ const MIGRATIONS: &[&str] = &[
     ALTER TABLE "array" ADD COLUMN module_ref TEXT;
     ALTER TABLE "array" ADD COLUMN mounting_ref TEXT;
     "#,
+    // v9: DC wiring (inverters, strings, electrical settings), replaced as a whole by
+    // `SetWiring`.
+    r#"
+    ALTER TABLE project ADD COLUMN wiring_json TEXT NOT NULL DEFAULT '{"inverters":[],"strings":[]}';
+    "#,
 ];
 
 /// Latest schema version known to this build.

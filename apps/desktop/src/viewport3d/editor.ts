@@ -1,4 +1,4 @@
-import { Vector3 } from 'three';
+import { Color, Vector3 } from 'three';
 import type { Command, ProjectSummary } from '../bindings';
 import { events } from '../bindings';
 import { commandBusy, runCommand, type CommandTiming } from '../commands/runCommand';
@@ -18,6 +18,9 @@ import {
 } from './PanelMeshes';
 import { vec3 } from './frames';
 
+/** Modules in no string (string colour mode). */
+const UNASSIGNED_COLOR = new Color('#9aa3ad');
+
 export type { CommandTiming } from '../commands/runCommand';
 
 /** Drag offsets below this (m) are treated as a click, not a move. */
@@ -33,6 +36,8 @@ export class Editor {
   private drag: { ids: number[]; startU: number; startV: number; du: number; dv: number } | null =
     null;
   private colorMode: ColorMode = 'default';
+  /** Real strings (module id → string ordinal); the fake strings when empty. */
+  private strings: ReadonlyMap<number, number> = new Map();
   private readonly axes: { u: Vector3; v: Vector3 }[];
   private readonly scratch = new Vector3();
   private unlisten: (() => void) | null = null;
@@ -92,12 +97,21 @@ export class Editor {
   readonly colorOf = (id: number) => {
     if (this.selection.has(id)) return SELECTED_COLOR;
     if (this.colorMode === 'string') {
-      return (
-        STRING_PALETTE[this.panels.stringIndex(id) % STRING_PALETTE.length] ?? DEFAULT_CELL_COLOR
-      );
+      const index = this.strings.size > 0 ? this.strings.get(id) : this.panels.stringIndex(id);
+      if (index === undefined) return UNASSIGNED_COLOR;
+      return STRING_PALETTE[index % STRING_PALETTE.length] ?? DEFAULT_CELL_COLOR;
     }
     return DEFAULT_CELL_COLOR;
   };
+
+  /** Colours the modules by the project's real strings. */
+  setStrings(strings: ReadonlyMap<number, number>): void {
+    this.strings = strings;
+    if (this.colorMode === 'string') {
+      this.panels.updateAllColors(this.colorOf);
+      this.invalidate();
+    }
+  }
 
   setColorMode(mode: ColorMode): void {
     this.colorMode = mode;

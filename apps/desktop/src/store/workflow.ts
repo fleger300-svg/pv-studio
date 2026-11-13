@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
-/** Editing steps (the connection step comes later). */
-export type Step = 'building' | 'roof' | 'layout';
+/** Editing steps. */
+export type Step = 'building' | 'roof' | 'layout' | 'connection';
 
-export const STEPS: readonly Step[] = ['building', 'roof', 'layout'];
+export const STEPS: readonly Step[] = ['building', 'roof', 'layout', 'connection'];
 
 interface WorkflowState {
   step: Step;

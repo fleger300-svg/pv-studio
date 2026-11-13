@@ -2528,6 +2528,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "pv-electrical"
+version = "0.1.0"
+dependencies = [
+ "pv-model",
+ "serde",
+ "serde_json",
+ "specta",
+]
+
+[[package]]
 name = "pv-geo"
 version = "0.1.0"
 dependencies = [
@@ -2588,6 +2598,7 @@ name = "pv-pipeline"
 version = "0.1.0"
 dependencies = [
  "pv-bom",
+ "pv-electrical",
  "pv-geo",
  "pv-graph",
  "pv-layout",
@@ -2660,6 +2671,7 @@ dependencies = [
  "base64 0.21.7",
  "pv-bom",
  "pv-copilot",
+ "pv-electrical",
  "pv-layout",
  "pv-library",
  "pv-model",

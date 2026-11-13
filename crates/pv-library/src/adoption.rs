@@ -10,7 +10,7 @@ use pv_model::{Command, ComponentId, Project};
 
 use crate::{LibraryError, LibraryStore};
 
-/// Component ids a command refers to (arrays' module and mounting system).
+/// Component ids a command refers to (arrays' module and mounting system, inverters).
 #[must_use]
 pub fn referenced_components(cmd: &Command) -> Vec<ComponentId> {
     fn walk(cmd: &Command, out: &mut Vec<ComponentId>) {
@@ -21,6 +21,7 @@ pub fn referenced_components(cmd: &Command) -> Vec<ComponentId> {
             Command::SetArrayComponents {
                 module, mounting, ..
             } => out.extend(module.iter().chain(mounting)),
+            Command::SetWiring { wiring } => out.extend(wiring.component_ids()),
             Command::Batch { commands } => commands.iter().for_each(|c| walk(c, out)),
             _ => {}
         }

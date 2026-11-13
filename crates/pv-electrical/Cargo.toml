@@ -1,0 +1,19 @@
+[package]
+name = "pv-electrical"
+description = "PV Studio DC design: string voltage limits, MPPT and inverter checks, DC/AC ratio, string plan table, automatic stringing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+pv-model.workspace = true
+serde.workspace = true
+specta.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

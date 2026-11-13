@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '../store/project';
 import { STEPS, useWorkflowStore } from '../store/workflow';
 
-/** Workflow steps: building, roof, layout (the connection step comes later). */
+/** Workflow steps: building, roof, layout, connection. */
 export function WorkflowSteps() {
   const { t } = useTranslation();
   const step = useWorkflowStore((s) => s.step);
@@ -27,16 +27,6 @@ export function WorkflowSteps() {
             </button>
           </li>
         ))}
-        <li>
-          <button
-            type="button"
-            className="workflow__step"
-            disabled
-            title={t('workflow.unavailable')}
-          >
-            {t('workflow.step', { index: STEPS.length + 1, label: t('workflow.connection') })}
-          </button>
-        </li>
       </ol>
     </nav>
   );

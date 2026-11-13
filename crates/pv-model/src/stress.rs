@@ -64,6 +64,7 @@ impl Builder {
                 modules: Vec::new(),
                 pricing: crate::pricing::Pricing::default(),
                 components: Vec::new(),
+                wiring: crate::wiring::Wiring::default(),
             },
         }
     }

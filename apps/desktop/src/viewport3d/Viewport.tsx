@@ -18,6 +18,7 @@ import { usePlanStore } from '../store/plan';
 import { useProjectStore } from '../store/project';
 import { useSelectionStore } from '../store/selection';
 import { useViewStore } from '../store/view';
+import { useWiringStore } from '../store/wiring';
 import { useWorkflowStore } from '../store/workflow';
 import { useUiStore } from '../store/ui';
 
@@ -159,6 +160,11 @@ function Scene({ summary, modules }: SceneProps) {
   useEffect(() => {
     editor.setColorMode(colorMode);
   }, [editor, colorMode]);
+
+  const strings = useWiringStore((s) => s.stringOf);
+  useEffect(() => {
+    editor.setStrings(strings);
+  }, [editor, strings]);
 
   return (
     <>
