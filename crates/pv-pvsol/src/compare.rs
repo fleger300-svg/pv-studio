@@ -205,8 +205,17 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
 /// to PV*SOL's results; `None` when PV*SOL has no results or the project cannot be simulated.
 #[must_use]
 pub fn compare(file: &PvsolFile, project: &Project) -> Option<Comparison> {
+    compare_with(file, project, assumptions_like(file))
+}
+
+/// [`compare`] with given assumptions (calibration studies).
+#[must_use]
+pub fn compare_with(
+    file: &PvsolFile,
+    project: &Project,
+    a: SimulationAssumptions,
+) -> Option<Comparison> {
     let p = file.results.as_ref()?;
-    let a = assumptions_like(file);
     let s = simulate(project, &a).ok()?;
     let same_weather = file.weather.as_ref().is_some_and(|(name, _)| {
         project

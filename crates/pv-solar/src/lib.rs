@@ -48,14 +48,17 @@ impl Default for SimulationAssumptions {
     fn default() -> Self {
         Self {
             albedo: 0.2,
-            iam_b0: 0.05,
-            iam_diffuse: 0.95,
+            // Calibrated on PV*SOL over the 119 completely imported projects of the corpus
+            // (same weather, M10): median reflection gap 0.0 pt, temperature −0.05 pt, low
+            // light 0.0 pt (`iam_b0`, `iam_diffuse`, `u_roof`, `low_light_a`).
+            iam_b0: 0.03,
+            iam_diffuse: 0.97,
             soiling_loss: 0.02,
             mismatch_loss: 0.01,
             dc_cable_loss: 0.01,
-            u_roof: 20.0,
+            u_roof: 27.5,
             u_free: 29.0,
-            low_light_a: 0.02,
+            low_light_a: 0.0275,
             default_inverter_efficiency: 0.96,
         }
     }
