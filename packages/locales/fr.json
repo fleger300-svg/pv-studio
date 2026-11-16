@@ -857,14 +857,15 @@
       "moduleSize": "Champ « {array} » : les dimensions de « {module} » diffèrent de la scène PV*SOL.",
       "facade": "Pan {face} : façade verticale, reprise à 89,9° (le modèle n’accepte pas 90°).",
       "noScene": "Pas de scène 3D dans le projet PV*SOL : aucun module n’a pu être placé.",
-      "rowFormations": "{count} formation(s) de rangées sur toit plat ({modules} modules) pas encore reprises.",
+      "rowFormations": "{count} formation(s) de rangées sur toit plat ({modules} modules) non reprise(s) : fiche du module introuvable.",
       "objectsSkipped": "{count} objet(s) d’ombrage ou de décor non repris : {names}.",
       "inverterMissing": "Onduleur « {inverter} » : fiche introuvable, non repris.",
       "trackerMissing": "« {inverter} » : tracker MPP {tracker} absent de la fiche, strings non repris.",
       "unwiredModules": "{count} module(s) câblés dans PV*SOL ne sont pas dans les champs repris.",
       "noWiring": "Le projet PV*SOL n’a pas de plan de câblage 3D : onduleurs et strings à refaire.",
       "chooseMounting": "Choisissez un système de montage pour chaque champ (PV*SOL ne le décrit pas) : la statique et la liste de matériel en dépendent.",
-      "surroundingsSkipped": "Le modèle de surface PV*SOL n’a pas pu être repris (carte au format inattendu)."
+      "surroundingsSkipped": "Le modèle de surface PV*SOL n’a pas pu être repris (carte au format inattendu).",
+      "unusedFormations": "{count} formation(s) de rangées ({modules} modules) ignorée(s) : elles ne font partie d’aucun champ de la configuration PV*SOL (non simulées par PV*SOL)."
     },
     "compare": {
       "peakPower": "Puissance crête",

@@ -857,14 +857,15 @@
       "moduleSize": "Array “{array}”: the dimensions of “{module}” differ from the PV*SOL scene.",
       "facade": "Face {face}: vertical facade, imported at 89.9° (the model does not accept 90°).",
       "noScene": "No 3-D scene in the PV*SOL project: no module could be placed.",
-      "rowFormations": "{count} module row formation(s) on flat roofs ({modules} modules) not carried over yet.",
+      "rowFormations": "{count} module row formation(s) on flat roofs ({modules} modules) not carried over: module record not found.",
       "objectsSkipped": "{count} shading or scenery object(s) not carried over: {names}.",
       "inverterMissing": "Inverter “{inverter}”: record not found, not carried over.",
       "trackerMissing": "“{inverter}”: MPP tracker {tracker} missing from the record, strings not carried over.",
       "unwiredModules": "{count} module(s) wired in PV*SOL are not in the imported arrays.",
       "noWiring": "The PV*SOL project has no 3-D wiring plan: inverters and strings to be redone.",
       "chooseMounting": "Choose a mounting system for each array (PV*SOL does not describe it): the statics and the bill of materials depend on it.",
-      "surroundingsSkipped": "PV*SOL’s surface model could not be carried over (unexpected map layout)."
+      "surroundingsSkipped": "PV*SOL’s surface model could not be carried over (unexpected map layout).",
+      "unusedFormations": "{count} row formation(s) ({modules} modules) ignored: they belong to no module area of the PV*SOL configuration (not simulated by PV*SOL)."
     },
     "compare": {
       "peakPower": "Peak power",

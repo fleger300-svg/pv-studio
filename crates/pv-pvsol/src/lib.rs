@@ -79,6 +79,10 @@ pub struct PvsolFile {
     pub db: PvsolDb,
     pub scene: Option<Scene>,
     pub wiring: Vec<WiredInverter>,
+    /// Module area of every formation and half row (from the wiring file).
+    pub form_areas: std::collections::HashMap<String, String>,
+    /// Racks of the row formations (`Visu3D/MoSys.xml`).
+    pub mounting_systems: Vec<geometry::MountingSystem>,
     /// Weather file name and content.
     pub weather: Option<(String, PvsolWeather)>,
     /// `None` when the project was never simulated.
@@ -119,9 +123,19 @@ pub fn read_archive(a: &Archive) -> Result<PvsolFile, ReadError> {
     let scene = xml_entry(a, "Visu3D/GeometrischeDaten.xml")?
         .map(|d| geometry::parse(&d))
         .transpose()?;
-    let wiring = xml_entry(a, "Visu3D/Modul_Verschaltung.xml")?
-        .map(|d| wiring::parse(&d))
+    let wiring_doc = xml_entry(a, "Visu3D/Modul_Verschaltung.xml")?;
+    let wiring = wiring_doc
+        .as_ref()
+        .map(wiring::parse)
         .transpose()?
+        .unwrap_or_default();
+    let form_areas = wiring_doc
+        .as_ref()
+        .map(wiring::form_areas)
+        .unwrap_or_default();
+    let mounting_systems = xml_entry(a, "Visu3D/MoSys.xml")?
+        .as_ref()
+        .map(geometry::mounting_systems)
         .unwrap_or_default();
     let results = xml_entry(a, "SimResults.xml")?
         .map(|d| results::parse(&d))
@@ -172,6 +186,8 @@ pub fn read_archive(a: &Archive) -> Result<PvsolFile, ReadError> {
         db,
         scene,
         wiring,
+        form_areas,
+        mounting_systems,
         weather,
         results,
         height_map,

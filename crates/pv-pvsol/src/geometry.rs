@@ -133,8 +133,8 @@ pub struct OtherObject {
 pub struct Scene {
     pub formations: Vec<Formation>,
     pub buildings: Vec<VarBuilding>,
-    /// Module row formations (racks on flat roofs), not decoded yet: name and module count.
-    pub row_formations: Vec<(String, u32)>,
+    /// Module row formations (racks on flat roofs).
+    pub row_formations: Vec<RowFormation>,
     pub others: Vec<OtherObject>,
     /// The map section (aerial image and height map), when the project has one.
     pub map: Option<MapSection>,
@@ -330,12 +330,10 @@ pub fn parse(doc: &Node) -> Result<Scene, ReadError> {
                     scene.others.push(OtherObject { kind: k, name });
                 }
             }
-            38 => {
-                let n = o.descendants("Modul").len();
-                scene
-                    .row_formations
-                    .push((name, u32::try_from(n).unwrap_or(u32::MAX)));
-            }
+            38 => match row_formation(o) {
+                Some(f) => scene.row_formations.push(f),
+                None => scene.others.push(OtherObject { kind: k, name }),
+            },
             15 => match var_building(o, reference_index) {
                 Some(b) => scene.buildings.push(b),
                 None => scene.others.push(OtherObject { kind: k, name }),
@@ -357,4 +355,125 @@ pub fn parse(doc: &Node) -> Result<Scene, ReadError> {
         }
     }
     Ok(scene)
+}
+
+/// One half of a module row (`FormsMRF`): the modules facing one way.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RowHalf {
+    /// Normalised signature (listed under its module area in the wiring file).
+    pub id: String,
+    pub modules: Vec<FormationModule>,
+}
+
+/// One row of a row formation (`ModulreiheSparVar`).
+#[derive(Debug, Clone, PartialEq)]
+pub struct ModuleRow {
+    /// Corner of the row in the flat face's `(u, v)` frame.
+    pub corner_uv: [f64; 2],
+    /// One half for rows facing one way, two for east-west racks.
+    pub halves: Vec<RowHalf>,
+}
+
+/// A module row formation (`AnwObjTyp` 38): racks on a flat roof.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RowFormation {
+    pub id: String,
+    pub name: String,
+    pub face: FaceKey,
+    /// Corner of the first row, world ENU.
+    pub corner: Enu,
+    /// Compass direction of the formation (the modules of the first halves face it or its
+    /// opposite).
+    pub azimuth_deg: f64,
+    /// Mounting system (normalised GUID, key into `Visu3D/MoSys.xml`).
+    pub mounting: String,
+    pub rows: Vec<ModuleRow>,
+}
+
+impl RowFormation {
+    #[must_use]
+    pub fn module_count(&self) -> usize {
+        self.rows
+            .iter()
+            .flat_map(|r| &r.halves)
+            .map(|h| h.modules.len())
+            .sum()
+    }
+}
+
+fn row_formation(o: &Node) -> Option<RowFormation> {
+    let sd = o.child("StandardDaten")?;
+    let f = o.at("SpezifDaten/ModulreihenFormation")?;
+    let rows: Vec<ModuleRow> = f
+        .children("ModulreiheSparVar")
+        .filter_map(|r| {
+            Some(ModuleRow {
+                corner_uv: [r.f64_at("PosAufBezugsFL/X")?, r.f64_at("PosAufBezugsFL/Y")?],
+                halves: r
+                    .children("FormsMRF")
+                    .map(|h| RowHalf {
+                        id: guid::normalise(h.text_at("SignaturXML").unwrap_or_default()),
+                        modules: h
+                            .children("Modul")
+                            .filter_map(|m| {
+                                Some(FormationModule {
+                                    id: guid::normalise(m.text_at("SignaturXML")?),
+                                    row: u32::try_from(m.f64_at("Zeile")?.round() as i64).ok()?,
+                                    col: u32::try_from(m.f64_at("Spalte")?.round() as i64).ok()?,
+                                })
+                            })
+                            .collect(),
+                    })
+                    .collect(),
+            })
+        })
+        .collect();
+    if rows.is_empty() {
+        return None;
+    }
+    Some(RowFormation {
+        id: guid::normalise(sd.text_at("SignaturXML").unwrap_or_default()),
+        name: sd.text_at("Bezeichnung").unwrap_or_default().to_owned(),
+        face: face_key(o),
+        corner: to_enu(sd.child("Position")?)?,
+        azimuth_deg: sd.f64_at("Rotation/AzimutWinkel")?.rem_euclid(360.0),
+        mounting: guid::normalise(f.text_at("MoSys_GUID").unwrap_or_default()),
+        rows,
+    })
+}
+
+/// A mounting system of `Visu3D/MoSys.xml` (racks of the row formations).
+#[derive(Debug, Clone, PartialEq)]
+pub struct MountingSystem {
+    pub id: String,
+    /// 1: rows facing one way; 2: east-west.
+    pub kind: u32,
+    /// Module tilt on the rack [°].
+    pub tilt_deg: f64,
+    /// Table size along the row and its slant depth [m].
+    pub table_along_m: f64,
+    pub table_depth_m: f64,
+    pub modules_along: u32,
+    /// Gap between modules along the row [m].
+    pub gap_m: f64,
+}
+
+/// Reads `Visu3D/MoSys.xml`.
+#[must_use]
+pub fn mounting_systems(doc: &Node) -> Vec<MountingSystem> {
+    doc.children("MoSys")
+        .filter_map(|m| {
+            Some(MountingSystem {
+                id: guid::normalise(m.text_at("GUID")?),
+                kind: m.f64_at("Typ").map_or(1, |k| k.round() as u32),
+                tilt_deg: m.f64_at("NeigungRelativ_RAD")?.to_degrees(),
+                table_along_m: m.f64_at("DimModulTisch/X").unwrap_or(0.0),
+                table_depth_m: m.f64_at("DimModulTisch/Y").unwrap_or(0.0),
+                modules_along: m
+                    .f64_at("ModulAnzahl/Horz")
+                    .map_or(1, |n| n.round().max(1.0) as u32),
+                gap_m: m.f64_at("ModulAbst/Horz").unwrap_or(0.005),
+            })
+        })
+        .collect()
 }

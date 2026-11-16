@@ -88,3 +88,18 @@ pub fn parse(doc: &Node) -> Result<Vec<WiredInverter>, ReadError> {
     }
     Ok(out)
 }
+
+/// Module area of every formation (and of every half row of a row formation): the
+/// `ReferenzModul` entries list them under their area (`FormsList`). Keys and values are
+/// normalised GUIDs.
+#[must_use]
+pub fn form_areas(doc: &Node) -> std::collections::HashMap<String, String> {
+    let mut out = std::collections::HashMap::new();
+    for r in doc.children("ReferenzModul") {
+        let area = guid::normalise(r.text_at("GUID_XML").unwrap_or_default());
+        for f in r.children("FormsList") {
+            out.insert(guid::normalise(&f.text), area.clone());
+        }
+    }
+    out
+}

@@ -857,14 +857,15 @@
       "moduleSize": "Modulfläche «{array}»: die Abmessungen von «{module}» weichen von der PV*SOL-Szene ab.",
       "facade": "Fläche {face}: senkrechte Fassade, mit 89,9° übernommen (das Modell akzeptiert keine 90°).",
       "noScene": "Keine 3D-Szene im PV*SOL-Projekt: es konnten keine Module platziert werden.",
-      "rowFormations": "{count} Modulreihen-Formation(en) auf Flachdach ({modules} Module) noch nicht übernommen.",
+      "rowFormations": "{count} Modulreihen-Formation(en) auf Flachdach ({modules} Module) nicht übernommen: Moduldatensatz nicht gefunden.",
       "objectsSkipped": "{count} Verschattungs- oder Dekorobjekt(e) nicht übernommen: {names}.",
       "inverterMissing": "Wechselrichter «{inverter}»: Datensatz nicht gefunden, nicht übernommen.",
       "trackerMissing": "«{inverter}»: MPP-Tracker {tracker} fehlt im Datensatz, Strings nicht übernommen.",
       "unwiredModules": "{count} in PV*SOL verschaltete Module sind nicht in den übernommenen Modulflächen.",
       "noWiring": "Das PV*SOL-Projekt hat keinen 3D-Verschaltungsplan: Wechselrichter und Strings neu anlegen.",
       "chooseMounting": "Wählen Sie für jede Modulfläche ein Montagesystem (PV*SOL beschreibt es nicht): Statik und Materialliste hängen davon ab.",
-      "surroundingsSkipped": "Das PV*SOL-Oberflächenmodell konnte nicht übernommen werden (unerwartetes Kartenformat)."
+      "surroundingsSkipped": "Das PV*SOL-Oberflächenmodell konnte nicht übernommen werden (unerwartetes Kartenformat).",
+      "unusedFormations": "{count} Modulreihen-Formation(en) ({modules} Module) ignoriert: sie gehören zu keiner Modulfläche der PV*SOL-Konfiguration (von PV*SOL nicht simuliert)."
     },
     "compare": {
       "peakPower": "Spitzenleistung",
