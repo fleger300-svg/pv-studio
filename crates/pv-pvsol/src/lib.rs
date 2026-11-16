@@ -12,6 +12,7 @@ pub mod config;
 pub mod db;
 pub mod geometry;
 pub mod guid;
+pub mod heightmap;
 pub mod import;
 pub mod results;
 pub mod weather;
@@ -82,6 +83,11 @@ pub struct PvsolFile {
     pub weather: Option<(String, PvsolWeather)>,
     /// `None` when the project was never simulated.
     pub results: Option<PvsolResults>,
+    /// PV*SOL's digital surface model of the map section, when the project has one.
+    pub height_map: Option<heightmap::HeightMap>,
+    /// Margin PV*SOL cuts around the project's buildings in the height map
+    /// (`GelaendeModell/AddDist`, 1 m when absent) [m].
+    pub cut_margin_m: f64,
 }
 
 fn xml_entry(a: &Archive, name: &str) -> Result<Option<xml::Node>, ReadError> {
@@ -121,6 +127,7 @@ pub fn read_archive(a: &Archive) -> Result<PvsolFile, ReadError> {
         .map(|d| results::parse(&d))
         .transpose()?
         .flatten();
+    let height_map = a.get("HeightMap.bin").map(heightmap::parse).transpose()?;
     let weather = a
         .weather()
         .map(|(name, b)| weather::parse(b).map(|w| (name.to_owned(), w)))
@@ -167,5 +174,11 @@ pub fn read_archive(a: &Archive) -> Result<PvsolFile, ReadError> {
         wiring,
         weather,
         results,
+        height_map,
+        cut_margin_m: proj
+            .as_ref()
+            .and_then(|p| p.f64_at("GelaendeModell/AddDist"))
+            .filter(|m| (0.0..=10.0).contains(m))
+            .unwrap_or(1.0),
     })
 }

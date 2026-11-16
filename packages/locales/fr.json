@@ -847,7 +847,7 @@
     "otherWeather": "Météo différente de celle de PV*SOL : les écarts incluent l’effet de la météo.",
     "gap": "Écart",
     "assumptions": "Hypothèses reprises de PV*SOL : salissure et spectre {soiling} %, mismatch et diodes {mismatch} %, câbles {cables} %.",
-    "notModelled": "Pas encore calculé par PV Studio : ombrage de l’environnement (bâtiments voisins du modèle de surface PV*SOL) et mismatch entre strings inégaux sur un même MPPT.",
+    "notModelled": "Pas encore calculé par PV Studio : horizon lointain (relief), objets dessinés dans PV*SOL (cheminées, arbres, bâtiments et polygones 3D) et mismatch entre strings inégaux sur un même MPPT. Les bâtiments voisins du modèle de surface PV*SOL sont pris en compte.",
     "noComparison": "Pas de comparaison : PV*SOL n’a pas de résultats pour ce projet, ou le fichier météo manque.",
     "close": "Fermer",
     "note": {
@@ -863,7 +863,8 @@
       "trackerMissing": "« {inverter} » : tracker MPP {tracker} absent de la fiche, strings non repris.",
       "unwiredModules": "{count} module(s) câblés dans PV*SOL ne sont pas dans les champs repris.",
       "noWiring": "Le projet PV*SOL n’a pas de plan de câblage 3D : onduleurs et strings à refaire.",
-      "chooseMounting": "Choisissez un système de montage pour chaque champ (PV*SOL ne le décrit pas) : la statique et la liste de matériel en dépendent."
+      "chooseMounting": "Choisissez un système de montage pour chaque champ (PV*SOL ne le décrit pas) : la statique et la liste de matériel en dépendent.",
+      "surroundingsSkipped": "Le modèle de surface PV*SOL n’a pas pu être repris (carte au format inattendu)."
     },
     "compare": {
       "peakPower": "Puissance crête",
@@ -877,7 +878,9 @@
       "inverter": "Onduleur",
       "clipping": "Écrêtage",
       "acEnergy": "Énergie AC annuelle",
-      "specificYield": "Rendement spécifique"
+      "specificYield": "Rendement spécifique",
+      "horizonShading": "  dont horizon lointain (relief)",
+      "nearShading": "  dont ombrage proche"
     }
   }
 }

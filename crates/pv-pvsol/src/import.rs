@@ -66,7 +66,7 @@ struct FaceGroup<'a> {
     origin: [f64; 3],
     tilt_deg: f64,
     azimuth_deg: f64,
-    /// Offset added to PV*SOL's `(u, v)` (when a formation starts left of / below `u = 0`).
+    /// Offset added to PV*SOL's `(u, v)`: the face starts [`FACE_MARGIN_M`] before its modules.
     shift: [f64; 2],
     width_m: f64,
     height_m: f64,
@@ -97,10 +97,9 @@ fn face_groups<'a>(formations: &'a [Formation]) -> Vec<FaceGroup<'a>> {
                     hi[k] = hi[k].max(b[k]);
                 }
             }
-            let shift = [
-                (FACE_MARGIN_M - lo[0]).max(0.0),
-                (FACE_MARGIN_M - lo[1]).max(0.0),
-            ];
+            // The face is the modules' area plus a margin: a face reaching back to PV*SOL's eave
+            // corner would cross the hips of a hipped roof and shade the neighbouring face.
+            let shift = [FACE_MARGIN_M - lo[0], FACE_MARGIN_M - lo[1]];
             // Facades (90°): the model takes faces strictly below vertical.
             let tilt = (fs.iter().map(|f| f.tilt_deg).sum::<f64>() / n).min(MAX_TILT_DEG);
             let azimuth = fs[0].azimuth_deg;
@@ -265,6 +264,34 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
 
     // --- Site and weather ------------------------------------------------------------------
     let weather = file.weather.as_ref();
+    // Module centres (world), to tie the height map to the scene vertically.
+    let centres: Vec<[f64; 3]> = file
+        .scene
+        .iter()
+        .flat_map(|s| &s.formations)
+        .flat_map(|f| {
+            let fr = pv_model::RoofFrame::new(f.face_origin(), f.tilt_deg, f.azimuth_deg);
+            f.modules.iter().map(move |m| {
+                let [u, v] = f.module_centre_uv(m.row, m.col);
+                fr.to_world(u, v, 0.0)
+            })
+        })
+        .collect();
+    let surroundings = file.height_map.as_ref().and_then(|h| {
+        let map = file.scene.as_ref()?.map.as_ref()?;
+        // Foot of the building carrying the modules (parametric building), else the terrain.
+        let ground = file.scene.as_ref().and_then(|s| {
+            let object = s.formations.first()?.face.object;
+            s.buildings
+                .iter()
+                .find(|b| b.reference_index == object)
+                .map(|b| b.ground_m)
+        });
+        crate::heightmap::surroundings(h, map, &centres, ground.unwrap_or(0.0), file.cut_margin_m)
+    });
+    if file.height_map.is_some() && surroundings.is_none() {
+        notes.push(ImportNote::new("pvsol.note.surroundingsSkipped"));
+    }
     if let (Some(lat), Some(lon)) = (file.site.lat_deg, file.site.lon_deg) {
         let (east, north) = wgs84_to_lv95(lat, lon);
         let label = if file.site.address.is_empty() {
@@ -283,6 +310,7 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
                     altitude_m: weather.map_or(0.0, |(_, w)| w.altitude_m),
                 }),
                 weather: weather.map(|(n, w)| w.to_weather_year(n, file.site.utc_offset_h)),
+                surroundings,
             }),
         });
     } else {

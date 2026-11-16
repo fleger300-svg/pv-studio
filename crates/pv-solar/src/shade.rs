@@ -1,5 +1,6 @@
-//! Near shading by the project's own geometry: roof faces, walls of every building and roof
-//! obstacles (prisms) cast shadows on the modules.
+//! Near shading by the project's own geometry — roof faces, walls of every building and roof
+//! obstacles (prisms) — and by its surroundings (height grid of neighbouring buildings and
+//! terrain, [`pv_model::Surroundings`]) cast shadows on the modules.
 //!
 //! - Beam: for each sun direction bin (5° × 5°), the shaded fraction of every array is the
 //!   share of blocked rays from 5 points of each module (centre and quarter points), averaged
@@ -98,6 +99,123 @@ pub fn bin_of(azimuth_deg: f64, elevation_deg: f64) -> (u16, u16) {
     )
 }
 
+/// The surroundings height grid as an occluder. Cells under the project's own buildings (and
+/// within [`OWN_MARGIN_M`] of their outline) are ignored: the survey holds the project's own
+/// roof — or what stood there before — which the project's own geometry replaces.
+struct Field {
+    west: f64,
+    north: f64,
+    cell: f64,
+    cols: usize,
+    rows: usize,
+    /// Heights [m]; `NEG_INFINITY` for ignored cells.
+    z: Vec<f64>,
+    top: f64,
+}
+
+/// Distance around the project's buildings within which the survey is ignored [m].
+const OWN_MARGIN_M: f64 = 0.75;
+
+fn inside(poly: &[[f64; 2]], p: [f64; 2]) -> bool {
+    let mut c = false;
+    for i in 0..poly.len() {
+        let (a, b) = (poly[i], poly[(i + 1) % poly.len()]);
+        if (a[1] > p[1]) != (b[1] > p[1])
+            && p[0] < a[0] + (p[1] - a[1]) * (b[0] - a[0]) / (b[1] - a[1])
+        {
+            c = !c;
+        }
+    }
+    c
+}
+
+fn segment_distance(a: [f64; 2], b: [f64; 2], p: [f64; 2]) -> f64 {
+    let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
+    let l2 = dx * dx + dy * dy;
+    let t = if l2 > 0.0 {
+        (((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
+    (p[0] - a[0] - t * dx).hypot(p[1] - a[1] - t * dy)
+}
+
+impl Field {
+    fn new(project: &Project) -> Option<Self> {
+        let s = project.site.surroundings.as_ref()?;
+        let footprints: Vec<Vec<[f64; 2]>> = project
+            .buildings
+            .iter()
+            .map(|b| {
+                b.footprint
+                    .iter()
+                    .map(|p| [b.origin[0] + p[0], b.origin[1] + p[1]])
+                    .collect()
+            })
+            .collect();
+        let (cols, rows) = (s.cols as usize, s.rows as usize);
+        let mut z = Vec::with_capacity(cols * rows);
+        for r in 0..rows {
+            for c in 0..cols {
+                let p = [
+                    s.origin_east_m + (c as f64 + 0.5) * s.cell_m,
+                    s.origin_north_m - (r as f64 + 0.5) * s.cell_m,
+                ];
+                let own = footprints.iter().any(|f| {
+                    inside(f, p)
+                        || (0..f.len()).any(|i| {
+                            segment_distance(f[i], f[(i + 1) % f.len()], p)
+                                < OWN_MARGIN_M + s.cell_m / 2.0
+                        })
+                });
+                let h = s.heights_cm[r * cols + c];
+                z.push(if own || h == pv_model::Surroundings::CUT {
+                    f64::NEG_INFINITY
+                } else {
+                    f64::from(h) / 100.0
+                });
+            }
+        }
+        let top = z.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        Some(Self {
+            west: s.origin_east_m,
+            north: s.origin_north_m,
+            cell: s.cell_m,
+            cols,
+            rows,
+            z,
+            top,
+        })
+    }
+
+    /// Does the ray from `o` towards `d` (pointing upwards) pass under the surface?
+    fn blocks(&self, o: V3, d: V3) -> bool {
+        let horizontal = d[0].hypot(d[1]);
+        if d[2] <= 0.0 || horizontal < 1e-9 {
+            return false;
+        }
+        let (ux, uy, rise) = (d[0] / horizontal, d[1] / horizontal, d[2] / horizontal);
+        let step = self.cell / 2.0;
+        let mut s = step;
+        loop {
+            let z = o[2] + s * rise;
+            if z > self.top {
+                return false;
+            }
+            let (e, n) = (o[0] + s * ux, o[1] + s * uy);
+            let c = ((e - self.west) / self.cell).floor();
+            let r = ((self.north - n) / self.cell).floor();
+            if c < 0.0 || r < 0.0 || c >= self.cols as f64 || r >= self.rows as f64 {
+                return false;
+            }
+            if self.z[r as usize * self.cols + c as usize] > z {
+                return true;
+            }
+            s += step;
+        }
+    }
+}
+
 struct Receiver {
     face: RoofFaceId,
     building: BuildingId,
@@ -109,6 +227,9 @@ struct Receiver {
 /// Shading of every array of a project.
 pub struct ShadeModel {
     tris: Vec<Tri>,
+    /// Frame and extent of every roof face.
+    planes: HashMap<RoofFaceId, (pv_model::RoofFrame, f64, f64)>,
+    field: Option<Field>,
     receivers: HashMap<ArrayId, Receiver>,
     beam: HashMap<(ArrayId, (u16, u16)), f64>,
     diffuse: HashMap<ArrayId, f64>,
@@ -119,6 +240,7 @@ impl ShadeModel {
     #[must_use]
     pub fn new(project: &Project) -> Self {
         let mut tris = Vec::new();
+        let mut planes = HashMap::new();
         for f in &project.roof_faces {
             let fr = f.frame();
             let world = |u: f64, v: f64| add(fr.origin, add(mul(fr.axis_u, u), mul(fr.axis_v, v)));
@@ -135,6 +257,7 @@ impl ShadeModel {
             );
             let pts: Vec<V3> = outline.iter().map(|p| world(p[0], p[1])).collect();
             fan(&pts, Some(f.id), None, &mut tris);
+            planes.insert(f.id, (fr, f.width_m, f.height_m));
             for o in f.outline.iter().flat_map(|o| &o.obstacles) {
                 let base: Vec<V3> = o.footprint_uv.iter().map(|p| world(p[0], p[1])).collect();
                 let top: Vec<V3> = base
@@ -211,16 +334,31 @@ impl ShadeModel {
         }
         Self {
             tris,
+            planes,
+            field: Field::new(project),
             receivers,
             beam: HashMap::new(),
             diffuse: HashMap::new(),
         }
     }
 
+    /// A roof face does not shade a point right under it: such a point is inside the building
+    /// (no module there) or in an opening of that roof (a dormer cut into it).
+    fn below(&self, face: Option<RoofFaceId>, o: V3) -> bool {
+        face.and_then(|f| self.planes.get(&f))
+            .is_some_and(|(fr, w, h)| {
+                let (u, v, n) = fr.to_local(o);
+                n < -0.02 && (0.0..=*w).contains(&u) && (0.0..=*h).contains(&v)
+            })
+    }
+
     fn blocked(&self, r: &Receiver, o: V3, d: V3) -> bool {
-        self.tris
-            .iter()
-            .any(|t| t.face != Some(r.face) && t.wall_of != Some(r.building) && hits(t, o, d))
+        self.tris.iter().any(|t| {
+            t.face != Some(r.face)
+                && t.wall_of != Some(r.building)
+                && !self.below(t.face, o)
+                && hits(t, o, d)
+        }) || self.field.as_ref().is_some_and(|f| f.blocks(o, d))
     }
 
     /// Shaded fraction of the beam on `array` for a sun in `bin` (bin centre direction).

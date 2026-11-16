@@ -847,7 +847,7 @@
     "otherWeather": "Weather differs from PV*SOL’s: the gaps include the effect of the weather.",
     "gap": "Gap",
     "assumptions": "Assumptions taken from PV*SOL: soiling and spectrum {soiling} %, mismatch and diodes {mismatch} %, cables {cables} %.",
-    "notModelled": "Not computed by PV Studio yet: shading by the surroundings (neighbouring buildings of PV*SOL’s height map) and mismatch between unequal strings on one MPPT.",
+    "notModelled": "Not computed by PV Studio yet: far horizon (relief), objects drawn in PV*SOL (chimneys, trees, buildings and 3-D polygons) and mismatch between unequal strings on one MPPT. The neighbouring buildings of PV*SOL’s surface model are taken into account.",
     "noComparison": "No comparison: PV*SOL has no results for this project, or the weather file is missing.",
     "close": "Close",
     "note": {
@@ -863,7 +863,8 @@
       "trackerMissing": "“{inverter}”: MPP tracker {tracker} missing from the record, strings not carried over.",
       "unwiredModules": "{count} module(s) wired in PV*SOL are not in the imported arrays.",
       "noWiring": "The PV*SOL project has no 3-D wiring plan: inverters and strings to be redone.",
-      "chooseMounting": "Choose a mounting system for each array (PV*SOL does not describe it): the statics and the bill of materials depend on it."
+      "chooseMounting": "Choose a mounting system for each array (PV*SOL does not describe it): the statics and the bill of materials depend on it.",
+      "surroundingsSkipped": "PV*SOL’s surface model could not be carried over (unexpected map layout)."
     },
     "compare": {
       "peakPower": "Peak power",
@@ -877,7 +878,9 @@
       "inverter": "Inverter",
       "clipping": "Clipping",
       "acEnergy": "Annual AC energy",
-      "specificYield": "Specific yield"
+      "specificYield": "Specific yield",
+      "horizonShading": "  of which far horizon (relief)",
+      "nearShading": "  of which near shading"
     }
   }
 }

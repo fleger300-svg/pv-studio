@@ -119,6 +119,8 @@ pub async fn site_locate(
             altitude_m: altitude,
         }),
         weather: old.weather.clone(),
+        // The surroundings belong to the previous location.
+        surroundings: None,
     })
 }
 
@@ -170,5 +172,6 @@ pub async fn site_fetch_weather(
     apply_site(&app, &state, |old| ProjectSite {
         location: old.location.clone(),
         weather: Some(weather),
+        surroundings: old.surroundings.clone(),
     })
 }

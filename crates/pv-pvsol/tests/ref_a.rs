@@ -208,7 +208,19 @@ fn imports_project_a() {
         })
         .unwrap();
     assert_eq!((m.row, m.col), (0, 0));
-    assert!(close(m.u, 7.3754, 0.002) && close(m.v, 1.1546, 0.002));
+    // Same place in the world as in PV*SOL (cable point (7.3754, 1.1546) of formation 01).
+    let scene = f.scene.as_ref().unwrap();
+    let f01 = &scene.formations[0];
+    let expected = pv_model::RoofFrame::new(f01.face_origin(), f01.tilt_deg, f01.azimuth_deg)
+        .to_world(7.3754, 1.1546, 0.0);
+    let (_, face) = p.module_context(m).unwrap();
+    let got = face.uv_to_world(m.u, m.v);
+    assert!(
+        (0..3).all(|k| close(got[k], expected[k], 0.003)),
+        "{got:?} {expected:?}"
+    );
+    // The face is the modules' area plus 0.3 m.
+    assert!(close(m.u, 0.3 + 0.9, 0.002), "{}", m.u);
     // Faces: 2° gable, facing 190° and 10°, at the building's eave.
     let mut az: Vec<f64> = p.roof_faces.iter().map(|f| f.azimuth_deg).collect();
     az.sort_by(f64::total_cmp);

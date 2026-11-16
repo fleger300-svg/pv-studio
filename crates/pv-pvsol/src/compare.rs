@@ -139,6 +139,15 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
             shading_pvsol,
             ratio(b.shading_kwh, b.nominal_kwh),
         ),
+        // Its two parts: the far horizon (relief; not modelled by PV Studio yet) and the near
+        // shading (buildings, obstacles, surroundings).
+        row("horizonShading", "%", 100.0 * horizon, 0.0),
+        row(
+            "nearShading",
+            "%",
+            100.0 * modules,
+            ratio(b.shading_kwh, b.nominal_kwh),
+        ),
         row(
             "reflection",
             "%",

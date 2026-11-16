@@ -53,5 +53,7 @@ pub use roof::{rectangle_footprint, EdgeRoof, RoofSpec};
 pub use site::{ConsequenceClass, ServiceLifeModel, SiteParams, SnowExposure, TerrainCategory};
 pub use stress::StressPreset;
 pub use summary::{ArraySummary, ProjectSummary, RoofFaceSummary, WallSummary};
-pub use weather::{wgs84_to_lv95, GeoLocation, ProjectSite, WeatherYear, HOURS_PER_YEAR};
+pub use weather::{
+    wgs84_to_lv95, GeoLocation, ProjectSite, Surroundings, WeatherYear, HOURS_PER_YEAR,
+};
 pub use wiring::{InverterUnit, ModuleRef, PvString, Wiring, WiringSettings};

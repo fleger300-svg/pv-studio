@@ -51,6 +51,7 @@ fn located(mut p: Project) -> Project {
                 altitude_m: 550.0,
             }),
             weather: Some(synthetic_weather()),
+            surroundings: None,
         }),
     }
     .apply(&mut p)

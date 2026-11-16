@@ -136,6 +136,19 @@ pub struct Scene {
     /// Module row formations (racks on flat roofs), not decoded yet: name and module count.
     pub row_formations: Vec<(String, u32)>,
     pub others: Vec<OtherObject>,
+    /// The map section (aerial image and height map), when the project has one.
+    pub map: Option<MapSection>,
+}
+
+/// The rectangular map section of the scene (`AnwObjTyp` 65): what `HeightMap.bin` covers.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MapSection {
+    /// ENU of the `Position` corner (south-west for the usual 180° rotation).
+    pub corner: [f64; 2],
+    /// Extent along the map's width (east) and depth (north) [m].
+    pub width_m: f64,
+    pub depth_m: f64,
+    pub rotation_deg: f64,
 }
 
 impl Scene {
@@ -327,6 +340,18 @@ pub fn parse(doc: &Node) -> Result<Scene, ReadError> {
                 Some(b) => scene.buildings.push(b),
                 None => scene.others.push(OtherObject { kind: k, name }),
             },
+            65 => {
+                let sd = o.child("StandardDaten");
+                scene.map = sd.and_then(|sd| {
+                    let p = to_enu(sd.child("Position")?)?;
+                    Some(MapSection {
+                        corner: [p[0], p[1]],
+                        width_m: sd.f64_at("ZweifacheSkalierung/Ebene1/BreiteR")?,
+                        depth_m: sd.f64_at("ZweifacheSkalierung/Ebene1/TiefeR")?,
+                        rotation_deg: sd.f64_at("Rotation/AzimutWinkel").unwrap_or(0.0),
+                    })
+                });
+            }
             k if NON_PHYSICAL.contains(&k) => {}
             _ => scene.others.push(OtherObject { kind: k, name }),
         }

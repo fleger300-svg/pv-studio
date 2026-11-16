@@ -74,7 +74,63 @@ impl WeatherYear {
     }
 }
 
-/// Location and weather of a project.
+/// The surroundings of the project as a height grid (digital surface model: terrain,
+/// neighbouring buildings, trees), for the shading of the modules. Regular grid in the
+/// project's ENU frame, rows from north to south, columns from west to east.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct Surroundings {
+    /// Where the heights come from, shown in reports.
+    pub source: String,
+    /// ENU (east, north) of the north-west corner of the grid [m].
+    pub origin_east_m: f64,
+    pub origin_north_m: f64,
+    /// Cell size [m].
+    pub cell_m: f64,
+    pub cols: u32,
+    pub rows: u32,
+    /// Height of each cell in the project frame (`z`, same as the buildings) [cm],
+    /// `rows × cols`, row by row from the north-west corner.
+    pub heights_cm: Vec<i32>,
+}
+
+impl Surroundings {
+    /// Height of a cell removed from the survey (the project's own building, which the
+    /// project's geometry replaces): casts no shadow.
+    pub const CUT: i32 = i32::MIN;
+
+    /// Height [m] of the cell holding ENU `(east, north)`; `None` outside the grid.
+    #[must_use]
+    pub fn height_at(&self, east: f64, north: f64) -> Option<f64> {
+        let c = ((east - self.origin_east_m) / self.cell_m).floor();
+        let r = ((self.origin_north_m - north) / self.cell_m).floor();
+        if c < 0.0 || r < 0.0 || c >= f64::from(self.cols) || r >= f64::from(self.rows) {
+            return None;
+        }
+        let i = r as usize * self.cols as usize + c as usize;
+        self.heights_cm
+            .get(i)
+            .filter(|&&h| h != Self::CUT)
+            .map(|&h| f64::from(h) / 100.0)
+    }
+
+    fn validate(&self) -> Result<(), CommandError> {
+        let ok = self.origin_east_m.is_finite()
+            && self.origin_north_m.is_finite()
+            && self.cell_m.is_finite()
+            && self.cell_m > 0.0
+            && self.cols > 0
+            && self.rows > 0
+            && self.heights_cm.len() == self.cols as usize * self.rows as usize;
+        if ok {
+            Ok(())
+        } else {
+            Err(CommandError::new(keys::ENTITY_INVALID).with_text("field", "surroundings"))
+        }
+    }
+}
+
+/// Location, weather and surroundings of a project.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectSite {
@@ -82,6 +138,11 @@ pub struct ProjectSite {
     pub location: Option<GeoLocation>,
     #[specta(optional)]
     pub weather: Option<WeatherYear>,
+    /// Neighbouring buildings and terrain (imported from PV*SOL's 3-D map); tied to the
+    /// location: a new location drops them.
+    #[serde(default)]
+    #[specta(optional)]
+    pub surroundings: Option<Surroundings>,
 }
 
 impl ProjectSite {
@@ -102,6 +163,9 @@ impl ProjectSite {
         }
         if let Some(w) = &self.weather {
             w.validate()?;
+        }
+        if let Some(s) = &self.surroundings {
+            s.validate()?;
         }
         Ok(())
     }

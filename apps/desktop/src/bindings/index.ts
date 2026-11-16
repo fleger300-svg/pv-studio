@@ -2374,19 +2374,29 @@ export type Pricing = {
 /**  Identifies a project. */
 export type ProjectId = string;
 
-/**  Location and weather of a project. */
+/**  Location, weather and surroundings of a project. */
 export type ProjectSite = ProjectSite_Serialize | ProjectSite_Deserialize;
 
-/**  Location and weather of a project. */
+/**  Location, weather and surroundings of a project. */
 export type ProjectSite_Deserialize = {
 	location?: GeoLocation | null,
 	weather?: WeatherYear | null,
+	/**
+	 *  Neighbouring buildings and terrain (imported from PV*SOL's 3-D map); tied to the
+	 *  location: a new location drops them.
+	 */
+	surroundings?: Surroundings | null,
 };
 
-/**  Location and weather of a project. */
+/**  Location, weather and surroundings of a project. */
 export type ProjectSite_Serialize = {
 	location?: GeoLocation | null,
 	weather?: WeatherYear | null,
+	/**
+	 *  Neighbouring buildings and terrain (imported from PV*SOL's 3-D map); tied to the
+	 *  location: a new location drops them.
+	 */
+	surroundings?: Surroundings | null,
 };
 
 export type ProjectSummary = ProjectSummary_Serialize | ProjectSummary_Deserialize;
@@ -2947,6 +2957,28 @@ export type SupportGridSpec = {
 	/**  `u` of one seam / rafter, m. */
 	originM: number,
 	spacingM: number,
+};
+
+/**
+ *  The surroundings of the project as a height grid (digital surface model: terrain,
+ *  neighbouring buildings, trees), for the shading of the modules. Regular grid in the
+ *  project's ENU frame, rows from north to south, columns from west to east.
+ */
+export type Surroundings = {
+	/**  Where the heights come from, shown in reports. */
+	source: string,
+	/**  ENU (east, north) of the north-west corner of the grid [m]. */
+	originEastM: number,
+	originNorthM: number,
+	/**  Cell size [m]. */
+	cellM: number,
+	cols: number,
+	rows: number,
+	/**
+	 *  Height of each cell in the project frame (`z`, same as the buildings) [cm],
+	 *  `rows × cols`, row by row from the north-west corner.
+	 */
+	heightsCm: number[],
 };
 
 /**  What a system can be mounted on and with. */

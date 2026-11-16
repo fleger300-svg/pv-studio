@@ -847,7 +847,7 @@
     "otherWeather": "Anderes Wetter als PV*SOL: die Abweichungen enthalten den Wettereinfluss.",
     "gap": "Abweichung",
     "assumptions": "Aus PV*SOL übernommen: Verschmutzung und Spektrum {soiling} %, Mismatch und Dioden {mismatch} %, Kabel {cables} %.",
-    "notModelled": "Von PV Studio noch nicht berechnet: Verschattung durch die Umgebung (Nachbargebäude aus dem PV*SOL-Höhenmodell) und Mismatch ungleicher Strings an einem MPPT.",
+    "notModelled": "Von PV Studio noch nicht berechnet: Fernhorizont (Relief), in PV*SOL gezeichnete Objekte (Kamine, Bäume, Gebäude und 3D-Polygone) und Mismatch ungleicher Strings an einem MPPT. Die Nachbargebäude aus dem PV*SOL-Oberflächenmodell werden berücksichtigt.",
     "noComparison": "Kein Vergleich: PV*SOL hat keine Ergebnisse für dieses Projekt, oder die Wetterdatei fehlt.",
     "close": "Schliessen",
     "note": {
@@ -863,7 +863,8 @@
       "trackerMissing": "«{inverter}»: MPP-Tracker {tracker} fehlt im Datensatz, Strings nicht übernommen.",
       "unwiredModules": "{count} in PV*SOL verschaltete Module sind nicht in den übernommenen Modulflächen.",
       "noWiring": "Das PV*SOL-Projekt hat keinen 3D-Verschaltungsplan: Wechselrichter und Strings neu anlegen.",
-      "chooseMounting": "Wählen Sie für jede Modulfläche ein Montagesystem (PV*SOL beschreibt es nicht): Statik und Materialliste hängen davon ab."
+      "chooseMounting": "Wählen Sie für jede Modulfläche ein Montagesystem (PV*SOL beschreibt es nicht): Statik und Materialliste hängen davon ab.",
+      "surroundingsSkipped": "Das PV*SOL-Oberflächenmodell konnte nicht übernommen werden (unerwartetes Kartenformat)."
     },
     "compare": {
       "peakPower": "Spitzenleistung",
@@ -877,7 +878,9 @@
       "inverter": "Wechselrichter",
       "clipping": "Abregelung",
       "acEnergy": "Jährliche AC-Energie",
-      "specificYield": "Spezifischer Ertrag"
+      "specificYield": "Spezifischer Ertrag",
+      "horizonShading": "  davon Fernhorizont (Relief)",
+      "nearShading": "  davon Nahverschattung"
     }
   }
 }
