@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjektDaten_XML xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <VersionsNr>2026.8</VersionsNr>
+  <Proj_DatenAllg>
+    <HorizontModus>0</HorizontModus>
+    <Proj_Bezeichnung>Projet A</Proj_Bezeichnung>
+    <Proj_Nr>A</Proj_Nr>
+    <Standort>
+      <Name>Montreux</Name>
+      <LaengenGrad>-0.12060225131280816</LaengenGrad>
+      <BreitenGrad>0.8103563717009672</BreitenGrad>
+      <ZeitZone>-1</ZeitZone>
+      <Geaendert>0</Geaendert>
+    </Standort>
+    <AnzPVModuleGesamt>116</AnzPVModuleGesamt>
+    <AnzPVModuleUnverschaltet>0</AnzPVModuleUnverschaltet>
+    <AnzBelegterFlaechen>2</AnzBelegterFlaechen>
+    <HatKartenAusschnitt>-1</HatKartenAusschnitt>
+    <AcNetz>
+      <AnzahlPhasen>3</AnzahlPhasen>
+      <Spannung>230</Spannung>
+      <CosPhi>1</CosPhi>
+    </AcNetz>
+    <MapMeshAktiv>-1</MapMeshAktiv>
+  </Proj_DatenAllg>
+  <Einst_FarbSkala>
+    <Max>
+      <Farbe>
+        <r> 2.55000025203999E+0002</r>
+        <g> 0.00000000000000E+0000</g>
+        <b> 0.00000000000000E+0000</b>
+        <a> 0.00000000000000E+0000</a>
+      </Farbe>
+      <Wert> 0.99999998430675E+0000</Wert>
+    </Max>
+    <Mid>
+      <Farbe>
+        <r> 2.55000025203999E+0002</r>
+        <g> 2.55000025203999E+0002</g>
+        <b> 0.00000000000000E+0000</b>
+        <a> 0.00000000000000E+0000</a>
+      </Farbe>
+      <Wert> 3.29999963897463E-0001</Wert>
+    </Mid>
+    <Min>
+      <Farbe>
+        <r> 0.00000000000000E+0000</r>
+        <g> 2.55000025203999E+0002</g>
+        <b> 0.00000000000000E+0000</b>
+        <a> 0.00000000000000E+0000</a>
+      </Farbe>
+      <Wert> 0.00000000000000E+0000</Wert>
+    </Min>
+    <None>
+      <Farbe>
+        <r> 2.55000025203999E+0002</r>
+        <g> 2.55000025203999E+0002</g>
+        <b> 2.55000025203999E+0002</b>
+        <a> 0.00000000000000E+0000</a>
+      </Farbe>
+    </None>
+  </Einst_FarbSkala>
+  <Einst_ModulAbst>
+    <Horz_XML> 1.99999995529652E-0002</Horz_XML>
+    <Vert_XML> 1.99999995529652E-0002</Vert_XML>
+  </Einst_ModulAbst>
+  <ScrShot_Ubersicht>
+    <DateiName>ProjScreenShot.jpg</DateiName>
+    <Kamera_Position3D>
+      <X>-1.67227609686475E+0000</X>
+      <Y> 5.81500570007765E+0001</Y>
+      <Z> 6.53290432964329E+0000</Z>
+    </Kamera_Position3D>
+    <Kamera_Ausrichtung3D>
+      <X> 0.00000000000000E+0000</X>
+      <Y>-9.99999915587273E-0001</Y>
+      <Z>-9.99999915587273E-0007</Z>
+    </Kamera_Ausrichtung3D>
+  </ScrShot_Ubersicht>
+  <ScrShots_Premium>
+    <DateiName>Screenshot-Building 01-Surface du toit sud.jpg</DateiName>
+  </ScrShots_Premium>
+  <ScrShots_Premium>
+    <DateiName>Screenshot-Building 01-Surface du toit nord.jpg</DateiName>
+  </ScrShots_Premium>
+  <Texturen>
+    <Bezeichnung>Map Section 1</Bezeichnung>
+    <DateiName>MapExtract.jpg</DateiName>
+    <IndexInList>150</IndexInList>
+    <VerwendungsSet>6</VerwendungsSet>
+    <Dimension>
+      <X> 1.99999996861350E+0002</X>
+      <Y> 1.99900010022699E+0002</Y>
+    </Dimension>
+    <Kachelung>3</Kachelung>
+    <IstKartenAusschnitt>-1</IstKartenAusschnitt>
+    <IstEinmalig>0</IstEinmalig>
+  </Texturen>
+  <Texturen>
+    <Bezeichnung>Modultextur</Bezeichnung>
+    <DateiName>SelfCreatedTexture151.jpg</DateiName>
+    <IndexInList>151</IndexInList>
+    <VerwendungsSet />
+    <Dimension>
+      <X> 6.14000003421045E+0002</X>
+      <Y> 3.86999986711167E+0002</Y>
+    </Dimension>
+    <Kachelung>3</Kachelung>
+    <IstKartenAusschnitt>0</IstKartenAusschnitt>
+    <IstEinmalig>-1</IstEinmalig>
+  </Texturen>
+  <Texturen>
+    <Bezeichnung>Modultextur</Bezeichnung>
+    <DateiName>SelfCreatedTexture152.jpg</DateiName>
+    <IndexInList>152</IndexInList>
+    <VerwendungsSet />
+    <Dimension>
+      <X> 3.86999986711167E+0002</X>
+      <Y> 6.14000003421045E+0002</Y>
+    </Dimension>
+    <Kachelung>3</Kachelung>
+    <IstKartenAusschnitt>0</IstKartenAusschnitt>
+    <IstEinmalig>-1</IstEinmalig>
+  </Texturen>
+  <TexturenSaetze>
+    <Flag>301</Flag>
+    <VerteilArt>1</VerteilArt>
+    <Texturen>
+      <Bez_Verwendung>Front surface</Bez_Verwendung>
+      <TexturNr>150</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Left side surface</Bez_Verwendung>
+      <TexturNr>13</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Back surface</Bez_Verwendung>
+      <TexturNr>13</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Right side surface</Bez_Verwendung>
+      <TexturNr>13</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Bottom Surface</Bez_Verwendung>
+      <TexturNr>10</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Top Surface</Bez_Verwendung>
+      <TexturNr>10</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+  </TexturenSaetze>
+  <TexturenSaetze>
+    <Flag>303</Flag>
+    <VerteilArt>1</VerteilArt>
+    <Texturen>
+      <Bez_Verwendung>Front surface</Bez_Verwendung>
+      <TexturNr>151</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Left side surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Back surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Right side surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Bottom Surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Top Surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Color of rear side</Bez_Verwendung>
+      <TexturNr>44</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Cell textures</Bez_Verwendung>
+      <TexturNr>77</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+  </TexturenSaetze>
+  <TexturenSaetze>
+    <Flag>302</Flag>
+    <VerteilArt>1</VerteilArt>
+    <Texturen>
+      <Bez_Verwendung>Front surface</Bez_Verwendung>
+      <TexturNr>152</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Left side surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Back surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Right side surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Bottom Surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Top Surface</Bez_Verwendung>
+      <TexturNr>50</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Color of rear side</Bez_Verwendung>
+      <TexturNr>44</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+    <Texturen>
+      <Bez_Verwendung>Cell textures</Bez_Verwendung>
+      <TexturNr>77</TexturNr>
+      <AnzTex_tu> 0.00000000000000E+0000</AnzTex_tu>
+      <AnzTex_tv> 0.00000000000000E+0000</AnzTex_tv>
+    </Texturen>
+  </TexturenSaetze>
+  <StdStrangRouten>
+    <Reihen>
+      <Aktiv>0</Aktiv>
+      <VSchaltArt>1</VSchaltArt>
+      <VSchaltStart>5</VSchaltStart>
+      <VSchaltVerlauf>0</VSchaltVerlauf>
+    </Reihen>
+    <NichtAufgestaenderte_Anlagen>
+      <TA>
+        <VSchaltArt>2</VSchaltArt>
+        <VSchaltStart>5</VSchaltStart>
+        <VSchaltVerlauf>0</VSchaltVerlauf>
+      </TA>
+      <WR>
+        <Aktiv>0</Aktiv>
+        <VSchaltArt>1</VSchaltArt>
+        <VSchaltStart>5</VSchaltStart>
+        <VSchaltVerlauf>0</VSchaltVerlauf>
+      </WR>
+      <MPP>
+        <Aktiv>0</Aktiv>
+        <VSchaltArt>1</VSchaltArt>
+        <VSchaltStart>5</VSchaltStart>
+        <VSchaltVerlauf>0</VSchaltVerlauf>
+      </MPP>
+      <STR>
+        <Aktiv>0</Aktiv>
+        <VSchaltArt>1</VSchaltArt>
+        <VSchaltStart>5</VSchaltStart>
+        <VSchaltVerlauf>1</VSchaltVerlauf>
+      </STR>
+    </NichtAufgestaenderte_Anlagen>
+  </StdStrangRouten>
+  <Abschattung>
+    <DirektAbschVorhanden>-1</DirektAbschVorhanden>
+    <HorizontVorhanden>-1</HorizontVorhanden>
+    <SimDurchgefuehrt>-1</SimDurchgefuehrt>
+    <SimUebersprungen>0</SimUebersprungen>
+  </Abschattung>
+  <Einheiten>
+    <EinheitenSystem>1</EinheitenSystem>
+  </Einheiten>
+  <BemassungsPlaene>
+    <BezeichnungBelegFL>Building 01 - Surface du toit sud</BezeichnungBelegFL>
+    <DateiName>BemassungsPlan1.xml</DateiName>
+  </BemassungsPlaene>
+  <BemassungsPlaene>
+    <BezeichnungBelegFL>Building 01 - Surface du toit nord</BezeichnungBelegFL>
+    <DateiName>BemassungsPlan2.xml</DateiName>
+  </BemassungsPlaene>
+  <StrangPlaene>
+    <BezeichnungBelegFL>Building 01 - Surface du toit sud</BezeichnungBelegFL>
+    <DateiName>StrangPlan1.xml</DateiName>
+  </StrangPlaene>
+  <StrangPlaene>
+    <BezeichnungBelegFL>Building 01 - Surface du toit nord</BezeichnungBelegFL>
+    <DateiName>StrangPlan2.xml</DateiName>
+  </StrangPlaene>
+  <GelaendeModell>
+    <Resolution>4</Resolution>
+    <ExcerptRatio> 9.99999984306749E-0001</ExcerptRatio>
+    <DoCutOuts>-1</DoCutOuts>
+    <AddDist> 9.99999984306749E-0001</AddDist>
+  </GelaendeModell>
+</ProjektDaten_XML>
