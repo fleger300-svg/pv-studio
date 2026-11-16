@@ -282,7 +282,7 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
                     north_m: north,
                     altitude_m: weather.map_or(0.0, |(_, w)| w.altitude_m),
                 }),
-                weather: weather.map(|(n, w)| w.to_weather_year(n)),
+                weather: weather.map(|(n, w)| w.to_weather_year(n, file.site.utc_offset_h)),
             }),
         });
     } else {

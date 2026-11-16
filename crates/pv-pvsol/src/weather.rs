@@ -8,6 +8,11 @@
 //! - `0x30D` `f64`: latitude [°]; `0x315` `f64`: longitude [°, **east negative**];
 //! - `0x362` `f64`: altitude [m]; `0x398` `f64`: annual global horizontal [Wh/m²];
 //! - the last `hours × columns × 4` bytes: `f32` values, hour by hour.
+//!
+//! Hours are **local standard time** (row `h` = interval `[h, h + 1)` of the time zone of the
+//! project): over the Montreux year the irradiance-weighted mean hour is 12.5, i.e. solar
+//! noon at 12:30 UTC+1. PV Studio's weather year is in UTC, hence the shift in
+//! [`PvsolWeather::to_weather_year`].
 
 use pv_model::{WeatherYear, HOURS_PER_YEAR};
 
@@ -26,17 +31,26 @@ pub struct PvsolWeather {
 }
 
 impl PvsolWeather {
-    /// As the project's weather year (no measured diffuse: the simulation decomposes).
+    /// As the project's weather year, in UTC: the file's local hours are shifted by
+    /// `utc_offset_h` (+1 for Switzerland: UTC hour `h` is local hour `h + 1`); the year wraps
+    /// around. No measured diffuse: the simulation decomposes.
     #[must_use]
-    pub fn to_weather_year(&self, file_name: &str) -> WeatherYear {
+    pub fn to_weather_year(&self, file_name: &str, utc_offset_h: i32) -> WeatherYear {
+        let shift =
+            usize::try_from(i64::from(utc_offset_h).rem_euclid(HOURS_PER_YEAR as i64)).unwrap_or(0);
+        let to_utc = |v: &[f32]| {
+            let mut out = v.to_vec();
+            out.rotate_left(shift);
+            out
+        };
         WeatherYear {
             source: format!("PV*SOL — {} ({file_name})", self.location_name),
             lat_deg: self.lat_deg,
             lon_deg: self.lon_deg,
             altitude_m: self.altitude_m,
-            ghi_w_m2: self.ghi_w_m2.clone(),
+            ghi_w_m2: to_utc(&self.ghi_w_m2),
             dhi_w_m2: Vec::new(),
-            temp_c: self.temp_c.clone(),
+            temp_c: to_utc(&self.temp_c),
         }
     }
 
@@ -191,7 +205,10 @@ mod tests {
         let back = parse(&bytes).unwrap();
         assert_eq!(back, w);
         assert!((back.annual_ghi_kwh_m2() - 8.0 * 0.4 * 365.0).abs() < 1e-6);
-        let y = back.to_weather_year("x.wbv");
+        let y = back.to_weather_year("x.wbv", 1);
+        // UTC hour 7 is local hour 8 (UTC+1): the first lit hour of the sample.
+        assert_eq!((y.ghi_w_m2[6], y.ghi_w_m2[7]), (0.0, 400.0));
+        assert_eq!(y.ghi_w_m2[HOURS_PER_YEAR - 1], 0.0);
         assert!(y.source.contains("Montreux"));
         assert!(y.dhi_w_m2.is_empty());
     }

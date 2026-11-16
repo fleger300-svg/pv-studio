@@ -42,6 +42,61 @@ fn main() {
         match pv_pvsol::import(&file, "x") {
             Ok(o) => {
                 ok += 1;
+                if let Some(c) = pv_pvsol::compare(&file, &o.project) {
+                    let r = |k: &str| {
+                        c.rows
+                            .iter()
+                            .find(|r| r.key == k)
+                            .map_or((0.0, 0.0), |r| (r.pvsol, r.pvstudio))
+                    };
+                    let pick = [
+                        "ghi",
+                        "poa",
+                        "shading",
+                        "reflection",
+                        "temperature",
+                        "inverter",
+                        "clipping",
+                        "wiringMismatch",
+                        "specificYield",
+                    ];
+                    let cells: Vec<String> = pick
+                        .iter()
+                        .map(|k| {
+                            let (a, b) = r(k);
+                            format!("{k} {a:.1}/{b:.1}")
+                        })
+                        .collect();
+                    println!(
+                        "{i:3} COMPARE gap {:+.1} % same_weather {} | {}",
+                        c.energy_gap().unwrap_or(f64::NAN) * 100.0,
+                        c.same_weather,
+                        cells.join(" ")
+                    );
+                    // DETAIL=<text>: everything about the projects whose path contains it.
+                    if std::env::var("DETAIL")
+                        .is_ok_and(|d| f.display().to_string().contains(d.as_str()))
+                    {
+                        for a in &file.config.areas {
+                            println!("    area {a:?}");
+                        }
+                        println!("    pvsol {:#?}", file.results);
+                        println!("    assumptions {:?}", c.assumptions);
+                        for r in &c.rows {
+                            println!(
+                                "    {} {:.2} / {:.2} {}",
+                                r.key, r.pvsol, r.pvstudio, r.unit
+                            );
+                        }
+                        for a in &o.project.arrays {
+                            let face = o.project.roof_face(a.roof_face_id).unwrap();
+                            println!(
+                                "    array tilt {:.1} az {:.1} on-roof {:.1}",
+                                face.tilt_deg, face.azimuth_deg, a.tilt_on_roof_deg
+                            );
+                        }
+                    }
+                }
                 let imported = o.project.modules.len();
                 let wired: usize = o
                     .project

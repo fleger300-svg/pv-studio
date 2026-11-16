@@ -248,3 +248,47 @@ fn the_whole_corpus_imports() {
         out.project.validate().unwrap();
     }
 }
+
+#[test]
+fn aligns_the_input_losses_on_pvsol() {
+    let f = read_archive(&fixture()).unwrap();
+    let a = pv_pvsol::compare::assumptions_like(&f);
+    assert!(close(a.albedo, 0.2, 1e-12));
+    // Soiling 2 % with the 1 % spectral loss; mismatch 2 % with 0.5 % in the diodes.
+    assert!(close(a.soiling_loss, 1.0 - 0.98 * 0.99, 1e-12));
+    assert!(close(a.mismatch_loss, 1.0 - 0.98 * 0.995, 1e-12));
+    // Cables: PV*SOL booked 1 626 kWh of AC cable losses on 55 588 kWh at the inverters.
+    assert!(
+        close(a.dc_cable_loss, 1626.4 / 55_588.2, 2e-4),
+        "{}",
+        a.dc_cable_loss
+    );
+    // Without the weather file there is nothing to compare.
+    let out = pv_pvsol::import(&f, "x").unwrap();
+    assert!(pv_pvsol::compare(&f, &out.project).is_none());
+}
+
+/// The real project A, with PV*SOL's weather: same irradiance as PV*SOL, and the same energy
+/// once the losses PV Studio does not compute yet (surroundings, unequal strings) are taken
+/// out. Needs the original file under `PVSOL_CORPUS`.
+#[test]
+#[ignore = "needs the PV*SOL corpus on this machine (PVSOL_CORPUS)"]
+fn project_a_matches_pvsol_with_the_same_weather() {
+    let dir = std::path::PathBuf::from(std::env::var("PVSOL_CORPUS").expect("PVSOL_CORPUS"));
+    let path = dir.join(r"Atrium\116\PVsol\20261019 PVsol Atrium Montreux 116.pvprj");
+    let f = pv_pvsol::read(&std::fs::read(&path).expect("project A")).unwrap();
+    let out = pv_pvsol::import(&f, "x").unwrap();
+    let c = pv_pvsol::compare(&f, &out.project).expect("comparison");
+    assert!(c.same_weather);
+    let r = |k: &str| c.rows.iter().find(|r| r.key == k).unwrap().clone();
+    let ghi = r("ghi");
+    assert!(close(ghi.pvsol, ghi.pvstudio, 0.1), "{ghi:?}");
+    let poa = r("poa");
+    assert!((poa.pvstudio / poa.pvsol - 1.0).abs() < 0.005, "{poa:?}");
+    let (sh, wm) = (r("shading"), r("wiringMismatch"));
+    let gap = c.energy_gap().unwrap();
+    let model = (1.0 + gap) * (1.0 - sh.pvsol / 100.0) * (1.0 - wm.pvsol / 100.0)
+        / (1.0 - sh.pvstudio / 100.0)
+        - 1.0;
+    assert!(model.abs() < 0.03, "model gap {model}");
+}

@@ -7,6 +7,7 @@
 //! Younergy corpus (PV*SOL premium 2024 R6 to 2026 R8), see each module's notes.
 
 pub mod archive;
+pub mod compare;
 pub mod config;
 pub mod db;
 pub mod geometry;
@@ -18,6 +19,7 @@ pub mod wiring;
 pub mod xml;
 
 pub use archive::Archive;
+pub use compare::{compare, Comparison, ComparisonRow};
 pub use config::PvsolConfig;
 pub use db::PvsolDb;
 pub use geometry::Scene;
@@ -62,6 +64,9 @@ pub struct PvsolSite {
     /// WGS84, east positive; `None` when the project has no 3-D data.
     pub lat_deg: Option<f64>,
     pub lon_deg: Option<f64>,
+    /// Offset of the project's standard time from UTC [h] (PV*SOL `ZeitZone`, negative east;
+    /// +1 when absent: Central European Time).
+    pub utc_offset_h: i32,
 }
 
 /// Everything read from one `.pvprj`.
@@ -154,6 +159,7 @@ pub fn read_archive(a: &Archive) -> Result<PvsolFile, ReadError> {
             address,
             lat_deg: lat,
             lon_deg: lon,
+            utc_offset_h: coord("ZeitZone").map_or(1, |z| -(z.round() as i32)),
         },
         config,
         db,
