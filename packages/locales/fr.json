@@ -767,6 +767,7 @@
     "poa": "Irradiation sur le plan",
     "monthly": "Production mensuelle",
     "balance": {
+      "shadingKwh": "Ombrage proche",
       "nominal": "Énergie nominale (STC × irradiation)",
       "iamKwh": "Réflexion (IAM)",
       "soilingKwh": "Salissure",
@@ -777,7 +778,7 @@
       "inverterKwh": "Conversion onduleur",
       "clippingKwh": "Écrêtage onduleur"
     },
-    "note": "Météo : {source}. Sans ombrage proche ni lointain (à venir).",
+    "note": "Météo : {source}. Ombrage par les bâtiments et obstacles du projet ; sans horizon lointain (à venir).",
     "months": {
       "0": "J",
       "1": "F",

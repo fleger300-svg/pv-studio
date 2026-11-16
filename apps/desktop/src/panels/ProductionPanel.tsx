@@ -7,6 +7,7 @@ import { api, unwrap } from '../ipc';
 import { useToastStore } from '../store/toast';
 
 const BALANCE = [
+  'shadingKwh',
   'iamKwh',
   'soilingKwh',
   'lowLightKwh',

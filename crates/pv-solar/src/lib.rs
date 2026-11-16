@@ -9,8 +9,10 @@
 //!
 //! The losses are booked one after the other, so that their sum is the gap between the
 //! nominal energy (STC efficiency × plane-of-array irradiation) and the AC energy, as in the
-//! PV*SOL energy balance. No near shading yet (M3.2).
+//! PV*SOL energy balance. Near shading by the project's own buildings and roof obstacles
+//! ([`shade`]) is booked first, on the plane-of-array irradiance.
 
+pub mod shade;
 pub mod sun;
 
 use std::collections::HashMap;
@@ -65,6 +67,8 @@ impl Default for SimulationAssumptions {
 pub struct EnergyBalance {
     /// STC efficiency × plane-of-array irradiation.
     pub nominal_kwh: f64,
+    /// Near shading (buildings, roof obstacles).
+    pub shading_kwh: f64,
     pub iam_kwh: f64,
     pub soiling_kwh: f64,
     pub low_light_kwh: f64,
@@ -103,6 +107,7 @@ pub enum NotSimulated {
 }
 
 struct Group {
+    array: pv_model::ArrayId,
     tilt_deg: f64,
     azimuth_deg: f64,
     u: f64,
@@ -212,6 +217,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
                 .filter(|i| inverters.contains_key(i));
             let k = *index.entry((arr.id, inv)).or_insert_with(|| {
                 groups.push(Group {
+                    array: arr.id,
                     tilt_deg: tilt,
                     azimuth_deg: azimuth,
                     u: if flat { a.u_free } else { a.u_roof },
@@ -230,6 +236,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
         return Err(NotSimulated::NoModules);
     }
 
+    let mut shade = shade::ShadeModel::new(project);
     let mut b = EnergyBalance::default();
     let mut monthly = vec![0.0; 12];
     let mut ghi_sum = 0.0;
@@ -266,6 +273,16 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             let p_stc = g.modules * g.pmax_w;
             poa_weighted += gpoa * p_stc;
             let nominal = p_stc * gpoa / 1000.0;
+            let elevation = 90.0 - sun.zenith_deg;
+            let s_beam = if elevation > 0.0 {
+                shade.beam_shade(g.array, shade::bin_of(sun.azimuth_deg, elevation))
+            } else {
+                0.0
+            };
+            let d_view = shade.diffuse_factor(g.array);
+            let beam = poa.beam * (1.0 - s_beam);
+            let sky = poa.sky_diffuse * d_view;
+            let after_shading = p_stc * (beam + sky + poa.ground) / 1000.0;
             // Incidence angle modifier.
             let theta = incidence_deg(&sun, g.tilt_deg, g.azimuth_deg).to_radians();
             let iam_beam = if theta.cos() > 0.05 {
@@ -273,7 +290,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             } else {
                 0.0
             };
-            let geff = poa.beam * iam_beam + (poa.sky_diffuse + poa.ground) * a.iam_diffuse;
+            let geff = beam * iam_beam + (sky + poa.ground) * a.iam_diffuse;
             let after_iam = p_stc * geff / 1000.0;
             let g_soiled = geff * (1.0 - a.soiling_loss);
             let after_soiling = p_stc * g_soiled / 1000.0;
@@ -288,7 +305,8 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             let after_mismatch = after_temp * (1.0 - a.mismatch_loss);
             let dc = after_mismatch * (1.0 - a.dc_cable_loss);
             b.nominal_kwh += nominal;
-            b.iam_kwh += nominal - after_iam;
+            b.shading_kwh += nominal - after_shading;
+            b.iam_kwh += after_shading - after_iam;
             b.soiling_kwh += after_iam - after_soiling;
             b.low_light_kwh += after_soiling - after_low_light;
             b.temperature_kwh += after_low_light - after_temp;
@@ -314,6 +332,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
     let k = 1.0 / 1000.0;
     for x in [
         &mut b.nominal_kwh,
+        &mut b.shading_kwh,
         &mut b.iam_kwh,
         &mut b.soiling_kwh,
         &mut b.low_light_kwh,

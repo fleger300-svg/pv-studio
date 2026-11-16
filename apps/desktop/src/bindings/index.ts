@@ -1303,6 +1303,8 @@ export type EdgeSetback = {
 export type EnergyBalance = {
 	/**  STC efficiency × plane-of-array irradiation. */
 	nominalKwh: number,
+	/**  Near shading (buildings, roof obstacles). */
+	shadingKwh: number,
 	iamKwh: number,
 	soilingKwh: number,
 	lowLightKwh: number,

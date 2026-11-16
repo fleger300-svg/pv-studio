@@ -71,7 +71,8 @@ fn the_energy_balance_closes_and_is_plausible() {
     let p = located(ref_a_roof1());
     let r = simulate(&p, &SimulationAssumptions::default()).unwrap();
     let b = &r.balance;
-    let losses = b.iam_kwh
+    let losses = b.shading_kwh
+        + b.iam_kwh
         + b.soiling_kwh
         + b.low_light_kwh
         + b.temperature_kwh
@@ -163,4 +164,54 @@ fn an_undersized_inverter_clips() {
         r.balance
     );
     assert!(r.performance_ratio < 0.5);
+}
+
+#[test]
+fn a_chimney_in_front_of_the_modules_shades_them() {
+    let p = located(ref_a_roof1());
+    let base = simulate(&p, &SimulationAssumptions::default()).unwrap();
+    // Without obstacles, only the building itself may shade (little or nothing).
+    assert!(
+        base.balance.shading_kwh < 0.02 * base.balance.nominal_kwh,
+        "{:?}",
+        base.balance
+    );
+
+    // A 3 m high, 2 m wide chimney just below (south of) the middle of the modules.
+    let mut shaded = p.clone();
+    let us: Vec<f64> = shaded.modules.iter().map(|m| m.u).collect();
+    let v0 = shaded
+        .modules
+        .iter()
+        .map(|m| m.v)
+        .fold(f64::INFINITY, f64::min);
+    let u_mid = (us.iter().copied().fold(f64::INFINITY, f64::min)
+        + us.iter().copied().fold(f64::NEG_INFINITY, f64::max))
+        / 2.0;
+    let face = &mut shaded.roof_faces[0];
+    let outline = face.outline.as_mut().expect("outline");
+    outline.obstacles.push(pv_model::RoofObstacle {
+        name: "chimney".into(),
+        kind: pv_model::ObstacleKind::Chimney,
+        footprint_uv: vec![
+            [u_mid - 1.0, v0 - 1.6],
+            [u_mid + 1.0, v0 - 1.6],
+            [u_mid + 1.0, v0 - 0.8],
+            [u_mid - 1.0, v0 - 0.8],
+        ],
+        height_m: 3.0,
+        clearance_m: None,
+    });
+    let r = simulate(&shaded, &SimulationAssumptions::default()).unwrap();
+    assert!(
+        r.balance.shading_kwh > base.balance.shading_kwh + 0.005 * r.balance.nominal_kwh,
+        "{:?}",
+        r.balance
+    );
+    assert!(r.ac_energy_kwh < base.ac_energy_kwh);
+    println!(
+        "shading: {:.1} % → {:.1} %",
+        base.balance.shading_kwh / base.balance.nominal_kwh * 100.0,
+        r.balance.shading_kwh / r.balance.nominal_kwh * 100.0
+    );
 }

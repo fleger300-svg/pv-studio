@@ -9,6 +9,7 @@ rust-version.workspace = true
 
 [dependencies]
 pv-model.workspace = true
+pv-roof.workspace = true
 serde.workspace = true
 specta.workspace = true
 

@@ -2652,6 +2652,7 @@ name = "pv-solar"
 version = "0.1.0"
 dependencies = [
  "pv-model",
+ "pv-roof",
  "serde",
  "specta",
 ]

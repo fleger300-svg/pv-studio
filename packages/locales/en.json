@@ -767,6 +767,7 @@
     "poa": "Plane-of-array irradiation",
     "monthly": "Monthly production",
     "balance": {
+      "shadingKwh": "Near shading",
       "nominal": "Nominal energy (STC × irradiation)",
       "iamKwh": "Reflection (IAM)",
       "soilingKwh": "Soiling",
@@ -777,7 +778,7 @@
       "inverterKwh": "Inverter conversion",
       "clippingKwh": "Inverter clipping"
     },
-    "note": "Weather: {source}. Without near or far shading (coming).",
+    "note": "Weather: {source}. Shading by the project’s buildings and obstacles; without far horizon (coming).",
     "months": {
       "0": "J",
       "1": "F",

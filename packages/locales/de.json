@@ -767,6 +767,7 @@
     "poa": "Einstrahlung auf Modulebene",
     "monthly": "Monatlicher Ertrag",
     "balance": {
+      "shadingKwh": "Nahverschattung",
       "nominal": "Nennenergie (STC × Einstrahlung)",
       "iamKwh": "Reflexion (IAM)",
       "soilingKwh": "Verschmutzung",
@@ -777,7 +778,7 @@
       "inverterKwh": "Wechselrichter-Umwandlung",
       "clippingKwh": "Wechselrichter-Abregelung"
     },
-    "note": "Wetter: {source}. Ohne Nah- und Fernverschattung (folgt).",
+    "note": "Wetter: {source}. Verschattung durch Gebäude und Hindernisse des Projekts; ohne Fernhorizont (folgt).",
     "months": {
       "0": "J",
       "1": "F",
