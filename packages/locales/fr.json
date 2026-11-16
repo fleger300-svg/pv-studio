@@ -31,7 +31,9 @@
     },
     "files": "Projet",
     "new": "Nouveau projet…",
-    "open": "Ouvrir…"
+    "open": "Ouvrir…",
+    "importPvsol": "Importer un projet PV*SOL…",
+    "importing": "Import en cours…"
   },
   "tools": {
     "label": "Outils",
@@ -166,6 +168,12 @@
     "yield": {
       "noWeather": "Pas de météo : localisez le projet et téléchargez la météo (étape Bâtiment).",
       "noModules": "Aucun module avec données électriques à simuler."
+    },
+    "pvsol": {
+      "notAnArchive": "Ce fichier n’est pas un projet PV*SOL lisible ({detail}).",
+      "missing": "Le projet PV*SOL est incomplet ({detail}).",
+      "format": "Contenu PV*SOL inattendu ({detail}).",
+      "weather": "Fichier météo PV*SOL illisible ({detail})."
     }
   },
   "hud": {
@@ -828,5 +836,48 @@
     "quantity": "Quantité",
     "mass": "Masse",
     "wiring": "Onduleurs et plan de strings"
+  },
+  "pvsol": {
+    "title": "Import PV*SOL",
+    "source": "Fichier importé : {file}",
+    "notesTitle": "Ce qui n’a pas été repris",
+    "complete": "Tout le projet a été repris.",
+    "compareTitle": "PV Studio comparé à PV*SOL",
+    "sameWeather": "Même météo que PV*SOL ; pertes d’entrée (salissure, mismatch, câbles) reprises de PV*SOL.",
+    "otherWeather": "Météo différente de celle de PV*SOL : les écarts incluent l’effet de la météo.",
+    "gap": "Écart",
+    "assumptions": "Hypothèses reprises de PV*SOL : salissure et spectre {soiling} %, mismatch et diodes {mismatch} %, câbles {cables} %.",
+    "notModelled": "Pas encore calculé par PV Studio : ombrage de l’environnement (bâtiments voisins du modèle de surface PV*SOL) et mismatch entre strings inégaux sur un même MPPT.",
+    "noComparison": "Pas de comparaison : PV*SOL n’a pas de résultats pour ce projet, ou le fichier météo manque.",
+    "close": "Fermer",
+    "note": {
+      "noLocation": "Le projet n’a pas de coordonnées : localisez-le à l’étape Site.",
+      "noWeather": "Pas de fichier météo dans le projet PV*SOL : chargez une année météo à l’étape Site.",
+      "moduleMissing": "Champ « {array} » : fiche du module introuvable, champ non repris.",
+      "moduleSize": "Champ « {array} » : les dimensions de « {module} » diffèrent de la scène PV*SOL.",
+      "facade": "Pan {face} : façade verticale, reprise à 89,9° (le modèle n’accepte pas 90°).",
+      "noScene": "Pas de scène 3D dans le projet PV*SOL : aucun module n’a pu être placé.",
+      "rowFormations": "{count} formation(s) de rangées sur toit plat ({modules} modules) pas encore reprises.",
+      "objectsSkipped": "{count} objet(s) d’ombrage ou de décor non repris : {names}.",
+      "inverterMissing": "Onduleur « {inverter} » : fiche introuvable, non repris.",
+      "trackerMissing": "« {inverter} » : tracker MPP {tracker} absent de la fiche, strings non repris.",
+      "unwiredModules": "{count} module(s) câblés dans PV*SOL ne sont pas dans les champs repris.",
+      "noWiring": "Le projet PV*SOL n’a pas de plan de câblage 3D : onduleurs et strings à refaire.",
+      "chooseMounting": "Choisissez un système de montage pour chaque champ (PV*SOL ne le décrit pas) : la statique et la liste de matériel en dépendent."
+    },
+    "compare": {
+      "peakPower": "Puissance crête",
+      "ghi": "Rayonnement horizontal",
+      "poa": "Rayonnement dans le plan",
+      "shading": "Ombrage",
+      "reflection": "Réflexion (angle d’incidence)",
+      "lowLight": "Faible éclairement",
+      "temperature": "Température",
+      "wiringMismatch": "Strings inégaux sur un MPPT",
+      "inverter": "Onduleur",
+      "clipping": "Écrêtage",
+      "acEnergy": "Énergie AC annuelle",
+      "specificYield": "Rendement spécifique"
+    }
   }
 }

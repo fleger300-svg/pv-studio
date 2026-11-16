@@ -1037,3 +1037,43 @@ body,
     break-inside: avoid;
   }
 }
+
+/* Report of a PV*SOL import (notes and comparison with PV*SOL's results). */
+.pvsol-report {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-xl);
+  overflow-y: auto;
+  background: rgb(0 0 0 / 0.35);
+}
+.pvsol-report > * {
+  width: min(44rem, 100%);
+  box-shadow: var(--shadow-float);
+}
+.pvsol-report__heading {
+  margin: var(--space-md) 0 var(--space-xs);
+  font-size: var(--font-size-md, 1rem);
+}
+.pvsol-report__notes {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+.pvsol-report__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.pvsol-report__table th,
+.pvsol-report__table td {
+  padding: var(--space-2xs, 2px) var(--space-xs);
+  border-bottom: 1px solid var(--color-border, rgb(127 127 127 / 0.25));
+  text-align: right;
+}
+.pvsol-report__table th[scope='row'] {
+  text-align: left;
+  font-weight: normal;
+}

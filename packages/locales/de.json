@@ -31,7 +31,9 @@
     },
     "files": "Projekt",
     "new": "Neues Projekt…",
-    "open": "Öffnen…"
+    "open": "Öffnen…",
+    "importPvsol": "PV*SOL-Projekt importieren…",
+    "importing": "Import läuft…"
   },
   "tools": {
     "label": "Werkzeuge",
@@ -166,6 +168,12 @@
     "yield": {
       "noWeather": "Keine Wetterdaten: Projekt lokalisieren und Wetterdaten herunterladen (Schritt Gebäude).",
       "noModules": "Kein Modul mit elektrischen Daten zu simulieren."
+    },
+    "pvsol": {
+      "notAnArchive": "Diese Datei ist kein lesbares PV*SOL-Projekt ({detail}).",
+      "missing": "Das PV*SOL-Projekt ist unvollständig ({detail}).",
+      "format": "Unerwarteter PV*SOL-Inhalt ({detail}).",
+      "weather": "PV*SOL-Wetterdatei nicht lesbar ({detail})."
     }
   },
   "hud": {
@@ -828,5 +836,48 @@
     "quantity": "Menge",
     "mass": "Masse",
     "wiring": "Wechselrichter und Stringplan"
+  },
+  "pvsol": {
+    "title": "PV*SOL-Import",
+    "source": "Importierte Datei: {file}",
+    "notesTitle": "Nicht übernommen",
+    "complete": "Das ganze Projekt wurde übernommen.",
+    "compareTitle": "PV Studio im Vergleich zu PV*SOL",
+    "sameWeather": "Gleiches Wetter wie PV*SOL; Eingangsverluste (Verschmutzung, Mismatch, Kabel) aus PV*SOL übernommen.",
+    "otherWeather": "Anderes Wetter als PV*SOL: die Abweichungen enthalten den Wettereinfluss.",
+    "gap": "Abweichung",
+    "assumptions": "Aus PV*SOL übernommen: Verschmutzung und Spektrum {soiling} %, Mismatch und Dioden {mismatch} %, Kabel {cables} %.",
+    "notModelled": "Von PV Studio noch nicht berechnet: Verschattung durch die Umgebung (Nachbargebäude aus dem PV*SOL-Höhenmodell) und Mismatch ungleicher Strings an einem MPPT.",
+    "noComparison": "Kein Vergleich: PV*SOL hat keine Ergebnisse für dieses Projekt, oder die Wetterdatei fehlt.",
+    "close": "Schliessen",
+    "note": {
+      "noLocation": "Das Projekt hat keine Koordinaten: im Schritt Standort verorten.",
+      "noWeather": "Keine Wetterdatei im PV*SOL-Projekt: im Schritt Standort ein Wetterjahr laden.",
+      "moduleMissing": "Modulfläche «{array}»: Moduldatensatz nicht gefunden, nicht übernommen.",
+      "moduleSize": "Modulfläche «{array}»: die Abmessungen von «{module}» weichen von der PV*SOL-Szene ab.",
+      "facade": "Fläche {face}: senkrechte Fassade, mit 89,9° übernommen (das Modell akzeptiert keine 90°).",
+      "noScene": "Keine 3D-Szene im PV*SOL-Projekt: es konnten keine Module platziert werden.",
+      "rowFormations": "{count} Modulreihen-Formation(en) auf Flachdach ({modules} Module) noch nicht übernommen.",
+      "objectsSkipped": "{count} Verschattungs- oder Dekorobjekt(e) nicht übernommen: {names}.",
+      "inverterMissing": "Wechselrichter «{inverter}»: Datensatz nicht gefunden, nicht übernommen.",
+      "trackerMissing": "«{inverter}»: MPP-Tracker {tracker} fehlt im Datensatz, Strings nicht übernommen.",
+      "unwiredModules": "{count} in PV*SOL verschaltete Module sind nicht in den übernommenen Modulflächen.",
+      "noWiring": "Das PV*SOL-Projekt hat keinen 3D-Verschaltungsplan: Wechselrichter und Strings neu anlegen.",
+      "chooseMounting": "Wählen Sie für jede Modulfläche ein Montagesystem (PV*SOL beschreibt es nicht): Statik und Materialliste hängen davon ab."
+    },
+    "compare": {
+      "peakPower": "Spitzenleistung",
+      "ghi": "Horizontale Einstrahlung",
+      "poa": "Einstrahlung in Modulebene",
+      "shading": "Verschattung",
+      "reflection": "Reflexion (Einfallswinkel)",
+      "lowLight": "Schwachlicht",
+      "temperature": "Temperatur",
+      "wiringMismatch": "Ungleiche Strings an einem MPPT",
+      "inverter": "Wechselrichter",
+      "clipping": "Abregelung",
+      "acEnergy": "Jährliche AC-Energie",
+      "specificYield": "Spezifischer Ertrag"
+    }
   }
 }

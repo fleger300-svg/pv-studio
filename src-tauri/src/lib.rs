@@ -9,6 +9,7 @@ mod export;
 mod layout;
 mod library;
 mod production;
+mod pvsol;
 mod roof;
 mod settings;
 mod site;
@@ -75,6 +76,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             settings::delete_api_key,
             settings::test_api_key,
             export::export_dxf,
+            pvsol::import_pvsol,
             commands::get_module_buffer,
             commands::get_module_buffer_for,
             commands::apply_command,

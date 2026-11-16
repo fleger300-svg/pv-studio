@@ -2743,6 +2743,7 @@ dependencies = [
  "pv-library",
  "pv-model",
  "pv-pipeline",
+ "pv-pvsol",
  "pv-roof",
  "pv-secrets",
  "pv-solar",

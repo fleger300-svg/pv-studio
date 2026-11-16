@@ -1,5 +1,11 @@
 import { create } from 'zustand';
-import type { CommandError, ProjectSummary, StressPreset } from '../bindings';
+import type {
+  CommandError,
+  Comparison,
+  ImportNote,
+  ProjectSummary,
+  StressPreset,
+} from '../bindings';
 import { api, BackendError, unwrap } from '../ipc';
 import { decodeModuleBuffer, type ModuleData } from '../viewport3d/moduleBuffer';
 import { useSelectionStore } from './selection';
@@ -13,7 +19,14 @@ export interface ProjectCounters {
 }
 
 /** What is being opened (buttons show it as busy). */
-export type Loading = StressPreset | 'new' | 'open';
+export type Loading = StressPreset | 'new' | 'open' | 'import';
+
+/** What a PV*SOL import left out, and PV Studio's simulation next to PV*SOL's. */
+export interface PvsolReport {
+  source: string;
+  notes: ImportNote[];
+  comparison: Comparison | null;
+}
 
 /** Read-only projection of the project owned by Rust. */
 interface ProjectState {
@@ -36,6 +49,11 @@ interface ProjectState {
   newProject: (path?: string) => Promise<void>;
   /** Opens a project file (native « Ouvrir »; `path` for automation). */
   openProject: (path?: string) => Promise<void>;
+  /** Imports a PV*SOL project into a new file (native dialogs; paths for automation). */
+  importPvsol: (source?: string, target?: string) => Promise<void>;
+  /** Report of the last PV*SOL import, shown until closed. */
+  pvsolReport: PvsolReport | null;
+  closePvsolReport: () => void;
   /** Applies the counters returned by Rust after a command. */
   setCounters: (counters: ProjectCounters) => void;
   /**
@@ -105,6 +123,7 @@ export const useProjectStore = create<ProjectState>()((set, get) => {
     loading: null,
     error: null,
     openStartedAt: null,
+    pvsolReport: null,
 
     loadPreset: (preset) =>
       opening(preset, async () => {
@@ -126,6 +145,24 @@ export const useProjectStore = create<ProjectState>()((set, get) => {
         summary: await unwrap(api.openProjectDialog(path ?? null)),
         preset: null,
       })),
+
+    importPvsol: (source, target) =>
+      opening('import', async () => {
+        const result = await unwrap(api.importPvsol(source ?? null, target ?? null));
+        if (!result) return { summary: null, preset: null };
+        set({
+          pvsolReport: {
+            source: result.source,
+            notes: result.notes,
+            comparison: result.comparison ?? null,
+          },
+        });
+        return { summary: result.summary, preset: null };
+      }),
+
+    closePvsolReport: () => {
+      set({ pvsolReport: null });
+    },
 
     setCounters: (counters) => {
       set({ counters });

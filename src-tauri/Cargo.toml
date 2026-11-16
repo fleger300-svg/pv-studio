@@ -43,6 +43,7 @@ pv-electrical.workspace = true
 pv-weather.workspace = true
 pv-solar.workspace = true
 pv-cad.workspace = true
+pv-pvsol.workspace = true
 pv-graph.workspace = true
 pv-copilot.workspace = true
 pv-secrets.workspace = true

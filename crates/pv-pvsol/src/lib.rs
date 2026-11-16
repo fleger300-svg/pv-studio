@@ -48,10 +48,10 @@ impl ReadError {
     #[must_use]
     pub fn key(&self) -> &'static str {
         match self {
-            Self::NotAnArchive(_) => "pvsol.notAnArchive",
-            Self::Missing(_) => "pvsol.missing",
-            Self::Xml { .. } | Self::Format { .. } => "pvsol.format",
-            Self::Weather(_) => "pvsol.weather",
+            Self::NotAnArchive(_) => "errors.pvsol.notAnArchive",
+            Self::Missing(_) => "errors.pvsol.missing",
+            Self::Xml { .. } | Self::Format { .. } => "errors.pvsol.format",
+            Self::Weather(_) => "errors.pvsol.weather",
         }
     }
 }

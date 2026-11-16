@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@pv/ui';
 import type { StressPreset } from '../bindings';
 import { useProjectStore } from '../store/project';
+import { PvsolReport } from './PvsolReport';
 
 const PRESETS: readonly { preset: StressPreset; key: string }[] = [
   { preset: 'Residential1k', key: 'project.presets.residential' },
@@ -17,6 +18,7 @@ export function ProjectPicker() {
   const loadPreset = useProjectStore((s) => s.loadPreset);
   const newProject = useProjectStore((s) => s.newProject);
   const openProject = useProjectStore((s) => s.openProject);
+  const importPvsol = useProjectStore((s) => s.importPvsol);
   const busy = loading !== null;
 
   return (
@@ -41,6 +43,14 @@ export function ProjectPicker() {
         >
           {t('project.open')}
         </Button>
+        <Button
+          variant="secondary"
+          disabled={busy}
+          aria-busy={loading === 'import'}
+          onClick={() => void importPvsol()}
+        >
+          {loading === 'import' ? t('project.importing') : t('project.importPvsol')}
+        </Button>
       </section>
       <section className="project-picker" aria-labelledby="project-picker-title">
         <h2 id="project-picker-title" className="workflow__title">
@@ -63,6 +73,7 @@ export function ProjectPicker() {
           </p>
         )}
       </section>
+      <PvsolReport />
     </>
   );
 }

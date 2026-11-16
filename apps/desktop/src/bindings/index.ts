@@ -132,6 +132,12 @@ export const commands = {
 	 *  (native dialog); `None` when the user cancels.
 	 */
 	exportDxf: (path: string | null) => typedError<string | null, CommandError>(__TAURI_INVOKE("export_dxf", { path })),
+	/**
+	 *  Imports a PV*SOL project into a new `.pvproj` and opens it. Without `source` / `target`,
+	 *  asks with the native « Ouvrir » / « Enregistrer sous » dialogs (`path`s for automation);
+	 *  `None` when the user cancels. An existing file is never replaced.
+	 */
+	importPvsol: (source: string | null, target: string | null) => typedError<PvsolImport_Serialize | null, CommandError>(__TAURI_INVOKE("import_pvsol", { source, target })),
 	/**  Binary buffer of every module of the open project. */
 	getModuleBuffer: () => typedError<ArrayBuffer, CommandError>(__TAURI_INVOKE("get_module_buffer")),
 	/**  Binary buffer of the given modules only (used to resync after undo/redo). */
@@ -968,6 +974,26 @@ export type Command_Serialize =
 /**  Several commands applied as one, all or nothing. */
 { type: "Batch"; commands: Command_Serialize[] };
 
+/**  The comparison of one project. */
+export type Comparison = {
+	rows: ComparisonRow[],
+	monthlyAcPvsolKwh: number[],
+	monthlyAcPvstudioKwh: number[],
+	/**  Both simulations ran on PV*SOL's weather file. */
+	sameWeather: boolean,
+	assumptions: SimulationAssumptions,
+};
+
+/**  One compared quantity. */
+export type ComparisonRow = {
+	/**  Translation key suffix (`pvsol.compare.<key>`). */
+	key: string,
+	/**  `kWh`, `kWh/m²`, `kWh/kWp`, `%`, `kWp`. */
+	unit: string,
+	pvsol: number,
+	pvstudio: number,
+};
+
 /**  One revision of a catalogue entry. */
 export type Component = Component_Serialize | Component_Deserialize;
 
@@ -1535,6 +1561,12 @@ export type ImportDifference = {
 	field: string,
 	library: string,
 	list: string,
+};
+
+/**  Something the import could not carry over, for the user (translated by `key`). */
+export type ImportNote = {
+	key: string,
+	params: { [key in string]: string },
 };
 
 /**  Outcome of an import (or of its preview). */
@@ -2440,6 +2472,38 @@ export type PvString_Serialize = {
 	modules: ModuleRef[],
 	/**  Locked strings are never changed by the automatic stringing. */
 	locked: boolean,
+};
+
+/**
+ *  What the import produced: the new (open) project, what PV*SOL had that was not carried
+ *  over, and PV Studio's simulation next to PV*SOL's results.
+ */
+export type PvsolImport = PvsolImport_Serialize | PvsolImport_Deserialize;
+
+/**
+ *  What the import produced: the new (open) project, what PV*SOL had that was not carried
+ *  over, and PV Studio's simulation next to PV*SOL's results.
+ */
+export type PvsolImport_Deserialize = {
+	summary: ProjectSummary_Deserialize,
+	/**  File name of the PV*SOL project. */
+	source: string,
+	notes: ImportNote[],
+	/**  `None` when PV*SOL has no results or the project cannot be simulated. */
+	comparison?: Comparison | null,
+};
+
+/**
+ *  What the import produced: the new (open) project, what PV*SOL had that was not carried
+ *  over, and PV Studio's simulation next to PV*SOL's results.
+ */
+export type PvsolImport_Serialize = {
+	summary: ProjectSummary_Serialize,
+	/**  File name of the PV*SOL project. */
+	source: string,
+	notes: ImportNote[],
+	/**  `None` when PV*SOL has no results or the project cannot be simulated. */
+	comparison?: Comparison | null,
 };
 
 /**

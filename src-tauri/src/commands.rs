@@ -40,7 +40,7 @@ impl Type for ModuleBuffer {
     }
 }
 
-fn summary(store: &ProjectStore) -> Result<ProjectSummary, CommandError> {
+pub(crate) fn summary(store: &ProjectStore) -> Result<ProjectSummary, CommandError> {
     let (can_undo, can_redo) = store.history_state().map_err(CommandError::from)?;
     let project = store.project();
     let mut summary = ProjectSummary::new(

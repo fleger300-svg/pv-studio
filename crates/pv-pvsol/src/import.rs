@@ -443,6 +443,12 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
         }
     }
 
+    if !module_refs.is_empty() {
+        // PV*SOL does not describe the mounting system: the statics and the bill of materials
+        // wait for the user's choice.
+        notes.push(ImportNote::new("pvsol.note.chooseMounting"));
+    }
+
     // --- Wiring ------------------------------------------------------------------------------
     let mut wiring = Wiring {
         inverters: Vec::new(),

@@ -168,7 +168,11 @@ fn imports_project_a() {
     keys.sort_unstable();
     assert_eq!(
         keys,
-        ["pvsol.note.noWeather", "pvsol.note.objectsSkipped"],
+        [
+            "pvsol.note.chooseMounting",
+            "pvsol.note.noWeather",
+            "pvsol.note.objectsSkipped"
+        ],
         "{:?}",
         out.notes
     );
