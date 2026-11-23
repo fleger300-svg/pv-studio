@@ -56,6 +56,188 @@ struct Tri {
     wall_of: Option<BuildingId>,
     /// Tilted modules: index of their footprint (a module never shades a point under it).
     module: Option<usize>,
+    /// A tree's crown: lets part of the light through (see [`ShadeModel::crown_opacity`]).
+    crown: bool,
+}
+
+impl Tri {
+    fn new(a: V3, b: V3, c: V3) -> Self {
+        Self {
+            a,
+            e1: sub(b, a),
+            e2: sub(c, a),
+            face: None,
+            wall_of: None,
+            module: None,
+            crown: false,
+        }
+    }
+}
+
+/// What stops a ray.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Hit {
+    Clear,
+    /// Only trees' crowns (partly transparent).
+    Crown,
+    Opaque,
+}
+
+/// Is the outline (projected on the horizontal plane) convex?
+fn convex(points: &[V3]) -> bool {
+    let n = points.len();
+    let mut sign = 0.0;
+    for i in 0..n {
+        let (a, b, c) = (points[i], points[(i + 1) % n], points[(i + 2) % n]);
+        let z = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
+        if z.abs() < 1e-12 {
+            continue;
+        }
+        if sign == 0.0 {
+            sign = z.signum();
+        } else if z.signum() != sign {
+            return false;
+        }
+    }
+    true
+}
+
+/// Triangles of a flat, simple polygon (ear clipping in its own plane).
+fn triangulate(points: &[V3], out: &mut Vec<Tri>) {
+    let n = points.len();
+    if n < 3 {
+        return;
+    }
+    // Normal (Newell), then a 2-D frame in the plane.
+    let mut nrm = [0.0; 3];
+    for i in 0..n {
+        let (a, b) = (points[i], points[(i + 1) % n]);
+        nrm[0] += (a[1] - b[1]) * (a[2] + b[2]);
+        nrm[1] += (a[2] - b[2]) * (a[0] + b[0]);
+        nrm[2] += (a[0] - b[0]) * (a[1] + b[1]);
+    }
+    let len = dot(nrm, nrm).sqrt();
+    if len < 1e-12 {
+        return;
+    }
+    let nrm = mul(nrm, 1.0 / len);
+    let helper = if nrm[2].abs() < 0.9 {
+        [0.0, 0.0, 1.0]
+    } else {
+        [1.0, 0.0, 0.0]
+    };
+    let ex = cross(helper, nrm);
+    let ex = mul(ex, 1.0 / dot(ex, ex).sqrt());
+    let ey = cross(nrm, ex);
+    let p2: Vec<[f64; 2]> = points.iter().map(|p| [dot(*p, ex), dot(*p, ey)]).collect();
+    let area: f64 = (0..n)
+        .map(|i| {
+            let (a, b) = (p2[i], p2[(i + 1) % n]);
+            a[0] * b[1] - b[0] * a[1]
+        })
+        .sum();
+    let ccw = area > 0.0;
+    let cross2 = |a: [f64; 2], b: [f64; 2], c: [f64; 2]| {
+        (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    };
+    let mut idx: Vec<usize> = (0..n).collect();
+    let mut guard = 0;
+    while idx.len() > 3 && guard < n * n {
+        guard += 1;
+        let m = idx.len();
+        let mut clipped = false;
+        for k in 0..m {
+            let (i, j, l) = (idx[(k + m - 1) % m], idx[k], idx[(k + 1) % m]);
+            let turn = cross2(p2[i], p2[j], p2[l]);
+            if (turn > 0.0) != ccw || turn.abs() < 1e-12 {
+                continue;
+            }
+            let inside = idx.iter().any(|&q| {
+                q != i && q != j && q != l && {
+                    let (a, b, c) = (
+                        cross2(p2[i], p2[j], p2[q]),
+                        cross2(p2[j], p2[l], p2[q]),
+                        cross2(p2[l], p2[i], p2[q]),
+                    );
+                    (a >= 0.0 && b >= 0.0 && c >= 0.0) || (a <= 0.0 && b <= 0.0 && c <= 0.0)
+                }
+            });
+            if !inside {
+                out.push(Tri::new(points[i], points[j], points[l]));
+                idx.remove(k);
+                clipped = true;
+                break;
+            }
+        }
+        if !clipped {
+            break;
+        }
+    }
+    if idx.len() == 3 {
+        out.push(Tri::new(points[idx[0]], points[idx[1]], points[idx[2]]));
+    }
+}
+
+/// Occluder triangles of a shading object: the polygon itself, or the walls of the extruded
+/// outline (with top and bottom when it is convex: a crown or a box seen from below); a
+/// tree's crown is the spheroid inscribed in its extruded outline.
+fn object_tris(o: &pv_model::ShadingObject, out: &mut Vec<Tri>) {
+    let base = &o.outline;
+    if o.height_m <= 0.0 {
+        triangulate(base, out);
+        return;
+    }
+    let up = [0.0, 0.0, o.height_m];
+    if !o.opacity_by_month.is_empty() {
+        let n = base.len() as f64;
+        let c = [
+            base.iter().map(|p| p[0]).sum::<f64>() / n,
+            base.iter().map(|p| p[1]).sum::<f64>() / n,
+            base.iter().map(|p| p[2]).sum::<f64>() / n,
+        ];
+        let r = base
+            .iter()
+            .map(|p| (p[0] - c[0]).hypot(p[1] - c[1]))
+            .sum::<f64>()
+            / n;
+        const SIDES: usize = 8;
+        const RINGS: usize = 4;
+        let ring = |k: usize| -> Vec<V3> {
+            let f = k as f64 / RINGS as f64;
+            let z = c[2] + f * o.height_m;
+            let rr = r * (1.0 - (2.0 * f - 1.0).powi(2)).max(0.0).sqrt();
+            (0..SIDES)
+                .map(|s| {
+                    let a = std::f64::consts::TAU * s as f64 / SIDES as f64;
+                    [c[0] + rr * a.cos(), c[1] + rr * a.sin(), z]
+                })
+                .collect()
+        };
+        let start = out.len();
+        for k in 0..RINGS {
+            let (lo, hi) = (ring(k), ring(k + 1));
+            for s in 0..SIDES {
+                let t = (s + 1) % SIDES;
+                out.push(Tri::new(lo[s], lo[t], hi[t]));
+                out.push(Tri::new(lo[s], hi[t], hi[s]));
+            }
+        }
+        for t in &mut out[start..] {
+            t.crown = true;
+        }
+        return;
+    }
+    let top: Vec<V3> = base.iter().map(|&p| add(p, up)).collect();
+    let n = base.len();
+    for i in 0..n {
+        let j = (i + 1) % n;
+        out.push(Tri::new(base[i], base[j], top[j]));
+        out.push(Tri::new(base[i], top[j], top[i]));
+    }
+    if n >= 3 && convex(base) {
+        triangulate(base, out);
+        triangulate(&top, out);
+    }
 }
 
 /// Möller–Trumbore: does the ray `o + t·d` (t > ε) hit the triangle?
@@ -140,6 +322,7 @@ fn fan(points: &[V3], face: Option<RoofFaceId>, wall_of: Option<BuildingId>, out
             face,
             wall_of,
             module: None,
+            crown: false,
         });
     }
 }
@@ -312,8 +495,15 @@ fn sample_offsets(x: f64, y: f64) -> [[f64; 2]; POINTS] {
 /// The tilted modules of one row: corners and footprint index.
 type RowModules = Vec<([V3; 4], usize)>;
 
-/// Shaded fraction of an array and the mask of each of its modules.
-type BeamShade = (f64, Vec<u16>);
+/// The beam's shade on an array for one sun bin: shaded fractions and the mask of each of its
+/// modules, by opaque occluders and by trees' crowns only.
+#[derive(Default)]
+struct BeamShade {
+    opaque: f64,
+    crown: f64,
+    opaque_masks: Vec<u16>,
+    crown_masks: Vec<u16>,
+}
 
 /// Shading of every array of a project.
 pub struct ShadeModel {
@@ -329,6 +519,8 @@ pub struct ShadeModel {
     /// Shaded fraction and module masks per array and sun bin.
     beam: HashMap<(ArrayId, (u16, u16)), BeamShade>,
     diffuse: HashMap<ArrayId, f64>,
+    /// Share of the light the trees' crowns stop, by month (mean over the crowns).
+    crown_opacity: [f64; 12],
 }
 
 impl ShadeModel {
@@ -396,6 +588,25 @@ impl ShadeModel {
                 fan(&poly, None, Some(b.id), &mut tris);
             }
             close(&tris, start, &mut clusters);
+        }
+        // Shading objects (trees, neighbouring buildings, roof fixtures, polygons).
+        let mut crown_opacity = [0.0; 12];
+        let mut crowns = 0.0;
+        for o in &project.site.objects {
+            let start = tris.len();
+            object_tris(o, &mut tris);
+            close(&tris, start, &mut clusters);
+            if !o.opacity_by_month.is_empty() {
+                crowns += 1.0;
+                for (m, x) in crown_opacity.iter_mut().enumerate() {
+                    *x += o.opacity(m);
+                }
+            }
+        }
+        if crowns > 0.0 {
+            for x in &mut crown_opacity {
+                *x /= crowns;
+            }
         }
         let mut receivers = HashMap::new();
         // Footprints (x, y) of the tilted modules.
@@ -479,6 +690,7 @@ impl ShadeModel {
             receivers,
             beam: HashMap::new(),
             diffuse: HashMap::new(),
+            crown_opacity,
         }
     }
 
@@ -535,61 +747,98 @@ impl ShadeModel {
             })
     }
 
-    fn blocked(&self, r: &Receiver, o: V3, d: V3) -> bool {
-        self.clusters.iter().any(|c| {
-            crosses(c, o, d)
-                && self.tris[c.start..c.end].iter().any(|t| {
-                    t.face != Some(r.face)
-                        && t.wall_of != Some(r.building)
-                        && !t
-                            .module
-                            .is_some_and(|k| inside(&self.footprints[k], [o[0], o[1]]))
-                        && !self.below(t.face, o)
-                        && hits(t, o, d)
-                })
-        }) || self.field.as_ref().is_some_and(|f| f.blocks(o, d))
+    fn hit(&self, r: &Receiver, o: V3, d: V3) -> Hit {
+        let mut crown = false;
+        for c in &self.clusters {
+            if !crosses(c, o, d) {
+                continue;
+            }
+            for t in &self.tris[c.start..c.end] {
+                if t.face != Some(r.face)
+                    && t.wall_of != Some(r.building)
+                    && !t
+                        .module
+                        .is_some_and(|k| inside(&self.footprints[k], [o[0], o[1]]))
+                    && !self.below(t.face, o)
+                    && (!crown || !t.crown)
+                    && hits(t, o, d)
+                {
+                    if !t.crown {
+                        return Hit::Opaque;
+                    }
+                    crown = true;
+                }
+            }
+        }
+        if self.field.as_ref().is_some_and(|f| f.blocks(o, d)) {
+            Hit::Opaque
+        } else if crown {
+            Hit::Crown
+        } else {
+            Hit::Clear
+        }
     }
 
     fn beam_entry(&mut self, array: ArrayId, bin: (u16, u16)) -> &BeamShade {
         if !self.beam.contains_key(&(array, bin)) {
-            let e = self.receivers.get(&array).map_or((0.0, Vec::new()), |r| {
-                let d = sun_vector(f64::from(bin.0) * 5.0 + 2.5, f64::from(bin.1) * 5.0 + 2.5);
-                let masks: Vec<u16> = r
-                    .modules
-                    .iter()
-                    .map(|m| {
-                        m.iter().enumerate().fold(0u16, |mask, (k, &p)| {
-                            if self.blocked(r, p, d) {
-                                mask | (1 << k)
-                            } else {
-                                mask
+            let e = self
+                .receivers
+                .get(&array)
+                .map_or_else(BeamShade::default, |r| {
+                    let d = sun_vector(f64::from(bin.0) * 5.0 + 2.5, f64::from(bin.1) * 5.0 + 2.5);
+                    let mut e = BeamShade::default();
+                    for m in &r.modules {
+                        let (mut opaque, mut crown) = (0u16, 0u16);
+                        for (k, &p) in m.iter().enumerate() {
+                            match self.hit(r, p, d) {
+                                Hit::Opaque => opaque |= 1 << k,
+                                Hit::Crown => crown |= 1 << k,
+                                Hit::Clear => {}
                             }
-                        })
-                    })
-                    .collect();
-                let hit: u32 = masks.iter().map(|m| m.count_ones()).sum();
-                let n = masks.len() * POINTS;
-                let s = if n == 0 {
-                    0.0
-                } else {
-                    f64::from(hit) / n as f64
-                };
-                (s, masks)
-            });
+                        }
+                        e.opaque_masks.push(opaque);
+                        e.crown_masks.push(crown);
+                    }
+                    let n = (r.modules.len() * POINTS).max(1) as f64;
+                    let count = |masks: &[u16]| {
+                        f64::from(masks.iter().map(|m| m.count_ones()).sum::<u32>()) / n
+                    };
+                    e.opaque = count(&e.opaque_masks);
+                    e.crown = count(&e.crown_masks);
+                    e
+                });
             self.beam.insert((array, bin), e);
         }
         &self.beam[&(array, bin)]
     }
 
-    /// Shaded fraction of the beam on `array` for a sun in `bin` (bin centre direction).
-    pub fn beam_shade(&mut self, array: ArrayId, bin: (u16, u16)) -> f64 {
-        self.beam_entry(array, bin).0
+    /// Shaded fraction of the beam on `array` for a sun in `bin` (bin centre direction) in
+    /// `month` (0 = January: the trees' crowns).
+    pub fn beam_shade(&mut self, array: ArrayId, bin: (u16, u16), month: usize) -> f64 {
+        let opacity = self.crown_opacity[month % 12];
+        let e = self.beam_entry(array, bin);
+        e.opaque + e.crown * opacity
     }
 
-    /// Shade mask of every module of `array` for a sun in `bin`, in the order of
-    /// [`Self::module_index`]: bit `strip * BANDS + band` set when that point is shaded.
-    pub fn module_masks(&mut self, array: ArrayId, bin: (u16, u16)) -> &[u16] {
-        &self.beam_entry(array, bin).1
+    /// Shade mask of module `index` of `array` (see [`Self::module_index`]) for a sun in `bin`
+    /// in `month`: bit `strip * BANDS + band` set when that point is shaded. A point behind a
+    /// crown counts as shaded when the crown stops most of the light.
+    pub fn module_mask(
+        &mut self,
+        array: ArrayId,
+        bin: (u16, u16),
+        month: usize,
+        index: usize,
+    ) -> u16 {
+        let dense = self.crown_opacity[month % 12] >= 0.5;
+        let e = self.beam_entry(array, bin);
+        let opaque = e.opaque_masks.get(index).copied().unwrap_or(0);
+        let crown = e.crown_masks.get(index).copied().unwrap_or(0);
+        if dense {
+            opaque | crown
+        } else {
+            opaque
+        }
     }
 
     /// Index of a module in its array's masks; `None` for an unknown or removed module.
@@ -607,6 +856,7 @@ impl ShadeModel {
         if let Some(&f) = self.diffuse.get(&array) {
             return f;
         }
+        let crown_mean = self.crown_opacity.iter().sum::<f64>() / 12.0;
         let f = self.receivers.get(&array).map_or(1.0, |r| {
             let (mut seen, mut total) = (0.0, 0.0);
             // Centre points only (diffuse varies slowly); directions above the horizon.
@@ -619,9 +869,11 @@ impl ShadeModel {
                             continue;
                         }
                         total += w;
-                        if !self.blocked(r, p, d) {
-                            seen += w;
-                        }
+                        seen += w * match self.hit(r, p, d) {
+                            Hit::Clear => 1.0,
+                            Hit::Crown => 1.0 - crown_mean,
+                            Hit::Opaque => 0.0,
+                        };
                     }
                 }
             }
@@ -648,6 +900,63 @@ fn pv_roof_walls(
 mod tests {
     use super::*;
 
+    fn any_hit(tris: &[Tri], o: V3, d: V3) -> bool {
+        tris.iter().any(|t| hits(t, o, d))
+    }
+
+    #[test]
+    fn a_concave_polygon_covers_only_itself() {
+        // An L, 2 m high: (0,0)-(2,0)-(2,1)-(1,1)-(1,2)-(0,2).
+        let l: Vec<V3> = [[0., 0.], [2., 0.], [2., 1.], [1., 1.], [1., 2.], [0., 2.]]
+            .iter()
+            .map(|p| [p[0], p[1], 2.0])
+            .collect();
+        let mut tris = Vec::new();
+        triangulate(&l, &mut tris);
+        assert_eq!(tris.len(), 4);
+        let up = [0.0, 0.0, 1.0];
+        assert!(any_hit(&tris, [0.5, 0.5, 0.0], up));
+        assert!(any_hit(&tris, [1.5, 0.5, 0.0], up));
+        assert!(any_hit(&tris, [0.5, 1.5, 0.0], up));
+        assert!(!any_hit(&tris, [1.5, 1.5, 0.0], up), "the notch of the L");
+    }
+
+    #[test]
+    fn objects_cast_shadows() {
+        let square =
+            |z: f64| -> Vec<[f64; 3]> { vec![[0., 0., z], [2., 0., z], [2., 2., z], [0., 2., z]] };
+        // A 3 m high box: a ray towards it is stopped, one over it is not.
+        let mut tris = Vec::new();
+        object_tris(
+            &pv_model::ShadingObject {
+                name: "box".into(),
+                kind: pv_model::ShadingObjectKind::Building,
+                outline: square(0.0),
+                height_m: 3.0,
+                opacity_by_month: Vec::new(),
+            },
+            &mut tris,
+        );
+        let east = [1.0, 0.0, 0.0];
+        assert!(any_hit(&tris, [-5.0, 1.0, 1.0], east));
+        assert!(!any_hit(&tris, [-5.0, 1.0, 4.0], east));
+        // A crown from 5 to 9 m, seen from right under it (through its rounded bottom).
+        let mut crown = Vec::new();
+        object_tris(
+            &pv_model::ShadingObject {
+                name: "tree".into(),
+                kind: pv_model::ShadingObjectKind::Tree,
+                outline: square(5.0),
+                height_m: 4.0,
+                opacity_by_month: vec![0.8; 12],
+            },
+            &mut crown,
+        );
+        assert!(crown.iter().all(|t| t.crown));
+        assert!(any_hit(&crown, [1.0, 1.0, 0.0], [0.0, 0.0, 1.0]));
+        assert!(!any_hit(&crown, [1.0, 1.0, 10.0], [0.0, 0.0, 1.0]));
+    }
+
     #[test]
     fn ray_triangle() {
         let t = Tri {
@@ -657,6 +966,7 @@ mod tests {
             face: None,
             wall_of: None,
             module: None,
+            crown: false,
         };
         assert!(hits(&t, [0.2, 0.2, 0.0], [0.0, 0.0, 1.0]));
         assert!(!hits(&t, [0.8, 0.8, 0.0], [0.0, 0.0, 1.0]));

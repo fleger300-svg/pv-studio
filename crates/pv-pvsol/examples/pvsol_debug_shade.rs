@@ -3,7 +3,7 @@
 //! Usage: `cargo run -p pv-pvsol --release --example pvsol_debug_shade -- <file.pvprj>`.
 
 fn model_beam(m: &mut pv_solar::shade::ShadeModel, a: pv_model::ArrayId, az: f64, el: f64) -> f64 {
-    m.beam_shade(a, pv_solar::shade::bin_of(az, el))
+    m.beam_shade(a, pv_solar::shade::bin_of(az, el), 6)
 }
 
 fn main() {

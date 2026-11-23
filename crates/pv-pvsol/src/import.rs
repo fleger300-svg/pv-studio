@@ -16,7 +16,8 @@ use pv_model::{
     wgs84_to_lv95, ArrayGrid, ArrayId, ArrayLayoutParams, Building, BuildingId, Command,
     CommandError, Component, ComponentId, ComponentSpec, GeoLocation, InverterId, InverterUnit,
     ModuleRef, ModuleSlot, ModuleState, Orientation, PanelArray, Project, ProjectSite, PvString,
-    RoofFace, RoofFaceId, RoofKind, StringId, Wiring, WiringSettings,
+    RoofFace, RoofFaceId, RoofKind, ShadingObject, ShadingObjectKind, StringId, Wiring,
+    WiringSettings,
 };
 use serde::Serialize;
 use specta::Type;
@@ -289,6 +290,7 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
                 // Added once the modules are placed (see below).
                 surroundings: None,
                 horizon: horizon.clone(),
+                objects: file.scene.as_ref().map_or_else(Vec::new, shading_objects),
             }),
         });
     } else {
@@ -603,6 +605,41 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
     }
     Command::Batch { commands: all }.apply(&mut project)?;
 
+    // A solid standing over modules is the project's own building (a reference object the
+    // formations do not name directly), or a fixture PV*SOL lets the modules overlap: not a
+    // shading object.
+    if !project.site.objects.is_empty() {
+        let centres: Vec<[f64; 2]> = project
+            .modules
+            .iter()
+            .filter_map(|m| {
+                let (_, f) = project.module_context(m)?;
+                let w = f.uv_to_world(m.u, m.v);
+                Some([w[0], w[1]])
+            })
+            .collect();
+        let mut site = project.site.clone();
+        let before = site.objects.len();
+        site.objects.retain(|o| {
+            // (A tree's crown may well hang over modules.)
+            o.height_m <= 0.0 || !o.opacity_by_month.is_empty() || {
+                let outline: Vec<[f64; 2]> = o.outline.iter().map(|p| [p[0], p[1]]).collect();
+                !centres.iter().any(|&c| point_in_polygon(&outline, c))
+            }
+        });
+        if site.objects.len() != before {
+            Command::SetSite {
+                site: Box::new(site),
+            }
+            .apply(&mut project)?;
+        }
+    }
+    if !project.site.objects.is_empty() {
+        notes.push(
+            ImportNote::new("pvsol.note.objectsImported").with("count", project.site.objects.len()),
+        );
+    }
+
     // Surroundings, cut out around the modules as placed (rows included).
     if let (Some(h), Some(map)) = (
         file.height_map.as_ref(),
@@ -647,6 +684,112 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
         }
     }
     Ok(ImportOutcome { project, notes })
+}
+
+/// Is `p` inside the polygon (even-odd rule)?
+fn point_in_polygon(poly: &[[f64; 2]], p: [f64; 2]) -> bool {
+    let mut c = false;
+    for i in 0..poly.len() {
+        let (a, b) = (poly[i], poly[(i + 1) % poly.len()]);
+        if (a[1] > p[1]) != (b[1] > p[1])
+            && p[0] < a[0] + (p[1] - a[1]) * (b[0] - a[0]) / (b[1] - a[1])
+        {
+            c = !c;
+        }
+    }
+    c
+}
+
+/// Sides of the regular polygon standing for a round outline (trees).
+const ROUND_SIDES: usize = 8;
+
+/// The scene's shading objects, except the reference objects that carry modules (the
+/// project's own buildings and surfaces, imported as buildings and roof faces).
+fn shading_objects(scene: &crate::geometry::Scene) -> Vec<ShadingObject> {
+    use crate::geometry::SceneShape;
+    let carrying: std::collections::HashSet<i32> = scene
+        .formations
+        .iter()
+        .map(|f| f.face.object)
+        .chain(scene.row_formations.iter().map(|r| r.face.object))
+        .collect();
+    let mut out = Vec::new();
+    for o in &scene.objects {
+        if o.reference_index.is_some_and(|i| carrying.contains(&i)) {
+            continue;
+        }
+        let kind = match o.kind {
+            2 | 15 | 16 | 18 | 67 => ShadingObjectKind::Building,
+            70 | 71 => ShadingObjectKind::Wall,
+            23 | 24 => ShadingObjectKind::Tree,
+            82 => ShadingObjectKind::Polygon,
+            _ if o.on_object > 0 => ShadingObjectKind::RoofFixture,
+            _ => ShadingObjectKind::Building,
+        };
+        match &o.shape {
+            SceneShape::Prism {
+                outline,
+                base_m,
+                height_m,
+            } => out.push(ShadingObject {
+                name: o.name.clone(),
+                kind,
+                outline: outline.iter().map(|p| [p[0], p[1], *base_m]).collect(),
+                height_m: *height_m,
+                opacity_by_month: Vec::new(),
+            }),
+            SceneShape::Polygon(points) => out.push(ShadingObject {
+                name: o.name.clone(),
+                kind,
+                outline: points.clone(),
+                height_m: 0.0,
+                opacity_by_month: Vec::new(),
+            }),
+            SceneShape::Tree {
+                centre,
+                base_m,
+                height_m,
+                crown_diameter_m,
+                crown_height_m,
+                trunk_diameter_m,
+                opacity_by_month,
+            } => {
+                let round = |d: f64, z: f64| -> Vec<[f64; 3]> {
+                    (0..ROUND_SIDES)
+                        .map(|k| {
+                            let a = std::f64::consts::TAU * k as f64 / ROUND_SIDES as f64;
+                            [
+                                centre[0] + d / 2.0 * a.cos(),
+                                centre[1] + d / 2.0 * a.sin(),
+                                z,
+                            ]
+                        })
+                        .collect()
+                };
+                let crown_base = base_m + height_m - crown_height_m;
+                if *crown_diameter_m > 0.0 && *crown_height_m > 0.0 {
+                    out.push(ShadingObject {
+                        name: o.name.clone(),
+                        kind,
+                        outline: round(*crown_diameter_m, crown_base),
+                        height_m: *crown_height_m,
+                        opacity_by_month: opacity_by_month.clone(),
+                    });
+                }
+                if crown_base > *base_m {
+                    // The trunk, opaque.
+                    out.push(ShadingObject {
+                        name: o.name.clone(),
+                        kind,
+                        outline: round(*trunk_diameter_m, *base_m),
+                        height_m: crown_base - base_m,
+                        opacity_by_month: Vec::new(),
+                    });
+                }
+            }
+        }
+    }
+    out
 }
 
 /// Freezes `c` once into the import's snapshots; returns its id.

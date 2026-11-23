@@ -2407,6 +2407,11 @@ export type ProjectSite_Deserialize = {
 	surroundings?: Surroundings | null,
 	/**  Far horizon (relief); tied to the location like the surroundings. */
 	horizon?: Horizon | null,
+	/**
+	 *  Shading objects (trees, neighbouring buildings, roof fixtures); tied to the location
+	 *  like the surroundings.
+	 */
+	objects?: ShadingObject_Deserialize[],
 };
 
 /**  Location, weather and surroundings of a project. */
@@ -2420,6 +2425,11 @@ export type ProjectSite_Serialize = {
 	surroundings?: Surroundings | null,
 	/**  Far horizon (relief); tied to the location like the surroundings. */
 	horizon?: Horizon | null,
+	/**
+	 *  Shading objects (trees, neighbouring buildings, roof fixtures); tied to the location
+	 *  like the surroundings.
+	 */
+	objects: ShadingObject_Serialize[],
 };
 
 export type ProjectSummary = ProjectSummary_Serialize | ProjectSummary_Deserialize;
@@ -2882,6 +2892,60 @@ export type ServiceLifeModel =
 
 /**  How serious a finding is. */
 export type Severity = "info" | "warning" | "error";
+
+/**
+ *  An object around or on the buildings that casts shadows: a neighbouring building, a
+ *  chimney, a parapet, a tree, a 3-D polygon. Coordinates in the project frame (ENU, same as
+ *  the buildings) [m].
+ */
+export type ShadingObject = ShadingObject_Serialize | ShadingObject_Deserialize;
+
+/**  What a [`ShadingObject`] is (shown in reports and the 3-D view). */
+export type ShadingObjectKind = "building" | 
+/**  Chimney, vent pipe, dish: a fixture on a roof. */
+"roofFixture" | 
+/**  Party wall, parapet, free-standing wall. */
+"wall" | "tree" | 
+/**  A flat polygon drawn in 3-D. */
+"polygon";
+
+/**
+ *  An object around or on the buildings that casts shadows: a neighbouring building, a
+ *  chimney, a parapet, a tree, a 3-D polygon. Coordinates in the project frame (ENU, same as
+ *  the buildings) [m].
+ */
+export type ShadingObject_Deserialize = {
+	name: string,
+	kind: ShadingObjectKind,
+	/**  Base outline (a solid) or the polygon itself (`height_m = 0`), `[east, north, up]`. */
+	outline: ([number, number, number])[],
+	/**  A solid is the outline extruded upwards by this height [m]; 0 for a flat polygon. */
+	heightM: number,
+	/**
+	 *  Share of the light the object stops, January to December (a tree's crown); empty
+	 *  for an opaque object.
+	 */
+	opacityByMonth?: number[],
+};
+
+/**
+ *  An object around or on the buildings that casts shadows: a neighbouring building, a
+ *  chimney, a parapet, a tree, a 3-D polygon. Coordinates in the project frame (ENU, same as
+ *  the buildings) [m].
+ */
+export type ShadingObject_Serialize = {
+	name: string,
+	kind: ShadingObjectKind,
+	/**  Base outline (a solid) or the polygon itself (`height_m = 0`), `[east, north, up]`. */
+	outline: ([number, number, number])[],
+	/**  A solid is the outline extruded upwards by this height [m]; 0 for a flat polygon. */
+	heightM: number,
+	/**
+	 *  Share of the light the object stops, January to December (a tree's crown); empty
+	 *  for an opaque object.
+	 */
+	opacityByMonth: number[],
+};
 
 /**  Assumptions of the simulation (shown with the results). */
 export type SimulationAssumptions = {

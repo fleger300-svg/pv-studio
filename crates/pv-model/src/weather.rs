@@ -176,6 +176,60 @@ impl Horizon {
     }
 }
 
+/// What a [`ShadingObject`] is (shown in reports and the 3-D view).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum ShadingObjectKind {
+    Building,
+    /// Chimney, vent pipe, dish: a fixture on a roof.
+    RoofFixture,
+    /// Party wall, parapet, free-standing wall.
+    Wall,
+    Tree,
+    /// A flat polygon drawn in 3-D.
+    Polygon,
+}
+
+/// An object around or on the buildings that casts shadows: a neighbouring building, a
+/// chimney, a parapet, a tree, a 3-D polygon. Coordinates in the project frame (ENU, same as
+/// the buildings) [m].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ShadingObject {
+    pub name: String,
+    pub kind: ShadingObjectKind,
+    /// Base outline (a solid) or the polygon itself (`height_m = 0`), `[east, north, up]`.
+    pub outline: Vec<[f64; 3]>,
+    /// A solid is the outline extruded upwards by this height [m]; 0 for a flat polygon.
+    pub height_m: f64,
+    /// Share of the light the object stops, January to December (a tree's crown); empty
+    /// for an opaque object.
+    #[serde(default)]
+    pub opacity_by_month: Vec<f64>,
+}
+
+impl ShadingObject {
+    /// Share of the light stopped in `month` (0 = January).
+    #[must_use]
+    pub fn opacity(&self, month: usize) -> f64 {
+        self.opacity_by_month.get(month).copied().unwrap_or(1.0)
+    }
+
+    fn valid(&self) -> bool {
+        let finite = |p: &[f64; 3]| p.iter().all(|x| x.is_finite());
+        self.outline.len() >= 2
+            && self.outline.iter().all(finite)
+            && self.height_m.is_finite()
+            && self.height_m >= 0.0
+            && (self.height_m > 0.0 || self.outline.len() >= 3)
+            && (self.opacity_by_month.is_empty() || self.opacity_by_month.len() == 12)
+            && self
+                .opacity_by_month
+                .iter()
+                .all(|o| (0.0..=1.0).contains(o))
+    }
+}
+
 /// Location, weather and surroundings of a project.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -193,6 +247,10 @@ pub struct ProjectSite {
     #[serde(default)]
     #[specta(optional)]
     pub horizon: Option<Horizon>,
+    /// Shading objects (trees, neighbouring buildings, roof fixtures); tied to the location
+    /// like the surroundings.
+    #[serde(default)]
+    pub objects: Vec<ShadingObject>,
 }
 
 impl ProjectSite {
@@ -219,6 +277,9 @@ impl ProjectSite {
         }
         if let Some(h) = &self.horizon {
             h.validate()?;
+        }
+        if !self.objects.iter().all(ShadingObject::valid) {
+            return Err(CommandError::new(keys::ENTITY_INVALID).with_text("field", "objects"));
         }
         Ok(())
     }

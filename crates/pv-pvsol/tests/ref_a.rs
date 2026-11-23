@@ -162,8 +162,14 @@ fn imports_project_a() {
     assert_eq!(p.wiring.strings.len(), 8);
     let wired: usize = p.wiring.strings.iter().map(|s| s.modules.len()).sum();
     assert_eq!(wired, 116);
-    // Only the shading objects (3-D polygons) are left out, and the weather, which the
-    // fixture does not carry (Meteonorm data).
+    // Two 3-D polygons come over as shading objects, one is left out (no surface); the
+    // fixture carries no weather (Meteonorm data).
+    assert_eq!(p.site.objects.len(), 2);
+    assert!(p
+        .site
+        .objects
+        .iter()
+        .all(|o| o.kind == pv_model::ShadingObjectKind::Polygon));
     let mut keys: Vec<&str> = out.notes.iter().map(|n| n.key.as_str()).collect();
     keys.sort_unstable();
     assert_eq!(
@@ -171,6 +177,7 @@ fn imports_project_a() {
         [
             "pvsol.note.chooseMounting",
             "pvsol.note.noWeather",
+            "pvsol.note.objectsImported",
             "pvsol.note.objectsSkipped"
         ],
         "{:?}",

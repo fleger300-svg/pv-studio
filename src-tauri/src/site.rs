@@ -122,6 +122,7 @@ pub async fn site_locate(
         // The surroundings belong to the previous location.
         surroundings: None,
         horizon: None,
+        objects: Vec::new(),
     })
 }
 
@@ -175,5 +176,6 @@ pub async fn site_fetch_weather(
         weather: Some(weather),
         surroundings: old.surroundings.clone(),
         horizon: old.horizon.clone(),
+        objects: old.objects.clone(),
     })
 }

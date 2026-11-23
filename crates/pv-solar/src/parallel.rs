@@ -104,26 +104,48 @@ impl SeriesString {
         self.blocks.iter().map(|(n, c)| n * c.voltage(i)).sum()
     }
 
-    /// Current at string voltage `v` (the voltage falls as the current rises).
-    fn current(&self, v: f64) -> f64 {
-        if v >= self.voltage(0.0) {
-            return 0.0;
-        }
-        let (mut lo, mut hi) = (0.0, self.i_max);
-        if self.voltage(hi) >= v {
-            return hi;
-        }
-        for _ in 0..30 {
-            let mid = 0.5 * (lo + hi);
-            if self.voltage(mid) > v {
-                lo = mid;
-            } else {
-                hi = mid;
+    /// The string's I-V curve as a table `[v, i]` by increasing voltage (decreasing current),
+    /// dense around the substrings' short-circuit currents where the diodes switch on.
+    fn table(&self) -> Vec<[f64; 2]> {
+        const K: usize = 128;
+        let mut currents: Vec<f64> = (0..=K).map(|k| self.i_max * k as f64 / K as f64).collect();
+        for (_, c) in &self.blocks {
+            for f in [0.98, 0.995, 1.0 - 1e-9, 1.0 + 1e-9] {
+                let i = c.isc * f;
+                if i < self.i_max {
+                    currents.push(i);
+                }
             }
         }
-        0.5 * (lo + hi)
+        currents.sort_by(f64::total_cmp);
+        currents.dedup_by(|a, b| (*a - *b).abs() < 1e-15);
+        currents
+            .iter()
+            .rev()
+            .map(|&i| [self.voltage(i), i])
+            .collect()
     }
+}
 
+/// Current at voltage `v` from an I-V table (see [`SeriesString::table`]): linear in
+/// between, no current above the open-circuit voltage, the highest current below the table.
+fn current_at(table: &[[f64; 2]], v: f64) -> f64 {
+    let (first, last) = (table[0], table[table.len() - 1]);
+    if v >= last[0] {
+        return 0.0;
+    }
+    if v <= first[0] {
+        return first[1];
+    }
+    let k = table.partition_point(|p| p[0] < v);
+    let (a, b) = (table[k - 1], table[k]);
+    if b[0] - a[0] <= 1e-12 {
+        return a[1];
+    }
+    a[1] + (b[1] - a[1]) * (v - a[0]) / (b[0] - a[0])
+}
+
+impl SeriesString {
     /// Global MPP of the string alone: the power is smooth between the substrings'
     /// short-circuit currents, where diodes switch on.
     fn pmax(&self) -> f64 {
@@ -158,7 +180,8 @@ pub fn tracker_power(strings: &[Vec<Block>]) -> f64 {
         [] => 0.0,
         [one] => one.pmax(),
         _ => {
-            let total = |v: f64| v * strings.iter().map(|s| s.current(v)).sum::<f64>();
+            let tables: Vec<Vec<[f64; 2]>> = strings.iter().map(SeriesString::table).collect();
+            let total = |v: f64| v * tables.iter().map(|t| current_at(t, v)).sum::<f64>();
             let hi = strings.iter().map(|s| s.voltage(0.0)).fold(0.0, f64::max);
             if hi <= 0.0 {
                 return 0.0;

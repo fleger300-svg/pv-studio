@@ -21,8 +21,16 @@
 //! building's azimuth; the roof storey (type 92) is not decoded (the roof faces come from the
 //! formations on them).
 //!
-//! **Module row formations** (type 38, racks on flat roofs) and the other objects (trees,
-//! chimneys, free buildings) are listed but not decoded yet.
+//! **Module row formations** (type 38, racks on flat roofs): see [`RowFormation`].
+//!
+//! **Shading objects** ([`SceneObject`]) come in four layouts: parametric buildings
+//! (`VarHaus`, types 15, 16, 18, 67), outlines extruded by a height (`HuellFlaechenObj`:
+//! free buildings, parapets — the outline is in the object's frame rotated by its azimuth,
+//! from its `Position`), trees (`Baum`: trunk, crown, crown shading by month) and flat
+//! 3-D polygons (`Polygon3D`: corners in the plane of the object, `PosAufBezugsFL` being
+//! `Position`); any other object with a `ZweifacheSkalierung` is a box `BreiteR × TiefeR ×
+//! Hoehe` from its corner (chimneys, vent pipes, party walls). Dormers and saw-tooth roofs
+//! are not decoded yet.
 
 use crate::guid;
 use crate::xml::Node;
@@ -121,6 +129,43 @@ pub struct VarBuilding {
     pub eave_height_m: f64,
 }
 
+/// The shape of a [`SceneObject`], ENU.
+#[derive(Debug, Clone, PartialEq)]
+pub enum SceneShape {
+    /// An outline extruded upwards from `base_m`.
+    Prism {
+        outline: Vec<[f64; 2]>,
+        base_m: f64,
+        height_m: f64,
+    },
+    /// A flat polygon.
+    Polygon(Vec<Enu>),
+    /// A tree: trunk and crown on the foot `centre`.
+    Tree {
+        centre: [f64; 2],
+        base_m: f64,
+        height_m: f64,
+        crown_diameter_m: f64,
+        crown_height_m: f64,
+        trunk_diameter_m: f64,
+        /// Share of the light the crown stops, January to December.
+        opacity_by_month: Vec<f64>,
+    },
+}
+
+/// A shading object of the scene: a tree, a free building, a chimney, a wall, a polygon.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SceneObject {
+    /// PV*SOL object type (`AnwObjTyp`).
+    pub kind: u32,
+    pub name: String,
+    /// Its index among the reference objects, when it is one (formations may lie on it).
+    pub reference_index: Option<i32>,
+    /// The reference object it stands on (0: the terrain).
+    pub on_object: i32,
+    pub shape: SceneShape,
+}
+
 /// An object of the scene the importer does not use, by type and name (reported).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OtherObject {
@@ -135,6 +180,8 @@ pub struct Scene {
     pub buildings: Vec<VarBuilding>,
     /// Module row formations (racks on flat roofs).
     pub row_formations: Vec<RowFormation>,
+    /// Shading objects (decoded); the type-15 parametric buildings are in `buildings` too.
+    pub objects: Vec<SceneObject>,
     pub others: Vec<OtherObject>,
     /// The map section (aerial image and height map), when the project has one.
     pub map: Option<MapSection>,
@@ -160,8 +207,110 @@ impl Scene {
 }
 
 /// Object types that carry no physical geometry (selection, edge distances, map area,
-/// terrain, horizon, module reference objects, barred areas).
-const NON_PHYSICAL: [u32; 8] = [0, 4, 37, 47, 48, 65, 79, 87];
+/// terrain, horizon, module reference objects, barred areas) or cast no shadow (roof and
+/// facade windows lie in their surface).
+const NON_PHYSICAL: [u32; 10] = [0, 4, 37, 47, 48, 65, 79, 87, 97, 100];
+
+/// How deep a fixture on a roof reaches into it: its base is the corner it is placed by,
+/// the other corners may lie lower on a pitched roof [m].
+const INTO_ROOF_M: f64 = 3.0;
+
+/// The horizontal frame of an object rotated by `azimuth_deg`: ENU directions of PV*SOL's
+/// local `+X` (west) and `+Z` (south).
+fn local_axes(azimuth_deg: f64) -> ([f64; 2], [f64; 2]) {
+    let az = azimuth_deg.to_radians();
+    ([-az.cos(), az.sin()], [-az.sin(), -az.cos()])
+}
+
+/// ENU of local `(x, z)` from the corner `p0`.
+fn local_point(p0: [f64; 2], axes: ([f64; 2], [f64; 2]), x: f64, z: f64) -> [f64; 2] {
+    let (ax, az) = axes;
+    [p0[0] + x * ax[0] + z * az[0], p0[1] + x * ax[1] + z * az[1]]
+}
+
+fn shape_of(o: &Node, on_object: i32) -> Option<SceneShape> {
+    let sd = o.child("StandardDaten")?;
+    let pos = to_enu(sd.child("Position")?)?;
+    let azimuth = sd.f64_at("Rotation/AzimutWinkel").unwrap_or(0.0);
+    let axes = local_axes(azimuth);
+    let p0 = [pos[0], pos[1]];
+    let spez = o.child("SpezifDaten");
+    if let Some(t) = spez.and_then(|s| s.child("Baum")) {
+        let height = t.f64_at("BaumHoehe")?;
+        let months = [
+            "Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez",
+        ];
+        let opacity: Vec<f64> = months
+            .iter()
+            .filter_map(|m| t.f64_at(&format!("KronenAbschGrad_Monat/{m}")))
+            .map(|x| x.clamp(0.0, 1.0))
+            .collect();
+        return (height > 0.0).then(|| SceneShape::Tree {
+            centre: p0,
+            base_m: pos[2],
+            height_m: height,
+            crown_diameter_m: t.f64_at("Krone/Durchmesser").unwrap_or(0.0).max(0.0),
+            crown_height_m: t.f64_at("Krone/Hoehe").unwrap_or(0.0).clamp(0.0, height),
+            trunk_diameter_m: t.f64_at("StammDurchmesser").unwrap_or(0.3).clamp(0.05, 1.0),
+            opacity_by_month: if opacity.len() == 12 {
+                opacity
+            } else {
+                vec![1.0; 12]
+            },
+        });
+    }
+    if let Some(p) = spez.and_then(|s| s.child("Polygon3D")) {
+        let tilt = (90.0 - sd.f64_at("Rotation/ZenitWinkel").unwrap_or(90.0)).clamp(-90.0, 90.0);
+        let fr = pv_model::RoofFrame::new(pos, tilt, azimuth);
+        let (px, py) = (
+            sd.f64_at("PosAufBezugsFL/X").unwrap_or(0.0),
+            sd.f64_at("PosAufBezugsFL/Y").unwrap_or(0.0),
+        );
+        let points: Vec<Enu> = p
+            .children("EckPunkte2D")
+            .filter_map(|q| Some(fr.to_world(q.f64_at("X")? - px, q.f64_at("Y")? - py, 0.0)))
+            .collect();
+        return (points.len() >= 3).then_some(SceneShape::Polygon(points));
+    }
+    if let Some(h) = spez.and_then(|s| s.child("HuellFlaechenObj")) {
+        let outline: Vec<[f64; 2]> = h
+            .child("BodenPolygon")?
+            .children("EckPunkte2D")
+            .filter_map(|q| Some(local_point(p0, axes, q.f64_at("X")?, q.f64_at("Y")?)))
+            .collect();
+        let height = h.f64_at("DeckFlaeche/Hoehe")?;
+        return (outline.len() >= 2 && height > 0.0).then_some(SceneShape::Prism {
+            outline,
+            base_m: pos[2],
+            height_m: height,
+        });
+    }
+    // A box: footprint `BreiteR × TiefeR` from the corner, `Hoehe` high.
+    let s = sd.child("ZweifacheSkalierung")?;
+    let b = s
+        .f64_at("Ebene1/BreiteR")
+        .or_else(|| s.f64_at("Ebene2/BreiteR"))?;
+    let t = s
+        .f64_at("Ebene1/TiefeR")
+        .or_else(|| s.f64_at("Ebene2/TiefeR"))?;
+    let height = s.f64_at("Ebene2/Hoehe")?;
+    if !(b > 0.0 && t > 0.0 && height > 0.0) {
+        return None;
+    }
+    let outline = vec![
+        p0,
+        local_point(p0, axes, b, 0.0),
+        local_point(p0, axes, b, t),
+        local_point(p0, axes, 0.0, t),
+    ];
+    // On a building: reach into its roof.
+    let sink = if on_object > 0 { INTO_ROOF_M } else { 0.0 };
+    Some(SceneShape::Prism {
+        outline,
+        base_m: pos[2] - sink,
+        height_m: height + sink,
+    })
+}
 
 fn kind(o: &Node) -> u32 {
     o.f64_at("StandardDaten/AnwObjTyp")
@@ -334,10 +483,30 @@ pub fn parse(doc: &Node) -> Result<Scene, ReadError> {
                 Some(f) => scene.row_formations.push(f),
                 None => scene.others.push(OtherObject { kind: k, name }),
             },
-            15 => match var_building(o, reference_index) {
-                Some(b) => scene.buildings.push(b),
+            // Parametric buildings (several object types share the layout).
+            15 | 16 | 18 | 67 => match var_building(o, reference_index) {
+                Some(b) => {
+                    scene.objects.push(SceneObject {
+                        kind: k,
+                        name: name.clone(),
+                        reference_index: is_reference.then_some(reference_index),
+                        on_object: face_key(o).object,
+                        shape: SceneShape::Prism {
+                            outline: b.footprint.clone(),
+                            base_m: b.ground_m,
+                            height_m: b.eave_height_m,
+                        },
+                    });
+                    // (Only type 15 stands for the project's buildings in the import; the
+                    // others, as their own foot, would shift the surroundings' heights.)
+                    if k == 15 {
+                        scene.buildings.push(b);
+                    }
+                }
                 None => scene.others.push(OtherObject { kind: k, name }),
             },
+            // Dormers, saw-tooth roofs and free 3-D objects: not decoded yet.
+            1 | 40 | 42 | 43 | 77 => scene.others.push(OtherObject { kind: k, name }),
             65 => {
                 let sd = o.child("StandardDaten");
                 scene.map = sd.and_then(|sd| {
@@ -351,7 +520,19 @@ pub fn parse(doc: &Node) -> Result<Scene, ReadError> {
                 });
             }
             k if NON_PHYSICAL.contains(&k) => {}
-            _ => scene.others.push(OtherObject { kind: k, name }),
+            _ => {
+                let on_object = face_key(o).object;
+                match shape_of(o, on_object) {
+                    Some(shape) => scene.objects.push(SceneObject {
+                        kind: k,
+                        name,
+                        reference_index: is_reference.then_some(reference_index),
+                        on_object,
+                        shape,
+                    }),
+                    None => scene.others.push(OtherObject { kind: k, name }),
+                }
+            }
         }
     }
     Ok(scene)

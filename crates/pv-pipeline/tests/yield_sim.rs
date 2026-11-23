@@ -53,6 +53,7 @@ fn located(mut p: Project) -> Project {
             weather: Some(synthetic_weather()),
             surroundings: None,
             horizon: None,
+            objects: Vec::new(),
         }),
     }
     .apply(&mut p)

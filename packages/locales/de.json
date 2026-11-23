@@ -861,6 +861,7 @@
       "noScene": "Keine 3D-Szene im PV*SOL-Projekt: es konnten keine Module platziert werden.",
       "rowFormations": "{count} Modulreihen-Formation(en) auf Flachdach ({modules} Module) nicht übernommen: Moduldatensatz nicht gefunden.",
       "objectsSkipped": "{count} Verschattungs- oder Dekorobjekt(e) nicht übernommen: {names}.",
+      "objectsImported": "{count} Verschattungsobjekt(e) übernommen (Bäume, Nachbargebäude, Kamine, Mauern, 3D-Polygone): Sie zählen in der Verschattung, werden aber noch nicht in 3D angezeigt.",
       "inverterMissing": "Wechselrichter «{inverter}»: Datensatz nicht gefunden, nicht übernommen.",
       "trackerMissing": "«{inverter}»: MPP-Tracker {tracker} fehlt im Datensatz, Strings nicht übernommen.",
       "unwiredModules": "{count} in PV*SOL verschaltete Module sind nicht in den übernommenen Modulflächen.",

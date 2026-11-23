@@ -861,6 +861,7 @@
       "noScene": "No 3-D scene in the PV*SOL project: no module could be placed.",
       "rowFormations": "{count} module row formation(s) on flat roofs ({modules} modules) not carried over: module record not found.",
       "objectsSkipped": "{count} shading or scenery object(s) not carried over: {names}.",
+      "objectsImported": "{count} shading object(s) carried over (trees, neighbouring buildings, chimneys, walls, 3-D polygons): they count in the shading, not yet shown in 3-D.",
       "inverterMissing": "Inverter “{inverter}”: record not found, not carried over.",
       "trackerMissing": "“{inverter}”: MPP tracker {tracker} missing from the record, strings not carried over.",
       "unwiredModules": "{count} module(s) wired in PV*SOL are not in the imported arrays.",

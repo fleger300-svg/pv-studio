@@ -861,6 +861,7 @@
       "noScene": "Pas de scène 3D dans le projet PV*SOL : aucun module n’a pu être placé.",
       "rowFormations": "{count} formation(s) de rangées sur toit plat ({modules} modules) non reprise(s) : fiche du module introuvable.",
       "objectsSkipped": "{count} objet(s) d’ombrage ou de décor non repris : {names}.",
+      "objectsImported": "{count} objet(s) d’ombrage repris (arbres, bâtiments voisins, cheminées, murs, polygones 3D) : ils comptent dans l’ombrage, sans apparaître encore en 3D.",
       "inverterMissing": "Onduleur « {inverter} » : fiche introuvable, non repris.",
       "trackerMissing": "« {inverter} » : tracker MPP {tracker} absent de la fiche, strings non repris.",
       "unwiredModules": "{count} module(s) câblés dans PV*SOL ne sont pas dans les champs repris.",

@@ -180,6 +180,7 @@ fn voltage_factor(g: f64, t_cell: f64, beta_voc: f64) -> f64 {
 fn partial_shading_loss(
     t: &Tracker,
     bin: (u16, u16),
+    month: usize,
     groups: &[Group],
     hour: &[GroupHour],
     shade: &mut shade::ShadeModel,
@@ -223,7 +224,7 @@ fn partial_shading_loss(
             let gh = hour[k];
             let lit = gh.p_sun_w > gh.p_shade_w;
             let (p_full, r, mask) = if lit {
-                let mask = shade.module_masks(array, bin).get(i).copied().unwrap_or(0);
+                let mask = shade.module_mask(array, bin, month, i);
                 (gh.p_sun_w, gh.p_shade_w / gh.p_sun_w, mask)
             } else {
                 (gh.p_module_w, 1.0, 0)
@@ -471,6 +472,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
         } else {
             f64::from(w.dhi_w_m2[h]).min(ghi)
         };
+        let month = month_of(h);
         dc_by_inverter.clear();
         hour_of_group.fill(GroupHour::default());
         for (k, g) in groups.iter().enumerate() {
@@ -484,7 +486,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             let nominal = p_stc * gpoa / 1000.0;
             let elevation = 90.0 - sun.zenith_deg;
             let s_beam = if elevation > 0.0 {
-                shade.beam_shade(g.array, shade::bin_of(sun.azimuth_deg, elevation))
+                shade.beam_shade(g.array, shade::bin_of(sun.azimuth_deg, elevation), month)
             } else {
                 0.0
             };
@@ -569,8 +571,9 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
         let elevation = 90.0 - sun.zenith_deg;
         let bin = (elevation > 0.0).then(|| shade::bin_of(sun.azimuth_deg, elevation));
         for t in &trackers {
-            let shaded = bin
-                .and_then(|bin| partial_shading_loss(t, bin, &groups, &hour_of_group, &mut shade));
+            let shaded = bin.and_then(|bin| {
+                partial_shading_loss(t, bin, month, &groups, &hour_of_group, &mut shade)
+            });
             if let Some(lost) = shaded.filter(|l| *l > 0.0) {
                 b.wiring_mismatch_kwh += lost;
                 *dc_by_inverter.entry(Some(t.inverter)).or_default() -= lost;
@@ -606,7 +609,6 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
                 *dc_by_inverter.entry(Some(t.inverter)).or_default() -= lost;
             }
         }
-        let month = month_of(h);
         for (inv, &before_cables) in &dc_by_inverter {
             let dc = before_cables * (1.0 - a.dc_cable_loss);
             b.dc_cable_kwh += before_cables - dc;
