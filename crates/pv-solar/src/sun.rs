@@ -80,7 +80,10 @@ pub fn incidence_deg(sun: &SunPosition, tilt_deg: f64, azimuth_deg: f64) -> f64 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Poa {
     pub beam: f64,
+    /// Sky diffuse, circumsolar part included.
     pub sky_diffuse: f64,
+    /// Circumsolar part of `sky_diffuse` (comes from around the sun: shaded like the beam).
+    pub circumsolar: f64,
     pub ground: f64,
 }
 
@@ -118,10 +121,12 @@ pub fn hay_davies(
     let tilt = tilt_deg.to_radians();
     let ai = (dni / dni_extra).clamp(0.0, 1.0);
     let rb = if cos_z > 0.0174 { cos_i / cos_z } else { 0.0 };
-    let sky = dhi * (ai * rb + (1.0 - ai) * (1.0 + tilt.cos()) / 2.0);
+    let circumsolar = (dhi * ai * rb).max(0.0);
+    let sky = circumsolar + dhi * (1.0 - ai) * (1.0 + tilt.cos()) / 2.0;
     Poa {
         beam: dni * cos_i,
         sky_diffuse: sky.max(0.0),
+        circumsolar,
         ground: ghi * albedo * (1.0 - tilt.cos()) / 2.0,
     }
 }

@@ -130,6 +130,52 @@ impl Surroundings {
     }
 }
 
+/// The far horizon (relief) seen from the project: elevation by compass azimuth.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct Horizon {
+    /// Where the profile comes from, shown in reports.
+    pub source: String,
+    /// `[azimuth°, elevation°]`, azimuths increasing in `[0, 360)`; linear in between,
+    /// wrapping around north.
+    pub points: Vec<[f64; 2]>,
+}
+
+impl Horizon {
+    /// Elevation of the horizon towards compass `azimuth_deg` [°].
+    #[must_use]
+    pub fn elevation(&self, azimuth_deg: f64) -> f64 {
+        let p = &self.points;
+        let n = p.len();
+        if n < 2 {
+            return p.first().map_or(0.0, |q| q[1]);
+        }
+        let az = azimuth_deg.rem_euclid(360.0);
+        let (a, b) = match p.iter().rposition(|q| q[0] <= az) {
+            Some(i) if i + 1 < n => (p[i], p[i + 1]),
+            Some(i) => (p[i], [p[0][0] + 360.0, p[0][1]]),
+            None => ([p[n - 1][0] - 360.0, p[n - 1][1]], p[0]),
+        };
+        a[1] + (b[1] - a[1]) * (az - a[0]) / (b[0] - a[0])
+    }
+
+    fn validate(&self) -> Result<(), CommandError> {
+        let ok = !self.points.is_empty()
+            && self.points.iter().all(|q| {
+                q[0].is_finite()
+                    && (0.0..360.0).contains(&q[0])
+                    && q[1].is_finite()
+                    && (-10.0..=90.0).contains(&q[1])
+            })
+            && self.points.windows(2).all(|w| w[0][0] < w[1][0]);
+        if ok {
+            Ok(())
+        } else {
+            Err(CommandError::new(keys::ENTITY_INVALID).with_text("field", "horizon"))
+        }
+    }
+}
+
 /// Location, weather and surroundings of a project.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -143,6 +189,10 @@ pub struct ProjectSite {
     #[serde(default)]
     #[specta(optional)]
     pub surroundings: Option<Surroundings>,
+    /// Far horizon (relief); tied to the location like the surroundings.
+    #[serde(default)]
+    #[specta(optional)]
+    pub horizon: Option<Horizon>,
 }
 
 impl ProjectSite {
@@ -166,6 +216,9 @@ impl ProjectSite {
         }
         if let Some(s) = &self.surroundings {
             s.validate()?;
+        }
+        if let Some(h) = &self.horizon {
+            h.validate()?;
         }
         Ok(())
     }
@@ -201,5 +254,29 @@ mod tests {
         );
         assert!((e - 2_699_999.76).abs() < 1.0, "{e}");
         assert!((n - 1_099_999.97).abs() < 1.0, "{n}");
+    }
+}
+
+#[cfg(test)]
+mod horizon_tests {
+    use super::*;
+
+    #[test]
+    fn interpolates_and_wraps_around_north() {
+        let h = Horizon {
+            source: "t".into(),
+            points: vec![[0.0, 10.0], [90.0, 20.0], [180.0, 0.0], [270.0, 4.0]],
+        };
+        assert!((h.elevation(45.0) - 15.0).abs() < 1e-12);
+        assert!((h.elevation(180.0) - 0.0).abs() < 1e-12);
+        // Between 270° (4°) and 360° (= 0°, 10°).
+        assert!((h.elevation(315.0) - 7.0).abs() < 1e-12);
+        assert!((h.elevation(-45.0) - 7.0).abs() < 1e-12);
+        let late = Horizon {
+            source: "t".into(),
+            points: vec![[10.0, 2.0], [350.0, 6.0]],
+        };
+        // Before the first point: between 350° and 370°.
+        assert!((late.elevation(0.0) - 4.0).abs() < 1e-12);
     }
 }

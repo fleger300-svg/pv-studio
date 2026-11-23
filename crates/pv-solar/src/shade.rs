@@ -227,6 +227,8 @@ struct Receiver {
 /// Shading of every array of a project.
 pub struct ShadeModel {
     tris: Vec<Tri>,
+    horizon: Option<pv_model::Horizon>,
+    horizon_views: HashMap<ArrayId, f64>,
     /// Frame and extent of every roof face.
     planes: HashMap<RoofFaceId, (pv_model::RoofFrame, f64, f64)>,
     field: Option<Field>,
@@ -334,12 +336,55 @@ impl ShadeModel {
         }
         Self {
             tris,
+            horizon: project.site.horizon.clone(),
+            horizon_views: HashMap::new(),
             planes,
             field: Field::new(project),
             receivers,
             beam: HashMap::new(),
             diffuse: HashMap::new(),
         }
+    }
+
+    /// Is a sun at `azimuth_deg`, `elevation_deg` behind the far horizon?
+    #[must_use]
+    pub fn below_horizon(&self, azimuth_deg: f64, elevation_deg: f64) -> bool {
+        self.horizon
+            .as_ref()
+            .is_some_and(|h| elevation_deg < h.elevation(azimuth_deg))
+    }
+
+    /// Share of the sky diffuse that the far horizon lets through to `array` (cosine-weighted
+    /// around its normal; 1 without a horizon).
+    pub fn horizon_view(&mut self, array: ArrayId) -> f64 {
+        let Some(h) = &self.horizon else {
+            return 1.0;
+        };
+        if let Some(&v) = self.horizon_views.get(&array) {
+            return v;
+        }
+        let v = self.receivers.get(&array).map_or(1.0, |r| {
+            let (mut seen, mut total) = (0.0, 0.0);
+            for k in 0..45 {
+                let el = f64::from(k) * 2.0 + 1.0;
+                for j in 0..72 {
+                    let az = f64::from(j) * 5.0 + 2.5;
+                    let d = sun_vector(az, el);
+                    let w = dot(d, r.normal).max(0.0) * el.to_radians().cos();
+                    total += w;
+                    if el >= h.elevation(az) {
+                        seen += w;
+                    }
+                }
+            }
+            if total > 0.0 {
+                seen / total
+            } else {
+                1.0
+            }
+        });
+        self.horizon_views.insert(array, v);
+        v
     }
 
     /// A roof face does not shade a point right under it: such a point is inside the building

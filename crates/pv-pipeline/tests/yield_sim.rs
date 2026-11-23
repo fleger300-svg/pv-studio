@@ -52,6 +52,7 @@ fn located(mut p: Project) -> Project {
             }),
             weather: Some(synthetic_weather()),
             surroundings: None,
+            horizon: None,
         }),
     }
     .apply(&mut p)
@@ -72,7 +73,8 @@ fn the_energy_balance_closes_and_is_plausible() {
     let p = located(ref_a_roof1());
     let r = simulate(&p, &SimulationAssumptions::default()).unwrap();
     let b = &r.balance;
-    let losses = b.shading_kwh
+    let losses = b.horizon_kwh
+        + b.shading_kwh
         + b.iam_kwh
         + b.soiling_kwh
         + b.low_light_kwh
@@ -215,4 +217,31 @@ fn a_chimney_in_front_of_the_modules_shades_them() {
         base.balance.shading_kwh / base.balance.nominal_kwh * 100.0,
         r.balance.shading_kwh / r.balance.nominal_kwh * 100.0
     );
+}
+
+#[test]
+fn a_far_horizon_costs_energy_and_the_balance_still_closes() {
+    let p = located(ref_a_roof1());
+    let base = simulate(&p, &SimulationAssumptions::default()).unwrap();
+    assert!(base.balance.horizon_kwh.abs() < 1e-6, "no horizon: no loss");
+    let mut hilly = p.clone();
+    hilly.site.horizon = Some(pv_model::Horizon {
+        source: "test".into(),
+        points: vec![[0.0, 20.0], [180.0, 20.0]],
+    });
+    let r = simulate(&hilly, &SimulationAssumptions::default()).unwrap();
+    let b = &r.balance;
+    assert!(b.horizon_kwh > 0.05 * b.nominal_kwh, "{b:?}");
+    let losses = b.horizon_kwh
+        + b.shading_kwh
+        + b.iam_kwh
+        + b.soiling_kwh
+        + b.low_light_kwh
+        + b.temperature_kwh
+        + b.mismatch_kwh
+        + b.dc_cable_kwh
+        + b.inverter_kwh
+        + b.clipping_kwh;
+    assert!((b.nominal_kwh - losses - r.ac_energy_kwh).abs() < 1e-6 * b.nominal_kwh);
+    assert!(r.ac_energy_kwh < base.ac_energy_kwh);
 }

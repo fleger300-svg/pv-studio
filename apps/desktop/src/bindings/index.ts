@@ -1329,6 +1329,8 @@ export type EdgeSetback = {
 export type EnergyBalance = {
 	/**  STC efficiency × plane-of-array irradiation. */
 	nominalKwh: number,
+	/**  Far horizon (relief). */
+	horizonKwh: number,
 	/**  Near shading (buildings, roof obstacles). */
 	shadingKwh: number,
 	iamKwh: number,
@@ -1549,6 +1551,17 @@ export type GeoLocation = {
 	northM: number,
 	/**  Terrain altitude (swissALTI3D) [m a.s.l.]. */
 	altitudeM: number,
+};
+
+/**  The far horizon (relief) seen from the project: elevation by compass azimuth. */
+export type Horizon = {
+	/**  Where the profile comes from, shown in reports. */
+	source: string,
+	/**
+	 *  `[azimuth°, elevation°]`, azimuths increasing in `[0, 360)`; linear in between,
+	 *  wrapping around north.
+	 */
+	points: ([number, number])[],
 };
 
 /**  One cell as read from the workbook. */
@@ -2386,6 +2399,8 @@ export type ProjectSite_Deserialize = {
 	 *  location: a new location drops them.
 	 */
 	surroundings?: Surroundings | null,
+	/**  Far horizon (relief); tied to the location like the surroundings. */
+	horizon?: Horizon | null,
 };
 
 /**  Location, weather and surroundings of a project. */
@@ -2397,6 +2412,8 @@ export type ProjectSite_Serialize = {
 	 *  location: a new location drops them.
 	 */
 	surroundings?: Surroundings | null,
+	/**  Far horizon (relief); tied to the location like the surroundings. */
+	horizon?: Horizon | null,
 };
 
 export type ProjectSummary = ProjectSummary_Serialize | ProjectSummary_Deserialize;

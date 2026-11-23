@@ -59,6 +59,8 @@ fn main() {
                         "clipping",
                         "wiringMismatch",
                         "specificYield",
+                        "horizonShading",
+                        "nearShading",
                     ];
                     let cells: Vec<String> = pick
                         .iter()

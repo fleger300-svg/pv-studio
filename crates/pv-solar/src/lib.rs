@@ -70,6 +70,8 @@ impl Default for SimulationAssumptions {
 pub struct EnergyBalance {
     /// STC efficiency × plane-of-array irradiation.
     pub nominal_kwh: f64,
+    /// Far horizon (relief).
+    pub horizon_kwh: f64,
     /// Near shading (buildings, roof obstacles).
     pub shading_kwh: f64,
     pub iam_kwh: f64,
@@ -283,8 +285,20 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
                 0.0
             };
             let d_view = shade.diffuse_factor(g.array);
-            let beam = poa.beam * (1.0 - s_beam);
-            let sky = poa.sky_diffuse * d_view;
+            // Far horizon first (on the irradiance), then the near shading.
+            let behind = elevation > 0.0 && shade.below_horizon(sun.azimuth_deg, elevation);
+            // The circumsolar diffuse comes from around the sun: shaded like the beam.
+            let iso = poa.sky_diffuse - poa.circumsolar;
+            let (h_beam, h_circ) = if behind {
+                (0.0, 0.0)
+            } else {
+                (poa.beam, poa.circumsolar)
+            };
+            let h_iso = iso * shade.horizon_view(g.array);
+            let after_horizon = p_stc * (h_beam + h_circ + h_iso + poa.ground) / 1000.0;
+            let beam = h_beam * (1.0 - s_beam);
+            // (The circumsolar part keeps the diffuse incidence modifier, as calibrated.)
+            let sky = h_circ * (1.0 - s_beam) + h_iso * d_view;
             let after_shading = p_stc * (beam + sky + poa.ground) / 1000.0;
             // Incidence angle modifier.
             let theta = incidence_deg(&sun, g.tilt_deg, g.azimuth_deg).to_radians();
@@ -308,7 +322,8 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             let after_mismatch = after_temp * (1.0 - a.mismatch_loss);
             let dc = after_mismatch * (1.0 - a.dc_cable_loss);
             b.nominal_kwh += nominal;
-            b.shading_kwh += nominal - after_shading;
+            b.horizon_kwh += nominal - after_horizon;
+            b.shading_kwh += after_horizon - after_shading;
             b.iam_kwh += after_shading - after_iam;
             b.soiling_kwh += after_iam - after_soiling;
             b.low_light_kwh += after_soiling - after_low_light;
@@ -335,6 +350,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
     let k = 1.0 / 1000.0;
     for x in [
         &mut b.nominal_kwh,
+        &mut b.horizon_kwh,
         &mut b.shading_kwh,
         &mut b.iam_kwh,
         &mut b.soiling_kwh,

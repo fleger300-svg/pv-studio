@@ -784,9 +784,10 @@
       "mismatchKwh": "Mismatch",
       "dcCableKwh": "Câbles DC",
       "inverterKwh": "Conversion onduleur",
-      "clippingKwh": "Écrêtage onduleur"
+      "clippingKwh": "Écrêtage onduleur",
+      "horizonKwh": "Horizon lointain"
     },
-    "note": "Météo : {source}. Ombrage par les bâtiments et obstacles du projet ; sans horizon lointain (à venir).",
+    "note": "Météo : {source}. Ombrage par les bâtiments et obstacles du projet, et par l’horizon lointain importé de PV*SOL.",
     "months": {
       "0": "J",
       "1": "F",
@@ -847,7 +848,7 @@
     "otherWeather": "Météo différente de celle de PV*SOL : les écarts incluent l’effet de la météo.",
     "gap": "Écart",
     "assumptions": "Hypothèses reprises de PV*SOL : salissure et spectre {soiling} %, mismatch et diodes {mismatch} %, câbles {cables} %.",
-    "notModelled": "Pas encore calculé par PV Studio : horizon lointain (relief), objets dessinés dans PV*SOL (cheminées, arbres, bâtiments et polygones 3D) et mismatch entre strings inégaux sur un même MPPT. Les bâtiments voisins du modèle de surface PV*SOL sont pris en compte.",
+    "notModelled": "Pas encore calculé par PV Studio : objets dessinés dans PV*SOL (cheminées, arbres, bâtiments et polygones 3D) et mismatch entre strings inégaux sur un même MPPT. Les bâtiments voisins du modèle de surface PV*SOL et l’horizon lointain (relief) sont pris en compte.",
     "noComparison": "Pas de comparaison : PV*SOL n’a pas de résultats pour ce projet, ou le fichier météo manque.",
     "close": "Fermer",
     "note": {

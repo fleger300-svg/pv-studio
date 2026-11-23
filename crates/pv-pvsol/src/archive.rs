@@ -29,6 +29,7 @@ fn wanted(name: &str) -> bool {
             | "Visu3D/Modul_Verschaltung.xml"
             | "Visu3D/ProjDaten.xml"
             | "Visu3D/MoSys.xml"
+            | "Visu3D/BasisHorizont.txt"
     ) || (name.ends_with(".wbv") && !name.contains('/'))
 }
 

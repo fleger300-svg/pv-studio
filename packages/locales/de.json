@@ -784,9 +784,10 @@
       "mismatchKwh": "Mismatch",
       "dcCableKwh": "DC-Kabel",
       "inverterKwh": "Wechselrichter-Umwandlung",
-      "clippingKwh": "Wechselrichter-Abregelung"
+      "clippingKwh": "Wechselrichter-Abregelung",
+      "horizonKwh": "Fernhorizont"
     },
-    "note": "Wetter: {source}. Verschattung durch Gebäude und Hindernisse des Projekts; ohne Fernhorizont (folgt).",
+    "note": "Wetter: {source}. Verschattung durch Gebäude und Hindernisse des Projekts sowie durch den aus PV*SOL importierten Fernhorizont.",
     "months": {
       "0": "J",
       "1": "F",
@@ -847,7 +848,7 @@
     "otherWeather": "Anderes Wetter als PV*SOL: die Abweichungen enthalten den Wettereinfluss.",
     "gap": "Abweichung",
     "assumptions": "Aus PV*SOL übernommen: Verschmutzung und Spektrum {soiling} %, Mismatch und Dioden {mismatch} %, Kabel {cables} %.",
-    "notModelled": "Von PV Studio noch nicht berechnet: Fernhorizont (Relief), in PV*SOL gezeichnete Objekte (Kamine, Bäume, Gebäude und 3D-Polygone) und Mismatch ungleicher Strings an einem MPPT. Die Nachbargebäude aus dem PV*SOL-Oberflächenmodell werden berücksichtigt.",
+    "notModelled": "Von PV Studio noch nicht berechnet: in PV*SOL gezeichnete Objekte (Kamine, Bäume, Gebäude und 3D-Polygone) und Mismatch ungleicher Strings an einem MPPT. Die Nachbargebäude aus dem PV*SOL-Oberflächenmodell und der Fernhorizont (Relief) werden berücksichtigt.",
     "noComparison": "Kein Vergleich: PV*SOL hat keine Ergebnisse für dieses Projekt, oder die Wetterdatei fehlt.",
     "close": "Schliessen",
     "note": {

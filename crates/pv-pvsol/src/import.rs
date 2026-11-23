@@ -264,6 +264,10 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
 
     // --- Site and weather ------------------------------------------------------------------
     let weather = file.weather.as_ref();
+    let horizon = file.horizon.as_ref().map(|points| pv_model::Horizon {
+        source: "PV*SOL (horizon du projet)".to_owned(),
+        points: points.clone(),
+    });
     if let (Some(lat), Some(lon)) = (file.site.lat_deg, file.site.lon_deg) {
         let (east, north) = wgs84_to_lv95(lat, lon);
         let label = if file.site.address.is_empty() {
@@ -284,6 +288,7 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
                 weather: weather.map(|(n, w)| w.to_weather_year(n, file.site.utc_offset_h)),
                 // Added once the modules are placed (see below).
                 surroundings: None,
+                horizon: horizon.clone(),
             }),
         });
     } else {

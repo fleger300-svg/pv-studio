@@ -92,6 +92,8 @@ pub struct PvsolFile {
     /// Margin PV*SOL cuts around the project's buildings in the height map
     /// (`GelaendeModell/AddDist`, 1 m when absent) [m].
     pub cut_margin_m: f64,
+    /// Far horizon profile (`Visu3D/BasisHorizont.txt`): `[azimuth°, elevation°]`, sorted.
+    pub horizon: Option<Vec<[f64; 2]>>,
 }
 
 fn xml_entry(a: &Archive, name: &str) -> Result<Option<xml::Node>, ReadError> {
@@ -191,10 +193,41 @@ pub fn read_archive(a: &Archive) -> Result<PvsolFile, ReadError> {
         weather,
         results,
         height_map,
+        horizon: a.get("Visu3D/BasisHorizont.txt").and_then(parse_horizon),
         cut_margin_m: proj
             .as_ref()
             .and_then(|p| p.f64_at("GelaendeModell/AddDist"))
             .filter(|m| (0.0..=10.0).contains(m))
             .unwrap_or(1.0),
     })
+}
+
+/// Parses PV*SOL's horizon profile: one `azimuth elevation` pair per line (compass degrees,
+/// north = 0). `None` when no valid line is found.
+fn parse_horizon(bytes: &[u8]) -> Option<Vec<[f64; 2]>> {
+    let text = String::from_utf8_lossy(bytes);
+    let mut points: Vec<[f64; 2]> = text
+        .lines()
+        .filter_map(|l| {
+            let mut it = l
+                .split_whitespace()
+                .map(|x| x.replace(',', ".").parse::<f64>());
+            let (az, el) = (it.next()?.ok()?, it.next()?.ok()?);
+            (az.is_finite() && el.is_finite() && (-10.0..=90.0).contains(&el))
+                .then_some([az.rem_euclid(360.0), el])
+        })
+        .collect();
+    points.sort_by(|a, b| a[0].total_cmp(&b[0]));
+    points.dedup_by(|a, b| (a[0] - b[0]).abs() < 1e-9);
+    (!points.is_empty()).then_some(points)
+}
+
+#[cfg(test)]
+mod horizon_tests {
+    #[test]
+    fn reads_the_profile() {
+        let h = super::parse_horizon(b"0 9.5\r\n8 11.8\n\n360 9.5\nbad line\n").unwrap();
+        assert_eq!(h, vec![[0.0, 9.5], [8.0, 11.8]]);
+        assert!(super::parse_horizon(b"").is_none());
+    }
 }

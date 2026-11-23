@@ -784,9 +784,10 @@
       "mismatchKwh": "Mismatch",
       "dcCableKwh": "DC cables",
       "inverterKwh": "Inverter conversion",
-      "clippingKwh": "Inverter clipping"
+      "clippingKwh": "Inverter clipping",
+      "horizonKwh": "Far horizon"
     },
-    "note": "Weather: {source}. Shading by the project’s buildings and obstacles; without far horizon (coming).",
+    "note": "Weather: {source}. Shading by the project’s buildings and obstacles, and by the far horizon imported from PV*SOL.",
     "months": {
       "0": "J",
       "1": "F",
@@ -847,7 +848,7 @@
     "otherWeather": "Weather differs from PV*SOL’s: the gaps include the effect of the weather.",
     "gap": "Gap",
     "assumptions": "Assumptions taken from PV*SOL: soiling and spectrum {soiling} %, mismatch and diodes {mismatch} %, cables {cables} %.",
-    "notModelled": "Not computed by PV Studio yet: far horizon (relief), objects drawn in PV*SOL (chimneys, trees, buildings and 3-D polygons) and mismatch between unequal strings on one MPPT. The neighbouring buildings of PV*SOL’s surface model are taken into account.",
+    "notModelled": "Not computed by PV Studio yet: objects drawn in PV*SOL (chimneys, trees, buildings and 3-D polygons) and mismatch between unequal strings on one MPPT. The neighbouring buildings of PV*SOL’s surface model and the far horizon (relief) are taken into account.",
     "noComparison": "No comparison: PV*SOL has no results for this project, or the weather file is missing.",
     "close": "Close",
     "note": {

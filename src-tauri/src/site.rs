@@ -121,6 +121,7 @@ pub async fn site_locate(
         weather: old.weather.clone(),
         // The surroundings belong to the previous location.
         surroundings: None,
+        horizon: None,
     })
 }
 
@@ -173,5 +174,6 @@ pub async fn site_fetch_weather(
         location: old.location.clone(),
         weather: Some(weather),
         surroundings: old.surroundings.clone(),
+        horizon: old.horizon.clone(),
     })
 }

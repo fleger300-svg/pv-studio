@@ -125,7 +125,8 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
     let reflection_pvsol = ratio(-i.reflection, after_horizon);
     // PV*SOL's temperature step follows module shading and part load.
     let before_temp_pvsol = p.pv.nominal + p.pv.module_shading + p.pv.part_load;
-    let before_temp = b.nominal_kwh - b.shading_kwh - b.iam_kwh - b.soiling_kwh - b.low_light_kwh;
+    let before_temp =
+        b.nominal_kwh - b.horizon_kwh - b.shading_kwh - b.iam_kwh - b.soiling_kwh - b.low_light_kwh;
     let inverter_pvsol =
         -(p.inverter.voltage_deviation + p.inverter.conversion + p.inverter.standby);
     let dc_pvstudio = before_temp - b.temperature_kwh - b.mismatch_kwh - b.dc_cable_kwh;
@@ -137,22 +138,27 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
             "shading",
             "%",
             shading_pvsol,
-            ratio(b.shading_kwh, b.nominal_kwh),
+            ratio(b.horizon_kwh + b.shading_kwh, b.nominal_kwh),
         ),
         // Its two parts: the far horizon (relief; not modelled by PV Studio yet) and the near
         // shading (buildings, obstacles, surroundings).
-        row("horizonShading", "%", 100.0 * horizon, 0.0),
+        row(
+            "horizonShading",
+            "%",
+            100.0 * horizon,
+            ratio(b.horizon_kwh, b.nominal_kwh),
+        ),
         row(
             "nearShading",
             "%",
             100.0 * modules,
-            ratio(b.shading_kwh, b.nominal_kwh),
+            ratio(b.shading_kwh, b.nominal_kwh - b.horizon_kwh),
         ),
         row(
             "reflection",
             "%",
             reflection_pvsol,
-            ratio(b.iam_kwh, b.nominal_kwh - b.shading_kwh),
+            ratio(b.iam_kwh, b.nominal_kwh - b.horizon_kwh - b.shading_kwh),
         ),
         row(
             "lowLight",
@@ -160,7 +166,7 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
             ratio(-p.pv.part_load, p.pv.nominal + p.pv.module_shading),
             ratio(
                 b.low_light_kwh,
-                b.nominal_kwh - b.shading_kwh - b.iam_kwh - b.soiling_kwh,
+                b.nominal_kwh - b.horizon_kwh - b.shading_kwh - b.iam_kwh - b.soiling_kwh,
             ),
         ),
         row(
