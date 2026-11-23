@@ -53,10 +53,10 @@ fn gaps(cases: &[(PvsolFile, Project)], a: SimulationAssumptions) -> Vec<(f64, f
                             let (tp, ts) = r("temperature")?;
                             let (lp, ls) = r("lowLight")?;
                             let (shp, shs) = r("shading")?;
-                            let (wm, _) = r("wiringMismatch")?;
+                            let (wm, wms) = r("wiringMismatch")?;
                             let gap = c.energy_gap()?;
                             let model = (1.0 + gap) * (1.0 - shp / 100.0) * (1.0 - wm / 100.0)
-                                / (1.0 - shs / 100.0)
+                                / ((1.0 - shs / 100.0) * (1.0 - wms / 100.0))
                                 - 1.0;
                             Some((rs - rp, ts - tp, model * 100.0, ls - lp))
                         })

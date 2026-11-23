@@ -1338,6 +1338,8 @@ export type EnergyBalance = {
 	lowLightKwh: number,
 	temperatureKwh: number,
 	mismatchKwh: number,
+	/**  Unequal strings in parallel on one tracker, held at one voltage. */
+	wiringMismatchKwh: number,
 	dcCableKwh: number,
 	inverterKwh: number,
 	clippingKwh: number,

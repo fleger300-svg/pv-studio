@@ -782,6 +782,7 @@
       "lowLightKwh": "Schwachlicht",
       "temperatureKwh": "Temperatur",
       "mismatchKwh": "Mismatch",
+      "wiringMismatchKwh": "Ungleiche Strings an einem MPPT",
       "dcCableKwh": "DC-Kabel",
       "inverterKwh": "Wechselrichter-Umwandlung",
       "clippingKwh": "Wechselrichter-Abregelung",
@@ -848,7 +849,7 @@
     "otherWeather": "Anderes Wetter als PV*SOL: die Abweichungen enthalten den Wettereinfluss.",
     "gap": "Abweichung",
     "assumptions": "Aus PV*SOL übernommen: Verschmutzung und Spektrum {soiling} %, Mismatch und Dioden {mismatch} %, Kabel {cables} %.",
-    "notModelled": "Von PV Studio noch nicht berechnet: in PV*SOL gezeichnete Objekte (Kamine, Bäume, Gebäude und 3D-Polygone) und Mismatch ungleicher Strings an einem MPPT. Die Nachbargebäude aus dem PV*SOL-Oberflächenmodell und der Fernhorizont (Relief) werden berücksichtigt.",
+    "notModelled": "Von PV Studio noch nicht berechnet: in PV*SOL gezeichnete Objekte (Kamine, Bäume, Gebäude und 3D-Polygone). Die Nachbargebäude aus dem PV*SOL-Oberflächenmodell, der Fernhorizont (Relief) und ungleiche Strings an einem MPPT werden berücksichtigt.",
     "noComparison": "Kein Vergleich: PV*SOL hat keine Ergebnisse für dieses Projekt, oder die Wetterdatei fehlt.",
     "close": "Schliessen",
     "note": {

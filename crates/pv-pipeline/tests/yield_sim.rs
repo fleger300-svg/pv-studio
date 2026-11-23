@@ -80,6 +80,7 @@ fn the_energy_balance_closes_and_is_plausible() {
         + b.low_light_kwh
         + b.temperature_kwh
         + b.mismatch_kwh
+        + b.wiring_mismatch_kwh
         + b.dc_cable_kwh
         + b.inverter_kwh
         + b.clipping_kwh;
@@ -169,6 +170,90 @@ fn an_undersized_inverter_clips() {
     assert!(r.performance_ratio < 0.5);
 }
 
+/// Project A roof 1 with one inverter and two strings of `a` and `b` modules on tracker 0.
+fn two_strings_on_one_tracker(a: usize, b: usize) -> Project {
+    let mut p = located(ref_a_roof1());
+    let inv = pv_library::catalog::components()
+        .unwrap()
+        .into_iter()
+        .find(|c| c.model == "SUN2000-3KTL-M1")
+        .expect("3 kW inverter");
+    let component = inv.id;
+    Command::AdoptComponents {
+        snapshots: vec![ComponentSnapshot {
+            component: inv,
+            price: None,
+        }],
+    }
+    .apply(&mut p)
+    .unwrap();
+    let modules: Vec<pv_model::ModuleRef> = p
+        .modules
+        .iter()
+        .map(|m| pv_model::ModuleRef {
+            array: m.array_id,
+            row: m.row,
+            col: m.col,
+        })
+        .collect();
+    assert!(modules.len() >= a + b);
+    let inverter = InverterId::new();
+    let string = |m: &[pv_model::ModuleRef]| pv_model::PvString {
+        id: pv_model::StringId::new(),
+        inverter,
+        tracker: 0,
+        modules: m.to_vec(),
+        locked: false,
+    };
+    p.wiring = Wiring {
+        inverters: vec![InverterUnit {
+            id: inverter,
+            name: "WR1".into(),
+            component,
+        }],
+        strings: vec![string(&modules[..a]), string(&modules[a..a + b])],
+        settings: WiringSettings::default(),
+    };
+    p
+}
+
+#[test]
+fn unequal_strings_on_one_tracker_lose_energy() {
+    let a = SimulationAssumptions::default();
+    let equal = simulate(&two_strings_on_one_tracker(8, 8), &a).unwrap();
+    assert!(
+        equal.balance.wiring_mismatch_kwh.abs() < 1e-9,
+        "{:?}",
+        equal.balance
+    );
+    let unequal = simulate(&two_strings_on_one_tracker(8, 6), &a).unwrap();
+    let b = &unequal.balance;
+    let before = b.nominal_kwh
+        - b.horizon_kwh
+        - b.shading_kwh
+        - b.iam_kwh
+        - b.soiling_kwh
+        - b.low_light_kwh
+        - b.temperature_kwh
+        - b.mismatch_kwh;
+    let share = b.wiring_mismatch_kwh / before;
+    // PV*SOL books a few % for strings differing by a quarter of their length.
+    assert!((0.01..0.15).contains(&share), "{share} {b:?}");
+    let losses = b.horizon_kwh
+        + b.shading_kwh
+        + b.iam_kwh
+        + b.soiling_kwh
+        + b.low_light_kwh
+        + b.temperature_kwh
+        + b.mismatch_kwh
+        + b.wiring_mismatch_kwh
+        + b.dc_cable_kwh
+        + b.inverter_kwh
+        + b.clipping_kwh;
+    assert!((b.nominal_kwh - losses - unequal.ac_energy_kwh).abs() < 1e-6 * b.nominal_kwh);
+    println!("8 + 6 modules on one tracker: {:.2} %", share * 100.0);
+}
+
 #[test]
 fn a_chimney_in_front_of_the_modules_shades_them() {
     let p = located(ref_a_roof1());
@@ -239,6 +324,7 @@ fn a_far_horizon_costs_energy_and_the_balance_still_closes() {
         + b.low_light_kwh
         + b.temperature_kwh
         + b.mismatch_kwh
+        + b.wiring_mismatch_kwh
         + b.dc_cable_kwh
         + b.inverter_kwh
         + b.clipping_kwh;

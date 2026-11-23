@@ -4,7 +4,8 @@
 //! sun position (NOAA) → diffuse/beam split (measured DHI, else Erbs) → plane of array
 //! (Hay & Davies, albedo) → incidence angle modifier (ASHRAE on beam, constant on diffuse) →
 //! soiling → module power at the cell temperature (Faiman-type `U` value) with a low-light
-//! correction → mismatch → DC cables → inverter efficiency and clipping at its AC power.
+//! correction → mismatch → unequal strings in parallel on one tracker ([`parallel`]) → DC
+//! cables → inverter efficiency and clipping at its AC power.
 //! Modules in no string get a generic inverter (efficiency, no clipping).
 //!
 //! The losses are booked one after the other, so that their sum is the gap between the
@@ -12,6 +13,7 @@
 //! PV*SOL energy balance. Near shading by the project's own buildings and roof obstacles
 //! ([`shade`]) is booked first, on the plane-of-array irradiance.
 
+pub mod parallel;
 pub mod shade;
 pub mod sun;
 
@@ -79,6 +81,8 @@ pub struct EnergyBalance {
     pub low_light_kwh: f64,
     pub temperature_kwh: f64,
     pub mismatch_kwh: f64,
+    /// Unequal strings in parallel on one tracker, held at one voltage.
+    pub wiring_mismatch_kwh: f64,
     pub dc_cable_kwh: f64,
     pub inverter_kwh: f64,
     pub clipping_kwh: f64,
@@ -120,6 +124,28 @@ struct Group {
     pmax_w: f64,
     gamma: f64,
     inverter: Option<InverterId>,
+    /// Module voltages and currents at STC, `Voc` temperature coefficient [1/K].
+    vmpp_v: f64,
+    voc_v: f64,
+    isc_per_impp: f64,
+    beta_voc: f64,
+}
+
+/// The modules of one string, as `(group index, module count)`.
+type StringGroups = Vec<(usize, f64)>;
+
+/// One group's modules this hour: power per module after the mismatch [W], voltage factor.
+#[derive(Clone, Copy, Default)]
+struct GroupHour {
+    p_module_w: f64,
+    voltage_factor: f64,
+}
+
+/// Relative change of the module voltages with the effective irradiance `g` [W/m²] (the
+/// thermal-voltage term `n·k·T/q·ln(G/1000)` over `Voc`, ≈ 0.04 for crystalline cells) and
+/// the cell temperature.
+fn voltage_factor(g: f64, t_cell: f64, beta_voc: f64) -> f64 {
+    (1.0 + beta_voc * (t_cell - 25.0) + 0.04 * (g.max(10.0) / 1000.0).ln()).max(0.2)
 }
 
 struct Inverter {
@@ -185,6 +211,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
     // Groups: (array, inverter) with the array's orientation and module data.
     let mut groups: Vec<Group> = Vec::new();
     let mut index: HashMap<(pv_model::ArrayId, Option<InverterId>), usize> = HashMap::new();
+    let mut group_of: HashMap<ModuleRef, usize> = HashMap::new();
     for arr in &project.arrays {
         let Some(e) = arr
             .module
@@ -230,16 +257,52 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
                     pmax_w: e.pmax_w,
                     gamma: e.temp_coeff_pmax_pct_per_k / 100.0,
                     inverter: inv,
+                    vmpp_v: e.vmpp_v,
+                    voc_v: e.voc_v,
+                    isc_per_impp: e.isc_a / e.impp_a,
+                    beta_voc: e.temp_coeff_voc_pct_per_k / 100.0,
                 });
                 groups.len() - 1
             });
             groups[k].modules += 1.0;
+            group_of.insert(r, k);
         }
     }
     let peak_w: f64 = groups.iter().map(|g| g.modules * g.pmax_w).sum();
     if peak_w <= 0.0 {
         return Err(NotSimulated::NoModules);
     }
+
+    // Trackers with several strings: each string as module counts per group.
+    let mut by_tracker: HashMap<(InverterId, u32), Vec<StringGroups>> = HashMap::new();
+    let mut order: Vec<(InverterId, u32)> = Vec::new();
+    for s in &project.wiring.strings {
+        if !inverters.contains_key(&s.inverter) {
+            continue;
+        }
+        let mut counts: Vec<(usize, f64)> = Vec::new();
+        for k in s.modules.iter().filter_map(|m| group_of.get(m)) {
+            match counts.iter_mut().find(|c| c.0 == *k) {
+                Some(c) => c.1 += 1.0,
+                None => counts.push((*k, 1.0)),
+            }
+        }
+        if !counts.is_empty() {
+            let key = (s.inverter, s.tracker);
+            if !by_tracker.contains_key(&key) {
+                order.push(key);
+            }
+            by_tracker.entry(key).or_default().push(counts);
+        }
+    }
+    // (In wiring order, so that the sums do not depend on the map's order.)
+    let trackers: Vec<(InverterId, Vec<StringGroups>)> = order
+        .into_iter()
+        .filter_map(|key| by_tracker.remove(&key).map(|strings| (key.0, strings)))
+        .filter(|(_, strings)| strings.len() > 1)
+        .collect();
+    let mut hour_of_group = vec![GroupHour::default(); groups.len()];
+    let mut points: Vec<parallel::StringPoint> = Vec::new();
 
     let mut shade = shade::ShadeModel::new(project);
     let mut b = EnergyBalance::default();
@@ -269,7 +332,8 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             f64::from(w.dhi_w_m2[h]).min(ghi)
         };
         dc_by_inverter.clear();
-        for g in &groups {
+        hour_of_group.fill(GroupHour::default());
+        for (k, g) in groups.iter().enumerate() {
             let poa = hay_davies(&sun, ghi, dhi, e0, g.tilt_deg, g.azimuth_deg, a.albedo);
             let gpoa = poa.total();
             if gpoa <= 0.0 {
@@ -320,7 +384,10 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             let t_cell = temp + gpoa * 0.9 * (1.0 - 0.2) / g.u;
             let after_temp = after_low_light * (1.0 + g.gamma * (t_cell - 25.0)).max(0.0);
             let after_mismatch = after_temp * (1.0 - a.mismatch_loss);
-            let dc = after_mismatch * (1.0 - a.dc_cable_loss);
+            hour_of_group[k] = GroupHour {
+                p_module_w: after_mismatch / g.modules,
+                voltage_factor: voltage_factor(g_soiled, t_cell, g.beta_voc),
+            };
             b.nominal_kwh += nominal;
             b.horizon_kwh += nominal - after_horizon;
             b.shading_kwh += after_horizon - after_shading;
@@ -329,11 +396,42 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             b.low_light_kwh += after_soiling - after_low_light;
             b.temperature_kwh += after_low_light - after_temp;
             b.mismatch_kwh += after_temp - after_mismatch;
-            b.dc_cable_kwh += after_mismatch - dc;
-            *dc_by_inverter.entry(g.inverter).or_default() += dc;
+            *dc_by_inverter.entry(g.inverter).or_default() += after_mismatch;
+        }
+        // Unequal strings in parallel: each tracker at its best common voltage.
+        for (inv, strings) in &trackers {
+            points.clear();
+            let mut power = 0.0;
+            for s in strings {
+                let (mut p, mut vmpp, mut voc, mut isc_per_impp) = (0.0, 0.0, 0.0, 0.0);
+                for &(k, n) in s {
+                    let (g, gh) = (&groups[k], hour_of_group[k]);
+                    p += n * gh.p_module_w;
+                    vmpp += n * g.vmpp_v * gh.voltage_factor;
+                    voc += n * g.voc_v * gh.voltage_factor;
+                    isc_per_impp += n * gh.p_module_w * g.isc_per_impp;
+                }
+                if p > 0.0 && vmpp > 0.0 {
+                    let impp = p / vmpp;
+                    points.push(parallel::StringPoint {
+                        vmpp_v: vmpp,
+                        impp_a: impp,
+                        voc_v: voc,
+                        isc_a: impp * isc_per_impp / p,
+                    });
+                    power += p;
+                }
+            }
+            let lost = power * parallel::loss_fraction(&points);
+            if lost > 0.0 {
+                b.wiring_mismatch_kwh += lost;
+                *dc_by_inverter.entry(Some(*inv)).or_default() -= lost;
+            }
         }
         let month = month_of(h);
-        for (inv, &dc) in &dc_by_inverter {
+        for (inv, &before_cables) in &dc_by_inverter {
+            let dc = before_cables * (1.0 - a.dc_cable_loss);
+            b.dc_cable_kwh += before_cables - dc;
             let (eta, ac_max) = inv
                 .and_then(|i| inverters.get(&i))
                 .map_or((a.default_inverter_efficiency, f64::INFINITY), |i| {
@@ -357,6 +455,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
         &mut b.low_light_kwh,
         &mut b.temperature_kwh,
         &mut b.mismatch_kwh,
+        &mut b.wiring_mismatch_kwh,
         &mut b.dc_cable_kwh,
         &mut b.inverter_kwh,
         &mut b.clipping_kwh,

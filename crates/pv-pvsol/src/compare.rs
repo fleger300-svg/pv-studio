@@ -129,7 +129,8 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
         b.nominal_kwh - b.horizon_kwh - b.shading_kwh - b.iam_kwh - b.soiling_kwh - b.low_light_kwh;
     let inverter_pvsol =
         -(p.inverter.voltage_deviation + p.inverter.conversion + p.inverter.standby);
-    let dc_pvstudio = before_temp - b.temperature_kwh - b.mismatch_kwh - b.dc_cable_kwh;
+    let before_wiring = before_temp - b.temperature_kwh - b.mismatch_kwh;
+    let dc_pvstudio = before_wiring - b.wiring_mismatch_kwh - b.dc_cable_kwh;
     vec![
         row("peakPower", "kWp", p.dc_power_kwp, s.peak_power_kwp),
         row("ghi", "kWh/m²", i.global_horizontal, s.ghi_kwh_m2),
@@ -140,8 +141,8 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
             shading_pvsol,
             ratio(b.horizon_kwh + b.shading_kwh, b.nominal_kwh),
         ),
-        // Its two parts: the far horizon (relief; not modelled by PV Studio yet) and the near
-        // shading (buildings, obstacles, surroundings).
+        // Its two parts: the far horizon (relief) and the near shading (buildings, obstacles,
+        // surroundings).
         row(
             "horizonShading",
             "%",
@@ -175,8 +176,7 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
             ratio(-p.pv.temperature, before_temp_pvsol),
             ratio(b.temperature_kwh, before_temp),
         ),
-        // Unequal strings in parallel on one tracker (PV*SOL's « MismatchVerschaltung »):
-        // not modelled by PV Studio yet.
+        // Unequal strings in parallel on one tracker (PV*SOL's « MismatchVerschaltung »).
         row(
             "wiringMismatch",
             "%",
@@ -184,7 +184,7 @@ pub fn rows(p: &PvsolResults, s: &YieldReport) -> Vec<ComparisonRow> {
                 -p.pv.mismatch_wiring,
                 before_temp_pvsol + p.pv.temperature + p.pv.diodes + p.pv.mismatch,
             ),
-            0.0,
+            ratio(b.wiring_mismatch_kwh, before_wiring),
         ),
         row(
             "inverter",

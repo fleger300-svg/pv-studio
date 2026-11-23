@@ -14,6 +14,7 @@ const BALANCE = [
   'lowLightKwh',
   'temperatureKwh',
   'mismatchKwh',
+  'wiringMismatchKwh',
   'dcCableKwh',
   'inverterKwh',
   'clippingKwh',

@@ -285,8 +285,8 @@ fn aligns_the_input_losses_on_pvsol() {
 }
 
 /// The real project A, with PV*SOL's weather: same irradiance as PV*SOL, and the same energy
-/// once the losses PV Studio does not compute yet (surroundings, unequal strings) are taken
-/// out. Needs the original file under `PVSOL_CORPUS`.
+/// once the shading and unequal-strings losses of both are taken out (PV*SOL also draws
+/// objects PV Studio does not import). Needs the original file under `PVSOL_CORPUS`.
 #[test]
 #[ignore = "needs the PV*SOL corpus on this machine (PVSOL_CORPUS)"]
 fn project_a_matches_pvsol_with_the_same_weather() {
@@ -304,7 +304,7 @@ fn project_a_matches_pvsol_with_the_same_weather() {
     let (sh, wm) = (r("shading"), r("wiringMismatch"));
     let gap = c.energy_gap().unwrap();
     let model = (1.0 + gap) * (1.0 - sh.pvsol / 100.0) * (1.0 - wm.pvsol / 100.0)
-        / (1.0 - sh.pvstudio / 100.0)
+        / ((1.0 - sh.pvstudio / 100.0) * (1.0 - wm.pvstudio / 100.0))
         - 1.0;
     assert!(model.abs() < 0.03, "model gap {model}");
 }
