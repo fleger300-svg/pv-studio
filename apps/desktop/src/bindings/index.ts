@@ -1338,7 +1338,11 @@ export type EnergyBalance = {
 	lowLightKwh: number,
 	temperatureKwh: number,
 	mismatchKwh: number,
-	/**  Unequal strings in parallel on one tracker, held at one voltage. */
+	/**
+	 *  Electrical mismatch on the trackers beyond the linear shading loss: partially shaded
+	 *  strings (bypass diodes, current limited by the shaded substrings) and unequal strings
+	 *  in parallel, held at one voltage.
+	 */
 	wiringMismatchKwh: number,
 	dcCableKwh: number,
 	inverterKwh: number,

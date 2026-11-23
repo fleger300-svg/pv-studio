@@ -254,29 +254,14 @@ fn unequal_strings_on_one_tracker_lose_energy() {
     println!("8 + 6 modules on one tracker: {:.2} %", share * 100.0);
 }
 
-#[test]
-fn a_chimney_in_front_of_the_modules_shades_them() {
-    let p = located(ref_a_roof1());
-    let base = simulate(&p, &SimulationAssumptions::default()).unwrap();
-    // Without obstacles, only the building itself may shade (little or nothing).
-    assert!(
-        base.balance.shading_kwh < 0.02 * base.balance.nominal_kwh,
-        "{:?}",
-        base.balance
-    );
-
-    // A 3 m high, 2 m wide chimney just below (south of) the middle of the modules.
-    let mut shaded = p.clone();
-    let us: Vec<f64> = shaded.modules.iter().map(|m| m.u).collect();
-    let v0 = shaded
-        .modules
-        .iter()
-        .map(|m| m.v)
-        .fold(f64::INFINITY, f64::min);
+/// A 3 m high, 2 m wide chimney just below (south of) the middle of the modules.
+fn add_chimney(p: &mut Project) {
+    let us: Vec<f64> = p.modules.iter().map(|m| m.u).collect();
+    let v0 = p.modules.iter().map(|m| m.v).fold(f64::INFINITY, f64::min);
     let u_mid = (us.iter().copied().fold(f64::INFINITY, f64::min)
         + us.iter().copied().fold(f64::NEG_INFINITY, f64::max))
         / 2.0;
-    let face = &mut shaded.roof_faces[0];
+    let face = &mut p.roof_faces[0];
     let outline = face.outline.as_mut().expect("outline");
     outline.obstacles.push(pv_model::RoofObstacle {
         name: "chimney".into(),
@@ -290,6 +275,56 @@ fn a_chimney_in_front_of_the_modules_shades_them() {
         height_m: 3.0,
         clearance_m: None,
     });
+}
+
+#[test]
+fn partial_shading_of_a_string_costs_more_than_the_shaded_area() {
+    let a = SimulationAssumptions::default();
+    // Every module in one string per tracker, so that no strings are in parallel.
+    let mut p = two_strings_on_one_tracker(8, 8);
+    p.wiring.strings[1].tracker = 1;
+    let base = simulate(&p, &a).unwrap();
+    add_chimney(&mut p);
+    let r = simulate(&p, &a).unwrap();
+    let b = &r.balance;
+    assert!(b.shading_kwh > base.balance.shading_kwh, "{b:?}");
+    assert!(
+        b.wiring_mismatch_kwh > base.balance.wiring_mismatch_kwh + 0.001 * b.nominal_kwh,
+        "{:?} → {b:?}",
+        base.balance
+    );
+    let losses = b.horizon_kwh
+        + b.shading_kwh
+        + b.iam_kwh
+        + b.soiling_kwh
+        + b.low_light_kwh
+        + b.temperature_kwh
+        + b.mismatch_kwh
+        + b.wiring_mismatch_kwh
+        + b.dc_cable_kwh
+        + b.inverter_kwh
+        + b.clipping_kwh;
+    assert!((b.nominal_kwh - losses - r.ac_energy_kwh).abs() < 1e-6 * b.nominal_kwh);
+    println!(
+        "chimney: shading {:.2} %, partial shading (diodes) {:.2} %",
+        b.shading_kwh / b.nominal_kwh * 100.0,
+        b.wiring_mismatch_kwh / b.nominal_kwh * 100.0
+    );
+}
+
+#[test]
+fn a_chimney_in_front_of_the_modules_shades_them() {
+    let p = located(ref_a_roof1());
+    let base = simulate(&p, &SimulationAssumptions::default()).unwrap();
+    // Without obstacles, only the building itself may shade (little or nothing).
+    assert!(
+        base.balance.shading_kwh < 0.02 * base.balance.nominal_kwh,
+        "{:?}",
+        base.balance
+    );
+
+    let mut shaded = p.clone();
+    add_chimney(&mut shaded);
     let r = simulate(&shaded, &SimulationAssumptions::default()).unwrap();
     assert!(
         r.balance.shading_kwh > base.balance.shading_kwh + 0.005 * r.balance.nominal_kwh,

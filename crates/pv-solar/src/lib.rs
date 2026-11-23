@@ -4,14 +4,16 @@
 //! sun position (NOAA) → diffuse/beam split (measured DHI, else Erbs) → plane of array
 //! (Hay & Davies, albedo) → incidence angle modifier (ASHRAE on beam, constant on diffuse) →
 //! soiling → module power at the cell temperature (Faiman-type `U` value) with a low-light
-//! correction → mismatch → unequal strings in parallel on one tracker ([`parallel`]) → DC
-//! cables → inverter efficiency and clipping at its AC power.
+//! correction → mismatch → electrical mismatch on each tracker ([`parallel`]: partial
+//! shading of the strings, unequal strings in parallel) → DC cables → inverter efficiency and
+//! clipping at its AC power. Module optimizers are not modelled (computed as without them).
 //! Modules in no string get a generic inverter (efficiency, no clipping).
 //!
 //! The losses are booked one after the other, so that their sum is the gap between the
 //! nominal energy (STC efficiency × plane-of-array irradiation) and the AC energy, as in the
-//! PV*SOL energy balance. Near shading by the project's own buildings and roof obstacles
-//! ([`shade`]) is booked first, on the plane-of-array irradiance.
+//! PV*SOL energy balance. Near shading by the project's own buildings, roof obstacles and
+//! tilted module rows ([`shade`]) is booked first, on the plane-of-array irradiance, in
+//! proportion to the shaded area; its electrical effect comes with the mismatch.
 
 pub mod parallel;
 pub mod shade;
@@ -81,7 +83,9 @@ pub struct EnergyBalance {
     pub low_light_kwh: f64,
     pub temperature_kwh: f64,
     pub mismatch_kwh: f64,
-    /// Unequal strings in parallel on one tracker, held at one voltage.
+    /// Electrical mismatch on the trackers beyond the linear shading loss: partially shaded
+    /// strings (bypass diodes, current limited by the shaded substrings) and unequal strings
+    /// in parallel, held at one voltage.
     pub wiring_mismatch_kwh: f64,
     pub dc_cable_kwh: f64,
     pub inverter_kwh: f64,
@@ -139,6 +143,27 @@ type StringGroups = Vec<(usize, f64)>;
 struct GroupHour {
     p_module_w: f64,
     voltage_factor: f64,
+    /// Power of one module wholly in the sun / wholly in the beam's shade; both 0 when the
+    /// group has no shade this hour.
+    p_sun_w: f64,
+    p_shade_w: f64,
+}
+
+/// A string's modules: `(group index, array, index in the array's shade masks)`.
+type StringModules = Vec<(usize, pv_model::ArrayId, usize)>;
+
+/// One tracker: its strings as module counts per group (unshaded hours) and as modules
+/// (hours with partial shading).
+struct Tracker {
+    inverter: InverterId,
+    counts: Vec<StringGroups>,
+    modules: Vec<StringModules>,
+}
+
+/// Bits of the two halves of strip `s` in a shade mask (bands 0–1 and 2–3).
+fn halves(mask: u16, s: usize) -> (bool, bool) {
+    let base = s * shade::BANDS;
+    (mask & (0b0011 << base) != 0, mask & (0b1100 << base) != 0)
 }
 
 /// Relative change of the module voltages with the effective irradiance `g` [W/m²] (the
@@ -146,6 +171,113 @@ struct GroupHour {
 /// the cell temperature.
 fn voltage_factor(g: f64, t_cell: f64, beta_voc: f64) -> f64 {
     (1.0 + beta_voc * (t_cell - 25.0) + 0.04 * (g.max(10.0) / 1000.0).ln()).max(0.2)
+}
+
+/// Loss [W] of a tracker with partially shaded modules this hour, beyond the linear loss of
+/// the shaded area already booked: bypass diodes and the string current limited by its
+/// shaded substrings, plus unequal strings in parallel. `None` when none of its modules is
+/// partly in the beam's shade (the unshaded path applies).
+fn partial_shading_loss(
+    t: &Tracker,
+    bin: (u16, u16),
+    groups: &[Group],
+    hour: &[GroupHour],
+    shade: &mut shade::ShadeModel,
+) -> Option<f64> {
+    const SUBSTRINGS: f64 = shade::STRIPS as f64;
+    fn count(counts: &mut Vec<((usize, u32), f64)>, key: (usize, u32)) {
+        match counts.iter_mut().find(|c| c.0 == key) {
+            Some(c) => c.1 += 1.0,
+            None => counts.push((key, 1.0)),
+        }
+    }
+    // Substrings by (group, shaded halves; 3: a group without shade this hour).
+    let blocks = |counts: &[((usize, u32), f64)]| -> Vec<parallel::Block> {
+        counts
+            .iter()
+            .map(|&((k, n), count)| {
+                let gh = hour[k];
+                let (p_full, r) = if n >= 3 {
+                    (gh.p_module_w, 1.0)
+                } else {
+                    (gh.p_sun_w, gh.p_shade_w / gh.p_sun_w)
+                };
+                // Each shaded half of a half-cell substring carries the shaded current.
+                let c = 1.0 - f64::from(n % 3) * (1.0 - r) / 2.0;
+                parallel::Block {
+                    count,
+                    point: substring(&groups[k], gh.voltage_factor, p_full, c),
+                }
+            })
+            .collect()
+    };
+    let mut any = false;
+    let mut pmax_of_group: Vec<Option<f64>> = vec![None; groups.len()];
+    let (mut p_ref, mut p_clear, mut p_linear) = (0.0, 0.0, 0.0);
+    let mut shaded_strings: Vec<Vec<parallel::Block>> = Vec::with_capacity(t.modules.len());
+    let mut clear_strings: Vec<Vec<parallel::Block>> = Vec::with_capacity(t.modules.len());
+    for s in &t.modules {
+        let mut counts: Vec<((usize, u32), f64)> = Vec::new();
+        let mut clear: Vec<((usize, u32), f64)> = Vec::new();
+        for &(k, array, i) in s {
+            let gh = hour[k];
+            let lit = gh.p_sun_w > gh.p_shade_w;
+            let (p_full, r, mask) = if lit {
+                let mask = shade.module_masks(array, bin).get(i).copied().unwrap_or(0);
+                (gh.p_sun_w, gh.p_shade_w / gh.p_sun_w, mask)
+            } else {
+                (gh.p_module_w, 1.0, 0)
+            };
+            if p_full <= 0.0 {
+                continue;
+            }
+            any |= mask != 0;
+            let shaded = f64::from(mask.count_ones()) / shade::POINTS as f64;
+            let linear = 1.0 - shaded * (1.0 - r);
+            p_linear += p_full * linear;
+            let g = &groups[k];
+            let pmax = *pmax_of_group[k].get_or_insert_with(|| {
+                parallel::block_pmax(&substring(g, gh.voltage_factor, p_full, 1.0)) / p_full
+            });
+            p_ref += SUBSTRINGS * pmax * p_full * linear;
+            p_clear += SUBSTRINGS * pmax * p_full;
+            let base = if lit { 0 } else { 3 };
+            for strip in 0..shade::STRIPS {
+                let (a, b) = halves(mask, strip);
+                count(&mut counts, (k, u32::from(a) + u32::from(b) + base));
+                count(&mut clear, (k, base));
+            }
+        }
+        shaded_strings.push(blocks(&counts));
+        clear_strings.push(blocks(&clear));
+    }
+    if !any || p_ref <= 0.0 {
+        return None;
+    }
+    // The electrical effect of the shade alone: the tracker's power with the shade over its
+    // power without, against the linear expectation. (Strings mixing orientations lose as
+    // much in both and are not counted, as in PV*SOL; unequal strings in parallel are
+    // counted apart.)
+    let clear = parallel::tracker_power(&clear_strings);
+    if clear <= 0.0 {
+        return None;
+    }
+    let ratio = parallel::tracker_power(&shaded_strings) / clear / (p_ref / p_clear);
+    Some((1.0 - ratio).clamp(0.0, 1.0) * p_linear)
+}
+
+/// One bypass-diode substring of a module of group `g` that gives `p_module_w` in full light,
+/// carrying the share `c` of its light.
+fn substring(g: &Group, voltage_factor: f64, p_module_w: f64, c: f64) -> parallel::StringPoint {
+    const SUBSTRINGS: f64 = shade::STRIPS as f64;
+    let vmpp = g.vmpp_v * voltage_factor;
+    let impp = c * p_module_w / vmpp;
+    parallel::StringPoint {
+        vmpp_v: vmpp / SUBSTRINGS,
+        impp_a: impp,
+        voc_v: g.voc_v * voltage_factor / SUBSTRINGS,
+        isc_a: impp * g.isc_per_impp,
+    }
 }
 
 struct Inverter {
@@ -273,38 +405,46 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
         return Err(NotSimulated::NoModules);
     }
 
-    // Trackers with several strings: each string as module counts per group.
-    let mut by_tracker: HashMap<(InverterId, u32), Vec<StringGroups>> = HashMap::new();
-    let mut order: Vec<(InverterId, u32)> = Vec::new();
+    let mut shade = shade::ShadeModel::new(project);
+
+    // Trackers: each string as module counts per group and as modules.
+    let mut trackers: Vec<Tracker> = Vec::new();
+    let mut tracker_of: HashMap<(InverterId, u32), usize> = HashMap::new();
     for s in &project.wiring.strings {
         if !inverters.contains_key(&s.inverter) {
             continue;
         }
-        let mut counts: Vec<(usize, f64)> = Vec::new();
-        for k in s.modules.iter().filter_map(|m| group_of.get(m)) {
-            match counts.iter_mut().find(|c| c.0 == *k) {
+        let mut counts: StringGroups = Vec::new();
+        let mut modules: StringModules = Vec::new();
+        for m in &s.modules {
+            let (Some(&k), Some(i)) = (group_of.get(m), shade.module_index(*m)) else {
+                continue;
+            };
+            modules.push((k, m.array, i));
+            match counts.iter_mut().find(|c| c.0 == k) {
                 Some(c) => c.1 += 1.0,
-                None => counts.push((*k, 1.0)),
+                None => counts.push((k, 1.0)),
             }
         }
-        if !counts.is_empty() {
-            let key = (s.inverter, s.tracker);
-            if !by_tracker.contains_key(&key) {
-                order.push(key);
-            }
-            by_tracker.entry(key).or_default().push(counts);
+        if counts.is_empty() {
+            continue;
         }
+        // (In wiring order, so that the sums do not depend on a map's order.)
+        let t = *tracker_of
+            .entry((s.inverter, s.tracker))
+            .or_insert_with(|| {
+                trackers.push(Tracker {
+                    inverter: s.inverter,
+                    counts: Vec::new(),
+                    modules: Vec::new(),
+                });
+                trackers.len() - 1
+            });
+        trackers[t].counts.push(counts);
+        trackers[t].modules.push(modules);
     }
-    // (In wiring order, so that the sums do not depend on the map's order.)
-    let trackers: Vec<(InverterId, Vec<StringGroups>)> = order
-        .into_iter()
-        .filter_map(|key| by_tracker.remove(&key).map(|strings| (key.0, strings)))
-        .filter(|(_, strings)| strings.len() > 1)
-        .collect();
     let mut hour_of_group = vec![GroupHour::default(); groups.len()];
     let mut points: Vec<parallel::StringPoint> = Vec::new();
-
-    let mut shade = shade::ShadeModel::new(project);
     let mut b = EnergyBalance::default();
     let mut monthly = vec![0.0; 12];
     let mut ghi_sum = 0.0;
@@ -360,10 +500,6 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             };
             let h_iso = iso * shade.horizon_view(g.array);
             let after_horizon = p_stc * (h_beam + h_circ + h_iso + poa.ground) / 1000.0;
-            let beam = h_beam * (1.0 - s_beam);
-            // (The circumsolar part keeps the diffuse incidence modifier, as calibrated.)
-            let sky = h_circ * (1.0 - s_beam) + h_iso * d_view;
-            let after_shading = p_stc * (beam + sky + poa.ground) / 1000.0;
             // Incidence angle modifier.
             let theta = incidence_deg(&sun, g.tilt_deg, g.azimuth_deg).to_radians();
             let iam_beam = if theta.cos() > 0.05 {
@@ -371,22 +507,52 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             } else {
                 0.0
             };
-            let geff = beam * iam_beam + (sky + poa.ground) * a.iam_diffuse;
-            let after_iam = p_stc * geff / 1000.0;
-            let g_soiled = geff * (1.0 - a.soiling_loss);
-            let after_soiling = p_stc * g_soiled / 1000.0;
-            let low_light = if g_soiled > 1.0 {
-                (1.0 + a.low_light_a * (g_soiled / 1000.0).ln()).max(0.0)
-            } else {
-                0.0
-            };
-            let after_low_light = after_soiling * low_light;
             let t_cell = temp + gpoa * 0.9 * (1.0 - 0.2) / g.u;
-            let after_temp = after_low_light * (1.0 + g.gamma * (t_cell - 25.0)).max(0.0);
-            let after_mismatch = after_temp * (1.0 - a.mismatch_loss);
+            // The chain from the shading on, for a share `lit` of the beam and circumsolar.
+            let chain = |lit: f64| {
+                let beam = h_beam * lit;
+                // (The circumsolar part keeps the diffuse incidence modifier, as calibrated.)
+                let sky = h_circ * lit + h_iso * d_view;
+                let after_shading = p_stc * (beam + sky + poa.ground) / 1000.0;
+                let geff = beam * iam_beam + (sky + poa.ground) * a.iam_diffuse;
+                let after_iam = p_stc * geff / 1000.0;
+                let g_soiled = geff * (1.0 - a.soiling_loss);
+                let after_soiling = p_stc * g_soiled / 1000.0;
+                let low_light = if g_soiled > 1.0 {
+                    (1.0 + a.low_light_a * (g_soiled / 1000.0).ln()).max(0.0)
+                } else {
+                    0.0
+                };
+                let after_low_light = after_soiling * low_light;
+                let after_temp = after_low_light * (1.0 + g.gamma * (t_cell - 25.0)).max(0.0);
+                let after_mismatch = after_temp * (1.0 - a.mismatch_loss);
+                [
+                    after_shading,
+                    after_iam,
+                    after_soiling,
+                    after_low_light,
+                    after_temp,
+                    after_mismatch,
+                    g_soiled,
+                ]
+            };
+            let [after_shading, after_iam, after_soiling, after_low_light, after_temp, after_mismatch, g_soiled] =
+                chain(1.0 - s_beam);
+            let sun_lit = h_beam + h_circ > 0.0 && s_beam > 0.0;
             hour_of_group[k] = GroupHour {
                 p_module_w: after_mismatch / g.modules,
                 voltage_factor: voltage_factor(g_soiled, t_cell, g.beta_voc),
+                // A module in full sun / in the shade (for the partial shading).
+                p_sun_w: if sun_lit {
+                    chain(1.0)[5] / g.modules
+                } else {
+                    0.0
+                },
+                p_shade_w: if sun_lit {
+                    chain(0.0)[5] / g.modules
+                } else {
+                    0.0
+                },
             };
             b.nominal_kwh += nominal;
             b.horizon_kwh += nominal - after_horizon;
@@ -398,11 +564,23 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             b.mismatch_kwh += after_temp - after_mismatch;
             *dc_by_inverter.entry(g.inverter).or_default() += after_mismatch;
         }
-        // Unequal strings in parallel: each tracker at its best common voltage.
-        for (inv, strings) in &trackers {
+        // Electrical mismatch on each tracker: partial shading inside its strings, unequal
+        // strings in parallel.
+        let elevation = 90.0 - sun.zenith_deg;
+        let bin = (elevation > 0.0).then(|| shade::bin_of(sun.azimuth_deg, elevation));
+        for t in &trackers {
+            let shaded = bin
+                .and_then(|bin| partial_shading_loss(t, bin, &groups, &hour_of_group, &mut shade));
+            if let Some(lost) = shaded.filter(|l| *l > 0.0) {
+                b.wiring_mismatch_kwh += lost;
+                *dc_by_inverter.entry(Some(t.inverter)).or_default() -= lost;
+            }
+            if t.counts.len() < 2 {
+                continue;
+            }
             points.clear();
             let mut power = 0.0;
-            for s in strings {
+            for s in &t.counts {
                 let (mut p, mut vmpp, mut voc, mut isc_per_impp) = (0.0, 0.0, 0.0, 0.0);
                 for &(k, n) in s {
                     let (g, gh) = (&groups[k], hour_of_group[k]);
@@ -425,7 +603,7 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
             let lost = power * parallel::loss_fraction(&points);
             if lost > 0.0 {
                 b.wiring_mismatch_kwh += lost;
-                *dc_by_inverter.entry(Some(*inv)).or_default() -= lost;
+                *dc_by_inverter.entry(Some(t.inverter)).or_default() -= lost;
             }
         }
         let month = month_of(h);
