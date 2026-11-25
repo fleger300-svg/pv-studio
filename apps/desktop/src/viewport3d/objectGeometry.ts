@@ -9,6 +9,7 @@ const KIND_COLORS: Record<ShadingObjectKind, Color> = {
   wall: new Color('#a8a196'),
   tree: new Color('#6b4f3a'), // trunk; crowns have their own material
   polygon: new Color('#9a8fb0'),
+  dormer: new Color('#b07a66'),
 };
 
 /** A tree's crown: partly transparent, drawn as the spheroid the shading uses. */

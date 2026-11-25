@@ -621,11 +621,14 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
         let mut site = project.site.clone();
         let before = site.objects.len();
         site.objects.retain(|o| {
-            // (A tree's crown may well hang over modules.)
-            o.height_m <= 0.0 || !o.opacity_by_month.is_empty() || {
-                let outline: Vec<[f64; 2]> = o.outline.iter().map(|p| [p[0], p[1]]).collect();
-                !centres.iter().any(|&c| point_in_polygon(&outline, c))
-            }
+            // (A tree's crown may well hang over modules; a drawn polygon is kept as drawn,
+            // but not a dormer's roof face.)
+            (o.height_m <= 0.0 && o.kind != ShadingObjectKind::Dormer)
+                || !o.opacity_by_month.is_empty()
+                || {
+                    let outline: Vec<[f64; 2]> = o.outline.iter().map(|p| [p[0], p[1]]).collect();
+                    !centres.iter().any(|&c| point_in_polygon(&outline, c))
+                }
         });
         if site.objects.len() != before {
             Command::SetSite {
@@ -722,6 +725,7 @@ fn shading_objects(scene: &crate::geometry::Scene) -> Vec<ShadingObject> {
             2 | 15 | 16 | 18 | 67 => ShadingObjectKind::Building,
             70 | 71 => ShadingObjectKind::Wall,
             23 | 24 => ShadingObjectKind::Tree,
+            40 | 42 | 43 => ShadingObjectKind::Dormer,
             82 => ShadingObjectKind::Polygon,
             _ if o.on_object > 0 => ShadingObjectKind::RoofFixture,
             _ => ShadingObjectKind::Building,
@@ -745,6 +749,26 @@ fn shading_objects(scene: &crate::geometry::Scene) -> Vec<ShadingObject> {
                 height_m: 0.0,
                 opacity_by_month: Vec::new(),
             }),
+            SceneShape::Dormer { storey, roof } => {
+                if let Some((outline, base_m, height_m)) = storey {
+                    out.push(ShadingObject {
+                        name: o.name.clone(),
+                        kind,
+                        outline: outline.iter().map(|p| [p[0], p[1], *base_m]).collect(),
+                        height_m: *height_m,
+                        opacity_by_month: Vec::new(),
+                    });
+                }
+                for face in roof {
+                    out.push(ShadingObject {
+                        name: o.name.clone(),
+                        kind,
+                        outline: face.clone(),
+                        height_m: 0.0,
+                        opacity_by_month: Vec::new(),
+                    });
+                }
+            }
             SceneShape::Tree {
                 centre,
                 base_m,

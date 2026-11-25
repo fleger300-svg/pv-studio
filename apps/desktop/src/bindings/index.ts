@@ -2917,7 +2917,9 @@ export type ShadingObjectKind = "building" |
 /**  Party wall, parapet, free-standing wall. */
 "wall" | "tree" | 
 /**  A flat polygon drawn in 3-D. */
-"polygon";
+"polygon" | 
+/**  A dormer on a roof: its storey (a solid) and its roof faces (polygons). */
+"dormer";
 
 /**
  *  An object around or on the buildings that casts shadows: a neighbouring building, a

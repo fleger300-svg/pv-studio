@@ -29,8 +29,16 @@
 //! from its `Position`), trees (`Baum`: trunk, crown, crown shading by month) and flat
 //! 3-D polygons (`Polygon3D`: corners in the plane of the object, `PosAufBezugsFL` being
 //! `Position`); any other object with a `ZweifacheSkalierung` is a box `BreiteR × TiefeR ×
-//! Hoehe` from its corner (chimneys, vent pipes, party walls). Dormers and saw-tooth roofs
-//! are not decoded yet.
+//! Hoehe` from its corner (chimneys, vent pipes, party walls). Saw-tooth roofs are not
+//! decoded yet.
+//!
+//! **Dormers** (`Gaube`, types 40 shed, 42 triangular, 43 gable) stand on a roof face and
+//! have two parts in the object's frame: a storey (type 91, a box `BreiteR × TiefeR × Hoehe`
+//! of `Ebene2` from its corner, its front wall at the corner, its depth going into the main
+//! roof) and a roof (type 92) joining the rectangle `Ebene1` (`BreiteR × TiefeR`, at the top
+//! of the storey) to the rectangle of `Ebene2`, `Hoehe` higher, offset by `BreiteL`/`TiefeL`,
+//! `BreiteR × TiefeR` in size (a ridge is a rectangle of no width; it may reach back past the
+//! storey, into the main roof).
 
 use crate::guid;
 use crate::xml::Node;
@@ -151,6 +159,12 @@ pub enum SceneShape {
         /// Share of the light the crown stops, January to December.
         opacity_by_month: Vec<f64>,
     },
+    /// A dormer: its storey (an outline extruded upwards, absent when it has no height) and
+    /// its roof's faces (flat polygons).
+    Dormer {
+        storey: Option<(Vec<[f64; 2]>, f64, f64)>,
+        roof: Vec<Vec<Enu>>,
+    },
 }
 
 /// A shading object of the scene: a tree, a free building, a chimney, a wall, a polygon.
@@ -215,9 +229,12 @@ const NON_PHYSICAL: [u32; 10] = [0, 4, 37, 47, 48, 65, 79, 87, 97, 100];
 /// the other corners may lie lower on a pitched roof [m].
 const INTO_ROOF_M: f64 = 3.0;
 
+/// ENU directions of an object's local `+X` and `+Z`.
+type Axes = ([f64; 2], [f64; 2]);
+
 /// The horizontal frame of an object rotated by `azimuth_deg`: ENU directions of PV*SOL's
 /// local `+X` (west) and `+Z` (south).
-fn local_axes(azimuth_deg: f64) -> ([f64; 2], [f64; 2]) {
+fn local_axes(azimuth_deg: f64) -> Axes {
     let az = azimuth_deg.to_radians();
     ([-az.cos(), az.sin()], [-az.sin(), -az.cos()])
 }
@@ -310,6 +327,131 @@ fn shape_of(o: &Node, on_object: i32) -> Option<SceneShape> {
         base_m: pos[2] - sink,
         height_m: height + sink,
     })
+}
+
+/// Storeys shallower or lower than this are left out (a triangular dormer has a token
+/// storey) [m].
+const MIN_STOREY_M: f64 = 0.05;
+/// Corners closer than this are merged (a ridge is a rectangle of ~1 mm width) [m].
+const MERGE_M: f64 = 0.005;
+
+/// A dormer (`Gaube`): its storey and its roof faces, ENU.
+fn dormer(o: &Node) -> Option<SceneShape> {
+    let parts: Vec<&Node> = o
+        .at("SpezifDaten/Gaube")?
+        .children("TeilKoerper")
+        .filter_map(|p| p.child("StandardDaten"))
+        .collect();
+    let part = |k: f64| {
+        parts
+            .iter()
+            .copied()
+            .find(|s| s.f64_at("AnwObjTyp").is_some_and(|x| (x - k).abs() < 0.5))
+    };
+    // A part's corner (ENU) and horizontal frame.
+    let frame = |s: &Node| -> Option<([f64; 2], f64, Axes)> {
+        let p = to_enu(s.child("Position")?)?;
+        let az = s.f64_at("Rotation/AzimutWinkel").unwrap_or(0.0);
+        Some(([p[0], p[1]], p[2], local_axes(az)))
+    };
+    let storey = part(91.0).and_then(|s| {
+        let (p0, base, axes) = frame(s)?;
+        let b = s.f64_at("ZweifacheSkalierung/Ebene2/BreiteR")?;
+        let t = s.f64_at("ZweifacheSkalierung/Ebene2/TiefeR")?;
+        let h = s.f64_at("ZweifacheSkalierung/Ebene2/Hoehe")?;
+        (b >= MIN_STOREY_M && t >= MIN_STOREY_M && h >= MIN_STOREY_M).then(|| {
+            let mut outline = vec![
+                p0,
+                local_point(p0, axes, b, 0.0),
+                local_point(p0, axes, b, t),
+                local_point(p0, axes, 0.0, t),
+            ];
+            if signed_area(&outline) < 0.0 {
+                outline.reverse();
+            }
+            (outline, base, h)
+        })
+    });
+    let roof = part(92.0)
+        .and_then(|r| {
+            let (q0, eave, axes) = frame(r)?;
+            let s = r.child("ZweifacheSkalierung")?;
+            let (b, t) = (s.f64_at("Ebene1/BreiteR")?, s.f64_at("Ebene1/TiefeR")?);
+            let e2 = |k: &str| s.f64_at(&format!("Ebene2/{k}"));
+            let (l, tl, w, d, h) = (
+                e2("BreiteL")?,
+                e2("TiefeL")?,
+                e2("BreiteR")?,
+                e2("TiefeR")?,
+                e2("Hoehe")?,
+            );
+            if !(b > 0.0 && t >= 0.0 && h > 0.0 && w >= 0.0 && d >= 0.0) {
+                return None;
+            }
+            let at = |x: f64, z: f64, up: f64| -> Enu {
+                let p = local_point(q0, axes, x, z);
+                [p[0], p[1], eave + up]
+            };
+            let lo = [
+                at(0.0, 0.0, 0.0),
+                at(b, 0.0, 0.0),
+                at(b, t, 0.0),
+                at(0.0, t, 0.0),
+            ];
+            let hi = [
+                at(l, tl, h),
+                at(l + w, tl, h),
+                at(l + w, tl + d, h),
+                at(l, tl + d, h),
+            ];
+            // The four sides, each joining an edge of the base to the matching edge of the
+            // top (planar: the two edges are parallel), and the top.
+            let mut faces: Vec<Vec<Enu>> = (0..4)
+                .map(|i| {
+                    let j = (i + 1) % 4;
+                    vec![lo[i], lo[j], hi[j], hi[i]]
+                })
+                .collect();
+            faces.push(hi.to_vec());
+            Some(faces.into_iter().filter_map(clean_face).collect::<Vec<_>>())
+        })
+        .unwrap_or_default();
+    (storey.is_some() || !roof.is_empty()).then_some(SceneShape::Dormer { storey, roof })
+}
+
+/// Twice the signed area of a horizontal outline (positive counter-clockwise).
+fn signed_area(outline: &[[f64; 2]]) -> f64 {
+    (0..outline.len())
+        .map(|i| {
+            let (a, c) = (outline[i], outline[(i + 1) % outline.len()]);
+            a[0] * c[1] - c[0] * a[1]
+        })
+        .sum()
+}
+
+/// A face without its merged corners, or `None` when it has no area left.
+fn clean_face(face: Vec<Enu>) -> Option<Vec<Enu>> {
+    let near = |a: &Enu, b: &Enu| (a[0] - b[0]).hypot(a[1] - b[1]).hypot(a[2] - b[2]) < MERGE_M;
+    let mut out: Vec<Enu> = Vec::with_capacity(face.len());
+    for p in face {
+        if out.last().is_none_or(|q| !near(q, &p)) {
+            out.push(p);
+        }
+    }
+    while out.len() > 1 && near(&out[0], &out[out.len() - 1]) {
+        out.pop();
+    }
+    // Area by Newell's normal.
+    let n = out.len();
+    let mut nrm = [0.0; 3];
+    for i in 0..n {
+        let (a, b) = (out[i], out[(i + 1) % n]);
+        nrm[0] += (a[1] - b[1]) * (a[2] + b[2]);
+        nrm[1] += (a[2] - b[2]) * (a[0] + b[0]);
+        nrm[2] += (a[0] - b[0]) * (a[1] + b[1]);
+    }
+    let area = 0.5 * (nrm[0] * nrm[0] + nrm[1] * nrm[1] + nrm[2] * nrm[2]).sqrt();
+    (n >= 3 && area > MERGE_M * MERGE_M).then_some(out)
 }
 
 fn kind(o: &Node) -> u32 {
@@ -505,8 +647,18 @@ pub fn parse(doc: &Node) -> Result<Scene, ReadError> {
                 }
                 None => scene.others.push(OtherObject { kind: k, name }),
             },
-            // Dormers, saw-tooth roofs and free 3-D objects: not decoded yet.
-            1 | 40 | 42 | 43 | 77 => scene.others.push(OtherObject { kind: k, name }),
+            40 | 42 | 43 => match dormer(o) {
+                Some(shape) => scene.objects.push(SceneObject {
+                    kind: k,
+                    name,
+                    reference_index: is_reference.then_some(reference_index),
+                    on_object: face_key(o).object,
+                    shape,
+                }),
+                None => scene.others.push(OtherObject { kind: k, name }),
+            },
+            // Saw-tooth roofs and free 3-D objects: not decoded yet.
+            1 | 77 => scene.others.push(OtherObject { kind: k, name }),
             65 => {
                 let sd = o.child("StandardDaten");
                 scene.map = sd.and_then(|sd| {
@@ -657,4 +809,70 @@ pub fn mounting_systems(doc: &Node) -> Vec<MountingSystem> {
             })
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn part(kind: u32, y: f64, e1: (f64, f64), e2: [f64; 5]) -> String {
+        let [bl, tl, br, tr, h] = e2;
+        format!(
+            "<TeilKoerper><StandardDaten><Position><X>0</X><Y>{y}</Y><Z>0</Z></Position>\
+             <Rotation><AzimutWinkel>180</AzimutWinkel></Rotation><AnwObjTyp>{kind}</AnwObjTyp>\
+             <ZweifacheSkalierung><Ebene1><BreiteR>{}</BreiteR><TiefeR>{}</TiefeR></Ebene1>\
+             <Ebene2><BreiteL>{bl}</BreiteL><TiefeL>{tl}</TiefeL><Hoehe>{h}</Hoehe>\
+             <BreiteR>{br}</BreiteR><TiefeR>{tr}</TiefeR></Ebene2></ZweifacheSkalierung>\
+             </StandardDaten></TeilKoerper>",
+            e1.0, e1.1
+        )
+    }
+
+    #[test]
+    fn decodes_a_gable_dormer() {
+        // Facing south (azimuth 180°: width to the east, depth to the north), 3 m wide,
+        // 2.5 m deep, 2 m high from 10 m; a 1 m high roof whose ridge runs 4 m back.
+        let xml = format!(
+            "<ZeichenObjekt><SpezifDaten><Gaube>{}{}</Gaube></SpezifDaten></ZeichenObjekt>",
+            part(91, 10.0, (3.0, 0.0), [0.0, 0.0, 3.0, 2.5, 2.0]),
+            part(92, 12.0, (3.0, 2.5), [1.5, 0.0, 0.001, 4.0, 1.0]),
+        );
+        let doc = crate::xml::parse("t.xml", xml.as_bytes()).unwrap();
+        let Some(SceneShape::Dormer { storey, roof }) = dormer(&doc) else {
+            panic!("not a dormer");
+        };
+        let (outline, base, height) = storey.unwrap();
+        assert!((base - 10.0).abs() < 1e-9 && (height - 2.0).abs() < 1e-9);
+        let (min, max) = outline
+            .iter()
+            .fold(([f64::MAX; 2], [f64::MIN; 2]), |(lo, hi), p| {
+                (
+                    [lo[0].min(p[0]), lo[1].min(p[1])],
+                    [hi[0].max(p[0]), hi[1].max(p[1])],
+                )
+            });
+        assert!(min[0].abs() < 1e-9 && min[1].abs() < 1e-9);
+        assert!((max[0] - 3.0).abs() < 1e-9 && (max[1] - 2.5).abs() < 1e-9);
+        assert!(signed_area(&outline) > 0.0);
+        // Gable triangle at the front, two roof slopes, a triangle at the back (the ridge's
+        // ends merged, its sliver top dropped).
+        let sizes: Vec<usize> = roof.iter().map(Vec::len).collect();
+        assert_eq!(sizes, [3, 4, 3, 4]);
+        let front = &roof[0];
+        assert!(front.iter().all(|p| p[1].abs() < 1e-9));
+        let top = front.iter().map(|p| p[2]).fold(f64::MIN, f64::max);
+        assert!((top - 13.0).abs() < 1e-9);
+        let back = roof.iter().flatten().map(|p| p[1]).fold(f64::MIN, f64::max);
+        assert!((back - 4.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_dormer_without_parts_is_not_decoded() {
+        let doc = crate::xml::parse(
+            "t.xml",
+            b"<ZeichenObjekt><SpezifDaten><Gaube/></SpezifDaten></ZeichenObjekt>",
+        )
+        .unwrap();
+        assert!(dormer(&doc).is_none());
+    }
 }

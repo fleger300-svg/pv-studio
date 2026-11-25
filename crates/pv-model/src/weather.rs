@@ -188,6 +188,8 @@ pub enum ShadingObjectKind {
     Tree,
     /// A flat polygon drawn in 3-D.
     Polygon,
+    /// A dormer on a roof: its storey (a solid) and its roof faces (polygons).
+    Dormer,
 }
 
 /// An object around or on the buildings that casts shadows: a neighbouring building, a
