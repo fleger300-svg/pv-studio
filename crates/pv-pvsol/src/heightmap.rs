@@ -76,6 +76,14 @@ const BUILDING_ABOVE_GROUND_M: f64 = 2.5;
 const OWN_SEARCH_RADIUS_M: f64 = 80.0;
 /// Width of the ring around the cut-out where the ground level is read [m].
 const GROUND_RING_M: f64 = 5.0;
+/// The survey under the modules standing higher above them than this means the map's base is
+/// not the scene's zero [m].
+const MAX_ROOF_GAP_M: f64 = 2.0;
+/// How far around the footprints of the project's buildings the survey's building is still
+/// theirs [m].
+const FOOTPRINT_GROWTH_M: f64 = 6.0;
+/// Faces steeper than this are facades: the survey under their modules is not their roof.
+const FACADE_TILT_DEG: f64 = 60.0;
 
 /// Chamfer distance (in cells, 3-4 weights / 3) from every cell to the nearest `true` cell.
 fn distance(mask: &[bool], cols: usize, rows: usize) -> Vec<f32> {
@@ -136,12 +144,19 @@ fn percentile(mut v: Vec<f64>, p: f64) -> Option<f64> {
 
 /// The height map as the project's surroundings, in the scene frame.
 ///
-/// - **Own building cut out**, as PV*SOL does (`GelaendeModell/DoCutOuts`, `AddDist`): from
-///   the cells under the modules, every connected cell higher than the local ground by
-///   [`BUILDING_ABOVE_GROUND_M`] is the project's building (whatever the survey shows there:
-///   its roof, or what stood before), removed with `margin_m` around it.
-/// - **Vertically**, the ground read around the cut-out (10th percentile of a
-///   [`GROUND_RING_M`] ring) is the foot of the building, `scene_ground_m` in the scene.
+/// - **Own building cut out**, as PV*SOL does (`GelaendeModell/DoCutOuts`, `AddDist`): the
+///   cells under the `footprints` of the buildings carrying the modules, and the cells
+///   connected to the modules higher than the local ground by [`BUILDING_ABOVE_GROUND_M`]
+///   (whatever the survey shows there: its roof, or what stood before) within
+///   [`FOOTPRINT_GROWTH_M`] of the footprints, removed with `margin_m` around them. Without
+///   footprints, all the connected cells (a tree touching the building goes with it).
+/// - **Vertically**, the scene's zero is the map's base (its lowest point; checked on the
+///   corpus: the survey's roofs then stand at the modules' height), unless the survey under
+///   the modules then stands more than [`MAX_ROOF_GAP_M`] above them; the ground read around
+///   the cut-out (10th percentile of a [`GROUND_RING_M`] ring) is then the foot of the
+///   building, `scene_ground_m` in the scene.
+///
+/// `modules`: centres `[east, north, up]` and the tilt of their face [°].
 ///
 /// `None` when the map section is not the usual one (rotated by 180°), does not match the
 /// grid, or no module lies on it.
@@ -149,7 +164,8 @@ fn percentile(mut v: Vec<f64>, p: f64) -> Option<f64> {
 pub fn surroundings(
     h: &HeightMap,
     map: &MapSection,
-    modules: &[[f64; 3]],
+    modules: &[[f64; 4]],
+    footprints: &[Vec<[f64; 2]>],
     scene_ground_m: f64,
     margin_m: f64,
 ) -> Option<Surroundings> {
@@ -194,14 +210,39 @@ pub fn surroundings(
     }
     let ground = percentile(around, 0.05)?;
 
-    // The project's building: cells connected to the modules, above the ground.
+    // The project's buildings: under their footprints when known, else the cells connected
+    // to the modules, above the ground.
     let mut own = vec![false; cols * rows];
+    if !footprints.is_empty() {
+        for r in 0..rows {
+            for c in 0..cols {
+                let p = [
+                    west + (c as f64 + 0.5) * cell,
+                    north - (r as f64 + 0.5) * cell,
+                ];
+                if footprints
+                    .iter()
+                    .any(|f| crate::import::point_in_polygon(f, p))
+                {
+                    own[r * cols + c] = true;
+                }
+            }
+        }
+    }
+    // Plus the cells connected to the modules, above the ground: within
+    // [`FOOTPRINT_GROWTH_M`] of the footprints (the survey's building may be larger than the
+    // model: annexes, attached houses), anywhere when no footprint is known.
+    let grow = (FOOTPRINT_GROWTH_M / cell) as f32;
+    let fp_dist = (!footprints.is_empty()).then(|| distance(&own, cols, rows));
+    let allowed = |j: usize| fp_dist.as_ref().is_none_or(|d| d[j] <= grow);
+    let mut flood = vec![false; cols * rows];
     let mut stack = seeds;
     while let Some((r, c)) = stack.pop() {
         let i = r * cols + c;
-        if own[i] {
+        if flood[i] {
             continue;
         }
+        flood[i] = true;
         own[i] = true;
         for (dr, dc) in [
             (-1i64, 0i64),
@@ -219,7 +260,12 @@ pub fn surroundings(
             }
             let (nr, nc) = (nr as usize, nc as usize);
             let j = nr * cols + nc;
-            if !own[j] && near(nr, nc) && h.altitude(nr, nc) >= ground + BUILDING_ABOVE_GROUND_M {
+            let inside = fp_dist.as_ref().is_some_and(|d| d[j] <= 0.0);
+            if !flood[j]
+                && near(nr, nc)
+                && allowed(j)
+                && (inside || h.altitude(nr, nc) >= ground + BUILDING_ABOVE_GROUND_M)
+            {
                 stack.push((nr, nc));
             }
         }
@@ -231,7 +277,22 @@ pub fn surroundings(
         .filter(|&i| dist[i] > cut_cells && dist[i] <= ring_cells)
         .map(|i| h.altitude(i / cols, i % cols))
         .collect();
-    let zero = percentile(ring, 0.10)? - scene_ground_m;
+    // The scene's zero is the map's base, unless the survey under the (non-facade) modules
+    // then stands above them: the building is not placed on the survey's terrain; its foot
+    // is then the ground read around the cut-out.
+    let roof_gap = percentile(
+        modules
+            .iter()
+            .filter(|m| m[3] < FACADE_TILT_DEG)
+            .filter_map(|m| index(m[0], m[1]).map(|(r, c)| h.altitude(r, c) - h.base_m - m[2]))
+            .collect(),
+        0.5,
+    );
+    let zero = if roof_gap.is_some_and(|g| g > MAX_ROOF_GAP_M) {
+        percentile(ring, 0.10)? - scene_ground_m
+    } else {
+        h.base_m
+    };
 
     let k = (CELL_M / cell).round().max(1.0) as usize;
     let (out_cols, out_rows) = (cols.div_ceil(k), rows.div_ceil(k));
@@ -320,18 +381,27 @@ mod tests {
             depth_m: 10.0,
             rotation_deg: 180.0,
         };
-        // The building's foot is at z = −1 in the scene: the ground lies at z = −1.
-        let s = surroundings(&h, &map, &[[0.0, 0.0, 6.2]], -1.0, 1.0).unwrap();
+        // The module stands on the survey's roof (6 m): the scene's zero is the map's base.
+        let s = surroundings(&h, &map, &[[0.0, 0.0, 6.2, 30.0]], &[], -1.0, 1.0).unwrap();
         assert_eq!((s.cols, s.rows), (20, 20));
         let cell = |r: usize, c: usize| s.heights_cm[r * 20 + c];
         assert_eq!(cell(10, 10), Surroundings::CUT, "own building cut out");
         assert_eq!(cell(7, 10), Surroundings::CUT, "within the 1 m margin");
-        assert_eq!(
-            cell(0, 19),
-            900,
-            "neighbour kept, 10 m above a ground at z = −1"
-        );
+        assert_eq!(cell(0, 19), 1000, "neighbour kept, 10 m above the base");
+        assert_eq!(cell(19, 0), 0, "ground at the base");
+        // The module stands 4 m under the survey's roof: the building is not placed on the
+        // survey's terrain; its foot (z = −1 in the scene) is the ground around it.
+        let s = surroundings(&h, &map, &[[0.0, 0.0, 2.0, 30.0]], &[], -1.0, 1.0).unwrap();
+        let cell = |r: usize, c: usize| s.heights_cm[r * 20 + c];
+        assert_eq!(cell(0, 19), 900, "neighbour 10 m above a ground at z = −1");
         assert_eq!(cell(19, 0), -100, "ground");
-        assert!(surroundings(&h, &map, &[], 0.0, 1.0).is_none());
+        // With the building's footprint: the cut follows it (and the survey's building
+        // around it), the neighbour 3 m away stays.
+        let fp = vec![[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]];
+        let s = surroundings(&h, &map, &[[0.0, 0.0, 6.2, 30.0]], &[fp], -1.0, 1.0).unwrap();
+        let cell = |r: usize, c: usize| s.heights_cm[r * 20 + c];
+        assert_eq!(cell(10, 10), Surroundings::CUT, "footprint cut out");
+        assert_eq!(cell(0, 19), 1000, "neighbour kept");
+        assert!(surroundings(&h, &map, &[], &[], 0.0, 1.0).is_none());
     }
 }

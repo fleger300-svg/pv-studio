@@ -605,32 +605,50 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
     }
     Command::Batch { commands: all }.apply(&mut project)?;
 
-    // A solid standing over modules is the project's own building (a reference object the
-    // formations do not name directly), or a fixture PV*SOL lets the modules overlap: not a
-    // shading object.
+    // A building standing under modules (the project's own building, whose roof carries
+    // them) keeps its body up to below them; any other solid over modules is a fixture
+    // PV*SOL lets the modules overlap: not a shading object. (Facade modules lie on a wall,
+    // on the edge of the footprint: they stand over nothing.)
     if !project.site.objects.is_empty() {
-        let centres: Vec<[f64; 2]> = project
+        let centres: Vec<[f64; 3]> = project
             .modules
             .iter()
             .filter_map(|m| {
                 let (_, f) = project.module_context(m)?;
-                let w = f.uv_to_world(m.u, m.v);
-                Some([w[0], w[1]])
+                (f.tilt_deg < MAX_TILT_DEG).then(|| f.uv_to_world(m.u, m.v))
             })
             .collect();
         let mut site = project.site.clone();
-        let before = site.objects.len();
-        site.objects.retain(|o| {
+        let before = site.objects.clone();
+        site.objects.retain_mut(|o| {
             // (A tree's crown may well hang over modules; a drawn polygon is kept as drawn,
             // but not a dormer's roof face.)
-            (o.height_m <= 0.0 && o.kind != ShadingObjectKind::Dormer)
+            if (o.height_m <= 0.0 && o.kind != ShadingObjectKind::Dormer)
                 || !o.opacity_by_month.is_empty()
-                || {
-                    let outline: Vec<[f64; 2]> = o.outline.iter().map(|p| [p[0], p[1]]).collect();
-                    !centres.iter().any(|&c| point_in_polygon(&outline, c))
-                }
+            {
+                return true;
+            }
+            let outline: Vec<[f64; 2]> = o.outline.iter().map(|p| [p[0], p[1]]).collect();
+            let lowest = centres
+                .iter()
+                .filter(|c| point_in_polygon(&outline, [c[0], c[1]]))
+                .map(|c| c[2])
+                .fold(f64::INFINITY, f64::min);
+            if lowest.is_infinite() {
+                return true;
+            }
+            if o.kind != ShadingObjectKind::Building || o.height_m <= 0.0 {
+                return false;
+            }
+            let base = o.outline.iter().map(|p| p[2]).fold(f64::INFINITY, f64::min);
+            let height = (lowest - BELOW_MODULES_M - base).min(o.height_m);
+            if height < MIN_BODY_M {
+                return false;
+            }
+            o.height_m = height;
+            true
         });
-        if site.objects.len() != before {
+        if site.objects != before {
             Command::SetSite {
                 site: Box::new(site),
             }
@@ -648,15 +666,20 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
         file.height_map.as_ref(),
         file.scene.as_ref().and_then(|s| s.map.as_ref()),
     ) {
-        let centres: Vec<[f64; 3]> = project
+        // Module centres on their face, with the face's tilt.
+        let centres: Vec<[f64; 4]> = project
             .modules
             .iter()
             .filter_map(|m| {
                 let (_, f) = project.module_context(m)?;
-                Some(f.uv_to_world(m.u, m.v))
+                let w = f.uv_to_world(m.u, m.v);
+                Some([w[0], w[1], w[2], f.tilt_deg])
             })
             .collect();
-        // Foot of the building carrying the modules (parametric building), else the terrain.
+        // The bodies of the buildings carrying modules: their footprints are cut out of the
+        // survey; the foot of the first one's is the building's foot (else the terrain).
+        let bodies = file.scene.as_ref().map(carrying_bodies).unwrap_or_default();
+        let footprints: Vec<Vec<[f64; 2]>> = bodies.iter().map(|b| b.1.clone()).collect();
         let ground = file.scene.as_ref().and_then(|s| {
             let object = s
                 .formations
@@ -667,11 +690,13 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
                 .iter()
                 .find(|b| b.reference_index == object)
                 .map(|b| b.ground_m)
+                .or_else(|| bodies.iter().find(|b| b.0 == object).map(|b| b.2))
         });
         match crate::heightmap::surroundings(
             h,
             map,
             &centres,
+            &footprints,
             ground.unwrap_or(0.0),
             file.cut_margin_m,
         ) {
@@ -690,7 +715,7 @@ pub fn import(file: &PvsolFile, fallback_name: &str) -> Result<ImportOutcome, Co
 }
 
 /// Is `p` inside the polygon (even-odd rule)?
-fn point_in_polygon(poly: &[[f64; 2]], p: [f64; 2]) -> bool {
+pub(crate) fn point_in_polygon(poly: &[[f64; 2]], p: [f64; 2]) -> bool {
     let mut c = false;
     for i in 0..poly.len() {
         let (a, b) = (poly[i], poly[(i + 1) % poly.len()]);
@@ -703,11 +728,44 @@ fn point_in_polygon(poly: &[[f64; 2]], p: [f64; 2]) -> bool {
     c
 }
 
+/// The bodies of the scene's building objects that carry modules: reference index, footprint
+/// (ENU) and foot height.
+fn carrying_bodies(scene: &crate::geometry::Scene) -> Vec<(i32, Vec<[f64; 2]>, f64)> {
+    let carrying: std::collections::HashSet<i32> = scene
+        .formations
+        .iter()
+        .map(|f| f.face.object)
+        .chain(scene.row_formations.iter().map(|r| r.face.object))
+        .collect();
+    scene
+        .objects
+        .iter()
+        .filter(|o| matches!(o.kind, 2 | 15 | 16 | 18 | 67))
+        .filter_map(|o| {
+            let i = o.reference_index.filter(|i| carrying.contains(i))?;
+            match &o.shape {
+                crate::geometry::SceneShape::Prism {
+                    outline, base_m, ..
+                } => Some((i, outline.clone(), *base_m)),
+                _ => None,
+            }
+        })
+        .collect()
+}
+
 /// Sides of the regular polygon standing for a round outline (trees).
 const ROUND_SIDES: usize = 8;
 
-/// The scene's shading objects, except the reference objects that carry modules (the
-/// project's own buildings and surfaces, imported as buildings and roof faces).
+/// How far below the lowest module over it a building's body stops [m] (a module's centre
+/// stands up to ~0.5 m above the eave of its face).
+const BELOW_MODULES_M: f64 = 1.0;
+/// A building's body lower than this is left out [m].
+const MIN_BODY_M: f64 = 0.5;
+
+/// The scene's shading objects. Of the reference objects that carry modules, only the
+/// parametric buildings of type 15 are left out: they are imported as buildings with their
+/// walls; the others' bodies are kept (cut below their modules on import), since the
+/// buildings standing for them are mere boxes under their roof faces.
 fn shading_objects(scene: &crate::geometry::Scene) -> Vec<ShadingObject> {
     use crate::geometry::SceneShape;
     let carrying: std::collections::HashSet<i32> = scene
@@ -716,9 +774,15 @@ fn shading_objects(scene: &crate::geometry::Scene) -> Vec<ShadingObject> {
         .map(|f| f.face.object)
         .chain(scene.row_formations.iter().map(|r| r.face.object))
         .collect();
+    let modelled: std::collections::HashSet<i32> = scene
+        .buildings
+        .iter()
+        .map(|b| b.reference_index)
+        .filter(|i| carrying.contains(i))
+        .collect();
     let mut out = Vec::new();
     for o in &scene.objects {
-        if o.reference_index.is_some_and(|i| carrying.contains(&i)) {
+        if o.reference_index.is_some_and(|i| modelled.contains(&i)) {
             continue;
         }
         let kind = match o.kind {

@@ -1,6 +1,7 @@
 //! Near shading of PV Studio against PV*SOL's « 3-D module shading » over the completely
 //! imported corpus projects that hold a height map (PV*SOL weather, PV*SOL-like losses).
-//! Usage: `cargo run -p pv-pvsol --release --example pvsol_near_shading -- <dir>`.
+//! Usage: `cargo run -p pv-pvsol --release --example pvsol_near_shading -- <dir>` (`ROW=shading`
+//! for the total shading, `LIST=1` for every project).
 
 use std::path::{Path, PathBuf};
 
@@ -42,7 +43,8 @@ fn main() {
                                 return None;
                             }
                             let c = pv_pvsol::compare(&file, &p)?;
-                            let r = c.rows.iter().find(|r| r.key == "nearShading")?;
+                            let key = std::env::var("ROW").unwrap_or_else(|_| "nearShading".into());
+                            let r = c.rows.iter().find(|r| r.key == key)?;
                             Some((
                                 r.pvsol,
                                 r.pvstudio,
