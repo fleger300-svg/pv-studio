@@ -2454,6 +2454,11 @@ export type ProjectSummary_Deserialize = {
 	location?: GeoLocation | null,
 	/**  The weather year, without its hourly values. */
 	weather?: WeatherSummary | null,
+	/**
+	 *  Shading objects around the buildings (trees, neighbouring buildings, roof fixtures),
+	 *  for the 3-D view.
+	 */
+	objects: ShadingObject_Deserialize[],
 	canUndo: boolean,
 	canRedo: boolean,
 };
@@ -2478,6 +2483,11 @@ export type ProjectSummary_Serialize = {
 	location?: GeoLocation | null,
 	/**  The weather year, without its hourly values. */
 	weather?: WeatherSummary | null,
+	/**
+	 *  Shading objects around the buildings (trees, neighbouring buildings, roof fixtures),
+	 *  for the 3-D view.
+	 */
+	objects: ShadingObject_Serialize[],
 	canUndo: boolean,
 	canRedo: boolean,
 };

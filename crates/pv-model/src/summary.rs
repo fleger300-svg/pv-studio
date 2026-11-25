@@ -93,6 +93,9 @@ pub struct ProjectSummary {
     /// The weather year, without its hourly values.
     #[specta(optional)]
     pub weather: Option<WeatherSummary>,
+    /// Shading objects around the buildings (trees, neighbouring buildings, roof fixtures),
+    /// for the 3-D view.
+    pub objects: Vec<crate::weather::ShadingObject>,
     pub can_undo: bool,
     pub can_redo: bool,
 }
@@ -171,6 +174,7 @@ impl ProjectSummary {
                     / w.temp_c.len().max(1) as f64,
                 has_diffuse: !w.dhi_w_m2.is_empty(),
             }),
+            objects: project.site.objects.clone(),
             can_undo,
             can_redo,
         }

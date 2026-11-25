@@ -8,6 +8,7 @@ import type { ModuleData } from './moduleBuffer';
 import { Buildings } from './Buildings';
 import { sceneBounds } from './frames';
 import { PanelMeshes } from './PanelMeshes';
+import { ShadingObjects } from './ShadingObjects';
 import { GridIndex } from './gridIndex';
 import { Editor } from './editor';
 import { Interaction } from './Interaction';
@@ -181,6 +182,7 @@ function Scene({ summary, modules }: SceneProps) {
         <meshStandardMaterial color={ground} roughness={1} />
       </mesh>
       <Buildings summary={summary} />
+      <ShadingObjects objects={summary.objects} />
       <primitive object={panels.group} />
       <Interaction editor={editor} />
       <FrameProbe key={summary.projectId} />

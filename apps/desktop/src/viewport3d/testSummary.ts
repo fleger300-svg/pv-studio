@@ -75,6 +75,7 @@ export function flatRoofFixture(): { summary: ProjectSummary; data: ModuleData }
       },
     ],
     walls: [],
+    objects: [],
     canUndo: false,
     wiring: {
       inverters: [],
