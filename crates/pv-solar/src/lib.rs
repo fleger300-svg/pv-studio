@@ -15,6 +15,7 @@
 //! tilted module rows ([`shade`]) is booked first, on the plane-of-array irradiance, in
 //! proportion to the shaded area; its electrical effect comes with the mismatch.
 
+pub mod module_shading;
 pub mod parallel;
 pub mod shade;
 pub mod sun;
@@ -299,6 +300,44 @@ fn month_of(hour: usize) -> usize {
     11
 }
 
+/// Tilt, azimuth of the modules of `arr` and whether they stand on a flat roof; `None` when
+/// its roof face is missing.
+fn orientation(project: &Project, arr: &pv_model::PanelArray) -> Option<(f64, f64, bool)> {
+    let face = project
+        .roof_faces
+        .iter()
+        .find(|f| f.id == arr.roof_face_id)?;
+    let flat = face.tilt_deg.abs() < 1e-9;
+    let tilt = if flat {
+        arr.tilt_on_roof_deg
+    } else {
+        face.tilt_deg + arr.tilt_on_roof_deg
+    };
+    let azimuth = (face.azimuth_deg + arr.azimuth_offset_deg).rem_euclid(360.0);
+    Some((tilt, azimuth, flat))
+}
+
+/// Diffuse horizontal irradiance of hour `h` [W/m²]: measured, else split from `ghi` (Erbs).
+fn diffuse_horizontal(
+    w: &pv_model::WeatherYear,
+    h: usize,
+    ghi: f64,
+    sun: &sun::SunPosition,
+    e0: f64,
+) -> f64 {
+    if w.dhi_w_m2.is_empty() {
+        let cos_z = sun.zenith_deg.to_radians().cos();
+        let kt = if cos_z > 0.0174 {
+            (ghi / (e0 * cos_z)).clamp(0.0, 1.0)
+        } else {
+            1.0
+        };
+        ghi * erbs_diffuse_fraction(kt)
+    } else {
+        f64::from(w.dhi_w_m2[h]).min(ghi)
+    }
+}
+
 /// Simulates the project's AC yield over its weather year.
 ///
 /// # Errors
@@ -356,16 +395,9 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
         else {
             continue;
         };
-        let Some(face) = project.roof_faces.iter().find(|f| f.id == arr.roof_face_id) else {
+        let Some((tilt, azimuth, flat)) = orientation(project, arr) else {
             continue;
         };
-        let flat = face.tilt_deg.abs() < 1e-9;
-        let tilt = if flat {
-            arr.tilt_on_roof_deg
-        } else {
-            face.tilt_deg + arr.tilt_on_roof_deg
-        };
-        let azimuth = (face.azimuth_deg + arr.azimuth_offset_deg).rem_euclid(360.0);
         for m in project
             .modules
             .iter()
@@ -460,18 +492,8 @@ pub fn simulate(project: &Project, a: &SimulationAssumptions) -> Result<YieldRep
         }
         let day = (h / 24) as u32 + 1;
         let sun = position(lat, lon, day, (h % 24) as f64 + 0.5);
-        let cos_z = sun.zenith_deg.to_radians().cos();
         let e0 = extraterrestrial(day);
-        let dhi = if w.dhi_w_m2.is_empty() {
-            let kt = if cos_z > 0.0174 {
-                (ghi / (e0 * cos_z)).clamp(0.0, 1.0)
-            } else {
-                1.0
-            };
-            ghi * erbs_diffuse_fraction(kt)
-        } else {
-            f64::from(w.dhi_w_m2[h]).min(ghi)
-        };
+        let dhi = diffuse_horizontal(w, h, ghi, &sun, e0);
         let month = month_of(h);
         dc_by_inverter.clear();
         hour_of_group.fill(GroupHour::default());

@@ -81,6 +81,7 @@ function LayoutPanels() {
             options={[
               { value: 'default', label: t('display.colorModes.default') },
               { value: 'string', label: t('display.colorModes.string') },
+              { value: 'shading', label: t('display.colorModes.shading') },
             ]}
             onChange={setColorMode}
           />

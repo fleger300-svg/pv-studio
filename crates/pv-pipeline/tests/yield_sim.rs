@@ -367,3 +367,53 @@ fn a_far_horizon_costs_energy_and_the_balance_still_closes() {
     assert!((b.nominal_kwh - losses - r.ac_energy_kwh).abs() < 1e-6 * b.nominal_kwh);
     assert!(r.ac_energy_kwh < base.ac_energy_kwh);
 }
+
+#[test]
+fn the_shading_of_each_module_adds_up_to_the_balance() {
+    let mut p = located(ref_a_roof1());
+    add_chimney(&mut p);
+    p.site.horizon = Some(pv_model::Horizon {
+        source: "test".into(),
+        points: vec![[0.0, 10.0], [180.0, 10.0]],
+    });
+    let a = SimulationAssumptions::default();
+    let r = simulate(&p, &a).unwrap();
+    let map = pv_solar::module_shading::module_shading(&p, a.albedo).unwrap();
+    let active = p
+        .modules
+        .iter()
+        .filter(|m| m.state == pv_model::ModuleState::Active)
+        .count();
+    assert_eq!(map.modules.len(), active);
+    // One module type on one face: the irradiation-weighted means are the balance's shares.
+    let b = &r.balance;
+    assert!(
+        (map.near - b.shading_kwh / b.nominal_kwh).abs() < 1e-9,
+        "{map:?} {b:?}"
+    );
+    assert!((map.horizon - b.horizon_kwh / b.nominal_kwh).abs() < 1e-9);
+    // The chimney stands south of the middle of the lowest row: the most shaded module is
+    // in that row, close to the middle.
+    let worst = map
+        .modules
+        .iter()
+        .max_by(|x, y| x.near.total_cmp(&y.near))
+        .unwrap();
+    let least = map
+        .modules
+        .iter()
+        .map(|m| m.near)
+        .fold(f64::INFINITY, f64::min);
+    assert!(worst.near > least + 0.02, "{worst:?} vs {least}");
+    let m = &p.modules[worst.module_id.0 as usize];
+    let v0 = p.modules.iter().map(|m| m.v).fold(f64::INFINITY, f64::min);
+    assert!(
+        m.v - v0 < 1.5,
+        "the worst module is in the lowest row: {m:?}"
+    );
+    // The horizon is the same for every module of the face.
+    assert!(map
+        .modules
+        .iter()
+        .all(|x| (x.horizon - map.horizon).abs() < 1e-12));
+}

@@ -253,6 +253,57 @@ body,
   margin: 2px var(--space-xs);
   background: var(--color-border);
 }
+/* Shading colour mode: scale (bottom left) and the module under the pointer. */
+.shading-legend {
+  position: absolute;
+  left: var(--space-md);
+  bottom: var(--space-md);
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
+  font-size: 12px;
+}
+.shading-legend__title {
+  font-size: 13px;
+}
+.shading-legend__bar {
+  height: 10px;
+  border-radius: 3px;
+}
+.shading-legend__ticks {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.shading-legend__status {
+  margin: 0;
+}
+.shading-legend__note {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+.shading-tip {
+  position: absolute;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .box-select {
   position: absolute;
   pointer-events: none;

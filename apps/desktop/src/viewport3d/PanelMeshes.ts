@@ -14,7 +14,7 @@ import { FLAG_REMOVED, type ModuleData } from './moduleBuffer';
 import { coalesceRuns } from './ranges';
 import { createModuleGeometry, createPanelMaterial } from './panelMaterial';
 
-export type ColorMode = 'default' | 'string';
+export type ColorMode = 'default' | 'string' | 'shading';
 
 export const DEFAULT_CELL_COLOR = new Color('#1f3b73');
 export const SELECTED_COLOR = new Color(tokens.color.selection3d);

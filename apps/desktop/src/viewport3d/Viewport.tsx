@@ -3,7 +3,8 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Object3D, Vector3, type DirectionalLight } from 'three';
 import { tokens } from '@pv/ui';
-import type { ProjectSummary } from '../bindings';
+import { events, type ProjectSummary } from '../bindings';
+import { useShadingStore } from '../store/shading';
 import type { ModuleData } from './moduleBuffer';
 import { Buildings } from './Buildings';
 import { sceneBounds } from './frames';
@@ -32,6 +33,9 @@ const SUN_DIR = (() => {
   const el = (40 * Math.PI) / 180;
   return new Vector3(Math.sin(az) * Math.cos(el), Math.cos(az) * Math.cos(el), Math.sin(el));
 })();
+
+/** Delay after the last model change before the shading is computed again [ms]. */
+const SHADING_REFRESH_MS = 400;
 
 interface SceneProps {
   summary: ProjectSummary;
@@ -166,6 +170,41 @@ function Scene({ summary, modules }: SceneProps) {
   useEffect(() => {
     editor.setStrings(strings);
   }, [editor, strings]);
+
+  // Shading mode: computed on entry and again after every model change (debounced).
+  // Another project: the previous one's shading must not colour its modules.
+  useEffect(
+    () => () => {
+      useShadingStore.getState().clear();
+    },
+    [summary.projectId],
+  );
+  const shading = useShadingStore((s) => s.byModule);
+  useEffect(() => {
+    editor.setShading(shading);
+  }, [editor, shading]);
+  useEffect(() => {
+    if (colorMode !== 'shading') return;
+    const { refresh } = useShadingStore.getState();
+    void refresh();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let unlisten: (() => void) | undefined;
+    let live = true;
+    void events.modelChanged
+      .listen(() => {
+        clearTimeout(timer);
+        timer = setTimeout(() => void refresh(), SHADING_REFRESH_MS);
+      })
+      .then((u) => {
+        if (live) unlisten = u;
+        else u();
+      });
+    return () => {
+      live = false;
+      clearTimeout(timer);
+      unlisten?.();
+    };
+  }, [colorMode, summary]);
 
   return (
     <>

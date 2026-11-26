@@ -60,7 +60,8 @@
     "colorMode": "Farbmodus",
     "colorModes": {
       "default": "Standard",
-      "string": "Nach String"
+      "string": "Nach String",
+      "shading": "Nach Verschattung"
     },
     "exportDxf": "Plan exportieren (DXF)",
     "dxfSaved": "Plan gespeichert: {path}"
@@ -802,7 +803,8 @@
       "9": "O",
       "10": "N",
       "11": "D"
-    }
+    },
+    "showShading": "Verschattung pro Modul anzeigen"
   },
   "assistant": {
     "title": "Assistent",
@@ -886,5 +888,13 @@
       "horizonShading": "  davon Fernhorizont (Relief)",
       "nearShading": "  davon Nahverschattung"
     }
+  },
+  "shading": {
+    "title": "Jährliche Verschattung pro Modul",
+    "computing": "Verschattung wird berechnet…",
+    "mean": "Mittel: {total} (Horizont {horizon}, nah {near})",
+    "horizon": "Horizont: {value}",
+    "near": "Nahverschattung: {value}",
+    "note": "Anteil der jährlichen Einstrahlung jedes Moduls, der durch Verschattung verloren geht (ohne elektrische Wirkung von Dioden und Strings)."
   }
 }

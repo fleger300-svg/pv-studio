@@ -518,7 +518,8 @@ pub struct ShadeModel {
     receivers: HashMap<ArrayId, Receiver>,
     /// Shaded fraction and module masks per array and sun bin.
     beam: HashMap<(ArrayId, (u16, u16)), BeamShade>,
-    diffuse: HashMap<ArrayId, f64>,
+    /// Sky view factor per array and per module of the array.
+    diffuse: HashMap<ArrayId, (f64, Vec<f64>)>,
     /// Share of the light the trees' crowns stop, by month (mean over the crowns).
     crown_opacity: [f64; 12],
 }
@@ -851,40 +852,71 @@ impl ShadeModel {
             .copied()
     }
 
+    /// Shaded fraction of the beam on module `index` of `array` (see [`Self::module_index`])
+    /// for a sun in `bin` in `month`: its shaded sample points, those behind a crown counted
+    /// with the crown's opacity (as [`Self::beam_shade`] for the array).
+    pub fn module_beam_shade(
+        &mut self,
+        array: ArrayId,
+        bin: (u16, u16),
+        month: usize,
+        index: usize,
+    ) -> f64 {
+        let opacity = self.crown_opacity[month % 12];
+        let e = self.beam_entry(array, bin);
+        let opaque = e.opaque_masks.get(index).map_or(0, |m| m.count_ones());
+        let crown = e.crown_masks.get(index).map_or(0, |m| m.count_ones());
+        (f64::from(opaque) + f64::from(crown) * opacity) / POINTS as f64
+    }
+
     /// Sky view factor of `array` (1 = unobstructed), cosine-weighted around its normal.
     pub fn diffuse_factor(&mut self, array: ArrayId) -> f64 {
-        if let Some(&f) = self.diffuse.get(&array) {
-            return f;
-        }
-        let crown_mean = self.crown_opacity.iter().sum::<f64>() / 12.0;
-        let f = self.receivers.get(&array).map_or(1.0, |r| {
-            let (mut seen, mut total) = (0.0, 0.0);
-            // Centre points only (diffuse varies slowly); directions above the horizon.
-            for &p in &r.centres {
-                for el in (1..9).map(|k| f64::from(k) * 10.0 - 5.0) {
-                    for az in (0..24).map(|k| f64::from(k) * 15.0) {
-                        let d = sun_vector(az, el);
-                        let w = dot(d, r.normal).max(0.0) * el.to_radians().cos();
-                        if w <= 0.0 {
-                            continue;
+        self.diffuse_entry(array).0
+    }
+
+    /// Sky view factor of module `index` of `array` (see [`Self::module_index`]).
+    pub fn module_diffuse_factor(&mut self, array: ArrayId, index: usize) -> f64 {
+        self.diffuse_entry(array)
+            .1
+            .get(index)
+            .copied()
+            .unwrap_or(1.0)
+    }
+
+    fn diffuse_entry(&mut self, array: ArrayId) -> &(f64, Vec<f64>) {
+        if !self.diffuse.contains_key(&array) {
+            let crown_mean = self.crown_opacity.iter().sum::<f64>() / 12.0;
+            let e = self.receivers.get(&array).map_or((1.0, Vec::new()), |r| {
+                let (mut seen, mut total) = (0.0, 0.0);
+                let mut per_module = Vec::with_capacity(r.centres.len());
+                // Centre points only (diffuse varies slowly); directions above the horizon.
+                for &p in &r.centres {
+                    let (mut s, mut t) = (0.0, 0.0);
+                    for el in (1..9).map(|k| f64::from(k) * 10.0 - 5.0) {
+                        for az in (0..24).map(|k| f64::from(k) * 15.0) {
+                            let d = sun_vector(az, el);
+                            let w = dot(d, r.normal).max(0.0) * el.to_radians().cos();
+                            if w <= 0.0 {
+                                continue;
+                            }
+                            t += w;
+                            s += w * match self.hit(r, p, d) {
+                                Hit::Clear => 1.0,
+                                Hit::Crown => 1.0 - crown_mean,
+                                Hit::Opaque => 0.0,
+                            };
                         }
-                        total += w;
-                        seen += w * match self.hit(r, p, d) {
-                            Hit::Clear => 1.0,
-                            Hit::Crown => 1.0 - crown_mean,
-                            Hit::Opaque => 0.0,
-                        };
                     }
+                    per_module.push(if t > 0.0 { s / t } else { 1.0 });
+                    seen += s;
+                    total += t;
                 }
-            }
-            if total > 0.0 {
-                seen / total
-            } else {
-                1.0
-            }
-        });
-        self.diffuse.insert(array, f);
-        f
+                let f = if total > 0.0 { seen / total } else { 1.0 };
+                (f, per_module)
+            });
+            self.diffuse.insert(array, e);
+        }
+        &self.diffuse[&array]
     }
 }
 

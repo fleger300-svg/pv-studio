@@ -60,7 +60,8 @@
     "colorMode": "Mode de couleur",
     "colorModes": {
       "default": "Par défaut",
-      "string": "Par string"
+      "string": "Par string",
+      "shading": "Par ombrage"
     },
     "exportDxf": "Exporter le plan (DXF)",
     "dxfSaved": "Plan enregistré : {path}"
@@ -802,7 +803,8 @@
       "9": "O",
       "10": "N",
       "11": "D"
-    }
+    },
+    "showShading": "Voir l’ombrage par module"
   },
   "assistant": {
     "title": "Assistant",
@@ -886,5 +888,13 @@
       "horizonShading": "  dont horizon lointain (relief)",
       "nearShading": "  dont ombrage proche"
     }
+  },
+  "shading": {
+    "title": "Ombrage annuel par module",
+    "computing": "Calcul de l’ombrage…",
+    "mean": "Moyenne : {total} (horizon {horizon}, proche {near})",
+    "horizon": "Horizon : {value}",
+    "near": "Ombrage proche : {value}",
+    "note": "Part de l’irradiation annuelle de chaque module perdue par l’ombrage (sans l’effet électrique des diodes et des strings)."
   }
 }

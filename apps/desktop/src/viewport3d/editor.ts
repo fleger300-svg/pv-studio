@@ -4,6 +4,7 @@ import { events } from '../bindings';
 import { commandBusy, runCommand, type CommandTiming } from '../commands/runCommand';
 import { api, unwrap } from '../ipc';
 import { useProjectStore } from '../store/project';
+import { shadingColor } from '../store/shading';
 import { useViewStore } from '../store/view';
 import { BoxSelectClient } from '../workers/boxSelectClient';
 import type { NdcRect } from '../workers/selectInRect';
@@ -38,6 +39,8 @@ export class Editor {
   private colorMode: ColorMode = 'default';
   /** Real strings (module id → string ordinal); the fake strings when empty. */
   private strings: ReadonlyMap<number, number> = new Map();
+  /** Shading colour of each module (shading colour mode); grey when not computed. */
+  private shading: ReadonlyMap<number, Color> = new Map();
   private readonly axes: { u: Vector3; v: Vector3 }[];
   private readonly scratch = new Vector3();
   private unlisten: (() => void) | null = null;
@@ -101,8 +104,20 @@ export class Editor {
       if (index === undefined) return UNASSIGNED_COLOR;
       return STRING_PALETTE[index % STRING_PALETTE.length] ?? DEFAULT_CELL_COLOR;
     }
+    if (this.colorMode === 'shading') return this.shading.get(id) ?? UNASSIGNED_COLOR;
     return DEFAULT_CELL_COLOR;
   };
+
+  /** Colours the modules by their yearly shading (total loss share). */
+  setShading(byModule: ReadonlyMap<number, { horizon: number; near: number }>): void {
+    const colors = new Map<number, Color>();
+    for (const [id, s] of byModule) colors.set(id, new Color(shadingColor(s.horizon + s.near)));
+    this.shading = colors;
+    if (this.colorMode === 'shading') {
+      this.panels.updateAllColors(this.colorOf);
+      this.invalidate();
+    }
+  }
 
   /** Colours the modules by the project's real strings. */
   setStrings(strings: ReadonlyMap<number, number>): void {

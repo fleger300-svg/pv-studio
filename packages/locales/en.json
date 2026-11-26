@@ -60,7 +60,8 @@
     "colorMode": "Colour mode",
     "colorModes": {
       "default": "Default",
-      "string": "By string"
+      "string": "By string",
+      "shading": "By shading"
     },
     "exportDxf": "Export the plan (DXF)",
     "dxfSaved": "Plan saved: {path}"
@@ -802,7 +803,8 @@
       "9": "O",
       "10": "N",
       "11": "D"
-    }
+    },
+    "showShading": "Show the shading per module"
   },
   "assistant": {
     "title": "Assistant",
@@ -886,5 +888,13 @@
       "horizonShading": "  of which far horizon (relief)",
       "nearShading": "  of which near shading"
     }
+  },
+  "shading": {
+    "title": "Yearly shading per module",
+    "computing": "Computing the shading…",
+    "mean": "Mean: {total} (horizon {horizon}, near {near})",
+    "horizon": "Horizon: {value}",
+    "near": "Near shading: {value}",
+    "note": "Share of each module’s yearly irradiation lost to shading (without the electrical effect of diodes and strings)."
   }
 }

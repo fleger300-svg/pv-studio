@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
 import { Matrix4, Raycaster, Vector2 } from 'three';
 import { useSelectionStore } from '../store/selection';
+import { useShadingStore } from '../store/shading';
 import { useViewStore } from '../store/view';
 import type { Editor } from './editor';
 import { hitRoofs, planeUV, type V3 } from './roofHit';
@@ -73,8 +74,40 @@ export function Interaction({ editor }: { editor: Editor }) {
       gesture = { kind: 'click', x: e.clientX, y: e.clientY };
     };
 
+    // Shading mode: the module under the pointer (once per frame).
+    let hoverFrame = 0;
+    const hover = (e: PointerEvent) => {
+      if (hoverFrame) return;
+      const { clientX, clientY } = e;
+      hoverFrame = requestAnimationFrame(() => {
+        hoverFrame = 0;
+        const shading = useShadingStore.getState();
+        if (useViewStore.getState().colorMode !== 'shading') {
+          if (shading.hover) shading.setHover(null);
+          return;
+        }
+        const r = el.getBoundingClientRect();
+        raycaster.setFromCamera(
+          ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1),
+          getThree().camera,
+        );
+        const { origin: o, direction: d } = raycaster.ray;
+        const hit = hitRoofs(editor.summary.roofFaces, [o.x, o.y, o.z], [d.x, d.y, d.z]);
+        const id = hit ? editor.pick(hit.faceIndex, hit.u, hit.v) : null;
+        shading.setHover(id === null ? null : { id, x: clientX - r.left, y: clientY - r.top });
+      });
+    };
+    const onLeave = () => {
+      cancelAnimationFrame(hoverFrame);
+      hoverFrame = 0;
+      if (useShadingStore.getState().hover) useShadingStore.getState().setHover(null);
+    };
+
     const onMove = (e: PointerEvent) => {
-      if (!gesture) return;
+      if (!gesture) {
+        hover(e);
+        return;
+      }
       if (gesture.kind === 'box') {
         const r = el.getBoundingClientRect();
         overlay.hidden = false;
@@ -147,7 +180,10 @@ export function Interaction({ editor }: { editor: Editor }) {
     el.addEventListener('pointerup', onUp);
     el.addEventListener('pointercancel', onCancel);
     el.addEventListener('contextmenu', onContextMenu);
+    el.addEventListener('pointerleave', onLeave);
     return () => {
+      el.removeEventListener('pointerleave', onLeave);
+      onLeave();
       el.removeEventListener('pointerdown', onDown, { capture: true });
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerup', onUp);

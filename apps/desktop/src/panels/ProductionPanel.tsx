@@ -5,6 +5,7 @@ import type { YieldReport } from '../bindings';
 import { toCommandError } from '../commands/runCommand';
 import { api, unwrap } from '../ipc';
 import { useToastStore } from '../store/toast';
+import { useViewStore } from '../store/view';
 
 const BALANCE = [
   'horizonKwh',
@@ -43,6 +44,14 @@ export function ProductionPanel() {
     <Panel title={t('production.title')}>
       <Button disabled={busy} onClick={() => void run()}>
         {busy ? t('production.running') : report ? t('production.rerun') : t('production.run')}
+      </Button>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          useViewStore.getState().setColorMode('shading');
+        }}
+      >
+        {t('production.showShading')}
       </Button>
       {report && (
         <>

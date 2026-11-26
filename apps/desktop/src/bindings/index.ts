@@ -154,6 +154,11 @@ export const commands = {
 	assistantReset: () => typedError<null, CommandError>(__TAURI_INVOKE("assistant_reset")),
 	/**  Simulates the AC yield of the open project. */
 	simulateYield: () => typedError<YieldReport, CommandError>(__TAURI_INVOKE("simulate_yield")),
+	/**
+	 *  Shading of each module of the open project over its weather year (share of its
+	 *  irradiation lost to the horizon and to the near shading), for the 3-D view.
+	 */
+	moduleShading: () => typedError<ShadingMap, CommandError>(__TAURI_INVOKE("module_shading")),
 	/**  Swiss addresses and places matching `text` (geo.admin.ch search). */
 	siteSearch: (text: string) => typedError<Place[], CommandError>(__TAURI_INVOKE("site_search", { text })),
 	/**
@@ -2001,6 +2006,15 @@ export type ModuleRef = {
 	col: number,
 };
 
+/**  Shading of one module over the year, as shares of its plane-of-array irradiation. */
+export type ModuleShading = {
+	moduleId: ModuleId,
+	/**  Far horizon (relief). */
+	horizon: number,
+	/**  Near shading (buildings, roof obstacles, surroundings, module rows). */
+	near: number,
+};
+
 /**
  *  One module of an array, without its id (ids are assigned canonically, see
  *  [`Project::compact_modules`]). Used by [`Command::SetArrayModules`].
@@ -2902,6 +2916,14 @@ export type ServiceLifeModel =
 
 /**  How serious a finding is. */
 export type Severity = "info" | "warning" | "error";
+
+/**  Shading of every active module of a project. */
+export type ShadingMap = {
+	modules: ModuleShading[],
+	/**  Means over the modules, weighted by their irradiation. */
+	horizon: number,
+	near: number,
+};
 
 /**
  *  An object around or on the buildings that casts shadows: a neighbouring building, a
