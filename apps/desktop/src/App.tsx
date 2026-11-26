@@ -17,6 +17,7 @@ import { isPlanStep, useWorkflowStore } from './store/workflow';
 import { Viewport } from './viewport3d/Viewport';
 import { Hud, useHudShortcut } from './perf/Hud';
 import { ShadingLegend } from './viewport3d/ShadingLegend';
+import { SunPanel } from './viewport3d/SunPanel';
 import { useStaticsSync } from './statics/useStatics';
 import { LibraryView } from './library/LibraryView';
 import { UpdateProposals } from './library/UpdateProposals';
@@ -65,6 +66,7 @@ export function App() {
                 <Toolbar modules={!split} />
                 <Hud />
                 <ShadingLegend />
+                <SunPanel />
               </section>
             </>
           ) : (

@@ -43,7 +43,9 @@
     "delete": "Supprimer la sélection",
     "undo": "Annuler",
     "redo": "Rétablir",
-    "frame": "Recadrer la vue 3D sur le projet"
+    "frame": "Recadrer la vue 3D sur le projet",
+    "sun": "Ombres du soleil à une date et une heure",
+    "sunNoLocation": "Localisez le projet pour voir les ombres du soleil"
   },
   "selection": {
     "title": "Sélection",
@@ -898,5 +900,21 @@
     "note": "Modules : part de l’irradiation annuelle perdue par l’ombrage (sans l’effet électrique des diodes et des strings). Toit : la même part pour une surface posée à cet endroit.",
     "roofMap": "Carte d’ombrage du toit",
     "roofPoint": "Toit : {value} perdus à cet endroit"
+  },
+  "sun": {
+    "title": "Soleil",
+    "date": "Date",
+    "time": "Heure",
+    "presets": {
+      "winter": "21 déc.",
+      "equinox": "21 mars",
+      "summer": "21 juin"
+    },
+    "play": "Jouer la journée",
+    "pause": "Pause",
+    "position": "Azimut {azimuth}, hauteur {elevation}",
+    "night": "Le soleil est couché.",
+    "daylight": "Lever {rise} · coucher {set} (heure suisse)",
+    "note": "Ombres des bâtiments et des objets de la vue 3D (le relief et le modèle de surface ne sont pas dessinés)."
   }
 }

@@ -43,7 +43,9 @@
     "delete": "Delete selection",
     "undo": "Undo",
     "redo": "Redo",
-    "frame": "Frame the project in the 3D view"
+    "frame": "Frame the project in the 3D view",
+    "sun": "Sun shadows at a date and time",
+    "sunNoLocation": "Locate the project to see the sun shadows"
   },
   "selection": {
     "title": "Selection",
@@ -898,5 +900,21 @@
     "note": "Modules: share of the yearly irradiation lost to shading (without the electrical effect of diodes and strings). Roof: the same share for a surface lying there.",
     "roofMap": "Roof shading map",
     "roofPoint": "Roof: {value} lost here"
+  },
+  "sun": {
+    "title": "Sun",
+    "date": "Date",
+    "time": "Time",
+    "presets": {
+      "winter": "21 Dec",
+      "equinox": "21 Mar",
+      "summer": "21 Jun"
+    },
+    "play": "Play the day",
+    "pause": "Pause",
+    "position": "Azimuth {azimuth}, elevation {elevation}",
+    "night": "The sun has set.",
+    "daylight": "Sunrise {rise} · sunset {set} (Swiss time)",
+    "note": "Shadows of the buildings and objects of the 3-D view (the terrain and the surface model are not drawn)."
   }
 }

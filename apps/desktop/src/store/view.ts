@@ -5,6 +5,12 @@ import type { Editor } from '../viewport3d/editor';
 
 export type Tool = 'select' | 'box' | 'move';
 
+/** The real sun of the 3-D view: day of the year (1–365) and Swiss legal time [min]. */
+export interface SunTime {
+  day: number;
+  minute: number;
+}
+
 /** View-only state (never part of the model). */
 interface ViewState {
   colorMode: ColorMode;
@@ -17,6 +23,9 @@ interface ViewState {
   three: (() => RootState) | null;
   /** Bumped to frame the whole project in the 3D view again. */
   frameRequest: number;
+  /** The light is the real sun at this date and time; null: the fixed default light. */
+  sun: SunTime | null;
+  setSun: (sun: SunTime | null) => void;
   setColorMode: (mode: ColorMode) => void;
   setTool: (tool: Tool) => void;
   requestFrame: () => void;
@@ -26,6 +35,10 @@ export const useViewStore = create<ViewState>()((set) => ({
   colorMode: 'default',
   tool: 'select',
   frameRequest: 0,
+  sun: null,
+  setSun: (sun) => {
+    set({ sun });
+  },
   requestFrame: () => {
     set((s) => ({ frameRequest: s.frameRequest + 1 }));
   },

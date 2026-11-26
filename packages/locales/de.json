@@ -43,7 +43,9 @@
     "delete": "Auswahl löschen",
     "undo": "Rückgängig",
     "redo": "Wiederherstellen",
-    "frame": "Projekt in der 3D-Ansicht einpassen"
+    "frame": "Projekt in der 3D-Ansicht einpassen",
+    "sun": "Sonnenschatten zu Datum und Uhrzeit",
+    "sunNoLocation": "Projekt verorten, um die Sonnenschatten zu sehen"
   },
   "selection": {
     "title": "Auswahl",
@@ -898,5 +900,21 @@
     "note": "Module: Anteil der jährlichen Einstrahlung, der durch Verschattung verloren geht (ohne elektrische Wirkung von Dioden und Strings). Dach: derselbe Anteil für eine dort liegende Fläche.",
     "roofMap": "Verschattungskarte des Dachs",
     "roofPoint": "Dach: {value} Verlust an dieser Stelle"
+  },
+  "sun": {
+    "title": "Sonne",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "presets": {
+      "winter": "21. Dez.",
+      "equinox": "21. März",
+      "summer": "21. Juni"
+    },
+    "play": "Tag abspielen",
+    "pause": "Pause",
+    "position": "Azimut {azimuth}, Höhe {elevation}",
+    "night": "Die Sonne ist untergegangen.",
+    "daylight": "Aufgang {rise} · Untergang {set} (Schweizer Zeit)",
+    "note": "Schatten der Gebäude und Objekte der 3D-Ansicht (Gelände und Oberflächenmodell werden nicht gezeichnet)."
   }
 }

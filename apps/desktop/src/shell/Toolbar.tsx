@@ -4,6 +4,7 @@ import { useProjectStore } from '../store/project';
 import { useViewStore, type Tool } from '../store/view';
 import { usePerfStore } from '../perf/perfStore';
 import { redo, undo } from '../commands/shortcuts';
+import { dayOfYear, daylight, swissUtcOffset } from '../viewport3d/sun';
 import {
   IconBox,
   IconDelete,
@@ -12,8 +13,21 @@ import {
   IconMove,
   IconRedo,
   IconSelect,
+  IconSun,
   IconUndo,
 } from './icons';
+
+/** The sun of today at the current Swiss time (5 min), or at noon when it is down. */
+function sunNow(latDeg: number, lonDeg: number) {
+  const now = new Date();
+  const day = dayOfYear(now);
+  const utc = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const local = (utc + swissUtcOffset(day, utc + 60) * 60) % 1440;
+  const minute = Math.round(local / 5) * 5;
+  const light = daylight(latDeg, lonDeg, day);
+  const up = light !== null && minute >= light.rise && minute <= light.set;
+  return { day, minute: up ? minute : 12 * 60 };
+}
 
 const TOOLS: readonly { tool: Tool; icon: () => React.JSX.Element }[] = [
   { tool: 'select', icon: IconSelect },
@@ -35,6 +49,9 @@ export function Toolbar({ modules }: { modules: boolean }) {
   const hudVisible = usePerfStore((s) => s.hudVisible);
   const toggleHud = usePerfStore((s) => s.toggleHud);
   const requestFrame = useViewStore((s) => s.requestFrame);
+  const sun = useViewStore((s) => s.sun);
+  const setSun = useViewStore((s) => s.setSun);
+  const location = useProjectStore((s) => s.summary?.location ?? null);
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('tools.label')}>
@@ -75,6 +92,15 @@ export function Toolbar({ modules }: { modules: boolean }) {
       />
       <span className="toolbar__sep" aria-hidden="true" />
       <IconButton label={t('tools.frame')} icon={<IconFit />} onClick={requestFrame} />
+      <IconButton
+        label={location ? t('tools.sun') : t('tools.sunNoLocation')}
+        icon={<IconSun />}
+        active={sun !== null}
+        disabled={!location}
+        onClick={() => {
+          setSun(sun || !location ? null : sunNow(location.latDeg, location.lonDeg));
+        }}
+      />
       <IconButton
         label={t('hud.toggle')}
         icon={<IconGauge />}

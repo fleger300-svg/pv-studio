@@ -7,7 +7,7 @@ import { events, type ProjectSummary } from '../bindings';
 import { useShadingStore } from '../store/shading';
 import type { ModuleData } from './moduleBuffer';
 import { Buildings } from './Buildings';
-import { sceneBounds } from './frames';
+import { sceneBounds, vec3 } from './frames';
 import { PanelMeshes } from './PanelMeshes';
 import { ShadingObjects } from './ShadingObjects';
 import { RoofShading } from './RoofShading';
@@ -21,6 +21,7 @@ import { usePlanStore } from '../store/plan';
 import { useProjectStore } from '../store/project';
 import { useSelectionStore } from '../store/selection';
 import { useViewStore } from '../store/view';
+import { sunAtLocal, sunDirection } from './sun';
 import { useWiringStore } from '../store/wiring';
 import { useWorkflowStore } from '../store/workflow';
 import { useUiStore } from '../store/ui';
@@ -139,29 +140,45 @@ function Scene({ summary, modules }: SceneProps) {
     invalidate();
   }, [getThree, center, radius, invalidate, summary.projectId, empty, frameRequest]);
 
-  // Sun with a shadow camera fitted tightly around the project.
+  // The real sun at the chosen date and time (toolbar), else a fixed afternoon light.
+  const sunTime = useViewStore((s) => s.sun);
+  const location = summary.location;
+  const realSun = useMemo(
+    () =>
+      sunTime && location
+        ? sunAtLocal(location.latDeg, location.lonDeg, sunTime.day, sunTime.minute)
+        : null,
+    [sunTime, location],
+  );
+  const night = realSun !== null && realSun.elevationDeg <= 0;
+
+  // Sun with a shadow camera fitted tightly around the project (wider when the sun is low:
+  // the shadows reach further).
   useLayoutEffect(() => {
     const light = sun.current;
     if (!light) return;
-    light.position.copy(center).addScaledVector(SUN_DIR, radius * 2);
+    const dir = realSun ? vec3(sunDirection(realSun)) : SUN_DIR;
+    const low = realSun ? Math.max(realSun.elevationDeg, 3) : 40;
+    const extent = radius * Math.min(3, 1 + 0.5 / Math.tan((low * Math.PI) / 180));
+    light.position.copy(center).addScaledVector(dir, radius * 2);
     light.target.position.copy(center);
     light.target.updateMatrixWorld();
     const cam = light.shadow.camera;
-    cam.left = -radius;
-    cam.right = radius;
-    cam.top = radius;
-    cam.bottom = -radius;
+    cam.left = -extent;
+    cam.right = extent;
+    cam.top = extent;
+    cam.bottom = -extent;
     cam.near = radius * 0.5;
     cam.far = radius * 3.5;
     cam.updateProjectionMatrix();
     // Texel size grows with the project; scale the normal bias with it to avoid acne on
     // the panels while keeping contact shadows.
-    const texel = (2 * radius) / light.shadow.mapSize.width;
+    const texel = (2 * extent) / light.shadow.mapSize.width;
     light.shadow.bias = -0.0005;
     light.shadow.normalBias = texel * 1.5;
     light.shadow.needsUpdate = true;
     redraw({ shadows: true });
-  }, [center, radius, redraw]);
+  }, [center, radius, redraw, realSun]);
 
   useEffect(() => {
     editor.setColorMode(colorMode);
@@ -172,7 +189,6 @@ function Scene({ summary, modules }: SceneProps) {
     editor.setStrings(strings);
   }, [editor, strings]);
 
-  // Shading mode: computed on entry and again after every model change (debounced).
   // Another project: the previous one's shading must not colour its modules.
   useEffect(
     () => () => {
@@ -180,6 +196,7 @@ function Scene({ summary, modules }: SceneProps) {
     },
     [summary.projectId],
   );
+  // Shading mode: computed on entry and again after every model change (debounced).
   const shading = useShadingStore((s) => s.byModule);
   const roofMap = useShadingStore((s) => s.roof);
   const showRoof = useShadingStore((s) => s.showRoof);
@@ -211,10 +228,14 @@ function Scene({ summary, modules }: SceneProps) {
 
   return (
     <>
-      <hemisphereLight args={['#dfe9f5', '#7a7466', 0.9]} />
+      {/* Less sky light with the real sun: its shadows stand out. */}
+      <hemisphereLight
+        args={['#dfe9f5', '#7a7466']}
+        intensity={night ? 0.35 : realSun ? 0.5 : 0.9}
+      />
       <directionalLight
         ref={sun}
-        intensity={2.2}
+        intensity={night ? 0 : 2.2}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
