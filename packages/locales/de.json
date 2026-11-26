@@ -890,11 +890,13 @@
     }
   },
   "shading": {
-    "title": "Jährliche Verschattung pro Modul",
+    "title": "Jährliche Verschattung",
     "computing": "Verschattung wird berechnet…",
     "mean": "Mittel: {total} (Horizont {horizon}, nah {near})",
     "horizon": "Horizont: {value}",
     "near": "Nahverschattung: {value}",
-    "note": "Anteil der jährlichen Einstrahlung jedes Moduls, der durch Verschattung verloren geht (ohne elektrische Wirkung von Dioden und Strings)."
+    "note": "Module: Anteil der jährlichen Einstrahlung, der durch Verschattung verloren geht (ohne elektrische Wirkung von Dioden und Strings). Dach: derselbe Anteil für eine dort liegende Fläche.",
+    "roofMap": "Verschattungskarte des Dachs",
+    "roofPoint": "Dach: {value} Verlust an dieser Stelle"
   }
 }

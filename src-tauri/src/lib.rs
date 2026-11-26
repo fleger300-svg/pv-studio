@@ -86,6 +86,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             assistant::assistant_reset,
             production::simulate_yield,
             production::module_shading,
+            production::roof_shading,
             site::site_search,
             site::site_locate,
             site::site_fetch_weather,

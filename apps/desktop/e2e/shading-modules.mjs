@@ -1,6 +1,6 @@
 // Shading per module in the running app (French UI): a PV*SOL project is imported, the 3-D
-// view is switched to the shading colour mode, the legend shows the project's means and the
-// module under the pointer shows its figures.
+// view is switched to the shading colour mode, the legend shows the project's means, the
+// module under the pointer shows its figures, and the roof map shows the bare roof's.
 //
 //   $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9222"; pnpm tauri dev
 //   node apps/desktop/e2e/shading-modules.mjs <output directory> <project.pvprj>
@@ -26,9 +26,12 @@ await report.getByRole('button', { name: 'Fermer' }).click();
 await waitFor(page, async () => (await report.count()) === 0, 'report closed');
 
 // The layout step shows the display options.
-await page.getByRole('button', { name: /Calepinage/ }).first().click();
+await page
+  .getByRole('button', { name: /Calepinage/ })
+  .first()
+  .click();
 await page.getByLabel('Mode de couleur').selectOption('shading');
-const legend = page.getByRole('group', { name: 'Ombrage annuel par module' });
+const legend = page.getByRole('group', { name: 'Ombrage annuel', exact: true });
 await legend.waitFor();
 const mean = await waitFor(
   page,
@@ -50,11 +53,39 @@ for (let y = 0.3; y <= 0.7 && !tip; y += 0.05) {
   for (let x = 0.3; x <= 0.7 && !tip; x += 0.05) {
     await page.mouse.move(box.x + box.width * x, box.y + box.height * y);
     await page.waitForTimeout(60);
-    if ((await page.locator('.shading-tip').count()) > 0) {
-      tip = await page.locator('.shading-tip').innerText();
-    }
+    const t = page.locator('.shading-tip');
+    if ((await t.count()) > 0 && /Horizon/.test(await t.innerText())) tip = await t.innerText();
   }
 }
 check(tip !== null && /Horizon/.test(tip), `tooltip: ${String(tip).replace(/\s+/g, ' ')}`);
 await page.screenshot({ path: path.join(out, 'shading-hover.png') });
+
+// The roof map: computed, drawn, and read under the pointer on the bare roof.
+const toggle = legend.getByLabel(/Carte d’ombrage du toit/);
+check(await toggle.isChecked(), 'roof map on by default');
+await waitFor(
+  page,
+  async () => !/Calcul/.test(await toggle.locator('..').innerText()),
+  'roof map computed',
+  120000,
+);
+const faces = await hook(
+  () => window.__pv.three().scene.getObjectByName('roof-shading')?.children.length ?? 0,
+);
+check(faces > 0, `roof map drawn on ${faces} face(s)`);
+let roofTip = null;
+for (let y = 0.25; y <= 0.75 && !roofTip; y += 0.025) {
+  for (let x = 0.25; x <= 0.75 && !roofTip; x += 0.025) {
+    await page.mouse.move(box.x + box.width * x, box.y + box.height * y);
+    await page.waitForTimeout(40);
+    const t = page.locator('.shading-tip');
+    if ((await t.count()) > 0 && /Toit/.test(await t.innerText())) roofTip = await t.innerText();
+  }
+}
+check(roofTip !== null, `roof tooltip: ${String(roofTip)}`);
+await page.screenshot({ path: path.join(out, 'shading-roof.png') });
+await toggle.uncheck();
+await page.waitForTimeout(300);
+const hidden = await hook(() => window.__pv.three().scene.getObjectByName('roof-shading') == null);
+check(hidden, 'roof map hidden when unchecked');
 await browser.close();

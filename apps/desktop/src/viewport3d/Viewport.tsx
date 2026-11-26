@@ -10,6 +10,7 @@ import { Buildings } from './Buildings';
 import { sceneBounds } from './frames';
 import { PanelMeshes } from './PanelMeshes';
 import { ShadingObjects } from './ShadingObjects';
+import { RoofShading } from './RoofShading';
 import { GridIndex } from './gridIndex';
 import { Editor } from './editor';
 import { Interaction } from './Interaction';
@@ -180,6 +181,8 @@ function Scene({ summary, modules }: SceneProps) {
     [summary.projectId],
   );
   const shading = useShadingStore((s) => s.byModule);
+  const roofMap = useShadingStore((s) => s.roof);
+  const showRoof = useShadingStore((s) => s.showRoof);
   useEffect(() => {
     editor.setShading(shading);
   }, [editor, shading]);
@@ -222,6 +225,9 @@ function Scene({ summary, modules }: SceneProps) {
       </mesh>
       <Buildings summary={summary} />
       <ShadingObjects objects={summary.objects} />
+      {colorMode === 'shading' && showRoof && roofMap && (
+        <RoofShading summary={summary} map={roofMap} />
+      )}
       <primitive object={panels.group} />
       <Interaction editor={editor} />
       <FrameProbe key={summary.projectId} />

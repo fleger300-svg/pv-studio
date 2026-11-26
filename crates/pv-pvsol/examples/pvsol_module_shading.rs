@@ -1,6 +1,6 @@
 //! Shading per module of one imported project (what the 3-D view colours): distribution of
 //! the total loss share, the most shaded modules, and the means against the simulation's
-//! balance.
+//! balance; then the shading map of the roof faces (cells, time, distribution).
 //! Usage: `cargo run -p pv-pvsol --release --example pvsol_module_shading -- <file.pvprj>`.
 
 fn main() {
@@ -46,4 +46,25 @@ fn main() {
             loss * 100.0
         );
     }
+    let t = std::time::Instant::now();
+    let roof = pv_solar::roof_shading::roof_shading(&p, a.albedo).expect("roof");
+    let took = t.elapsed();
+    let mut all: Vec<i16> = roof
+        .faces
+        .iter()
+        .flat_map(|f| f.losses.iter().copied())
+        .filter(|&x| x >= 0)
+        .collect();
+    all.sort_unstable();
+    let q = |f: f64| f64::from(all[((all.len() - 1) as f64 * f).round() as usize]) / 100.0;
+    println!(
+        "roof map: {} faces, {} cells of {} m in {took:.2?} | min {:.1} median {:.1} p90 {:.1} max {:.1} %",
+        roof.faces.len(),
+        all.len(),
+        roof.faces.first().map_or(0.0, |f| f.cell_m),
+        q(0.0),
+        q(0.5),
+        q(0.9),
+        q(1.0)
+    );
 }

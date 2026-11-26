@@ -890,11 +890,13 @@
     }
   },
   "shading": {
-    "title": "Ombrage annuel par module",
+    "title": "Ombrage annuel",
     "computing": "Calcul de l’ombrage…",
     "mean": "Moyenne : {total} (horizon {horizon}, proche {near})",
     "horizon": "Horizon : {value}",
     "near": "Ombrage proche : {value}",
-    "note": "Part de l’irradiation annuelle de chaque module perdue par l’ombrage (sans l’effet électrique des diodes et des strings)."
+    "note": "Modules : part de l’irradiation annuelle perdue par l’ombrage (sans l’effet électrique des diodes et des strings). Toit : la même part pour une surface posée à cet endroit.",
+    "roofMap": "Carte d’ombrage du toit",
+    "roofPoint": "Toit : {value} perdus à cet endroit"
   }
 }

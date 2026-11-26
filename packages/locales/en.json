@@ -890,11 +890,13 @@
     }
   },
   "shading": {
-    "title": "Yearly shading per module",
+    "title": "Yearly shading",
     "computing": "Computing the shading…",
     "mean": "Mean: {total} (horizon {horizon}, near {near})",
     "horizon": "Horizon: {value}",
     "near": "Near shading: {value}",
-    "note": "Share of each module’s yearly irradiation lost to shading (without the electrical effect of diodes and strings)."
+    "note": "Modules: share of the yearly irradiation lost to shading (without the electrical effect of diodes and strings). Roof: the same share for a surface lying there.",
+    "roofMap": "Roof shading map",
+    "roofPoint": "Roof: {value} lost here"
   }
 }

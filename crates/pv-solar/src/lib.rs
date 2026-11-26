@@ -17,6 +17,7 @@
 
 pub mod module_shading;
 pub mod parallel;
+pub mod roof_shading;
 pub mod shade;
 pub mod sun;
 

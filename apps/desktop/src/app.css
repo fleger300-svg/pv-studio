@@ -1128,3 +1128,9 @@ body,
   text-align: left;
   font-weight: normal;
 }
+.shading-legend__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+}

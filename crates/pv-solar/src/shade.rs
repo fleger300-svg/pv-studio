@@ -706,34 +706,45 @@ impl ShadeModel {
     /// Share of the sky diffuse that the far horizon lets through to `array` (cosine-weighted
     /// around its normal; 1 without a horizon).
     pub fn horizon_view(&mut self, array: ArrayId) -> f64 {
-        let Some(h) = &self.horizon else {
+        if self.horizon.is_none() {
             return 1.0;
-        };
+        }
         if let Some(&v) = self.horizon_views.get(&array) {
             return v;
         }
-        let v = self.receivers.get(&array).map_or(1.0, |r| {
-            let (mut seen, mut total) = (0.0, 0.0);
-            for k in 0..45 {
-                let el = f64::from(k) * 2.0 + 1.0;
-                for j in 0..72 {
-                    let az = f64::from(j) * 5.0 + 2.5;
-                    let d = sun_vector(az, el);
-                    let w = dot(d, r.normal).max(0.0) * el.to_radians().cos();
-                    total += w;
-                    if el >= h.elevation(az) {
-                        seen += w;
-                    }
-                }
-            }
-            if total > 0.0 {
-                seen / total
-            } else {
-                1.0
-            }
-        });
+        let v = self
+            .receivers
+            .get(&array)
+            .map_or(1.0, |r| self.horizon_view_around(r.normal));
         self.horizon_views.insert(array, v);
         v
+    }
+
+    /// Share of the sky diffuse that the far horizon lets through to a surface facing
+    /// `normal` (cosine-weighted; 1 without a horizon).
+    #[must_use]
+    pub fn horizon_view_around(&self, normal: [f64; 3]) -> f64 {
+        let Some(h) = &self.horizon else {
+            return 1.0;
+        };
+        let (mut seen, mut total) = (0.0, 0.0);
+        for k in 0..45 {
+            let el = f64::from(k) * 2.0 + 1.0;
+            for j in 0..72 {
+                let az = f64::from(j) * 5.0 + 2.5;
+                let d = sun_vector(az, el);
+                let w = dot(d, normal).max(0.0) * el.to_radians().cos();
+                total += w;
+                if el >= h.elevation(az) {
+                    seen += w;
+                }
+            }
+        }
+        if total > 0.0 {
+            seen / total
+        } else {
+            1.0
+        }
     }
 
     /// A roof face does not shade a point over its rectangle that is under it — inside the
@@ -749,14 +760,19 @@ impl ShadeModel {
     }
 
     fn hit(&self, r: &Receiver, o: V3, d: V3) -> Hit {
+        self.hit_from(r.face, r.building, o, d)
+    }
+
+    /// What stops a ray from `o` (on `face` of `building`) towards `d`.
+    fn hit_from(&self, face: RoofFaceId, building: BuildingId, o: V3, d: V3) -> Hit {
         let mut crown = false;
         for c in &self.clusters {
             if !crosses(c, o, d) {
                 continue;
             }
             for t in &self.tris[c.start..c.end] {
-                if t.face != Some(r.face)
-                    && t.wall_of != Some(r.building)
+                if t.face != Some(face)
+                    && t.wall_of != Some(building)
                     && !t
                         .module
                         .is_some_and(|k| inside(&self.footprints[k], [o[0], o[1]]))
@@ -891,22 +907,7 @@ impl ShadeModel {
                 let mut per_module = Vec::with_capacity(r.centres.len());
                 // Centre points only (diffuse varies slowly); directions above the horizon.
                 for &p in &r.centres {
-                    let (mut s, mut t) = (0.0, 0.0);
-                    for el in (1..9).map(|k| f64::from(k) * 10.0 - 5.0) {
-                        for az in (0..24).map(|k| f64::from(k) * 15.0) {
-                            let d = sun_vector(az, el);
-                            let w = dot(d, r.normal).max(0.0) * el.to_radians().cos();
-                            if w <= 0.0 {
-                                continue;
-                            }
-                            t += w;
-                            s += w * match self.hit(r, p, d) {
-                                Hit::Clear => 1.0,
-                                Hit::Crown => 1.0 - crown_mean,
-                                Hit::Opaque => 0.0,
-                            };
-                        }
-                    }
+                    let (s, t) = self.sky_sums(r.face, r.building, p, r.normal, crown_mean);
                     per_module.push(if t > 0.0 { s / t } else { 1.0 });
                     seen += s;
                     total += t;
@@ -917,6 +918,77 @@ impl ShadeModel {
             self.diffuse.insert(array, e);
         }
         &self.diffuse[&array]
+    }
+
+    /// Seen and total cosine weights of the sky over point `p` (on `face` of `building`)
+    /// around `normal`: directions above the horizon, crowns at their yearly mean opacity.
+    fn sky_sums(
+        &self,
+        face: RoofFaceId,
+        building: BuildingId,
+        p: V3,
+        normal: V3,
+        crown_mean: f64,
+    ) -> (f64, f64) {
+        let (mut s, mut t) = (0.0, 0.0);
+        for el in (1..9).map(|k| f64::from(k) * 10.0 - 5.0) {
+            for az in (0..24).map(|k| f64::from(k) * 15.0) {
+                let d = sun_vector(az, el);
+                let w = dot(d, normal).max(0.0) * el.to_radians().cos();
+                if w <= 0.0 {
+                    continue;
+                }
+                t += w;
+                s += w * match self.hit_from(face, building, p, d) {
+                    Hit::Clear => 1.0,
+                    Hit::Crown => 1.0 - crown_mean,
+                    Hit::Opaque => 0.0,
+                };
+            }
+        }
+        (s, t)
+    }
+
+    /// Sky view factor of a point `p` lying on roof face `face` of `building` (1 =
+    /// unobstructed), cosine-weighted around the face's `normal`.
+    #[must_use]
+    pub fn point_sky_view(
+        &self,
+        face: RoofFaceId,
+        building: BuildingId,
+        p: [f64; 3],
+        normal: [f64; 3],
+    ) -> f64 {
+        let crown_mean = self.crown_opacity.iter().sum::<f64>() / 12.0;
+        let (s, t) = self.sky_sums(face, building, p, normal, crown_mean);
+        if t > 0.0 {
+            s / t
+        } else {
+            1.0
+        }
+    }
+
+    /// Beam lost before point `p` lying on roof face `face` of `building`, for light from
+    /// direction `d` amounting to `by_month[m]` in month `m`: all of it behind an opaque
+    /// occluder, the crown's monthly opacity behind a tree, none in the clear.
+    #[must_use]
+    pub fn point_beam_loss(
+        &self,
+        face: RoofFaceId,
+        building: BuildingId,
+        p: [f64; 3],
+        d: [f64; 3],
+        by_month: &[f64; 12],
+    ) -> f64 {
+        match self.hit_from(face, building, p, d) {
+            Hit::Opaque => by_month.iter().sum(),
+            Hit::Crown => by_month
+                .iter()
+                .zip(&self.crown_opacity)
+                .map(|(w, o)| w * o)
+                .sum(),
+            Hit::Clear => 0.0,
+        }
     }
 }
 

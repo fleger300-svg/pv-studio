@@ -74,7 +74,7 @@ export function Interaction({ editor }: { editor: Editor }) {
       gesture = { kind: 'click', x: e.clientX, y: e.clientY };
     };
 
-    // Shading mode: the module under the pointer (once per frame).
+    // Shading mode: the module and roof point under the pointer (once per frame).
     let hoverFrame = 0;
     const hover = (e: PointerEvent) => {
       if (hoverFrame) return;
@@ -93,8 +93,19 @@ export function Interaction({ editor }: { editor: Editor }) {
         );
         const { origin: o, direction: d } = raycaster.ray;
         const hit = hitRoofs(editor.summary.roofFaces, [o.x, o.y, o.z], [d.x, d.y, d.z]);
-        const id = hit ? editor.pick(hit.faceIndex, hit.u, hit.v) : null;
-        shading.setHover(id === null ? null : { id, x: clientX - r.left, y: clientY - r.top });
+        const face = hit && editor.summary.roofFaces[hit.faceIndex]?.face;
+        if (!hit || !face) {
+          if (shading.hover) shading.setHover(null);
+          return;
+        }
+        shading.setHover({
+          id: editor.pick(hit.faceIndex, hit.u, hit.v),
+          face: face.id,
+          u: hit.u,
+          v: hit.v,
+          x: clientX - r.left,
+          y: clientY - r.top,
+        });
       });
     };
     const onLeave = () => {

@@ -417,3 +417,65 @@ fn the_shading_of_each_module_adds_up_to_the_balance() {
         .iter()
         .all(|x| (x.horizon - map.horizon).abs() < 1e-12));
 }
+
+#[test]
+fn the_roof_map_shows_the_chimney_shadow_and_the_horizon_everywhere() {
+    let mut p = located(ref_a_roof1());
+    p.site.horizon = Some(pv_model::Horizon {
+        source: "test".into(),
+        points: vec![[0.0, 10.0], [180.0, 10.0]],
+    });
+    let a = SimulationAssumptions::default();
+    let open = pv_solar::roof_shading::roof_shading(&p, a.albedo).unwrap();
+    let map = pv_solar::module_shading::module_shading(&p, a.albedo).unwrap();
+    // Without obstacles, the roof loses about the horizon alone (a little more at its edges,
+    // under the neighbouring face).
+    let face = open
+        .faces
+        .iter()
+        .find(|f| f.face_id == p.roof_faces[0].id)
+        .unwrap();
+    let cells: Vec<f64> = face
+        .losses
+        .iter()
+        .filter(|&&x| x >= 0)
+        .map(|&x| f64::from(x) / 10_000.0)
+        .collect();
+    assert!(!cells.is_empty());
+    let mut sorted = cells.clone();
+    sorted.sort_by(f64::total_cmp);
+    let median = sorted[sorted.len() / 2];
+    assert!(
+        (median - map.horizon).abs() < 0.01,
+        "median {median} vs horizon {}",
+        map.horizon
+    );
+
+    // A chimney: the cells just north of it (in its shadow) lose much more.
+    add_chimney(&mut p);
+    let shaded = pv_solar::roof_shading::roof_shading(&p, a.albedo).unwrap();
+    let face = shaded
+        .faces
+        .iter()
+        .find(|f| f.face_id == p.roof_faces[0].id)
+        .unwrap();
+    let obstacle = &p.roof_faces[0].outline.as_ref().unwrap().obstacles[0].footprint_uv;
+    let (u_mid, v_top) = ((obstacle[0][0] + obstacle[1][0]) / 2.0, obstacle[2][1]);
+    let at = |u: f64, v: f64| {
+        let c = ((u - face.origin_uv[0]) / face.cell_m) as usize;
+        let r = ((v - face.origin_uv[1]) / face.cell_m) as usize;
+        f64::from(face.losses[r * face.cols as usize + c]) / 10_000.0
+    };
+    let behind = at(u_mid, v_top + 0.3);
+    assert!(
+        behind > median + 0.1,
+        "behind the chimney {behind} vs {median}"
+    );
+    // Under the chimney there is no roof to show.
+    assert_eq!(
+        face.losses[((obstacle[0][1] + 0.3 - face.origin_uv[1]) / face.cell_m) as usize
+            * face.cols as usize
+            + ((u_mid - face.origin_uv[0]) / face.cell_m) as usize],
+        pv_solar::roof_shading::OUTSIDE
+    );
+}

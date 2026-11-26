@@ -159,6 +159,12 @@ export const commands = {
 	 *  irradiation lost to the horizon and to the near shading), for the 3-D view.
 	 */
 	moduleShading: () => typedError<ShadingMap, CommandError>(__TAURI_INVOKE("module_shading")),
+	/**
+	 *  Shading map of the roof faces of the open project over its weather year (share of the
+	 *  irradiation of a surface lying on the roof lost to the horizon and the near shading, on
+	 *  a grid over each face), for the 3-D view.
+	 */
+	roofShading: () => typedError<RoofShadingMap, CommandError>(__TAURI_INVOKE("roof_shading")),
 	/**  Swiss addresses and places matching `text` (geo.admin.ch search). */
 	siteSearch: (text: string) => typedError<Place[], CommandError>(__TAURI_INVOKE("site_search", { text })),
 	/**
@@ -1435,6 +1441,21 @@ export type ExtractionResult_Deserialize = {
 export type ExtractionResult_Serialize = {
 	component: Component_Serialize,
 	warnings: string[],
+};
+
+/**  Shading over one roof face, on a grid in its own `(u, v)` frame. */
+export type FaceShadingGrid = {
+	faceId: RoofFaceId,
+	/**  `(u, v)` of the grid's corner (cell `(0, 0)` spans `u0..u0 + cell`, `v0..v0 + cell`). */
+	originUv: [number, number],
+	cellM: number,
+	cols: number,
+	rows: number,
+	/**
+	 *  Loss share of each cell in hundredths of a percent (row by row from `v0`, each row
+	 *  from `u0`); [`OUTSIDE`] off the face.
+	 */
+	losses: number[],
 };
 
 /**  One changed field (`path` in the component's JSON, values as JSON text). */
@@ -2826,6 +2847,11 @@ export type RoofPreview = {
 	faces: PreviewFace[],
 	roofKind: RoofKind,
 	ridgeHeightM: number,
+};
+
+/**  Shading over every roof face of a project. */
+export type RoofShadingMap = {
+	faces: FaceShadingGrid[],
 };
 
 /**  Roof types of the building form. */
