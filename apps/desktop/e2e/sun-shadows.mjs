@@ -1,7 +1,8 @@
 // Real sun of the 3-D view in the running app (French UI): a PV*SOL project is imported, the
 // sun is switched on from the toolbar, dates and times are chosen, and the light follows the
 // sun (direction checked against the panel's azimuth and elevation); screenshots of a winter
-// morning, a winter noon and a summer evening, and the night.
+// morning, a winter noon and a summer evening, and the night. The surroundings (terrain,
+// neighbouring buildings of the surface model) are drawn and can be hidden.
 //
 //   $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9222"; pnpm tauri dev
 //   node apps/desktop/e2e/sun-shadows.mjs <output directory> <project.pvprj>
@@ -72,10 +73,20 @@ async function shot(name, preset, minute, expectUp) {
   await page.screenshot({ path: path.join(out, `sun-${name}.png`) });
 }
 
+const surroundings = () =>
+  hook(() => window.__pv.three().scene.getObjectByName('surroundings')?.visible === true);
+await waitFor(page, surroundings, 'surroundings drawn', 30000);
+check(true, 'surroundings drawn');
+
 await shot('winter-morning', '21 déc.', 9 * 60 + 30, true);
 await shot('winter-noon', '21 déc.', 12 * 60 + 30, true);
 await shot('summer-evening', '21 juin', 19 * 60 + 30, true);
 await shot('night', '21 juin', 23 * 60, false);
+
+await panel.getByRole('switch', { name: /Environs/ }).click();
+await waitFor(page, async () => !(await surroundings()), 'surroundings hidden');
+check(true, 'surroundings hidden by the switch');
+await panel.getByRole('switch', { name: /Environs/ }).click();
 
 await page.getByRole('button', { name: 'Ombres du soleil à une date et une heure' }).click();
 await waitFor(page, async () => (await panel.count()) === 0, 'sun off');

@@ -66,7 +66,8 @@
       "shading": "Par ombrage"
     },
     "exportDxf": "Exporter le plan (DXF)",
-    "dxfSaved": "Plan enregistré : {path}"
+    "dxfSaved": "Plan enregistré : {path}",
+    "surroundings": "Environs (relief, bâtiments voisins)"
   },
   "viewport": {
     "label": "Vue 3D",
@@ -915,6 +916,6 @@
     "position": "Azimut {azimuth}, hauteur {elevation}",
     "night": "Le soleil est couché.",
     "daylight": "Lever {rise} · coucher {set} (heure suisse)",
-    "note": "Ombres des bâtiments et des objets de la vue 3D (le relief et le modèle de surface ne sont pas dessinés)."
+    "note": "Ombres des bâtiments, des objets et des environs du projet (relief et bâtiments voisins du modèle de surface), tels que le calcul d’ombrage les voit."
   }
 }

@@ -165,6 +165,11 @@ export const commands = {
 	 *  a grid over each face), for the 3-D view.
 	 */
 	roofShading: () => typedError<RoofShadingMap, CommandError>(__TAURI_INVOKE("roof_shading")),
+	/**
+	 *  The surroundings of the open project (terrain, neighbouring buildings of the surface
+	 *  model) as they shade it, reduced for the 3-D view; `None` without any.
+	 */
+	surroundingsView: () => typedError<SurroundingsView | null, CommandError>(__TAURI_INVOKE("surroundings_view")),
 	/**  Swiss addresses and places matching `text` (geo.admin.ch search). */
 	siteSearch: (text: string) => typedError<Place[], CommandError>(__TAURI_INVOKE("site_search", { text })),
 	/**
@@ -3126,6 +3131,24 @@ export type Surroundings = {
 	 *  `rows × cols`, row by row from the north-west corner.
 	 */
 	heightsCm: number[],
+};
+
+/**
+ *  The surroundings as the shading sees them (the project's own buildings left out), for
+ *  drawing: the grid reduced to at most `max_side` cells a side (highest cell of each block).
+ */
+export type SurroundingsView = {
+	/**  ENU (east, north) of the north-west corner of the grid [m]. */
+	originEastM: number,
+	originNorthM: number,
+	cellM: number,
+	cols: number,
+	rows: number,
+	/**
+	 *  Height of each cell [cm] (`z` of the project), row by row from the north-west corner;
+	 *  `None` where nothing shades (the project's own buildings).
+	 */
+	heightsCm: (number | null)[],
 };
 
 /**  What a system can be mounted on and with. */

@@ -384,6 +384,50 @@ fn segment_distance(a: [f64; 2], b: [f64; 2], p: [f64; 2]) -> f64 {
     (p[0] - a[0] - t * dx).hypot(p[1] - a[1] - t * dy)
 }
 
+/// The surroundings as the shading sees them (the project's own buildings left out), for
+/// drawing: the grid reduced to at most `max_side` cells a side (highest cell of each block).
+#[derive(Debug, Clone, PartialEq, serde::Serialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SurroundingsView {
+    /// ENU (east, north) of the north-west corner of the grid [m].
+    pub origin_east_m: f64,
+    pub origin_north_m: f64,
+    pub cell_m: f64,
+    pub cols: u32,
+    pub rows: u32,
+    /// Height of each cell [cm] (`z` of the project), row by row from the north-west corner;
+    /// `None` where nothing shades (the project's own buildings).
+    pub heights_cm: Vec<Option<i32>>,
+}
+
+/// The surroundings of `project` as they shade it, for drawing; `None` without any.
+#[must_use]
+pub fn surroundings_view(project: &Project, max_side: usize) -> Option<SurroundingsView> {
+    let f = Field::new(project)?;
+    let k = f.cols.max(f.rows).div_ceil(max_side.max(1)).max(1);
+    let (cols, rows) = (f.cols.div_ceil(k), f.rows.div_ceil(k));
+    let mut heights_cm = Vec::with_capacity(cols * rows);
+    for r in 0..rows {
+        for c in 0..cols {
+            let mut top = f64::NEG_INFINITY;
+            for rr in r * k..((r + 1) * k).min(f.rows) {
+                for cc in c * k..((c + 1) * k).min(f.cols) {
+                    top = top.max(f.z[rr * f.cols + cc]);
+                }
+            }
+            heights_cm.push(top.is_finite().then(|| (top * 100.0).round() as i32));
+        }
+    }
+    Some(SurroundingsView {
+        origin_east_m: f.west,
+        origin_north_m: f.north,
+        cell_m: f.cell * k as f64,
+        cols: cols as u32,
+        rows: rows as u32,
+        heights_cm,
+    })
+}
+
 impl Field {
     fn new(project: &Project) -> Option<Self> {
         let s = project.site.surroundings.as_ref()?;

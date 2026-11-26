@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@pv/ui';
+import { Button, Toggle } from '@pv/ui';
 import { useProjectStore } from '../store/project';
 import { useViewStore } from '../store/view';
 import { dateOfDay, daylight, sunAtLocal } from './sun';
@@ -33,6 +33,8 @@ function SunControls() {
   const { t, i18n } = useTranslation();
   const sun = useViewStore((s) => s.sun);
   const setSun = useViewStore((s) => s.setSun);
+  const showSurroundings = useViewStore((s) => s.showSurroundings);
+  const setShowSurroundings = useViewStore((s) => s.setShowSurroundings);
   const location = useProjectStore((s) => s.summary?.location ?? null);
   const [playing, setPlaying] = useState(false);
   const day = sun?.day ?? 1;
@@ -133,6 +135,11 @@ function SunControls() {
           {t('sun.daylight', { rise: clock(light.rise), set: clock(light.set) })}
         </p>
       )}
+      <Toggle
+        label={t('display.surroundings')}
+        checked={showSurroundings}
+        onChange={setShowSurroundings}
+      />
       <p className="sun-panel__note">{t('sun.note')}</p>
     </div>
   );

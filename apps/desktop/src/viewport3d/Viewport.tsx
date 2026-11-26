@@ -1,15 +1,26 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type ComponentRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentRef,
+} from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Object3D, Vector3, type DirectionalLight } from 'three';
 import { tokens } from '@pv/ui';
-import { events, type ProjectSummary } from '../bindings';
+import { events, type ProjectSummary, type SurroundingsView } from '../bindings';
+import { api, unwrap } from '../ipc';
 import { useShadingStore } from '../store/shading';
 import type { ModuleData } from './moduleBuffer';
 import { Buildings } from './Buildings';
 import { sceneBounds, vec3 } from './frames';
 import { PanelMeshes } from './PanelMeshes';
 import { ShadingObjects } from './ShadingObjects';
+import { Surroundings } from './Surroundings';
+import { surroundingsFloor } from './surroundingsGeometry';
 import { RoofShading } from './RoofShading';
 import { GridIndex } from './gridIndex';
 import { Editor } from './editor';
@@ -51,6 +62,30 @@ function Scene({ summary, modules }: SceneProps) {
   const sun = useRef<DirectionalLight>(null);
   const colorMode = useViewStore((s) => s.colorMode);
   const ground = tokens[useUiStore((s) => s.theme)].ground;
+  const showSurroundings = useViewStore((s) => s.showSurroundings);
+
+  // Terrain and neighbouring buildings (surface model), as the shading sees them; read
+  // again with every new summary (the site may have changed).
+  const [surroundings, setSurroundings] = useState<SurroundingsView | null>(null);
+  useEffect(() => {
+    let live = true;
+    unwrap(api.surroundingsView())
+      .then((v) => {
+        if (live) setSurroundings(v);
+      })
+      .catch(() => {
+        if (live) setSurroundings(null);
+      });
+    return () => {
+      live = false;
+    };
+  }, [summary]);
+  const drawn = showSurroundings ? surroundings : null;
+  // The ground plane stays under the drawn terrain.
+  const floor = useMemo(
+    () => (drawn ? Math.min(0, (surroundingsFloor(drawn) ?? 0) - 0.05) : 0),
+    [drawn],
+  );
 
   const panels = useMemo(() => new PanelMeshes(summary, modules), [summary, modules]);
   // Static shadows: light and geometry do not move with the camera, so the shadow map is
@@ -240,12 +275,13 @@ function Scene({ summary, modules }: SceneProps) {
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />
-      <mesh position={[center.x, center.y, 0]} receiveShadow>
+      <mesh position={[center.x, center.y, floor]} receiveShadow>
         <planeGeometry args={[radius * 8, radius * 8]} />
         <meshStandardMaterial color={ground} roughness={1} />
       </mesh>
       <Buildings summary={summary} />
       <ShadingObjects objects={summary.objects} />
+      {drawn && <Surroundings view={drawn} color={ground} />}
       {colorMode === 'shading' && showRoof && roofMap && (
         <RoofShading summary={summary} map={roofMap} />
       )}

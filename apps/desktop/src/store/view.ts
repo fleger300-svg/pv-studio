@@ -25,6 +25,9 @@ interface ViewState {
   frameRequest: number;
   /** The light is the real sun at this date and time; null: the fixed default light. */
   sun: SunTime | null;
+  /** The terrain and neighbouring buildings of the surface model are drawn. */
+  showSurroundings: boolean;
+  setShowSurroundings: (show: boolean) => void;
   setSun: (sun: SunTime | null) => void;
   setColorMode: (mode: ColorMode) => void;
   setTool: (tool: Tool) => void;
@@ -36,6 +39,10 @@ export const useViewStore = create<ViewState>()((set) => ({
   tool: 'select',
   frameRequest: 0,
   sun: null,
+  showSurroundings: true,
+  setShowSurroundings: (showSurroundings) => {
+    set({ showSurroundings });
+  },
   setSun: (sun) => {
     set({ sun });
   },

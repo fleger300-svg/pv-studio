@@ -479,3 +479,41 @@ fn the_roof_map_shows_the_chimney_shadow_and_the_horizon_everywhere() {
         pv_solar::roof_shading::OUTSIDE
     );
 }
+
+#[test]
+fn the_surroundings_are_drawn_without_the_own_building() {
+    let mut p = located(ref_a_roof1());
+    assert!(pv_solar::shade::surroundings_view(&p, 100).is_none());
+    // A flat survey 3 m high, 1 m cells, over 80 × 80 m around the building.
+    let b = &p.buildings[0];
+    let (mut w, mut s, mut e, mut n) = (f64::MAX, f64::MAX, f64::MIN, f64::MIN);
+    for q in &b.footprint {
+        w = w.min(b.origin[0] + q[0]);
+        e = e.max(b.origin[0] + q[0]);
+        s = s.min(b.origin[1] + q[1]);
+        n = n.max(b.origin[1] + q[1]);
+    }
+    let (cx, cy) = ((w + e) / 2.0, (s + n) / 2.0);
+    p.site.surroundings = Some(pv_model::Surroundings {
+        source: "test".into(),
+        origin_east_m: cx - 40.0,
+        origin_north_m: cy + 40.0,
+        cell_m: 1.0,
+        cols: 80,
+        rows: 80,
+        heights_cm: vec![300; 6400],
+    });
+    let v = pv_solar::shade::surroundings_view(&p, 100).unwrap();
+    assert_eq!((v.cols, v.rows), (80, 80));
+    let at = |east: f64, north: f64| {
+        let c = ((east - v.origin_east_m) / v.cell_m) as usize;
+        let r = ((v.origin_north_m - north) / v.cell_m) as usize;
+        v.heights_cm[r * v.cols as usize + c]
+    };
+    assert_eq!(at(cx, cy), None, "the building's own cells are left out");
+    assert_eq!(at(cx - 35.0, cy + 35.0), Some(300));
+    // Reduced: at most 20 cells a side, 4 m each, the highest cell of each block.
+    let small = pv_solar::shade::surroundings_view(&p, 20).unwrap();
+    assert_eq!((small.cols, small.rows, small.cell_m), (20, 20, 4.0));
+    assert_eq!(small.heights_cm[0], Some(300));
+}

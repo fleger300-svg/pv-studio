@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Panel, Select, Stat } from '@pv/ui';
+import { Button, Panel, Select, Stat, Toggle } from '@pv/ui';
 import { api, unwrap } from '../ipc';
 import { useToastStore } from '../store/toast';
 import { toCommandError } from '../commands/runCommand';
@@ -59,6 +59,8 @@ function LayoutPanels() {
   const { t, i18n } = useTranslation();
   const colorMode = useViewStore((s) => s.colorMode);
   const setColorMode = useViewStore((s) => s.setColorMode);
+  const showSurroundings = useViewStore((s) => s.showSurroundings);
+  const setShowSurroundings = useViewStore((s) => s.setShowSurroundings);
   const count = useViewStore((s) => s.selectionCount);
   const wp = useProjectStore((s) => s.summary?.modulePeakPowerWp ?? 0);
   const kwp = new Intl.NumberFormat(i18n.language, {
@@ -84,6 +86,11 @@ function LayoutPanels() {
               { value: 'shading', label: t('display.colorModes.shading') },
             ]}
             onChange={setColorMode}
+          />
+          <Toggle
+            label={t('display.surroundings')}
+            checked={showSurroundings}
+            onChange={setShowSurroundings}
           />
           <Button
             variant="secondary"

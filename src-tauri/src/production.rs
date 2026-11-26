@@ -4,6 +4,7 @@ use pv_model::command::keys;
 use pv_model::CommandError;
 use pv_solar::module_shading::{module_shading as shading_of, ShadingMap};
 use pv_solar::roof_shading::{roof_shading as roof_map, RoofShadingMap};
+use pv_solar::shade::SurroundingsView;
 use pv_solar::{simulate, NotSimulated, SimulationAssumptions, YieldReport};
 use tauri::State;
 
@@ -14,6 +15,24 @@ fn not_simulated(e: NotSimulated) -> CommandError {
         NotSimulated::NoWeather => CommandError::new(keys::YIELD_NO_WEATHER),
         NotSimulated::NoModules => CommandError::new(keys::YIELD_NO_MODULES),
     }
+}
+
+/// Most cells a side of the surroundings drawn in the 3-D view.
+const SURROUNDINGS_MAX_SIDE: usize = 400;
+
+/// The surroundings of the open project (terrain, neighbouring buildings of the surface
+/// model) as they shade it, reduced for the 3-D view; `None` without any.
+#[tauri::command]
+#[specta::specta]
+pub async fn surroundings_view(
+    state: State<'_, AppState>,
+) -> Result<Option<SurroundingsView>, CommandError> {
+    let project = state.with(|store| Ok(store.project().clone()))?;
+    tauri::async_runtime::spawn_blocking(move || {
+        pv_solar::shade::surroundings_view(&project, SURROUNDINGS_MAX_SIDE)
+    })
+    .await
+    .map_err(|e| CommandError::new(keys::STATICS_INTERNAL).with_text("detail", e.to_string()))
 }
 
 /// Shading map of the roof faces of the open project over its weather year (share of the
